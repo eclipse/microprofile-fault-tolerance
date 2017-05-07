@@ -37,15 +37,14 @@ import java.util.concurrent.TimeUnit;
 public @interface Retry {
 
     /**
+     * @return The max number of retries. -1 means retry forever. If less than -1, an IllegalArgumentException will be thrown.
      *
-     * @return The max number of retries. -1 indicates retry forever.
-     * IllegalArgumentException if maxRetries <-1.
      */
     int maxRetries() default 3;
 
     /**
-     * The delay between retries. Defaults to {@link Duration#NONE}.
-     * @return
+     * The delay between retries. Defaults to 0.
+     * @return the delay time
      */
     int delay() default 0;
 
