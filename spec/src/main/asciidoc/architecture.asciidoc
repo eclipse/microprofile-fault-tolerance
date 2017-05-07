@@ -1,0 +1,47 @@
+//
+// Copyright (c) 2016-2017 Contributors to the Eclipse Foundation
+//
+// See the NOTICE file(s) distributed with this work for additional
+// information regarding copyright ownership.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// You may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// Contributors:
+// Emily Jiang
+[[architecture]]
+
+== Architecture
+
+This specification defines an easy to use and flexible system for building resilient applications.
+
+
+=== Rational
+
+It is increasingly important to build fault tolerant micro services. Fault tolerance is about leveraging different strategies to guide the execution and result of some logic. Retry policies, bulkheads, and circuit breakers are popular concepts in this area. They dictate whether and when executions should take place, and fallbacks offer an alternative result when an execution does not complete successfully.
+
+As mentioned above, the Fault Tolerance proposal is to focus the aspects: TimeOut, RetryPolicy, Fallback, bulkhead and circuit breaker:
+
+* TimeOut: Define a duration for timeout
+
+* RetryPolicy: Define a criteria on when to retry
+
+* Fallback: provide an alternative solution for a failed execution.
+
+* Bulkhead: isolate failures in part of the system while the rest part of the system can still function.
+
+ * CircuitBreaker: offer a way of fail fast by automatically failing execution to prevent the system overloading and indefinite wait or timeout by the clients.
+
+The main design is to separate execution logic from execution. The execution can be configured with fault tolerance policies, such as RetryPolicy, fallback, Bulkhead and CircuitBreaker.
+
+Hystrix and Failsafe are two popular libraries for handling failures. This proposal is to define a standard API and approach for applications to follow in order to achieve the fault tolerance.
+
+
