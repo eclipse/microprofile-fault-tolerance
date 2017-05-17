@@ -46,7 +46,7 @@ public @interface Retry {
      * The delay between retries. Defaults to 0.
      * @return the delay time
      */
-    int delay() default 0;
+    long delay() default 0;
 
     /**
      *
@@ -58,7 +58,7 @@ public @interface Retry {
     /**
      * @return the maximum duration to perform retries for.
      */
-    int maxDuration() default 200;
+    long maxDuration() default 200;
 
     /**
      *
@@ -71,7 +71,7 @@ public @interface Retry {
      * @return the jitter that randomly vary retry delays by. e.g. a jitter of 20 milliseconds
      * will randomly add betweem -20 and 20 milliseconds to each retry delay.
      */
-    int jitter() default 20;
+    long jitter() default 20;
 
     /**
      *
