@@ -26,8 +26,9 @@ import java.lang.annotation.Target;
 import java.time.temporal.ChronoUnit;
 
 /**
- * The Retry annotation to define the number of the retries and the fallback method on reaching the
+ * The Timeout annotation to define the timeout period
  * retry counts.
+ * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
@@ -42,7 +43,7 @@ public @interface TimeOut {
 
     /**
      *
-     * @return the time unit
+     * @return the timeout unit
      */
     ChronoUnit timeOutUnit() default ChronoUnit.MILLIS;
 
