@@ -32,13 +32,14 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Target({ ElementType.TYPE, ElementType.METHOD })
+@Target({ ElementType.METHOD })
 public @interface Fallback {
 
     /**
-     *
-     * @return the fallback class
+     * The fallback method name. The fallback method must have the exactly same signature as the
+     * original main service or zero argument.
+     * @return the fallback method
      */
-    Class<?> fallback();
+    String method();
 
 }
