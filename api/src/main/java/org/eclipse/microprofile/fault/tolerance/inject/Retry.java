@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eclipse.microprofile.fault.tolerance.cdi;
+package org.eclipse.microprofile.fault.tolerance.inject;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -58,7 +58,7 @@ public @interface Retry {
     /**
      * @return the maximum duration to perform retries for.
      */
-    long maxDuration() default 200;
+    long maxDuration() default 2000;
 
     /**
      *
@@ -69,9 +69,9 @@ public @interface Retry {
     /**
      *
      * @return the jitter that randomly vary retry delays by. e.g. a jitter of 20 milliseconds
-     * will randomly add betweem -20 and 20 milliseconds to each retry delay.
+     * will randomly add betweem -200 and 200 milliseconds to each retry delay.
      */
-    long jitter() default 20;
+    long jitter() default 200;
 
     /**
      *

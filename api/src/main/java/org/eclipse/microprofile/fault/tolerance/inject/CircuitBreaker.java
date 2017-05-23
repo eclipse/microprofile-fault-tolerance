@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eclipse.microprofile.fault.tolerance.cdi;
+package org.eclipse.microprofile.fault.tolerance.inject;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -45,7 +45,7 @@ public @interface CircuitBreaker {
      *
      * @return The delay time after the circuit is open
      */
-    long delay() default 2;
+    long delay() default 5000;
 
     /**
      *
@@ -53,17 +53,29 @@ public @interface CircuitBreaker {
      */
 
     ChronoUnit delayUnit() default ChronoUnit.MILLIS;
+    
 
     /**
+     * The number of consecutive requests in a rolling window 
+     * that will trip the circuit.
+     * @return the number of the consecutive requests in a rolling window
      *
+     */
+    long requestVolumeThreshold() default 20;
+    /**
+     * The failure threshold to trigger the circuit to open.
+     * e.g. if the requestVolumeThreshold is 20 and failureRation is .50, 
+     * more than 10 failures in 20 consecutive requests will trigger
+     * the circuit to open.
      * @return The failure threshold to open the circuit
      */
-    long failThreshold() default 2;
+    double failureRatio() default .50;
 
     /**
-     *
+     * For an open circuit, after the delay period is reached, once the successThreshold
+     * is reached, the circuit is back to close again.
      * @return The success threshold to fully close the circuit
      */
-    long successThreshold() default 2;
+    long successThreshold() default 1;
 
 }

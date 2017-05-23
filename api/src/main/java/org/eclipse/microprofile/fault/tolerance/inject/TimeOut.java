@@ -16,23 +16,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eclipse.microprofile.fault.tolerance.cdi;
+package org.eclipse.microprofile.fault.tolerance.inject;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.time.temporal.ChronoUnit;
 
 /**
- * Wrap the execution and invoke it asynchronously.
- * @author Emily Jiang
+ * The Timeout annotation to define the timeout period
+ * retry counts.
+ * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.METHOD, ElementType.TYPE })
-@Inherited
-public @interface Asynchronous {
+@Target({ ElementType.METHOD})
+public @interface TimeOut {
+
+    /**
+     *
+     * @return the timeout
+     */
+    long timeOut() default 1000;
+
+    /**
+     *
+     * @return the timeout unit
+     */
+    ChronoUnit timeOutUnit() default ChronoUnit.MILLIS;
 
 }
