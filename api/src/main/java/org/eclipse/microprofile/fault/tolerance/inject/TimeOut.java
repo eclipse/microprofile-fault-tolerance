@@ -32,7 +32,7 @@ import java.time.temporal.ChronoUnit;
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.METHOD})
+@Target({ ElementType.METHOD, ElementType.TYPE})
 public @interface TimeOut {
 
     /**
