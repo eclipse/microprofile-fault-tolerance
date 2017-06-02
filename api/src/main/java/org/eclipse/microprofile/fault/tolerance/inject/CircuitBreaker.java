@@ -32,7 +32,7 @@ import java.time.temporal.ChronoUnit;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Target({ ElementType.METHOD })
+@Target({ ElementType.METHOD, ElementType.TYPE })
 public @interface CircuitBreaker {
 
     /**
@@ -53,10 +53,10 @@ public @interface CircuitBreaker {
      */
 
     ChronoUnit delayUnit() default ChronoUnit.MILLIS;
-    
+
 
     /**
-     * The number of consecutive requests in a rolling window 
+     * The number of consecutive requests in a rolling window
      * that will trip the circuit.
      * @return the number of the consecutive requests in a rolling window
      *
@@ -64,7 +64,7 @@ public @interface CircuitBreaker {
     long requestVolumeThreshold() default 20;
     /**
      * The failure threshold to trigger the circuit to open.
-     * e.g. if the requestVolumeThreshold is 20 and failureRation is .50, 
+     * e.g. if the requestVolumeThreshold is 20 and failureRation is .50,
      * more than 10 failures in 20 consecutive requests will trigger
      * the circuit to open.
      * @return The failure threshold to open the circuit

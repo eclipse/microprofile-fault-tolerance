@@ -33,7 +33,7 @@ import java.time.temporal.ChronoUnit;
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.METHOD})
+@Target({ ElementType.METHOD, ElementType.TYPE})
 public @interface Retry {
 
     /**
@@ -79,7 +79,7 @@ public @interface Retry {
      */
     ChronoUnit jitterDelayUnit() default ChronoUnit.MILLIS;
 
-    
+
     /**
      *
      * @return Specify the failure to retry on
