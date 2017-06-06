@@ -23,8 +23,7 @@ package org.eclipse.microprofile.fault.tolerance.inject;
  * @author Ken Finnigan
  *
  */
-public interface FallbackHandler<T>
-{
+public interface FallbackHandler<T>{
     /**
      * Handle the previous calling failure and then call alternative methods
      * or perform any alternative operations.
