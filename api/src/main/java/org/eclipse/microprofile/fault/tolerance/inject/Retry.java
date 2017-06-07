@@ -92,6 +92,6 @@ public @interface Retry {
      *
      * @return Specify the failure to abort on
      */
-    Class<? extends Throwable>[] abortOn() default { Throwable.class };
+    Class<? extends Throwable>[] abortOn() default {};
 
 }

@@ -63,7 +63,7 @@ public @interface CircuitBreaker {
      * @return the number of the consecutive requests in a rolling window
      *
      */
-    long requestVolumeThreshold() default 20;
+    int requestVolumeThreshold() default 20;
     /**
      * The failure threshold to trigger the circuit to open.
      * e.g. if the requestVolumeThreshold is 20 and failureRation is .50,
@@ -78,6 +78,6 @@ public @interface CircuitBreaker {
      * is reached, the circuit is back to close again.
      * @return The success threshold to fully close the circuit
      */
-    long successThreshold() default 1;
+    int successThreshold() default 1;
 
 }
