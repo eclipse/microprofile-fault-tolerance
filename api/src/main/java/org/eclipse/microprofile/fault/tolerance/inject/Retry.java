@@ -70,8 +70,8 @@ public @interface Retry {
 
     /**
      *
-     * @return the jitter that randomly vary retry delays by. e.g. a jitter of 20 milliseconds
-     * will randomly add betweem -200 and 200 milliseconds to each retry delay.
+     * @return the jitter that randomly vary retry delays by. e.g. a jitter of 200 milliseconds
+     * will randomly add between -200 and 200 milliseconds to each retry delay.
      */
     long jitter() default 200;
 
