@@ -60,23 +60,19 @@ public class RetryConditionTest extends Arquillian {
     @Test
     public void testRetryOnTrue() {
         clientForRetryOn.serviceA();
-        Assert.assertEquals("The invocation should only occur once.",  1, clientForRetryOn.getRetryCounterForServiceA());
         Assert.assertEquals("The max retry counter should be 3", 3, clientForRetryOn.getRetryCountForConnectionService());
     }
     
     @Test
     public void testRetryOnFalse() {
         clientForRetryOn.serviceB();
-        Assert.assertEquals("The invocation should only occur once.",  1, clientForRetryOn.getRetryCounterForServiceB());
         Assert.assertEquals("The max invocation counter should be 1 as the retry condition is false", 1,  
                         clientForRetryOn.getRetryCountForWritingService());
     }
     
     @Test
     public void testRetryWithAbortOnFlase() {
-        
         clientForAbortOn.serviceA();
-        Assert.assertEquals("The invocation should only occur once.",  1, clientForAbortOn.getRetryCounterForServiceA());
         Assert.assertEquals("The max invocation should be 4 (3 retries + 1)", 4,  clientForAbortOn.getRetryCountForConnectionService());
         
     }
@@ -84,7 +80,6 @@ public class RetryConditionTest extends Arquillian {
     @Test
     public void testRetryWithAbortOnTrue() {
         clientForRetryOn.serviceB();
-        Assert.assertEquals("The invocation should only occur once.",  1, clientForAbortOn.getRetryCounterForServiceB());
         Assert.assertEquals("The max invocation counter should be 1 as the abort condition is true", 1,  
                         clientForAbortOn.getRetryCountForWritingService());
     }

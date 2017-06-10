@@ -34,12 +34,10 @@ import org.eclipse.microprofile.fault.tolerance.inject.Retry;
 public class RetryClientAbortOn {
     private int counterForInvokingConnenectionService;
     private int counterForInvokingWritingService;
-    private int counterForInvokingServiceA;
-    private int counterForInvokingServiceB;
+    
     @Retry(abortOn = {IOException.class})
     public Connection serviceA() {
-        counterForInvokingServiceA ++;
-        return connectionService();
+       return connectionService();
     }
 
     private Connection connectionService() {
@@ -56,7 +54,6 @@ public class RetryClientAbortOn {
      */
     @Retry(abortOn = {RuntimeException.class})
     public void serviceB() {
-        counterForInvokingServiceB ++;
         writingService();
     }
 
@@ -74,13 +71,5 @@ public class RetryClientAbortOn {
     
     public int getRetryCountForWritingService() {
         return counterForInvokingWritingService;
-    }
-    
-    public int getRetryCounterForServiceA() {
-        return counterForInvokingServiceA;
-    }
-    
-    public int getRetryCounterForServiceB() {
-        return counterForInvokingServiceB;
     }
 }

@@ -34,17 +34,15 @@ import org.eclipse.microprofile.fault.tolerance.inject.Retry;
 @RequestScoped
 public class RetryClientWithDelay {
     private int counterForInvokingConnenectionService;
-    private int counterForInvokingServiceA;
     private long timestampForConnectionService = 0;
     private Set<Long> delayTimes = new HashSet<Long>();
     //There should be 0-800ms (jitter is -400ms - 400ms) delays between each invocation
     //there should be at least 4 retries
     @Retry(delay = 400, maxDuration= 3200, jitter= 400, maxRetries = 10)
     public Connection serviceA() {
-        counterForInvokingServiceA ++;
         return connectionService();
     }
-
+    //simulate a backend service
     private Connection connectionService() {
        // the time delay between each invocation should be 0-800ms
        if (timestampForConnectionService != 0) {
@@ -67,11 +65,6 @@ public class RetryClientWithDelay {
         return isDelayInRange;
     }
    
-    
-    public int getRetryCounterForServiceA() {
-        return counterForInvokingServiceA;
-    }
-
     public int getRetryCountForConnectionService() {
         return counterForInvokingConnenectionService;
     }

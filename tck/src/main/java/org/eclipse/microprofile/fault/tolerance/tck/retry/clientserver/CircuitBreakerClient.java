@@ -23,6 +23,7 @@ import java.sql.Connection;
 
 import javax.enterprise.context.RequestScoped;
 
+import org.eclipse.microprofile.fault.tolerance.inject.CircuitBreaker;
 import org.eclipse.microprofile.fault.tolerance.inject.Retry;
 /**
  * A client to demonstrate the maxRetries and max duration configuration
@@ -30,56 +31,14 @@ import org.eclipse.microprofile.fault.tolerance.inject.Retry;
  *
  */
 @RequestScoped
-public class RetryClientForMaxRetries {
-    private int counterForInvokingConnenectionService;
-    private int counterForInvokingWritingService;
-    private int counterForInvokingServiceA;
-    private int counterForInvokingServiceB;
-    @Retry(maxRetries = 5)
+public class CircuitBreakerClient {
+    @CircuitBreaker(successThreshold = 2, failureRatio=0.75)
     public Connection serviceA() {
-        counterForInvokingServiceA ++;
         return connectionService();
     }
 
+    //simulate a backend service
     private Connection connectionService() {
-        counterForInvokingConnenectionService++;
         throw new RuntimeException("Connection failed");
-    }
-    
-    public int getRetryCountForConnectionService() {
-        return counterForInvokingConnenectionService;
-    }
-    /**
-     * The configured the max retries is 90 but the max duration is 100ms. 
-     * Once the duration is reached, no more retries should be performed.
-     */
-    @Retry(maxRetries = 90, maxDuration= 1000)
-    public void serviceB() {
-        counterForInvokingServiceB ++;
-        writingService();
-    }
-
-    private void writingService() {
-        counterForInvokingWritingService ++;
-        try {
-            Thread.sleep(100);
-            throw new RuntimeException("WritinService failed");
-        } 
-        catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        
-    }
-    
-    public int getRetryCountForWritingService() {
-        return counterForInvokingWritingService;
-    }
-    
-    public int getRetryCounterForServiceA() {
-        return counterForInvokingServiceA;
-    }
-    
-    public int getRetryCounterForServiceB() {
-        return counterForInvokingServiceB;
     }
 }
