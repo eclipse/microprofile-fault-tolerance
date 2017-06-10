@@ -59,26 +59,21 @@ public class RetryTest extends Arquillian {
     
     @Test
     public void testRetryMaxRetries() {
-        
         clientForMaxRetry.serviceA();
-        Assert.assertEquals("The invocation should only occur once.",  1, clientForMaxRetry.getRetryCounterForServiceA());
         Assert.assertEquals("The max number of execution should be 6", 6, clientForMaxRetry.getRetryCountForConnectionService());
     }
     
     @Test
     public void testRetryMaxDuration() {
         clientForMaxRetry.serviceB();
-        Assert.assertEquals("The invocation should only occur once.",  1, clientForMaxRetry.getRetryCounterForServiceB());
         //The writingservice invocation takes 100ms plus a jitter of 0-200ms with the max duration of 1000ms, 
         //the max invocation should be less than 10
-        Assert.assertTrue("The max retry counter should be less than 11", clientForMaxRetry.getRetryCountForWritingService()< 11);
+        Assert.assertTrue("The max execution counter should be less than 11", clientForMaxRetry.getRetryCountForWritingService()< 11);
     }
     
     @Test
     public void testRetryWithDelay() {
-        
         clientForDelay.serviceA();
-        Assert.assertEquals("The invocation should only occur once.",  1, clientForDelay.getRetryCounterForServiceA());
         Assert.assertEquals("The max number of execution should be greater than 4",  clientForDelay.getRetryCountForConnectionService() > 4);
         Assert.assertTrue("The delay between each retry should be 0-800ms", clientForDelay.isDelayInRange());
     }
