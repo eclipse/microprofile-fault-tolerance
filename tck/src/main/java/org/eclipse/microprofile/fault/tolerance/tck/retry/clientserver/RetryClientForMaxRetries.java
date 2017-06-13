@@ -19,23 +19,25 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver;
 
-import java.io.IOException;
 import java.sql.Connection;
 
 import javax.enterprise.context.RequestScoped;
 
 import org.eclipse.microprofile.fault.tolerance.inject.Retry;
 /**
- * A client to demonstrate the retryOn conditions
+ * A client to demonstrate the maxRetries and max duration configuration
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  *
  */
 @RequestScoped
-public class RetryClientRetryOn {
+public class RetryClientForMaxRetries {
     private int counterForInvokingConnenectionService;
     private int counterForInvokingWritingService;
-    @Retry(retryOn = {RuntimeException.class})
+    private int counterForInvokingServiceA;
+    private int counterForInvokingServiceB;
+    @Retry(maxRetries = 5)
     public Connection serviceA() {
+        counterForInvokingServiceA ++;
         return connectionService();
     }
 
@@ -51,13 +53,14 @@ public class RetryClientRetryOn {
      * The configured the max retries is 90 but the max duration is 100ms. 
      * Once the duration is reached, no more retries should be performed.
      */
-    @Retry(retryOn = {IOException.class})
+    @Retry(maxRetries = 90, maxDuration= 1000)
     public void serviceB() {
+        counterForInvokingServiceB ++;
         writingService();
     }
 
     private void writingService() {
-        counterForInvokingWritingService ++;
+         counterForInvokingWritingService ++;
         try {
             Thread.sleep(100);
             throw new RuntimeException("WritingService failed");
@@ -70,5 +73,13 @@ public class RetryClientRetryOn {
     
     public int getRetryCountForWritingService() {
         return counterForInvokingWritingService;
+    }
+    
+    public int getRetryCounterForServiceA() {
+        return counterForInvokingServiceA;
+    }
+    
+    public int getRetryCounterForServiceB() {
+        return counterForInvokingServiceB;
     }
 }

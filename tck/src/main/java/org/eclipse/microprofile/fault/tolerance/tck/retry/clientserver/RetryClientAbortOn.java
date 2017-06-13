@@ -61,7 +61,7 @@ public class RetryClientAbortOn {
         counterForInvokingWritingService ++;
         try {
             Thread.sleep(100);
-            throw new RuntimeException("WritinService failed");
+            throw new RuntimeException("WritingService failed");
         } 
         catch (InterruptedException e) {
             e.printStackTrace();
