@@ -29,7 +29,7 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.Assert;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 /**
  * Test when maxDuration is reached, no more retries will be perfomed.
@@ -59,22 +59,42 @@ public class RetryTest extends Arquillian {
     
     @Test
     public void testRetryMaxRetries() {
-        clientForMaxRetry.serviceA();
-        Assert.assertEquals("The max number of execution should be 6", 6, clientForMaxRetry.getRetryCountForConnectionService());
+        try {
+            clientForMaxRetry.serviceA();
+            Assert.fail("serviceA should throw a RuntimeException in testRetryMaxRetries");
+        }
+        catch(RuntimeException ex) {
+            // Expected
+        }
+        Assert.assertEquals(clientForMaxRetry.getRetryCountForConnectionService(), 6, "The max number of execution should be 6");
     }
     
     @Test
     public void testRetryMaxDuration() {
-        clientForMaxRetry.serviceB();
-        //The writingservice invocation takes 100ms plus a jitter of 0-200ms with the max duration of 1000ms, 
+        try {
+            clientForMaxRetry.serviceB();
+            Assert.fail("serviceB should throw a RuntimeException in testRetryMaxDuration");
+        }
+        catch(RuntimeException ex) {
+            // Expected
+        }
+
+        //The writing service invocation takes 100ms plus a jitter of 0-200ms with the max duration of 1000ms, 
         //the max invocation should be less than 10
-        Assert.assertTrue("The max execution counter should be less than 11", clientForMaxRetry.getRetryCountForWritingService()< 11);
+        Assert.assertTrue(clientForMaxRetry.getRetryCountForWritingService()< 11, "The max retry counter should be less than 11");
     }
     
     @Test
     public void testRetryWithDelay() {
-        clientForDelay.serviceA();
-        Assert.assertEquals("The max number of execution should be greater than 4",  clientForDelay.getRetryCountForConnectionService() > 4);
-        Assert.assertTrue("The delay between each retry should be 0-800ms", clientForDelay.isDelayInRange());
+        try {
+            clientForDelay.serviceA();
+            Assert.fail("serviceA should throw a RuntimeException in testRetryWithDelay");
+        }
+        catch(RuntimeException ex) {
+            // Expected
+        }
+
+        Assert.assertTrue(clientForDelay.getRetryCountForConnectionService() > 4, "The max number of execution should be greater than 4");
+        Assert.assertTrue(clientForDelay.isDelayInRange(), "The delay between each retry should be 0-800ms");
     }
 }

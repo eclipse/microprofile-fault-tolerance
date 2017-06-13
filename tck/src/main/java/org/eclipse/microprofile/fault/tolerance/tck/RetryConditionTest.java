@@ -29,7 +29,7 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.Assert;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 /**
  * Test the retryOn and abortOn conditions.
@@ -59,28 +59,51 @@ public class RetryConditionTest extends Arquillian {
     
     @Test
     public void testRetryOnTrue() {
-        clientForRetryOn.serviceA();
-        Assert.assertEquals("The max retry counter should be 3", 3, clientForRetryOn.getRetryCountForConnectionService());
+        try {
+            clientForRetryOn.serviceA();
+            Assert.fail("serviceA should throw a RuntimeException in testRetryOnTrue");
+        }
+        catch(RuntimeException ex) {
+            // Expected
+        }
+        Assert.assertEquals(clientForRetryOn.getRetryCountForConnectionService(), 4, "The max retry counter should be 4");
     }
     
     @Test
     public void testRetryOnFalse() {
-        clientForRetryOn.serviceB();
-        Assert.assertEquals("The max invocation counter should be 1 as the retry condition is false", 1,  
-                        clientForRetryOn.getRetryCountForWritingService());
+        try {
+            clientForRetryOn.serviceB();
+            Assert.fail("serviceB should throw a RuntimeException in testRetryOnFalse");
+        }
+        catch(RuntimeException ex) {
+            // Expected
+        }
+        Assert.assertEquals(clientForRetryOn.getRetryCountForWritingService(), 1,
+            "The max invocation counter should be 1 as the retry condition is false");
     }
     
     @Test
     public void testRetryWithAbortOnFlase() {
-        clientForAbortOn.serviceA();
-        Assert.assertEquals("The max invocation should be 4 (3 retries + 1)", 4,  clientForAbortOn.getRetryCountForConnectionService());
-        
+        try {
+            clientForAbortOn.serviceA();
+            Assert.fail("serviceA should throw a RuntimeException in testRetryWithAbortOnFalse");
+        }
+        catch(RuntimeException ex) {
+            // Expected
+        }
+        Assert.assertEquals(clientForAbortOn.getRetryCountForConnectionService(), 4, "The max invocation should be 4 (3 retries + 1)");
     }
     
     @Test
     public void testRetryWithAbortOnTrue() {
-        clientForRetryOn.serviceB();
-        Assert.assertEquals("The max invocation counter should be 1 as the abort condition is true", 1,  
-                        clientForAbortOn.getRetryCountForWritingService());
+        try {
+            clientForAbortOn.serviceB();
+            Assert.fail("serviceB should throw a RuntimeException in testRetryWithAbortOnTrue");
+        }
+        catch(RuntimeException ex) {
+            // Expected
+        }
+        Assert.assertEquals(clientForAbortOn.getRetryCountForWritingService(), 1,
+            "The max invocation counter should be 1 as the abort condition is true");
     }
 }

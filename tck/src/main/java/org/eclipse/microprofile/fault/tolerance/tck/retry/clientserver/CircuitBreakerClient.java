@@ -24,7 +24,6 @@ import java.sql.Connection;
 import javax.enterprise.context.RequestScoped;
 
 import org.eclipse.microprofile.fault.tolerance.inject.CircuitBreaker;
-import org.eclipse.microprofile.fault.tolerance.inject.Retry;
 /**
  * A client to demonstrate the maxRetries and max duration configuration
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
