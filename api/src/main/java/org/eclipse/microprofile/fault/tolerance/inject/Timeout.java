@@ -27,26 +27,26 @@ import java.lang.annotation.Target;
 import java.time.temporal.ChronoUnit;
 
 /**
- * The Timeout annotation to define the timeout period
- * retry counts.
+ * The annotation to define a method execution timeout.
+ *
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  */
 @Inherited
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.METHOD, ElementType.TYPE})
-public @interface TimeOut {
+public @interface Timeout {
 
     /**
      *
      * @return the timeout
      */
-    long timeOut() default 1000;
+    long value() default 1000;
 
     /**
      *
      * @return the timeout unit
      */
-    ChronoUnit timeOutUnit() default ChronoUnit.MILLIS;
+    ChronoUnit unit() default ChronoUnit.MILLIS;
 
 }
