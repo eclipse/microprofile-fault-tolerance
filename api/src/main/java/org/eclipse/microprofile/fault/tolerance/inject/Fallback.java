@@ -38,5 +38,10 @@ import java.lang.annotation.Target;
 @Inherited
 public @interface Fallback {
 
-    Class<? extends FallbackHandler> handler();
+    /**
+     * Specify the fallback class to be used. An new instance of the fallback class
+     * is returned. The instance is unmanaged.
+     * @return the fallback class
+     */
+    Class<? extends FallbackHandler> value();
 }
