@@ -18,7 +18,33 @@
  */
 package org.eclipse.microprofile.fault.tolerance.inject;
 /**
- * The handler interface to be implemenated by any fallback handling.
+ * The handler instance used by the container to service a fallback invocation is a non-contextual
+ * instance created using the CDI SPI. The instance exists to service a single invocation only.
+ * The type parameter of the handler instance must be assignable to the return type of the method, 
+ * where the {@link Fallback} is specified. The container must ensure this type safety. 
+ * <h3>Usage</h3>
+ * <pre>
+ * public class MyService {
+ *  &#064;Inject OtherService otherService;
+ * 
+ *  &#064;Timeout(3000)
+ *  &#064;Fallback(MyFallback.class) 
+ *  Long getAmount() {
+ *      return otherService.getAmount() * 2;
+ *  }
+ *}
+ *</pre>
+ *
+ *The fallback handler implementation is shown below. The type parameter must be assignable to 
+ *{@link Long}.
+ *
+ *<pre>
+ * public class MyFallback implements FallbackHandler&lt;Long&gt; {
+ * Long handle(ExecutionContext context) {
+ *   return 42;
+ * }
+*}
+</pre>
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  * @author Ken Finnigan
  *
