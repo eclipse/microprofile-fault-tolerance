@@ -27,12 +27,20 @@ import java.lang.annotation.Target;
 
 /**
  * Wrap the execution and invoke it asynchronously.
- * @author Emily Jiang
+ * Any methods marked with this annotation must return {@link java.util.concurrent.Future}.
+ * Example usage:
+ * 
+ * <pre>
+ * <code>@Asynchronous</code>
+ * public Future&lt;String&gt; getString() {
+ *  return CompletableFuture.completedFuture("hello");
+ * }
+ * </pre>
+ * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.METHOD, ElementType.TYPE })
 @Inherited
 public @interface Asynchronous {
-
 }
