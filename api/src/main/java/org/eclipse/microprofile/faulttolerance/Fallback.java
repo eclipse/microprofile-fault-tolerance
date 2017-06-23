@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eclipse.microprofile.fault.tolerance.inject;
+package org.eclipse.microprofile.faulttolerance;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -26,21 +26,22 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Wrap the execution and invoke it asynchronously.
- * Any methods marked with this annotation must return {@link java.util.concurrent.Future}.
- * Example usage:
+ * The fallback annotation to define the fallback handler class so that
+ * a failure can be handled properly.
  * 
- * <pre>
- * <code>@Asynchronous</code>
- * public Future&lt;String&gt; getString() {
- *  return CompletableFuture.completedFuture("hello");
- * }
- * </pre>
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
+ * 
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.METHOD, ElementType.TYPE })
 @Inherited
-public @interface Asynchronous {
+public @interface Fallback {
+
+    /**
+     * Specify the fallback class to be used. An new instance of the fallback class
+     * is returned. The instance is unmanaged.
+     * @return the fallback class
+     */
+    Class<? extends FallbackHandler> value();
 }

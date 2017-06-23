@@ -16,32 +16,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eclipse.microprofile.fault.tolerance.inject;
+package org.eclipse.microprofile.faulttolerance;
+
+import java.lang.reflect.Method;
 
 /**
- * The exception should be thrown when timeout is reached. 
- * <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
- *
+ * The execution context for the method being executed.
+ * 
+ * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  */
-public class TimeoutRuntimeException extends FaultToleranceRuntimeException {
-    
-    private static final long serialVersionUID = 958116453839967874L;
-    
-    public TimeoutRuntimeException() {
-        super();
-    }
-    
-    public TimeoutRuntimeException(Throwable t){
-        super(t) ;
-    }
-    
-    public TimeoutRuntimeException(String message){
-        super(message) ;
-    }
-    
-    public TimeoutRuntimeException(String message, Throwable t) {
-        super (message, t);
-    }
 
+public interface ExecutionContext {
+
+     /**
+     * Returns the method being executed
+     * 
+     * @return the method
+     */
+    public Method getMethod();
+
+    /**
+     * Returns the parameter values being passed to the method 
+     * 
+     * @return the parameter values, as an array
+     * 
+     * 
+     */
+    public Object[] getParameters();
 
 }

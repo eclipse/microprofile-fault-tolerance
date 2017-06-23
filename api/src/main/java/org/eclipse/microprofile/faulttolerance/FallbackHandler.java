@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eclipse.microprofile.fault.tolerance.inject;
+package org.eclipse.microprofile.faulttolerance;
 /**
  * The handler instance used by the container to service a fallback invocation is a non-contextual
  * instance created using the CDI SPI. The instance exists to service a single invocation only.

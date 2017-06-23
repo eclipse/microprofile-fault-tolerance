@@ -25,7 +25,7 @@ import java.util.Set;
 
 import javax.enterprise.context.RequestScoped;
 
-import org.eclipse.microprofile.fault.tolerance.inject.Retry;
+import org.eclipse.microprofile.faulttolerance.Retry;
 /**
  * A client to demonstrate the delay configurations
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>

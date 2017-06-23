@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eclipse.microprofile.fault.tolerance.inject;
+package org.eclipse.microprofile.faulttolerance.exceptions;
 
 /**
  * The exception should be thrown when the maximum retries is reached or overall retry duration is reached,
@@ -24,23 +24,23 @@ package org.eclipse.microprofile.fault.tolerance.inject;
  * <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  *
  */
-public class FaultToleranceRuntimeException extends RuntimeException {
+public class FaultToleranceException extends RuntimeException {
     
     private static final long serialVersionUID = 958116453839967874L;
     
-    public FaultToleranceRuntimeException() {
+    public FaultToleranceException() {
         super();
     }
     
-    public FaultToleranceRuntimeException(Throwable t){
+    public FaultToleranceException(Throwable t){
         super(t) ;
     }
     
-    public FaultToleranceRuntimeException(String message){
+    public FaultToleranceException(String message){
         super(message) ;
     }
     
-    public FaultToleranceRuntimeException(String message, Throwable t) {
+    public FaultToleranceException(String message, Throwable t) {
         super (message, t);
     }
 

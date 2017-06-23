@@ -16,30 +16,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eclipse.microprofile.fault.tolerance.inject;
+package org.eclipse.microprofile.faulttolerance.exceptions;
 
 /**
- * The exception should be thrown when circuit breaker is open. 
+ * The exception should be thrown when timeout is reached. 
  * <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  *
  */
-public class CircuitBreakerRuntimeException extends FaultToleranceRuntimeException {
+public class TimeoutException extends FaultToleranceException {
     
     private static final long serialVersionUID = 958116453839967874L;
     
-    public CircuitBreakerRuntimeException() {
+    public TimeoutException() {
         super();
     }
     
-    public CircuitBreakerRuntimeException(Throwable t){
+    public TimeoutException(Throwable t){
         super(t) ;
     }
     
-    public CircuitBreakerRuntimeException(String message){
+    public TimeoutException(String message){
         super(message) ;
     }
     
-    public CircuitBreakerRuntimeException(String message, Throwable t) {
+    public TimeoutException(String message, Throwable t) {
         super (message, t);
     }
 

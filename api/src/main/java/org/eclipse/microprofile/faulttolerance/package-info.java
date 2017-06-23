@@ -26,5 +26,5 @@
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  * @version 1.0
  */
-package org.eclipse.microprofile.fault.tolerance.inject;
+package org.eclipse.microprofile.faulttolerance;
 
