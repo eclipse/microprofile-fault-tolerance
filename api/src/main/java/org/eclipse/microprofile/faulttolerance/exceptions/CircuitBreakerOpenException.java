@@ -16,32 +16,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eclipse.microprofile.fault.tolerance.inject;
-
-import java.lang.reflect.Method;
+package org.eclipse.microprofile.faulttolerance.exceptions;
 
 /**
- * The execution context for the method being executed.
- * 
- * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
+ * The exception should be thrown when circuit breaker is open. 
+ * <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
+ *
  */
+public class CircuitBreakerOpenException extends FaultToleranceException {
+    
+    private static final long serialVersionUID = 958116453839967874L;
+    
+    public CircuitBreakerOpenException() {
+        super();
+    }
+    
+    public CircuitBreakerOpenException(Throwable t){
+        super(t) ;
+    }
+    
+    public CircuitBreakerOpenException(String message){
+        super(message) ;
+    }
+    
+    public CircuitBreakerOpenException(String message, Throwable t) {
+        super (message, t);
+    }
 
-public interface ExecutionContext {
-
-     /**
-     * Returns the method being executed
-     * 
-     * @return the method
-     */
-    public Method getMethod();
-
-    /**
-     * Returns the parameter values being passed to the method 
-     * 
-     * @return the parameter values, as an array
-     * 
-     * 
-     */
-    public Object[] getParameters();
 
 }

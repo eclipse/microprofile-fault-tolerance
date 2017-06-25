@@ -24,7 +24,7 @@ import java.sql.Connection;
 
 import javax.enterprise.context.RequestScoped;
 
-import org.eclipse.microprofile.fault.tolerance.inject.Retry;
+import org.eclipse.microprofile.faulttolerance.Retry;
 /**
  * A client to demonstrate the abortOn conditions
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
