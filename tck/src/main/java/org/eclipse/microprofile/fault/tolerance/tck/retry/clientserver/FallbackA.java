@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2016-2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2017 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -17,27 +17,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
+
 package org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver;
 
-import java.sql.Connection;
+import javax.inject.Inject;
 
-import javax.enterprise.context.RequestScoped;
-
-import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
+import org.eclipse.microprofile.faulttolerance.ExecutionContext;
+import org.eclipse.microprofile.faulttolerance.FallbackHandler;
 /**
- * A client to demonstrate the circuit breaker policy
+ * A fallback handler to recover and return a string object.
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  *
  */
-@RequestScoped
-public class CircuitBreakerClient {
-    @CircuitBreaker(successThreshold = 2, failureRatio=0.75)
-    public Connection serviceA() {
-        return connectionService();
+public class FallbackA implements FallbackHandler<String> { 
+    private @Inject MyBean myBean;
+
+    @Override
+    public String handle(ExecutionContext context) {
+        return "fallback for " + context.getMethod().getName() + " myBean.getCount()=" + myBean.getCount();
     }
 
-    //simulate a backend service
-    private Connection connectionService() {
-        throw new RuntimeException("Connection failed");
-    }
 }

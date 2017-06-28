@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2016-2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2017 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -17,27 +17,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
+
 package org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver;
 
-import java.sql.Connection;
+import javax.enterprise.context.ApplicationScoped;
 
-import javax.enterprise.context.RequestScoped;
-
-import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
-/**
- * A client to demonstrate the circuit breaker policy
- * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
- *
- */
-@RequestScoped
-public class CircuitBreakerClient {
-    @CircuitBreaker(successThreshold = 2, failureRatio=0.75)
-    public Connection serviceA() {
-        return connectionService();
+@ApplicationScoped
+public class MyBean {
+    private static int count = 33;
+    public int getCount() {
+        return count = count ++;
     }
 
-    //simulate a backend service
-    private Connection connectionService() {
-        throw new RuntimeException("Connection failed");
-    }
 }

@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2016-2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2017 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,58 +19,69 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver;
 
-import java.sql.Connection;
-
 import javax.enterprise.context.RequestScoped;
 
+import org.eclipse.microprofile.faulttolerance.Fallback;
 import org.eclipse.microprofile.faulttolerance.Retry;
 /**
- * A client to demonstrate the maxRetries and max duration configuration
+ * A client to demonstrate the fallback after doing the maximum retries
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  *
  */
 @RequestScoped
-public class RetryClientForMaxRetries {
-    private int counterForInvokingConnenectionService;
-    private int counterForInvokingWritingService;
+public class FallbackClient {
+    private int counterForInvokingNameService;
+    private int counterForInvokingCountService;
     
-    @Retry(maxRetries = 5)
-    public Connection serviceA() {
-        return connectionService();
+    @Retry(maxRetries = 1)
+    @Fallback(FallbackA.class)
+    public String serviceA1() {
+       return nameService();
     }
 
-    private Connection connectionService() {
-        counterForInvokingConnenectionService++;
+    @Retry(maxRetries = 2)
+    @Fallback(FallbackA.class)
+    public String serviceA2() {
+       return nameService();
+    }
+    
+    private String nameService() {
+        counterForInvokingNameService++;
         throw new RuntimeException("Connection failed");
     }
     
-    public int getRetryCountForConnectionService() {
-        return counterForInvokingConnenectionService;
-    }
+    
     /**
-     * The configured the max retries is 90 but the max duration is 100ms. 
-     * Once the duration is reached, no more retries should be performed.
+     * Retry 5 times and then fallback
      */
-    @Retry(maxRetries = 90, maxDuration= 1000)
-    public void serviceB() {
-        writingService();
+    @Retry(maxRetries = 4)
+    @Fallback(FallbackA.class)
+    public int serviceB() {
+        return countService();
     }
 
-    private void writingService() {
-         counterForInvokingWritingService ++;
+    private int countService() {
+        counterForInvokingCountService++;
         try {
             Thread.sleep(100);
-            throw new RuntimeException("WritingService failed");
+            throw new RuntimeException("countService failed");
         } 
         catch (InterruptedException e) {
             e.printStackTrace();
         }
+        return 0;
         
     }
-    
-    public int getRetryCountForWritingService() {
-        return counterForInvokingWritingService;
+
+    public int getCounterForInvokingNameService() {
+        return counterForInvokingNameService;
     }
+
+    public int getCounterForInvokingCountService() {
+        return counterForInvokingCountService;
+    }
+
     
     
+   
 }
