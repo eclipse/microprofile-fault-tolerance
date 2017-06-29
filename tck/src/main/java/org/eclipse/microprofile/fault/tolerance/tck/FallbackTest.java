@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2016-2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2017 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -32,8 +32,7 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 /**
- * Test when maxDuration is reached, no more retries will be perfomed.
- * Test the delay and jitter were taken into consideration.
+ * Test fallback was invoked correctly; fallback handler supporting CDI injection; type safety on fallback class.
  * 
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  *
@@ -68,21 +67,20 @@ public class FallbackTest extends Arquillian {
         catch(RuntimeException ex) {
             Assert.fail("serviceA1 should not throw a RuntimeException in testRetryMaxRetries");
         }
-       
-    }
-    @Test
-    public void testFallbackInjection() {
+        
         try {
             String result = fallbackClient.serviceA2();
             Assert.assertTrue(result.contains("serviceA2"), "The message should be \"fallback for serviceA2\"");
             //MyBean should be injected to the fallbackA, MyBean is application scoped, 
             //so the same instance should be injected to the fallback handler
-            Assert.assertTrue(result.contains("34"), "The message should be \"fallback for serviceA2 myBean.getCount()=34\"");
+            Assert.assertTrue(result.contains("35"), "The message should be \"fallback for serviceA2 myBean.getCount()=35\"");
         }
         catch(RuntimeException ex) {
             Assert.fail("serviceA2 should not throw a RuntimeException in testRetryMaxRetries");
         }
+       
     }
+    
     /**
      * The fallbakHandler is the wrong type. This should failed the validation check.
      */

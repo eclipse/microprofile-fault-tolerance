@@ -24,7 +24,7 @@ import javax.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class MyBean {
-    private static int count = 33;
+    private int count = 33;
     public int getCount() {
         return count = count ++;
     }
