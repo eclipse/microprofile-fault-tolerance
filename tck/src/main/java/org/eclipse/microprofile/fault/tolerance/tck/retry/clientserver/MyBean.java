@@ -26,7 +26,8 @@ import javax.enterprise.context.ApplicationScoped;
 public class MyBean {
     private int count = 33;
     public int getCount() {
-        return count = count ++;
+        count++;
+        return count;
     }
 
 }

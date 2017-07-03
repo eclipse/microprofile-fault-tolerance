@@ -20,6 +20,7 @@
 
 package org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver;
 
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import org.eclipse.microprofile.faulttolerance.ExecutionContext;
@@ -29,7 +30,8 @@ import org.eclipse.microprofile.faulttolerance.FallbackHandler;
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  *
  */
-public class FallbackA implements FallbackHandler<String> { 
+@Dependent
+public class FallbackA implements FallbackHandler<String> {
     private @Inject MyBean myBean;
 
     @Override
