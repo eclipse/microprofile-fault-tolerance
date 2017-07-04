@@ -23,6 +23,7 @@ import javax.inject.Inject;
 
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.FallbackA;
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.FallbackClient;
+import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.MyBean;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -33,19 +34,19 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 /**
  * Test fallback was invoked correctly; fallback handler supporting CDI injection; type safety on fallback class.
- * 
+ *
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  *
  */
 public class FallbackTest extends Arquillian {
 
     private @Inject FallbackClient fallbackClient;
-    
+
     @Deployment
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
                 .create(JavaArchive.class, "ftfallback.jar")
-                .addClasses(FallbackClient.class, FallbackA.class)
+                .addClasses(FallbackClient.class, FallbackA.class, MyBean.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                 .as(JavaArchive.class);
 
@@ -54,10 +55,10 @@ public class FallbackTest extends Arquillian {
                 .addAsLibrary(testJar);
         return war;
     }
-    
-    @Test
+
+    @Test(priority = 1)
     public void testFallbackSuccess() {
-        
+
         try {
             String result = fallbackClient.serviceA1();
             Assert.assertTrue(result.contains("serviceA1"), "The message should be \"fallback for serviceA1\"");
@@ -65,38 +66,37 @@ public class FallbackTest extends Arquillian {
             Assert.assertTrue(result.contains("34"), "The message should be \"fallback for serviceA1 myBean.getCount()=34\"");
         }
         catch(RuntimeException ex) {
-            Assert.fail("serviceA1 should not throw a RuntimeException in testRetryMaxRetries");
+            Assert.fail("serviceA1 should not throw a RuntimeException in testRetryMaxRetries", ex);
         }
-        
+
         try {
             String result = fallbackClient.serviceA2();
             Assert.assertTrue(result.contains("serviceA2"), "The message should be \"fallback for serviceA2\"");
-            //MyBean should be injected to the fallbackA, MyBean is application scoped, 
+            //MyBean should be injected to the fallbackA, MyBean is application scoped,
             //so the same instance should be injected to the fallback handler
             Assert.assertTrue(result.contains("35"), "The message should be \"fallback for serviceA2 myBean.getCount()=35\"");
         }
         catch(RuntimeException ex) {
             Assert.fail("serviceA2 should not throw a RuntimeException in testRetryMaxRetries");
         }
-       
+
     }
-    
+
     /**
      * The fallbakHandler is the wrong type. This should failed the validation check.
      */
-    @Test
+    @Test(priority = 2)
     public void testFallbackFailure() {
         try {
             fallbackClient.serviceB();
             Assert.fail("serviceB should throw an IllegalArgumentException in testFallbackFailure");
         }
         catch(RuntimeException ex) {
-            
             Assert.assertTrue(ex instanceof IllegalArgumentException, "serviceB should throw an IllegalArgumentException in testFallbackFailure");
         }
         Assert.assertEquals(fallbackClient.getCounterForInvokingCountService(), 5, "The max number of execution should be 5");
-        
+
     }
-    
-    
+
+
 }
