@@ -30,7 +30,7 @@ import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
  * a requestVolumeThreshold of 4, failureRatio of 0.75 and a 50 second delay, so
  * that, once opened, the Circuit Breaker remains open for the duration of the test.
  * 
- * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
+ * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  *
  */
 @RequestScoped

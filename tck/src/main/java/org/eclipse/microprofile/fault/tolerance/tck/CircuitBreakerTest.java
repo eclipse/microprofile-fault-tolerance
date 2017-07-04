@@ -37,7 +37,7 @@ import org.testng.annotations.Test;
 /**
  * Test CircuitBreaker Thresholds and delays.
  * 
- * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
+ * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  *
  */
 
