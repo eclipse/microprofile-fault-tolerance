@@ -28,16 +28,18 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Define bulkhead policy to limit the number of the concurrent calls to a component.
+ * Define bulkhead policy to limit the number of the concurrent calls to an instance.
  * <p>
  * If this is used together with {@code Asynchronous}, it means thread isolation. 
  * 
  * Otherwise, it means semaphore isolation.
+ * <ul>
  * <li> Thread isolation - execution happens on a separate thread and the concurrent requests
- * are confined in a fixed number of a thread pool.
+ * are confined in a fixed number of a thread pool.</li>
  * <li> Semaphore isolation - execution happens on the calling thread and the concurrent requests
- * are constrained by the semaphore count.
- * </p>
+ * are constrained by the semaphore count.</li>
+ * </ul>
+ * 
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  *
  */
@@ -48,8 +50,14 @@ import java.lang.annotation.Target;
 public @interface Bulkhead {
 
     /**
-     * Specify the maximum number of concurrent calls to a component.
+     * Specify the maximum number of concurrent calls to an instance.
      * @return the limit of the concurrent calls
      */
     short value() default 10;
+    /**
+     * Specify the waiting queue when a Thread pool style of bulkhead is used. This setting
+     * has no effect when semaphore style of bulkhead is used.
+     * @return the waiting queue size
+     */
+    short waitingThreadQueue() default 5;
 }
