@@ -16,38 +16,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // Contributors:
-// Emily Jiang
+// John D. Ament
 
-= Microprofile Fault Tolerance
-:author: Emily Jiang
-:email: emijiang@uk.ibm.com
-:revnumber: 0.1
-:revdate: 2017-05-07
-:revremark: Specification
-:version-label!:
-:sectanchors:
-:doctype: book
-:license: Apache License v2.0
-:source-highlighter: coderay
-:toc: left
-:toclevels: 4
-:sectnumlevels: 4
-ifdef::backend-pdf[]
-:pagenums:
-endif::[]
+[[fallback]]
+== Fallback
+Fallbacks are invoked once a Retry or CircuitBreaker has failed enough times.
+
+For a Retry, Fallback is handled any time the Retry would exceed its maximum number of attempts.
+
+For a CircuitBreaker, it is invoked any time the method invocation fails.  When the Circuit is open, the Fallback is always invoked.
+
+If a FallbackHandler is registered for a method returning a different type than the FallbackHandler would return, then the container should treat as an error and deployment fails.
+
+FallbackHandlers are meant to be CDI managed, and should follow the life cycle of the scope of the bean.
 
 
-include::license-alv2.asciidoc[]
-
-=== Microprofile Fault Tolerance
-
-
-include::architecture.asciidoc[]
-
-include::execution.asciidoc[]
-
-include::retry.asciidoc[]
-
-include::circuitbreaker.asciidoc[]
-
-include::fallback.asciidoc[]

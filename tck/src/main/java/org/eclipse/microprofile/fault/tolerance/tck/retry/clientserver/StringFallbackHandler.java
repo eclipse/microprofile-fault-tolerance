@@ -31,7 +31,7 @@ import org.eclipse.microprofile.faulttolerance.FallbackHandler;
  *
  */
 @Dependent
-public class FallbackA implements FallbackHandler<String> {
+public class StringFallbackHandler implements FallbackHandler<String> {
     private @Inject MyBean myBean;
 
     @Override
