@@ -21,7 +21,7 @@ package org.eclipse.microprofile.fault.tolerance.tck;
 
 import javax.inject.Inject;
 
-import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.FallbackA;
+import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.StringFallbackHandler;
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.FallbackClient;
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.MyBean;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -46,7 +46,7 @@ public class FallbackTest extends Arquillian {
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
                 .create(JavaArchive.class, "ftfallback.jar")
-                .addClasses(FallbackClient.class, FallbackA.class, MyBean.class)
+                .addClasses(FallbackClient.class, StringFallbackHandler.class, MyBean.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                 .as(JavaArchive.class);
 
@@ -56,7 +56,7 @@ public class FallbackTest extends Arquillian {
         return war;
     }
 
-    @Test(priority = 1)
+    @Test
     public void testFallbackSuccess() {
 
         try {
@@ -81,22 +81,5 @@ public class FallbackTest extends Arquillian {
         }
 
     }
-
-    /**
-     * The fallbakHandler is the wrong type. This should failed the validation check.
-     */
-    @Test(priority = 2)
-    public void testFallbackFailure() {
-        try {
-            fallbackClient.serviceB();
-            Assert.fail("serviceB should throw an IllegalArgumentException in testFallbackFailure");
-        }
-        catch(RuntimeException ex) {
-            Assert.assertTrue(ex instanceof IllegalArgumentException, "serviceB should throw an IllegalArgumentException in testFallbackFailure");
-        }
-        Assert.assertEquals(fallbackClient.getCounterForInvokingCountService(), 5, "The max number of execution should be 5");
-
-    }
-
 
 }

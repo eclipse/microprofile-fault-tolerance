@@ -17,34 +17,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver;
 
-import javax.enterprise.context.RequestScoped;
+package org.eclipse.microprofile.fault.tolerance.tck.illegalConfig;
 
-import org.eclipse.microprofile.faulttolerance.Fallback;
-import org.eclipse.microprofile.faulttolerance.Retry;
+import org.eclipse.microprofile.faulttolerance.ExecutionContext;
+import org.eclipse.microprofile.faulttolerance.FallbackHandler;
+
+import javax.enterprise.context.Dependent;
+
 /**
- * A client to demonstrate the fallback after doing the maximum retries
+ * A fallback handler to recover and return a string object.
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
+ * @author <a href="mailto:john.d.ament@gmail.com">John D. Ament</a>
  *
  */
-@RequestScoped
-public class FallbackClient {
-
-    @Retry(maxRetries = 1)
-    @Fallback(StringFallbackHandler.class)
-    public String serviceA1() {
-       return nameService();
-    }
-
-    @Retry(maxRetries = 2)
-    @Fallback(StringFallbackHandler.class)
-    public String serviceA2() {
-       return nameService();
-    }
-
-    private String nameService() {
-        throw new RuntimeException("Connection failed");
+@Dependent
+public class IncompatibleFallbackHandler implements FallbackHandler<String> {
+    @Override
+    public String handle(ExecutionContext context) {
+        return "fourty-two";
     }
 
 }
