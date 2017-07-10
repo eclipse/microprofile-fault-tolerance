@@ -21,8 +21,6 @@ package org.eclipse.microprofile.fault.tolerance.tck;
 
 import javax.inject.Inject;
 
-import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClientForMaxRetries;
-import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClientWithDelay;
 import org.eclipse.microprofile.fault.tolerance.tck.timeout.clientserver.TimeoutClient;
 import org.eclipse.microprofile.faulttolerance.exceptions.TimeoutException;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -33,6 +31,7 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
 /**
  * Tests to exercise Fault Tolerance Timeouts.
  * 
@@ -42,58 +41,54 @@ import org.testng.annotations.Test;
 public class TimeoutTest extends Arquillian {
 
     private @Inject TimeoutClient clientForTimeout;
-    
+
     @Deployment
     public static WebArchive deploy() {
-        JavaArchive testJar = ShrinkWrap
-                .create(JavaArchive.class, "ftTimeout.jar")
-                .addClasses(TimeoutClient.class)
-                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
-                .as(JavaArchive.class);
+        JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftTimeout.jar").addClasses(TimeoutClient.class)
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml").as(JavaArchive.class);
 
-        WebArchive war = ShrinkWrap
-                .create(WebArchive.class, "ftTimeout.war")
-                .addAsLibrary(testJar);
+        WebArchive war = ShrinkWrap.create(WebArchive.class, "ftTimeout.war").addAsLibrary(testJar);
         return war;
     }
- 
-	/**
-	 * A test to exercise the default timeout. The default Fault Tolerance timeout is 1 second but 
-	 * serviceA will attempt to sleep for 20 seconds, so should throw a TimeoutException.
-	 * 
-	 */
+
+    /**
+     * A test to exercise the default timeout. The default Fault Tolerance
+     * timeout is 1 second but serviceA will attempt to sleep for 20 seconds, so
+     * should throw a TimeoutException.
+     * 
+     */
     @Test
     public void testTimeout() {
         try {
-        	clientForTimeout.serviceA();
+            clientForTimeout.serviceA();
             Assert.fail("serviceA should throw a TimeoutException in testTimeout");
-        }
-        catch(TimeoutException ex) {
+        } 
+        catch (TimeoutException ex) {
             // Expected
-        }
-        catch(RuntimeException ex) {
+        } 
+        catch (RuntimeException ex) {
             // Not Expected
-        	Assert.fail("serviceA should throw a TimeoutException in testTimeout not a RuntimeException");
+            Assert.fail("serviceA should throw a TimeoutException in testTimeout not a RuntimeException");
         }
     }
 
-	/**
-	 * A test that should not time out. The default Fault Tolerance timeout is 1 second but 
-	 * serviceB will attempt to sleep for only 10 milliseconds before throwing a RuntimeException. There
-	 * should be no Timeout.
-	 * 
-	 */
+    /**
+     * A test that should not time out. The default Fault Tolerance timeout is 1
+     * second but serviceB will attempt to sleep for only 10 milliseconds before
+     * throwing a RuntimeException. There should be no Timeout.
+     * 
+     */
     @Test
     public void testNoTimeout() {
         try {
-        	clientForTimeout.serviceB();
+            clientForTimeout.serviceB();
             Assert.fail("serviceB should throw a RuntimeException in testNoTimeout");
-        }
-        catch(TimeoutException ex) {
+        } 
+        catch (TimeoutException ex) {
             // Not Expected
-        	Assert.fail("serviceB should throw a RuntimeException in testNoTimeout not a TimeoutException");
-        }
-        catch(RuntimeException ex) {
+            Assert.fail("serviceB should throw a RuntimeException in testNoTimeout not a TimeoutException");
+        } 
+        catch (RuntimeException ex) {
             // Expected
         }
     }

@@ -39,7 +39,8 @@ public class TimeoutClient {
         try {
             Thread.sleep(20000);
             throw new RuntimeException("Timeout did not interrupt");
-        } catch (InterruptedException e) {
+        } 
+        catch (InterruptedException e) {
             //expected
         }
         return null;
@@ -50,7 +51,8 @@ public class TimeoutClient {
         try {
             Thread.sleep(10);
             throw new RuntimeException("Timeout did not interrupt");
-        } catch (InterruptedException e) {
+        } 
+        catch (InterruptedException e) {
             //expected
         }
         return null;
