@@ -17,27 +17,49 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver;
+package org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver;
 
+import java.io.Serializable;
 import java.sql.Connection;
 
 import javax.enterprise.context.RequestScoped;
 
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 /**
- * A client to demonstrate the circuit breaker policy
- * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
+ * A client to exercise Circuit Breaker thresholds, with a default SuccessThreshold of 1,
+ * a requestVolumeThreshold of 4, failureRatio of 0.75 and a 1 second delay.
+ * 
+ * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  *
  */
 @RequestScoped
-public class CircuitBreakerClient {
-    @CircuitBreaker(successThreshold = 2, failureRatio=0.75)
+public class CircuitBreakerClientDefaultSuccessThreshold implements Serializable {
+    private int counterForInvokingServiceA = 0;
+        
+    public int getCounterForInvokingServiceA() {
+                return counterForInvokingServiceA;
+        }
+
+        public void setCounterForInvokingServiceA(int count) {
+                this.counterForInvokingServiceA = count;
+        }
+
+        @CircuitBreaker(successThreshold = 1, requestVolumeThreshold = 4, failureRatio=0.75, delay = 1000)
     public Connection serviceA() {
-        return connectionService();
+        Connection conn = null;
+        counterForInvokingServiceA++;
+        conn = connectionService();
+        
+        return conn;
     }
 
     //simulate a backend service
     private Connection connectionService() {
-        throw new RuntimeException("Connection failed");
+        // Only one execution succeeds
+        if(counterForInvokingServiceA != 5) {
+                throw new RuntimeException("Connection failed");
+        }
+                
+        return null;
     }
 }
