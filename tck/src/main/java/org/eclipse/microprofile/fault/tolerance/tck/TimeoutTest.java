@@ -60,7 +60,7 @@ public class TimeoutTest extends Arquillian {
     @Test
     public void testTimeout() {
         try {
-            clientForTimeout.serviceA();
+            clientForTimeout.serviceA(20000);
             Assert.fail("serviceA should throw a TimeoutException in testTimeout");
         } 
         catch (TimeoutException ex) {
@@ -74,19 +74,141 @@ public class TimeoutTest extends Arquillian {
 
     /**
      * A test that should not time out. The default Fault Tolerance timeout is 1
-     * second but serviceB will attempt to sleep for only 10 milliseconds before
+     * second but serviceA will attempt to sleep for only 10 milliseconds before
      * throwing a RuntimeException. There should be no Timeout.
      * 
      */
     @Test
     public void testNoTimeout() {
         try {
-            clientForTimeout.serviceB();
+            clientForTimeout.serviceA(10);
             Assert.fail("serviceB should throw a RuntimeException in testNoTimeout");
         } 
         catch (TimeoutException ex) {
             // Not Expected
             Assert.fail("serviceB should throw a RuntimeException in testNoTimeout not a TimeoutException");
+        } 
+        catch (RuntimeException ex) {
+            // Expected
+        }
+    }
+    
+    /**
+     * A test that should time out. The Fault Tolerance timeout is set to a (non-default) 2 seconds but serviceB 
+     * will attempt to sleep for 2.5 seconds - so longer than a  default timeout.
+     */
+    @Test
+    public void testGreaterThanDefaultTimeout() {
+        try {
+            clientForTimeout.serviceB(2500);
+            Assert.fail("serviceB should throw a TimeoutException in testGreaterThanDefaultTimeout");
+        } 
+        catch (TimeoutException ex) {
+            // Expected
+        } 
+        catch (RuntimeException ex) {
+            // Not Expected
+            Assert.fail("serviceB should throw a TimeoutException in testGreaterThanDefaultTimeout not a RuntimeException");
+        }
+    }
+    
+    /**
+     * A test that should not time out. The Fault Tolerance timeout is set to 2
+     * seconds but serviceB will attempt to sleep for 1.5 seconds - so longer than a  default
+     * timeout but shorter than the timeout that has been configured, before throwing a 
+     * RuntimeException. There should be no Timeout.
+     * 
+     */
+    @Test
+    public void testGreaterThanDefaultNoTimeout() {
+        try {
+            clientForTimeout.serviceB(1500);
+            Assert.fail("serviceB should throw a RuntimeException in testGreaterThanDefaultNoTimeout");
+        } 
+        catch (TimeoutException ex) {
+            // Not Expected
+            Assert.fail("serviceB should throw a RuntimeException in testGreaterThanDefaultNoTimeout not a TimeoutException");
+        } 
+        catch (RuntimeException ex) {
+            // Expected
+        }
+    }
+    
+    /**
+     * A test that should time out. The Fault Tolerance timeout is set to a (non-default) 0.5 seconds but serviceC 
+     * will attempt to sleep for 1 second - so longer than a  default timeout.
+     */
+    @Test
+    public void testLessThanDefaultTimeout() {
+        try {
+            clientForTimeout.serviceC(1000);
+            Assert.fail("serviceC should throw a TimeoutException in testLessThanDefaultTimeout");
+        } 
+        catch (TimeoutException ex) {
+            // Expected
+        } 
+        catch (RuntimeException ex) {
+            // Not Expected
+            Assert.fail("serviceC should throw a TimeoutException in testLessThanDefaultTimeout not a RuntimeException");
+        }
+    }    
+    /**
+     * A test that should not time out. The Fault Tolerance timeout is set to a (non-default) 0.5
+     * seconds but serviceC will attempt to sleep for only 10 milliseconds before
+     * throwing a RuntimeException. There should be no Timeout.
+     * 
+     */
+    @Test
+    public void testLessThanDefaultNoTimeout() {
+        try {
+            clientForTimeout.serviceC(10);
+            Assert.fail("serviceC should throw a RuntimeException in testLessThanDefaultNoTimeout");
+        } 
+        catch (TimeoutException ex) {
+            // Not Expected
+            Assert.fail("serviceC should throw a RuntimeException in testLessThanDefaultNoTimeout not a TimeoutException");
+        } 
+        catch (RuntimeException ex) {
+            // Expected
+        }
+    }
+    
+    /**
+     * A test that should time out. The Fault Tolerance timeout is set to a (non-default) 2 seconds but serviceD 
+     * will attempt to sleep for 2.5 seconds - so longer than a  default timeout. serviceD specifies its timeout
+     * in Seconds rather than milliseconds.
+     */
+    @Test
+    public void testSecondsTimeout() {
+        try {
+            clientForTimeout.serviceD(2500);
+            Assert.fail("serviceD should throw a TimeoutException in testSecondsTimeout");
+        } 
+        catch (TimeoutException ex) {
+            // Expected
+        } 
+        catch (RuntimeException ex) {
+            // Not Expected
+            Assert.fail("serviceD should throw a TimeoutException in testSecondsTimeout not a RuntimeException");
+        }
+    }
+    
+    /**
+     * A test that should not time out. The Fault Tolerance timeout is set to 2
+     * seconds but serviceD will attempt to sleep for 1.5 seconds - so longer than a  default
+     * timeout but shorter than the timeout that has been configured, before throwing a 
+     * RuntimeException. There should be no Timeout.
+     * 
+     */
+    @Test
+    public void testSecondsNoTimeout() {
+        try {
+            clientForTimeout.serviceD(1500);
+            Assert.fail("serviceD should throw a RuntimeException in testSecondsNoTimeout");
+        } 
+        catch (TimeoutException ex) {
+            // Not Expected
+            Assert.fail("serviceD should throw a RuntimeException in testSecondsNoTimeout not a TimeoutException");
         } 
         catch (RuntimeException ex) {
             // Expected
