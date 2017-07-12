@@ -20,8 +20,9 @@
 
 [[timeout]]
 == Timeout
-Each method invocation should specify timeout so that the execution won't wait forever. It is recommended that
+`Timeout` prevents from the execution from waiting forever. It is recommended that
 a microservice invocation should have timeout associated with.
+
 == Timeout Usage
 
 A method or a class can be annotated with `@Timeout`, which means the method or the methods under the class will have Timeout policy applied.
@@ -29,7 +30,6 @@ A method or a class can be annotated with `@Timeout`, which means the method or 
 [source, java]
 ----
 @Timeout(400) // timeout is 400ms
-void bar() { }
 public Connection serviceA() {
    Connection conn = null;
    counterForInvokingServiceA++;
