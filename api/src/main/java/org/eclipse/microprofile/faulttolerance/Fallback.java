@@ -43,5 +43,5 @@ public @interface Fallback {
      * is returned. The instance is unmanaged.
      * @return the fallback class
      */
-    Class<? extends FallbackHandler> value();
+    Class<? extends FallbackHandler<?>> value();
 }
