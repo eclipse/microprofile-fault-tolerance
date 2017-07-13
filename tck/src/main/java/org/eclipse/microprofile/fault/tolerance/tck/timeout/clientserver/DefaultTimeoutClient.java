@@ -51,7 +51,7 @@ public class DefaultTimeoutClient {
     /**
      * serviceB specifies a an overriding Timeout longer than the default, at 2 seconds
      */
-    @Timeout(value = 2000)
+    @Timeout(2000)
     public Connection serviceB(long timeToSleep) {
         try {
             Thread.sleep(timeToSleep);

@@ -52,7 +52,7 @@ public class TimeoutClient {
     /**
      * serviceB specifies a Timeout longer than the default, at 2 seconds
      */
-    @Timeout(value = 2000)
+    @Timeout(2000)
     public Connection serviceB(long timeToSleep) {
         try {
             Thread.sleep(timeToSleep);
@@ -67,7 +67,7 @@ public class TimeoutClient {
     /**
      * serviceC specifies a Timeout shorter than the default, at .5 seconds
      */
-    @Timeout(value = 500)
+    @Timeout(500)
     public Connection serviceC(long timeToSleep) {
         try {
             Thread.sleep(timeToSleep);
