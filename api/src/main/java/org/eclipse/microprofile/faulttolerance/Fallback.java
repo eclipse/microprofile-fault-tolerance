@@ -44,4 +44,10 @@ public @interface Fallback {
      * @return the fallback class
      */
     Class<? extends FallbackHandler<?>> value();
+    /**
+     * Specify the method name to be fallbacked to. This method belongs
+     * to the same class as the method to fallback.
+     * @return the local method to fallback to
+     */
+    String fallbackMethod() default "";
 }
