@@ -17,8 +17,8 @@
 // limitations under the License.
 // Contributors:
 // Emily Jiang
-[[architecture]]
 
+[[architecture]]
 == Architecture
 
 This specification defines an easy to use and flexible system for building resilient applications.
@@ -30,15 +30,15 @@ It is increasingly important to build fault tolerant micro services. Fault toler
 
 As mentioned above, the Fault Tolerance proposal is to focus the aspects: TimeOut, RetryPolicy, Fallback, bulkhead and circuit breaker:
 
-* TimeOut: Define a duration for timeout
+* `TimeOut`: Define a duration for timeout
 
-* RetryPolicy: Define a criteria on when to retry
+* `RetryPolicy`: Define a criteria on when to retry
 
-* Fallback: provide an alternative solution for a failed execution.
+* `Fallback`: provide an alternative solution for a failed execution.
 
-* Bulkhead: isolate failures in part of the system while the rest part of the system can still function.
+* `Bulkhead`: isolate failures in part of the system while the rest part of the system can still function.
 
- * CircuitBreaker: offer a way of fail fast by automatically failing execution to prevent the system overloading and indefinite wait or timeout by the clients.
+ * `CircuitBreaker`: offer a way of fail fast by automatically failing execution to prevent the system overloading and indefinite wait or timeout by the clients.
 
 The main design is to separate execution logic from execution. The execution can be configured with fault tolerance policies, such as RetryPolicy, fallback, Bulkhead and CircuitBreaker.
 
