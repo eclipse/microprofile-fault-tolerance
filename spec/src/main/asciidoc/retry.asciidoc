@@ -18,17 +18,18 @@
 [[retry]]
 == Retry Policy
 In order to recover from a brief network glitch, `Retry` can be used to invoke the same operation again. The `Retry` policy allows to configure :
-* maxRetries: the maximum retries
-* delay: delays between each retry
-* delayUnit: the delay unit
-* maxDuration: maximum duration to perform the retry for.
-* durationUnit: duration unit
-* jitter: the random vary of retry delays
-* jitterDelayUnit: the jitter unit
-* retryOn: specify the failure to retry on
-* abortOn: specify the failure to abort on
 
-== Retry usage
+* `maxRetries`: the maximum retries
+* `delay`: delays between each retry
+* `delayUnit`: the delay unit
+* `maxDuration`: maximum duration to perform the retry for.
+* `durationUnit`: duration unit
+* `jitter`: the random vary of retry delays
+* `jitterDelayUnit`: the jitter unit
+* `retryOn`: specify the failure to retry on
+* `abortOn`: specify the failure to abort on
+ 
+=== Retry usage
 `Retry` can be applied to the class or method level. If applied to a class, it means the all methods in the class will have the `Retry` policy applied. If applied to a method, it means  that method will have `Retry` policy applied. If the `Retry` policy applied on a class level and on a method level within that class, the method level `Retry` will override the class-level `Retry` policy for that particular method. 
 
 [source, java]

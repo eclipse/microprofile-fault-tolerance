@@ -39,12 +39,11 @@ endif::[]
 
 include::license-alv2.asciidoc[]
 
-=== Microprofile Fault Tolerance
-
-
 include::architecture.asciidoc[]
 
 include::execution.asciidoc[]
+
+include::asynchronous.asciidoc[]
 
 include::retry.asciidoc[]
 
