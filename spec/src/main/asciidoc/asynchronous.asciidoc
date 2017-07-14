@@ -26,12 +26,12 @@ This thread should have the correct security context or naming context associate
 
 === Asynchronous Usage
 
-A method or a class can be annotated with `@Asynchronous`, which means the method or the methods under the class will be invoked by a separate thread.
+A method or a class can be annotated with `@Asynchronsou`, which means the method or the methods under the class will be invoked by a separate thread.
 
 [source, java]
 ----
 @Asynchronous
-public Futurt<Connection> serviceA() {
+public Connection serviceA() {
    Connection conn = null;
    counterForInvokingServiceA++;
    conn = connectionService();
@@ -40,6 +40,6 @@ public Futurt<Connection> serviceA() {
 ----
 
 The above code-snippet means the method serviceA applies the `Asynchronous` policy, 
-which means the invocation will be done by a different thread. The return type must be a `Future`.
+which means the invocation will be done by a different thread.
 
 The `Asynchronous` annotation can be used together with `Timeout`, `Fallback`, `Asynchronous`, `Bulkhead` and `Retry`, which means the method being annotated will be invoked by a different thread.
