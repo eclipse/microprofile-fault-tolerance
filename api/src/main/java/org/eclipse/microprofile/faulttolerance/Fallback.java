@@ -29,6 +29,15 @@ import java.lang.annotation.Target;
  * The fallback annotation to define the fallback handler class so that
  * a failure can be handled properly.
  * 
+ * <li>If value is specified, use {@link FallbackHandler#handle()} on the specified handler to execute the fallback.
+ * <li>If fallbackMethod is specified, invoke the method specified by the fallbackMethod on the same class.
+ * <li>If both are specified, try to fallback to fallbackMethod first, 
+ * if it fails then call {@link FallbackHandler#handle()}
+ * 
+ * 
+ * 
+ *  
+ * 
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  * 
  */
@@ -40,8 +49,19 @@ public @interface Fallback {
 
     /**
      * Specify the fallback class to be used. An new instance of the fallback class
-     * is returned. The instance is unmanaged.
+     * is returned. The instance is unmanaged. The type parameter of the fallback class must be assignable to the
+     * return type of the annotated method. Otherwise, the {@link javax.enterprise.inject.spi.DeploymentException} must be thrown.
+     * 
      * @return the fallback class
      */
     Class<? extends FallbackHandler<?>> value();
+    /**
+    * Specify the method name to be fallbacked to. This method belongs
+    * to the same class as the method to fallback.
+    * The method must be either zero argument or have the exactly same arguments as the method being annotated.
+    * The method return type must be assignable to the return type of the method annotated. 
+    * Otherwise, the {@link javax.enterprise.inject.spi.DeploymentException} must be thrown.
+    * @return the local method to fallback to
+    */
+    String fallbackMethod() default "";
 }
