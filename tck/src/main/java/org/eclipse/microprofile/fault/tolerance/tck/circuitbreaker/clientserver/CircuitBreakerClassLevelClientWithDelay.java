@@ -25,6 +25,7 @@ import java.sql.Connection;
 import javax.enterprise.context.RequestScoped;
 
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
+
 /**
  * A client to exercise Circuit Breaker thresholds, with a SuccessThreshold of 2,
  * a requestVolumeThreshold of 4, failureRatio of 0.75 and a 50 second delay, so
@@ -34,7 +35,7 @@ import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
  *
  */
 @RequestScoped
-@CircuitBreaker(successThreshold = 2, requestVolumeThreshold = 4, failureRatio=0.75, delay = 50000)
+@CircuitBreaker(successThreshold = 2, requestVolumeThreshold = 4, failureRatio = 0.75, delay = 50000)
 public class CircuitBreakerClassLevelClientWithDelay implements Serializable {
     private int counterForInvokingService = 0;
 
@@ -51,42 +52,42 @@ public class CircuitBreakerClassLevelClientWithDelay implements Serializable {
 
         counterForInvokingService++;
         conn = connectionService();
-        
+
         return conn;
     }
 
-    public Connection serviceB() {  
+    public Connection serviceB() {
         Connection conn = null;
 
         counterForInvokingService++;
         conn = connectionService();
-        
+
         return conn;
     }
 
-    @CircuitBreaker(successThreshold = 2, requestVolumeThreshold = 2, failureRatio=1, delay = 50000)
-    public Connection serviceC() {  
+    @CircuitBreaker(successThreshold = 2, requestVolumeThreshold = 2, failureRatio = 1, delay = 50000)
+    public Connection serviceC() {
         Connection conn = null;
 
         counterForInvokingService++;
         conn = connectionService();
-        
+
         return conn;
     }
 
-    @CircuitBreaker(successThreshold = 2, requestVolumeThreshold = 4, failureRatio=0.75, delay = 1)
-    public Connection serviceD() {  
+    @CircuitBreaker(successThreshold = 2, requestVolumeThreshold = 4, failureRatio = 0.75, delay = 1)
+    public Connection serviceD() {
         Connection conn = null;
 
         counterForInvokingService++;
         conn = connectionService();
-        
+
         return conn;
     }
-    
+
     //simulate a backend service
     private Connection connectionService() {
-        if(counterForInvokingService < 5) {
+        if (counterForInvokingService < 5) {
             throw new RuntimeException("Connection failed");
         }
         return null;
