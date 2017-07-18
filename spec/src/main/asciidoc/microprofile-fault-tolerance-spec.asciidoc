@@ -45,8 +45,16 @@ include::execution.asciidoc[]
 
 include::asynchronous.asciidoc[]
 
+include::timeout.asciidoc[]
+
 include::retry.asciidoc[]
+
+include::fallback.asciidoc[]
 
 include::circuitbreaker.asciidoc[]
 
-include::fallback.asciidoc[]
+include::bulkhead.asciidoc[]
+
+
+
+

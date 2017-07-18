@@ -28,7 +28,8 @@ There are three circuit states:
 * Open: calls to the circuit breaker fail immediately. After the specified timeout is reached, the circuit transitions to half open state.
 
 * Half-open: one call to the circuit is allowed. If it fails, the circuit will remain open. Otherwise, subsequent calls are allowed. After the specified successful execution, the circuit will be closed.
-== Circuit Breaker Usage
+
+=== Circuit Breaker Usage
 
 A method or a class can be annotated with `@CircuitBreaker`, which means the method or the methods under the class will have CircuitBreaker policy applied.
 

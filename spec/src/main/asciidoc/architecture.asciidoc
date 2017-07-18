@@ -36,9 +36,9 @@ As mentioned above, the Fault Tolerance proposal is to focus the aspects: TimeOu
 
 * `Fallback`: provide an alternative solution for a failed execution.
 
-* `Bulkhead`: isolate failures in part of the system while the rest part of the system can still function.
+* `CircuitBreaker`: offer a way of fail fast by automatically failing execution to prevent the system overloading and indefinite wait or timeout by the clients.
 
- * `CircuitBreaker`: offer a way of fail fast by automatically failing execution to prevent the system overloading and indefinite wait or timeout by the clients.
+* `Bulkhead`: isolate failures in part of the system while the rest part of the system can still function.
 
 The main design is to separate execution logic from execution. The execution can be configured with fault tolerance policies, such as RetryPolicy, fallback, Bulkhead and CircuitBreaker.
 
