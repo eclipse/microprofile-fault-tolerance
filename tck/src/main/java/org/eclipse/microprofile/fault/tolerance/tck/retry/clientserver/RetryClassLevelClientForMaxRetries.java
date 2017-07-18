@@ -31,14 +31,14 @@ import org.eclipse.microprofile.faulttolerance.Retry;
  *
  */
 @RequestScoped
-public class RetryClientForMaxRetries {
+@Retry(maxRetries = 2)
+public class RetryClassLevelClientForMaxRetries {
     private int counterForInvokingConnenectionService;
     private int counterForInvokingWritingService;
     private int counterForInvokingServiceA;
     private int counterForInvokingServiceB;
     private int counterForInvokingServiceC;
     
-    @Retry(maxRetries = 5)
     public Connection serviceA() {
         counterForInvokingServiceA ++;
         return connectionService();
@@ -52,7 +52,7 @@ public class RetryClientForMaxRetries {
     public int getRetryCountForConnectionService() {
         return counterForInvokingConnenectionService;
     }
-
+    
     /**
      * Max retries is configured to 90 but the max duration is 1 second with a default 
      * durationUnit of milliseconds.
@@ -100,7 +100,7 @@ public class RetryClientForMaxRetries {
     public int getRetryCounterForServiceB() {
         return counterForInvokingServiceB;
     }
-    
+
     public int getRetryCounterForServiceC() {
         return counterForInvokingServiceC;
     }

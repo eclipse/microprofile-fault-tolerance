@@ -19,28 +19,25 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver;
 
+import java.io.IOException;
 import java.sql.Connection;
-import java.time.temporal.ChronoUnit;
 
 import javax.enterprise.context.RequestScoped;
 
 import org.eclipse.microprofile.faulttolerance.Retry;
 /**
- * A client to demonstrate the maxRetries and max duration configuration
+ * A client to demonstrate the specification of abortOn conditions at the Class level.
+ * 
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  *
  */
 @RequestScoped
-public class RetryClientForMaxRetries {
+@Retry(abortOn = {IOException.class})
+public class RetryClassLevelClientAbortOn {
     private int counterForInvokingConnenectionService;
     private int counterForInvokingWritingService;
-    private int counterForInvokingServiceA;
-    private int counterForInvokingServiceB;
-    private int counterForInvokingServiceC;
-    
-    @Retry(maxRetries = 5)
+
     public Connection serviceA() {
-        counterForInvokingServiceA ++;
         return connectionService();
     }
 
@@ -52,33 +49,17 @@ public class RetryClientForMaxRetries {
     public int getRetryCountForConnectionService() {
         return counterForInvokingConnenectionService;
     }
-
-    /**
-     * Max retries is configured to 90 but the max duration is 1 second with a default 
-     * durationUnit of milliseconds.
-     *  
-     * Once the duration is reached, no more retries should be performed.
-     */
-    @Retry(maxRetries = 90, maxDuration= 1000)
-    public void serviceB() {
-        counterForInvokingServiceB ++;
-        writingService();
-    }
-
-    /**
-     * Max retries is configured to 90 but the max duration is 1 second with a durationUnit of seconds
-     * specified.
-     *  
-     * Once the duration is reached, no more retries should be performed.
-     */
-    @Retry(maxRetries = 90, maxDuration= 1, durationUnit = ChronoUnit.SECONDS)
-    public void serviceC() {
-        counterForInvokingServiceC ++;
-        writingService();
-    }
     
+    /**
+     * serviceB is configured to retry on a RuntimeException. The WritingService throws RuntimeExceptions.
+     */
+    @Retry(abortOn = {RuntimeException.class})
+    public void serviceB() {
+        writingService();
+    }
+
     private void writingService() {
-         counterForInvokingWritingService ++;
+        counterForInvokingWritingService ++;
         try {
             Thread.sleep(100);
             throw new RuntimeException("WritingService failed");
@@ -91,17 +72,5 @@ public class RetryClientForMaxRetries {
     
     public int getRetryCountForWritingService() {
         return counterForInvokingWritingService;
-    }
-    
-    public int getRetryCounterForServiceA() {
-        return counterForInvokingServiceA;
-    }
-    
-    public int getRetryCounterForServiceB() {
-        return counterForInvokingServiceB;
-    }
-    
-    public int getRetryCounterForServiceC() {
-        return counterForInvokingServiceC;
     }
 }
