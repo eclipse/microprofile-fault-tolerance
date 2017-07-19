@@ -46,7 +46,11 @@ To enable the tests in your project you need to add the following dependency to 
 </dependency>
 ----
 
-== Declaring the Tests to run
+== Using a TestNG Test Suite
+
+You can run the tests either as a test suite or via Maven Surefire configuration.  This section is how to do it in a test suite.
+
+=== Declaring the Tests to run
 
 You also need to specify which tests you want to run, e.g. create a file `tck-suite.xml` in your project which contains the following content:
 [source, xml]
@@ -65,7 +69,7 @@ You also need to specify which tests you want to run, e.g. create a file `tck-su
 </suite>
 ----
 
-== Configuration in Apache Maven pom.xml
+=== Configuration in Apache Maven pom.xml
 
 If you use Apache Maven then the tests are run via the `maven-surefire-plugin`
 [source, xml]
@@ -86,3 +90,28 @@ If you use Apache Maven then the tests are run via the `maven-surefire-plugin`
 </build>
 ----
 
+== Running as a Scanned Dependency
+
+You can also run the TCK as a scanned dependency.
+
+=== Surefire Configuration in your pom.xml
+
+Once you've added the dependency, you don't need a `tck-suite.xml` you can just scan the dependency for tests.
+
+[source, xml]
+----
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>2.19.1</version>
+            <configuration>
+                <dependenciesToScan>
+                    <dependency>org.eclipse.microprofile.fault.tolerance:microprofile-fault-tolerance-tck</dependency>
+                </dependenciesToScan>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+----

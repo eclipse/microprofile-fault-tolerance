@@ -21,6 +21,8 @@ package org.eclipse.microprofile.fault.tolerance.tck;
 
 import javax.inject.Inject;
 
+import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClassLevelClientAbortOn;
+import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClassLevelClientRetryOn;
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClientAbortOn;
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClientRetryOn;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -42,21 +44,29 @@ public class RetryConditionTest extends Arquillian {
 
     private @Inject RetryClientRetryOn clientForRetryOn;
     private @Inject RetryClientAbortOn clientForAbortOn;
+    private @Inject RetryClassLevelClientRetryOn clientForClassLevelRetryOn;
+    private @Inject RetryClassLevelClientAbortOn clientForClassLevelAbortOn;
     
     @Deployment
     public static WebArchive deploy() {
-        JavaArchive testJar = ShrinkWrap
-                .create(JavaArchive.class, "ftRetryCondition.jar")
-                .addClasses(RetryClientAbortOn.class, RetryClientRetryOn.class)
-                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
-                .as(JavaArchive.class);
+        JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftRetryCondition.jar")
+                        .addClasses(RetryClientAbortOn.class, RetryClientRetryOn.class,
+                                        RetryClassLevelClientRetryOn.class,
+                                        RetryClassLevelClientAbortOn.class)
+                        .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
+                        .as(JavaArchive.class);
 
         WebArchive war = ShrinkWrap
                 .create(WebArchive.class, "ftRetryCondition.war")
                 .addAsLibrary(testJar);
         return war;
     }
-    
+
+    /**
+     * Test that retries are executed where a failure declared as "retry on" in the @Retry annotation is encountered.
+     *  
+     * serviceA is configured to retry on a RuntimeException. The service should be retried 3 times.
+     */
     @Test
     public void testRetryOnTrue() {
         try {
@@ -66,9 +76,16 @@ public class RetryConditionTest extends Arquillian {
         catch(RuntimeException ex) {
             // Expected
         }
-        Assert.assertEquals(clientForRetryOn.getRetryCountForConnectionService(), 4, "The max retry counter should be 4");
+        Assert.assertEquals(clientForRetryOn.getRetryCountForConnectionService(), 4, "The execution count should be 4 (3 retries + 1)");
     }
-    
+
+    /**
+     * Test that no retries are executed where a failure declared as "retry on" in the @Retry annotation
+     * is NOT encountered.
+     *  
+     * serviceB is configured to retry on an IOException. In practice the only exception that the service
+     * will throw is a RuntimeException, therefore no retries should be executed. 
+     */
     @Test
     public void testRetryOnFalse() {
         try {
@@ -81,9 +98,16 @@ public class RetryConditionTest extends Arquillian {
         Assert.assertEquals(clientForRetryOn.getRetryCountForWritingService(), 1,
             "The max invocation counter should be 1 as the retry condition is false");
     }
-    
+
+    /**
+     * Test that the default number of retries are executed where a failure declared as "abort on" in the @Retry annotation
+     * is NOT encountered.
+     *  
+     * serviceA is configured to abort on an IOException. In practice the only exception that the service
+     * will throw is a RuntimeException, therefore the default number of 3 retries should be executed. 
+     */
     @Test
-    public void testRetryWithAbortOnFlase() {
+    public void testRetryWithAbortOnFalse() {
         try {
             clientForAbortOn.serviceA();
             Assert.fail("serviceA should throw a RuntimeException in testRetryWithAbortOnFalse");
@@ -91,9 +115,15 @@ public class RetryConditionTest extends Arquillian {
         catch(RuntimeException ex) {
             // Expected
         }
-        Assert.assertEquals(clientForAbortOn.getRetryCountForConnectionService(), 4, "The max invocation should be 4 (3 retries + 1)");
+        Assert.assertEquals(clientForAbortOn.getRetryCountForConnectionService(), 4, "The execution count should be 4 (3 retries + 1)");
     }
-    
+
+    /**
+     * Test that no retries are executed where a failure declared as "abort on" in the @Retry annotation
+     * is encountered.
+     *  
+     * serviceB is configured to abort on a RuntimeException. The service should not be retried.
+     */
     @Test
     public void testRetryWithAbortOnTrue() {
         try {
@@ -104,6 +134,85 @@ public class RetryConditionTest extends Arquillian {
             // Expected
         }
         Assert.assertEquals(clientForAbortOn.getRetryCountForWritingService(), 1,
+            "The max invocation counter should be 1 as the abort condition is true");
+    }
+
+    /**
+     * Analogous to testRetryOnTrue but using a Class level rather than method level annotation.
+     * 
+     * serviceA is configured to retry on a RuntimeException. The service should be retried 3 times.
+     */
+    @Test
+    public void testClassLevelRetryOnTrue() {
+        try {
+            clientForClassLevelRetryOn.serviceA();
+            Assert.fail("serviceA should throw a RuntimeException in testClassLevelRetryOnTrue");
+        }
+        catch(RuntimeException ex) {
+            // Expected
+        }
+        Assert.assertEquals(clientForClassLevelRetryOn.getRetryCountForConnectionService(), 4, "The execution count should be 4 (3 retries + 1)");
+    }
+    
+    /**
+     * Analogous to testRetryonFalse, testing whether the @Retry annotation on method serviceB overrides the Class level
+     * @Retry annotation.
+     *  
+     * serviceB is configured to retry on an IOException. In practice the only exception that the service
+     * will throw is a RuntimeException, therefore no retries should be executed. 
+     */
+    @Test
+    public void testClassLevelRetryOnFalse() {
+        try {
+            clientForClassLevelRetryOn.serviceB();
+            Assert.fail("serviceB should throw a RuntimeException in testClassLevelRetryOnFalse");
+        }
+        catch(RuntimeException ex) {
+            // Expected
+        }
+        Assert.assertEquals(clientForClassLevelRetryOn.getRetryCountForWritingService(), 1,
+            "The execution count should be 1 as the retry condition is false");
+    }
+    
+    /**
+     * Analogous to testRetryWithAbortOnFalse but using a Class level rather than method level @Retry annotation.
+     * Test that the default number of retries are executed where a failure declared as "abort on" in the @Retry annotation
+     * is NOT encountered.
+     *  
+     * The Class, and therefore serviceA, is configured to abort on an IOException. In practice the only exception that the service
+     * will throw is a RuntimeException, therefore the default number of 3 retries should be executed. 
+     */
+    @Test
+    public void testClassLevelRetryWithAbortOnFalse() {
+        try {
+            clientForClassLevelAbortOn.serviceA();
+            Assert.fail("serviceA should throw a RuntimeException in testClassLevelRetryWithAbortOnFalse");
+        }
+        catch(RuntimeException ex) {
+            // Expected
+        }
+        Assert.assertEquals(clientForClassLevelAbortOn.getRetryCountForConnectionService(), 4, "The execution count should be 4 (3 retries + 1)");
+    }
+
+    /**
+     * Analogous to testRetryWithAbortOnTrue, testing whether the @Retry annotation on method serviceB overrides the Class level
+     * @Retry annotation.
+     * 
+     * Test that no retries are executed where a failure declared as "abort on" in the @Retry annotation
+     * is encountered.
+     *  
+     * serviceB is configured to abort on a RuntimeException. The service should not be retried.
+     */
+    @Test
+    public void testClassLevelRetryWithAbortOnTrue() {
+        try {
+            clientForClassLevelAbortOn.serviceB();
+            Assert.fail("serviceB should throw a RuntimeException in testClassLevelRetryWithAbortOnTrue");
+        }
+        catch(RuntimeException ex) {
+            // Expected
+        }
+        Assert.assertEquals(clientForClassLevelAbortOn.getRetryCountForWritingService(), 1,
             "The max invocation counter should be 1 as the abort condition is true");
     }
 }

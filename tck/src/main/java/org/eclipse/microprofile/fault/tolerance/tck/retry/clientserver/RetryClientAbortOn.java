@@ -26,7 +26,8 @@ import javax.enterprise.context.RequestScoped;
 
 import org.eclipse.microprofile.faulttolerance.Retry;
 /**
- * A client to demonstrate the abortOn conditions
+ * A client to demonstrate abortOn conditions
+ * 
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  *
  */
@@ -37,7 +38,7 @@ public class RetryClientAbortOn {
     
     @Retry(abortOn = {IOException.class})
     public Connection serviceA() {
-       return connectionService();
+        return connectionService();
     }
 
     private Connection connectionService() {
@@ -48,9 +49,9 @@ public class RetryClientAbortOn {
     public int getRetryCountForConnectionService() {
         return counterForInvokingConnenectionService;
     }
+    
     /**
-     * The configured the max retries is 90 but the max duration is 100ms. 
-     * Once the duration is reached, no more retries should be performed.
+     * serviceB is configured to retry on a RuntimeException. The WritingService throws RuntimeExceptions.
      */
     @Retry(abortOn = {RuntimeException.class})
     public void serviceB() {

@@ -20,7 +20,6 @@
 package org.eclipse.microprofile.fault.tolerance.tck.timeout.clientserver;
 
 import java.sql.Connection;
-import java.time.temporal.ChronoUnit;
 
 import javax.enterprise.context.RequestScoped;
 
@@ -32,43 +31,13 @@ import org.eclipse.microprofile.faulttolerance.Timeout;
  *
  */
 @RequestScoped
-public class TimeoutClient {
+@Timeout(500)
+public class ShorterTimeoutClient {
 
     /**
-     * serviceA uses the default Fault Tolerance timeout of 1 second.
+     * serviceA uses the class scoped Fault Tolerance timeout of 0.5 seconds.
      */    
-    @Timeout
     public Connection serviceA(long timeToSleep) {
-        try {
-            Thread.sleep(timeToSleep);
-            throw new RuntimeException("Timeout did not interrupt");
-        } 
-        catch (InterruptedException e) {
-            //expected
-        }
-        return null;
-    }
-
-    /**
-     * serviceB specifies a Timeout longer than the default, at 2 seconds
-     */
-    @Timeout(2000)
-    public Connection serviceB(long timeToSleep) {
-        try {
-            Thread.sleep(timeToSleep);
-            throw new RuntimeException("Timeout did not interrupt");
-        } 
-        catch (InterruptedException e) {
-            //expected
-        }
-        return null;
-    }
-
-    /**
-     * serviceC specifies a Timeout shorter than the default, at .5 seconds
-     */
-    @Timeout(500)
-    public Connection serviceC(long timeToSleep) {
         try {
             Thread.sleep(timeToSleep);
             throw new RuntimeException("Timeout did not interrupt");
@@ -80,13 +49,12 @@ public class TimeoutClient {
     }
     
     /**
-     * serviceD specifies a Timeout longer than the default, at 2 
-     * seconds 
+     * serviceB specifies a an overriding Timeout longer than the default, at 2 seconds
      */
-    @Timeout(value = 2, unit = ChronoUnit.SECONDS)
-    public Connection serviceD(long timeToSleepInMillis) {
+    @Timeout(2000)
+    public Connection serviceB(long timeToSleep) {
         try {
-            Thread.sleep(timeToSleepInMillis);
+            Thread.sleep(timeToSleep);
             throw new RuntimeException("Timeout did not interrupt");
         } 
         catch (InterruptedException e) {
