@@ -58,7 +58,7 @@ public @interface Fallback {
     /**
     * Specify the method name to be fallbacked to. This method belongs
     * to the same class as the method to fallback.
-    * The method must be either zero argument or have the exactly same arguments as the method being annotated.
+    * The method must have the exactly same arguments as the method being annotated.
     * The method return type must be assignable to the return type of the method annotated. 
     * Otherwise, the {@link javax.enterprise.inject.spi.DeploymentException} must be thrown.
     * @return the local method to fallback to
