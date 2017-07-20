@@ -47,13 +47,25 @@ import javax.interceptor.InterceptorBinding;
 public @interface Fallback {
 
     /**
+     * Create a default class so the value is not required to be set all the time.
+     * @param <T>
+     * @param <T>
+     */
+    class  DEFAULT<T> implements FallbackHandler<T>{
+        @Override
+        public T handle(ExecutionContext context) {
+            return null;
+        }
+    }
+    /**
      * Specify the fallback class to be used. An new instance of the fallback class
      * is returned. The instance is unmanaged. The type parameter of the fallback class must be assignable to the
      * return type of the annotated method. Otherwise, the {@link javax.enterprise.inject.spi.DeploymentException} must be thrown.
      * 
      * @return the fallback class
      */
-    Class<? extends FallbackHandler<?>> value();
+    @SuppressWarnings("rawtypes")
+    Class<? extends FallbackHandler> value() default DEFAULT.class;
     /**
     * Specify the method name to be fallbacked to. This method belongs
     * to the same class as the method to fallback.
