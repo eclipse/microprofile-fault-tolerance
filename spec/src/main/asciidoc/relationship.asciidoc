@@ -1,0 +1,41 @@
+//
+// Copyright (c) 2016-2017 Contributors to the Eclipse Foundation
+//
+// See the NOTICE file(s) distributed with this work for additional
+// information regarding copyright ownership.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// You may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// Contributors:
+// Emily Jiang
+
+[[relationship]]
+== Relationship to other specifications
+This specification defines a set of annotations to be used by classes or methods. The annotations are interceptor bindings. Therefore, this specification depends on the JavaEE specification of Java Interceptors and Contexts and Dependency Injection.
+
+
+=== Relationship to Java Interceptors
+
+The Java Interceptors specification defines the basic programming model and semantics for interceptors. This specification ustilises the typesafe interceptor bindings. The annotations of `Asynchronous`, `Bulkhead`, `CircuitBreaker`, `Fallback`, `Retry` and `Timeout` are all interceptor bindings. 
+
+These annotations may be bound at the class level or method level. The annotations adhere to the rules of interceptor binding defined by Java Interceptors specification. 
+
+For an instance, if the annotation is bound to the class level, it applies to all business methods of the class. If the component class declares or inherits a class level interceptor binding, it must not be declared final, or have any static, private, or final methods. If a non-static, non-private method of a component class declares a method level interceptor binding, neither the method nor the component class may be declared final.
+
+=== Relationship to Contexts and Dependency Injection
+
+The Contexts and Dependency Injection (CDI) specification defines a powerful component model to enable loosely coupled architecture design. This specification explores the rich SPI provided by CDI to register an interceptor so that the Fault Tolerance policies can be applied to the method invocation.
+
+=== Relationship to MicroProfile Config
+
+The MicroProfile config specification defines a flexible config model to enable microservice configurable and achieve the strict separation of config from code.
+All parameters on the annotations/interceptor bindings are config properties. They can be configured externally either via other predefined config sources (e.g. environment variables or other sources). For an instance, the `maxRetries` parameter on the `Retry` annotation is a configuration property. It can be configured externally.

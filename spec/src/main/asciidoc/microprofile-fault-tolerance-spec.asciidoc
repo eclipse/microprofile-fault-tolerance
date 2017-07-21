@@ -41,6 +41,8 @@ include::license-alv2.asciidoc[]
 
 include::architecture.asciidoc[]
 
+include::relationship.asciidoc[]
+
 include::execution.asciidoc[]
 
 include::asynchronous.asciidoc[]

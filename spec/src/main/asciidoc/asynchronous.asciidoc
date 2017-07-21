@@ -18,7 +18,7 @@
 // Contributors:
 // Emily Jiang
 
-[[circuitbreaker]]
+[[asynchronous]]
 == Asynchronous
 `Asynchronous` means the execution of the client request will be on a separate thread.
 This thread should have the correct security context or naming context associated with.
@@ -35,7 +35,7 @@ public Future<Connection> serviceA() {
    Connection conn = null;
    counterForInvokingServiceA++;
    conn = connectionService();
-   return conn;
+   return CompletableFuture.completedFuture(conn);
 }
 ----
 
