@@ -17,34 +17,50 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver;
+package org.eclipse.microprofile.fault.tolerance.tck.fallback.clientserver;
 
 import javax.enterprise.context.RequestScoped;
 
 import org.eclipse.microprofile.faulttolerance.Fallback;
 import org.eclipse.microprofile.faulttolerance.Retry;
+
+//import org.eclipse.microprofile.faulttolerance.Fallback;
+//import org.eclipse.microprofile.faulttolerance.Retry;
 /**
  * A client to demonstrate the fallback after doing the maximum retries
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  *
  */
 @RequestScoped
-public class FallbackClient {
+@Retry(maxRetries = 1)
+@Fallback(StringFallbackHandler.class)
+public class FallbackClassLevelClient {
+    
+    private int counterForInvokingServiceA = 0;
+    private int counterForInvokingServiceB = 0;
 
-    @Retry(maxRetries = 1)
-    @Fallback(StringFallbackHandler.class)
-    public String serviceA1() {
+    public int getCounterForInvokingServiceA() {
+        return counterForInvokingServiceA;
+    }
+
+    public int getCounterForInvokingServiceB() {
+        return counterForInvokingServiceB;
+    }
+    
+    public String serviceA() {
+        counterForInvokingServiceA++;
        return nameService();
     }
 
     @Retry(maxRetries = 2)
-    @Fallback(StringFallbackHandler.class)
-    public String serviceA2() {
+    @Fallback(SecondStringFallbackHandler.class)
+    public String serviceB() {
+        counterForInvokingServiceB++;
        return nameService();
     }
-
+    
     private String nameService() {
         throw new RuntimeException("Connection failed");
     }
-
+    
 }
