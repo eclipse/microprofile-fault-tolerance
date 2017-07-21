@@ -24,7 +24,9 @@ The `Bulkhead` pattern is to prevent faults in one part of the system from casca
 
 === Bulkhead Usage
 A method or class can be annotated with `@Bulkhead`, which means the method or the methods under the class will have Bulkhead policy applied correspondingly. There are two different approaches to the bulkhead: thread pool isolation and semaphore isolation. When `Bulkhead` used together with `Asynchronous`, the thread pool isolation approach is in use. If `Bulkhead` is used without `Asynchronous`, it means the semaphore approach. The thread pool approach allows to configure the maximum concurrent requests together with the waiting queue size, while the semaphore approach only allows the concurrent number of requests configuration.
-
+* Semaphore style Bulkhead
+The above code-snippet means the method serviceA applies the `Bulkhead` policy, 
+which is semaphore approach, limiting the maximum concurrent requests to 5.
 [source, java]
 ----
 @Bulkhead(5) // maximum 5 concurrent requests allowed
@@ -36,23 +38,24 @@ public Connection serviceA() {
 }
 ----
 
+
+* Thread pool style Bulkhead
 The above code-snippet means the method serviceA applies the `Bulkhead` policy, 
-which is semaphore approach, limiting the maximum concurrent requests to 5.
+which is thread pool approach, limiting the maximum concurrent requests to 5 and the waiting queue size to 8.
 
 [source, java]
 ----
 // maximum 5 concurrent requests allowed, maximum 8 requests allowed in the waiting queue
+@Asynchronous
 @Bulkhead(value = 5, waitingThreadQueue = 8) 
-public Connection serviceA() {
+public Future<Connection> serviceA() {
    Connection conn = null;
    counterForInvokingServiceA++;
    conn = connectionService();
-   return conn;
+   return CompletableFuture.completedFuture(conn);
 }
 ----
 
-The above code-snippet means the method serviceA applies the `Bulkhead` policy, 
-which is thread pool approach, limiting the maximum concurrent requests to 5 and the waiting queue size to 8.
 
 In the semaphore approach, on reaching maximum request counter, the extra request will fail with `BulkheadException`. In the thread pool approach, when a request cannot be added to the waiting queue, `BulkheadException` will be thrown.
 The `Bulkhead` annotation can be used together with `Fallback`, `CircuitBreaker`, `Asynchronous`, `Timeout` and `Retry`. A `Fallback` can be specified, so that it can be invoked if the `BulkheadException` is thrown. 

@@ -26,11 +26,11 @@ This specification defines an easy to use and flexible system for building resil
 
 === Rational
 
-It is increasingly important to build fault tolerant micro services. Fault tolerance is about leveraging different strategies to guide the execution and result of some logic. Retry policies, bulkheads, and circuit breakers are popular concepts in this area. They dictate whether and when executions should take place, and fallbacks offer an alternative result when an execution does not complete successfully.
+It is increasingly important to build fault tolerant microservices. Fault tolerance is about leveraging different strategies to guide the execution and result of some logic. Retry policies, bulkheads, and circuit breakers are popular concepts in this area. They dictate whether and when executions should take place, and fallbacks offer an alternative result when an execution does not complete successfully.
 
 As mentioned above, the Fault Tolerance proposal is to focus the aspects: TimeOut, RetryPolicy, Fallback, bulkhead and circuit breaker:
 
-* `TimeOut`: Define a duration for timeout
+* `Timeout`: Define a duration for timeout
 
 * `RetryPolicy`: Define a criteria on when to retry
 
@@ -44,4 +44,12 @@ The main design is to separate execution logic from execution. The execution can
 
 Hystrix and Failsafe are two popular libraries for handling failures. This proposal is to define a standard API and approach for applications to follow in order to achieve the fault tolerance.
 
+This specification introduces the following interceptor bindings.
+* `Timeout`
+* `Retry`
+* `Fallback`
+* `CircuitBreaker`
+* `Bulkhead`
+* `Asynchronous`
+Refer to Interceptor Specification for more information on interceptor bindings. 
 
