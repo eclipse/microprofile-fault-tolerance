@@ -18,16 +18,28 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver;
+package org.eclipse.microprofile.fault.tolerance.tck.fallback.clientserver;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 
-@ApplicationScoped
-public class MyBean {
-    private int count = 33;
-    public int getCount() {
-        count++;
-        return count;
+import org.eclipse.microprofile.faulttolerance.ExecutionContext;
+import org.eclipse.microprofile.faulttolerance.FallbackHandler;
+
+//import org.eclipse.microprofile.faulttolerance.ExecutionContext;
+//import org.eclipse.microprofile.faulttolerance.FallbackHandler;
+/**
+ * A fallback handler to recover and return a string object.
+ * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
+ *
+ */
+@Dependent
+public class StringFallbackHandlerWithBean implements FallbackHandler<String> {
+    private @Inject MyBean myBean;
+
+    @Override
+    public String handle(ExecutionContext context) {
+        return "fallback for " + context.getMethod().getName() + " myBean.getCount()=" + myBean.getCount();
     }
 
 }
