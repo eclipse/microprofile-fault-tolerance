@@ -24,8 +24,7 @@ import javax.enterprise.context.RequestScoped;
 import org.eclipse.microprofile.faulttolerance.Fallback;
 import org.eclipse.microprofile.faulttolerance.Retry;
 
-//import org.eclipse.microprofile.faulttolerance.Fallback;
-//import org.eclipse.microprofile.faulttolerance.Retry;
+
 /**
  * A client to demonstrate the fallback after doing the maximum retries
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
