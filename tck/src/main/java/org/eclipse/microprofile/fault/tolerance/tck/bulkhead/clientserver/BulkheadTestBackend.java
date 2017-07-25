@@ -8,6 +8,7 @@ import java.util.concurrent.Future;
  * code that has methods that don't return a Future delegate to the
  * BulkheadTestAction class
  * 
+ * @author Gordon Hutchison
  */
 public interface BulkheadTestBackend {
 

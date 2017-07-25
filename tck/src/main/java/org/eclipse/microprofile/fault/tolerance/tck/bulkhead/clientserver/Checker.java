@@ -9,6 +9,8 @@ import org.testng.Assert;
 
 /**
  * A simple sleeping test backend worker
+ * 
+ * @author Gordon Hutchison
  */
 public class Checker implements BackendTestDelegate {
 
@@ -57,14 +59,17 @@ public class Checker implements BackendTestDelegate {
                 max = maxSimultaneousWorkers.get();
             }
 
-            BulkheadTest.log("Task " + taskId + " sleeping for " + millis + " milliseconds. " + now + " workers from " + instances
-                    + " instances " + BAR.substring(0, now));
+            BulkheadTest.log("Task " + taskId + " sleeping for " + millis + " milliseconds. " + now + " workers from "
+                    + instances + " instances " + BAR.substring(0, now));
             Thread.sleep(millis);
-            workers.decrementAndGet();
+
             BulkheadTest.log("woke");
         }
         catch (InterruptedException e) {
             BulkheadTest.log(e.toString());
+        } 
+        finally {
+            workers.decrementAndGet();
         }
         CompletableFuture<String> result = new CompletableFuture<>();
         result.complete("max workers was " + maxSimultaneousWorkers.get());
@@ -85,24 +90,30 @@ public class Checker implements BackendTestDelegate {
      * Check the test ran successfully
      */
     public static void check() {
-        Assert.assertEquals(workers.get(), 0, "Not all workers finished");
-        Assert.assertEquals(instances.get(), expectedInstances, " Not all workers launched");
+        Assert.assertEquals(workers.get(), 0, "Some workers still active. ");
+        Assert.assertEquals(instances.get(), expectedInstances, " Not all workers launched. ");
         Assert.assertTrue(maxSimultaneousWorkers.get() <= expectedMaxSimultaneousWorkers,
                 " Bulkhead appears to have been breeched " + maxSimultaneousWorkers.get() + " workers, expected "
-                        + expectedMaxSimultaneousWorkers);
+                        + expectedMaxSimultaneousWorkers + ". ");
         Assert.assertFalse(expectedMaxSimultaneousWorkers > 1 && maxSimultaneousWorkers.get() == 1,
-                " Workers are not in parrallel ");
-        Assert.assertTrue(expectedMaxSimultaneousWorkers == maxSimultaneousWorkers.get(),
-                " Work is not being done simultaneously enough, only  " + maxSimultaneousWorkers + ". "
-                        + " workers are once. Expecting " + expectedMaxSimultaneousWorkers + ". ");
+                " Workers are not in parrallel. ");
+        // Assert.assertTrue(expectedMaxSimultaneousWorkers ==
+        // maxSimultaneousWorkers.get(),
+        // " Work is not being done simultaneously enough, only " +
+        // maxSimultaneousWorkers + ". "
+        // + " workers are once. Expecting " + expectedMaxSimultaneousWorkers +
+        // ". ");
         Assert.assertFalse(expectedTasksScheduled != 0 && tasksScheduled.get() < expectedTasksScheduled,
-                " Some tasks are missing, expected " + expectedTasksScheduled + " got " + tasksScheduled.get() + ".");
-        
-        
+                " Some tasks are missing, expected " + expectedTasksScheduled + " got " + tasksScheduled.get() + ". ");
+
         BulkheadTest.log("Checks passed");
     }
 
     public static void setExpectedTasksScheduled(int expected) {
         expectedTasksScheduled = expected;
+    }
+
+    public static int getWorkers() {
+        return workers.get();
     }
 }

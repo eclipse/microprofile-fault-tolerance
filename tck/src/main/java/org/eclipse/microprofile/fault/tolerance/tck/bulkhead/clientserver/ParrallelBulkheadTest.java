@@ -5,6 +5,10 @@ import java.util.concurrent.Future;
 
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.BulkheadTest;
 
+/**
+ * @author Gordon Hutchison 
+ *
+ */
 public class ParrallelBulkheadTest implements Callable<Future> {
 
     protected BulkheadTestBackend target;
@@ -33,7 +37,7 @@ public class ParrallelBulkheadTest implements Callable<Future> {
      */
     public ParrallelBulkheadTest(BulkheadTestBackend target) {
         this.target = target;
-        this.action = new Checker(5 * 1000);
+        this.action = new Checker(1000);
     }
 
     @Override

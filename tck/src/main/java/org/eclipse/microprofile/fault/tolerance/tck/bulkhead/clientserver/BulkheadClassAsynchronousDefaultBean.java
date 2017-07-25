@@ -7,15 +7,17 @@ import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 
 /**
- *  A simple class level Asynchronous @Bulkhead
+ * A simple class level Asynchronous @Bulkhead
  *
+ * @author Gordon Hutchison
  */
-@Bulkhead @Asynchronous
+@Bulkhead
+@Asynchronous
 public class BulkheadClassAsynchronousDefaultBean implements BulkheadTestBackend {
 
     @Override
     public Future test(BackendTestDelegate action) {
-        BulkheadTest.log("in bean");
+        BulkheadTest.log("in bean " + this.getClass().getName());
         return action.perform();
     }
 

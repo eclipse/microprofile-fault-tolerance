@@ -6,15 +6,16 @@ import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.BulkheadTest;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 
 /**
- *  A simple class level Semaphore @Bulkhead(10)
+ * A simple class level Semaphore @Bulkhead
  *
+ * @author Gordon Hutchison
  */
 @Bulkhead
 public class BulkheadClassSemaphoreDefaultBean implements BulkheadTestBackend {
 
     @Override
     public Future test(BackendTestDelegate action) {
-        BulkheadTest.log("in bean");
+        BulkheadTest.log("in bean " + this.getClass().getName() );
         return action.perform();
     }
 
