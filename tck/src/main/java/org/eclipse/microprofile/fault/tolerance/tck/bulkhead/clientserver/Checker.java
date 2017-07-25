@@ -97,12 +97,9 @@ public class Checker implements BackendTestDelegate {
                         + expectedMaxSimultaneousWorkers + ". ");
         Assert.assertFalse(expectedMaxSimultaneousWorkers > 1 && maxSimultaneousWorkers.get() == 1,
                 " Workers are not in parrallel. ");
-        // Assert.assertTrue(expectedMaxSimultaneousWorkers ==
-        // maxSimultaneousWorkers.get(),
-        // " Work is not being done simultaneously enough, only " +
-        // maxSimultaneousWorkers + ". "
-        // + " workers are once. Expecting " + expectedMaxSimultaneousWorkers +
-        // ". ");
+        Assert.assertTrue(expectedMaxSimultaneousWorkers == maxSimultaneousWorkers.get(),
+                " Work is not being done simultaneously enough, only " + maxSimultaneousWorkers + ". "
+                        + " workers are once. Expecting " + expectedMaxSimultaneousWorkers + ". ");
         Assert.assertFalse(expectedTasksScheduled != 0 && tasksScheduled.get() < expectedTasksScheduled,
                 " Some tasks are missing, expected " + expectedTasksScheduled + " got " + tasksScheduled.get() + ". ");
 
