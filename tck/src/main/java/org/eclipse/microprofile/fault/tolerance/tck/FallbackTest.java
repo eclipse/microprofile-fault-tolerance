@@ -28,6 +28,7 @@ import org.eclipse.microprofile.fault.tolerance.tck.fallback.clientserver.MyBean
 import org.eclipse.microprofile.fault.tolerance.tck.fallback.clientserver.SecondStringFallbackHandler;
 import org.eclipse.microprofile.fault.tolerance.tck.fallback.clientserver.StringFallbackHandler;
 import org.eclipse.microprofile.fault.tolerance.tck.fallback.clientserver.StringFallbackHandlerWithBean;
+import org.eclipse.microprofile.faulttolerance.exceptions.TimeoutException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -156,5 +157,55 @@ public class FallbackTest extends Arquillian {
             Assert.fail("serviceB should not throw a RuntimeException in testFallbackSuccess");
         }
         Assert.assertEquals(fallbackClassLevelClient.getCounterForInvokingServiceB(), 3, "The execution count should be 3 (2 retries + 1)");
+    }
+    
+    /**
+     * Test that a Fallback service is driven after the specified number of retries are executed.
+     * 
+     * A timeout is configured for serviceC but the service should fail before the timeout is reached
+     * and generate a RuntimeException. After a retry the Fallback will be executed.
+     */
+    @Test
+    public void testFallbacktNoTimeout() {
+        try {
+            String result = fallbackClient.serviceC(10);
+            Assert.assertTrue(result.contains("serviceC"),
+                            "The message should be \"fallback for serviceC\"");
+        } 
+        catch (TimeoutException ex) {
+            // Not Expected
+            Assert.fail("serviceC should not throw a TimeoutException in testFallbacktNoTimeout");
+        } 
+        catch (RuntimeException ex) {
+            // Not expected
+            Assert.fail("serviceC should not throw a RuntimeException in testFallbacktNoTimeout");
+        }        
+
+        Assert.assertEquals(fallbackClient.getCounterForInvokingServiceC(), 2, "The execution count should be 2 (1 retry + 1)");
+    }
+    
+    /**
+     * Test that a Fallback service is driven after the specified number of retries are executed.
+     * 
+     * A timeout is configured for serviceC and in this case the service should generate Timeout exceptions.
+     * After a retry the Fallback will be executed.
+     */
+    @Test
+    public void testFallbackTimeout() {
+        try {
+            String result = fallbackClient.serviceC(1000);
+            Assert.assertTrue(result.contains("serviceC"),
+                            "The message should be \"fallback for serviceC\"");
+        } 
+        catch (TimeoutException ex) {
+            // Not Expected
+            Assert.fail("serviceC should not throw a TimeoutException in testFallbackTimeout");
+        } 
+        catch (RuntimeException ex) {
+            // Not Expected
+            Assert.fail("serviceC should not throw a RuntimeException in testFallbackTimeout");
+        }
+        
+        Assert.assertEquals(fallbackClient.getCounterForInvokingServiceC(), 2, "The execution count should be 2 (1 retry + 1)");
     }
 }
