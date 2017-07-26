@@ -25,7 +25,7 @@ The `Bulkhead` pattern is to prevent faults in one part of the system from casca
 === Bulkhead Usage
 A method or class can be annotated with `@Bulkhead`, which means the method or the methods under the class will have Bulkhead policy applied correspondingly. There are two different approaches to the bulkhead: thread pool isolation and semaphore isolation. When `Bulkhead` used together with `Asynchronous`, the thread pool isolation approach is in use. If `Bulkhead` is used without `Asynchronous`, it means the semaphore approach. The thread pool approach allows to configure the maximum concurrent requests together with the waiting queue size, while the semaphore approach only allows the concurrent number of requests configuration.
 * Semaphore style Bulkhead
-The above code-snippet means the method serviceA applies the `Bulkhead` policy, 
+The code-snippet below means the method serviceA applies the `Bulkhead` policy, 
 which is semaphore approach, limiting the maximum concurrent requests to 5.
 [source, java]
 ----
