@@ -208,4 +208,26 @@ public class FallbackTest extends Arquillian {
         
         Assert.assertEquals(fallbackClient.getCounterForInvokingServiceC(), 2, "The execution count should be 2 (1 retry + 1)");
     }
+    
+    /**
+     * Test that a method in a Fallback service is driven after the specified number of retries are executed.
+     * 
+     * ServiceD specifies a method on a FallbackHandler. The test checks that the FallbackHandler method 
+     * has been driven in the correct ExecutionContext and that the Service has been
+     * executed the correct number of times.
+     */
+    @Test
+    public void testFallbackMethodSuccess() {
+
+        try {
+            String result = fallbackClient.serviceD();
+            Assert.assertTrue(result.contains("method for serviceD"),
+                            "The message should be \"fallback method for serviceD\"");
+        }
+        catch (RuntimeException ex) {
+            Assert.fail("serviceD should not throw a RuntimeException in testFallbackMethodSuccess");
+        }
+        Assert.assertEquals(fallbackClient.getCounterForInvokingServiceD(), 2, "The execution count should be 2 (1 retry + 1)");
+        
+    }
 }

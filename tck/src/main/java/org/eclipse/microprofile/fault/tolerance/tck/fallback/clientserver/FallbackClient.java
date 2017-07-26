@@ -23,9 +23,8 @@ import javax.enterprise.context.RequestScoped;
 
 import org.eclipse.microprofile.faulttolerance.Fallback;
 import org.eclipse.microprofile.faulttolerance.Retry;
-
-
 import org.eclipse.microprofile.faulttolerance.Timeout;
+
 /**
  * A client to demonstrate the fallback after doing the maximum retries
  * 
@@ -38,6 +37,7 @@ public class FallbackClient {
     private int counterForInvokingServiceA = 0;
     private int counterForInvokingServiceB = 0;
     private int counterForInvokingServiceC = 0;
+    private int counterForInvokingServiceD = 0;
 
     public int getCounterForInvokingServiceA() {
         return counterForInvokingServiceA;
@@ -51,6 +51,10 @@ public class FallbackClient {
         return counterForInvokingServiceC;
     }
 
+    public int getCounterForInvokingServiceD() {
+        return counterForInvokingServiceD;
+    }
+    
     @Retry(maxRetries = 1)
     @Fallback(StringFallbackHandler.class)
     public String serviceA() {
@@ -78,6 +82,13 @@ public class FallbackClient {
             //expected
         }
         return null;
+    }
+
+    @Retry(maxRetries = 1)
+    @Fallback(value = StringFallbackHandler.class, fallbackMethod = "stringFallbackMethod")
+    public String serviceD() {
+        counterForInvokingServiceD++;
+        return nameService();
     }
     
     private String nameService() {

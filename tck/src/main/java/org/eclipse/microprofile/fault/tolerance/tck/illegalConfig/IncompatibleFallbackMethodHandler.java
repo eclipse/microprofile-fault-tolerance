@@ -18,7 +18,10 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.eclipse.microprofile.fault.tolerance.tck.fallback.clientserver;
+package org.eclipse.microprofile.fault.tolerance.tck.illegalConfig;
+
+//import org.eclipse.microprofile.faulttolerance.ExecutionContext;
+//import org.eclipse.microprofile.faulttolerance.FallbackHandler;
 
 import javax.enterprise.context.Dependent;
 
@@ -28,14 +31,14 @@ import org.eclipse.microprofile.faulttolerance.FallbackHandler;
 /**
  * A fallback handler to recover and return a string object.
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
+ * @author <a href="mailto:john.d.ament@gmail.com">John D. Ament</a>
  *
  */
 @Dependent
-public class StringFallbackHandler implements FallbackHandler<String> {
-
+public class IncompatibleFallbackMethodHandler implements FallbackHandler<Integer> {
     @Override
-    public String handle(ExecutionContext context) {
-        return "fallback for " + context.getMethod().getName();
+    public Integer handle(ExecutionContext context) {
+        return 42;
     }
 
     public String stringFallbackMethod(ExecutionContext context) {
