@@ -17,23 +17,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-
 package org.eclipse.microprofile.fault.tolerance.tck.illegalConfig;
 
-import javax.enterprise.context.Dependent;
 
-import org.eclipse.microprofile.faulttolerance.ExecutionContext;
-import org.eclipse.microprofile.faulttolerance.FallbackHandler;
+import javax.enterprise.context.RequestScoped;
+
+import org.eclipse.microprofile.faulttolerance.Fallback;
+import org.eclipse.microprofile.faulttolerance.Retry;
 
 /**
- * A fallback handler to recover and return an Integer.
+ * A client to demonstrate the fallback after doing retries
+ * 
  * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  *
  */
-@Dependent
-public class IncompatibleFallbackMethodHandler implements FallbackHandler<Integer> {
-    @Override
-    public Integer handle(ExecutionContext context) {
+@RequestScoped
+public class FallbackMethodWithArgsClient {
+
+    /**
+     * Retry 5 times and then fallback
+     */
+    @Retry(maxRetries = 4)
+    @Fallback(value = IncompatibleFallbackMethodHandler.class, fallbackMethod = "fallbackForServiceB")
+    public Integer serviceB(String name, Integer type) {
+        return 42;
+    }
+    
+    /**
+     * Incompatible signature, only one parameter
+     */
+    public Integer fallbackForServiceB(String name) {
         return 42;
     }
 }

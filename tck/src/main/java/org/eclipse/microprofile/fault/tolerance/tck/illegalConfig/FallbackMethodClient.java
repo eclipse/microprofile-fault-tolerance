@@ -26,7 +26,8 @@ import org.eclipse.microprofile.faulttolerance.Fallback;
 import org.eclipse.microprofile.faulttolerance.Retry;
 
 /**
- * A client to demonstrate the fallback after doing the maximum retries
+ * A client to demonstrate the fallback after doing retries
+ * 
  * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  *
  */
@@ -41,7 +42,10 @@ public class FallbackMethodClient {
     public Integer serviceB() {
         return 42;
     }
-    
+
+    /**
+     * Incompatible signature, only one parameter
+     */
     public String fallbackForServiceB() {
         return "fallback method for serviceB";
     }

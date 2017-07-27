@@ -38,6 +38,7 @@ public class FallbackClient {
     private int counterForInvokingServiceB = 0;
     private int counterForInvokingServiceC = 0;
     private int counterForInvokingServiceD = 0;
+    private int counterForInvokingServiceE = 0;
 
     public int getCounterForInvokingServiceA() {
         return counterForInvokingServiceA;
@@ -53,6 +54,10 @@ public class FallbackClient {
 
     public int getCounterForInvokingServiceD() {
         return counterForInvokingServiceD;
+    }
+
+    public int getCounterForInvokingServiceE() {
+        return counterForInvokingServiceE;
     }
     
     @Retry(maxRetries = 1)
@@ -93,6 +98,17 @@ public class FallbackClient {
 
     public String fallbackForServiceD() {
         return "fallback method for serviceD";
+    }
+
+    @Retry(maxRetries = 1)
+    @Fallback(value = StringFallbackHandler.class, fallbackMethod = "fallbackForServiceE")
+    public String serviceE(String name, Integer type) {
+        counterForInvokingServiceE++;
+        return nameService();
+    }
+
+    public String fallbackForServiceE(String name, Integer type) {
+        return "fallback method for serviceE";
     }
     
     private String nameService() {
