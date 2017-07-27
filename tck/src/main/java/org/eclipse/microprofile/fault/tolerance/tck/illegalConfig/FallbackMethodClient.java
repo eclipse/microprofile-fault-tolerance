@@ -27,8 +27,7 @@ import org.eclipse.microprofile.faulttolerance.Retry;
 
 /**
  * A client to demonstrate the fallback after doing the maximum retries
- * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
- * @author <a href="mailto:john.d.ament@gmail.com">John D. Ament</a>
+ * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  *
  */
 @RequestScoped
@@ -38,8 +37,12 @@ public class FallbackMethodClient {
      * Retry 5 times and then fallback
      */
     @Retry(maxRetries = 4)
-    @Fallback(value = IncompatibleFallbackMethodHandler.class, fallbackMethod = "stringFallbackMethod")
+    @Fallback(value = IncompatibleFallbackMethodHandler.class, fallbackMethod = "fallbackForServiceB")
     public Integer serviceB() {
         return 42;
+    }
+    
+    public String fallbackForServiceB() {
+        return "fallback method for serviceB";
     }
 }

@@ -37,8 +37,4 @@ public class StringFallbackHandler implements FallbackHandler<String> {
     public String handle(ExecutionContext context) {
         return "fallback for " + context.getMethod().getName();
     }
-
-    public String stringFallbackMethod(ExecutionContext context) {
-        return "fallback method for " + context.getMethod().getName();
-    }
 }

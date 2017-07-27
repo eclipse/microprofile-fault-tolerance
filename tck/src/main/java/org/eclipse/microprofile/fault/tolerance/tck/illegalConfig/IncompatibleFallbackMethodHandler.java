@@ -30,8 +30,7 @@ import org.eclipse.microprofile.faulttolerance.FallbackHandler;
 
 /**
  * A fallback handler to recover and return a string object.
- * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
- * @author <a href="mailto:john.d.ament@gmail.com">John D. Ament</a>
+ * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  *
  */
 @Dependent
@@ -39,9 +38,5 @@ public class IncompatibleFallbackMethodHandler implements FallbackHandler<Intege
     @Override
     public Integer handle(ExecutionContext context) {
         return 42;
-    }
-
-    public String stringFallbackMethod(ExecutionContext context) {
-        return "fallback method for " + context.getMethod().getName();
     }
 }
