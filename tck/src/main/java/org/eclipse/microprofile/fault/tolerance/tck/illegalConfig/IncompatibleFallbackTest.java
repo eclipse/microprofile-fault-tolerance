@@ -33,7 +33,7 @@ import javax.inject.Inject;
 
 import static org.testng.Assert.fail;
 
-public class IllegalConfigTest extends Arquillian {
+public class IncompatibleFallbackTest extends Arquillian {
     private
     @Inject
     FallbackClient fallbackClient;
