@@ -52,7 +52,13 @@ public class IncompatibleFallbackMethodTest extends Arquillian {
                 .addAsLibrary(testJar);
         return war;
     }
-    
+
+    /**
+     * Test that the deployment of a FallbackHandler with an invalid Fallback Method leads to a DeploymentException.
+     * 
+     * A Service is annotated with the IncompatibleFallbackMethodHandler. While the Service returns an
+     * Integer, the IncompatibleFallbackMethodHandler's Fallback Method returns a String.
+     */
     @Test
     public void shouldNotBeCalled() {
         fail("This test should not have been called, deployment exception expected");
