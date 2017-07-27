@@ -16,7 +16,7 @@ package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.BulkheadTest;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
 
 /**
  * @author Gordon Hutchison 
@@ -55,9 +55,9 @@ public class ParrallelBulkheadTest implements Callable<Future> {
 
     @Override
     public Future call() throws Exception {
-        BulkheadTest.log("here");
-        BulkheadTest.log("action " + action);
-        BulkheadTest.log("target " + target);
+        Utils.log("here");
+        Utils.log("action " + action);
+        Utils.log("target " + target);
         return target.test(action);
     }
 }

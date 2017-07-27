@@ -13,8 +13,7 @@
 **********************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import javax.inject.Inject;
 
@@ -22,31 +21,26 @@ import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhe
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadClassAsynchronous3Bean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadClassAsynchronousDefaultBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadClassAsynchronousQueueingBean;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadClassSemaphore10Bean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadMethodAsynchronous10Bean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadMethodAsynchronous3Bean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadMethodAsynchronousDefaultBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadMethodAsynchronousQueueingBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadTestBackend;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Checker;
 import org.jboss.arquillian.container.test.api.Deployment;
+import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 /**
  * @author Gordon Hutchison
  */
 
-public class BulkheadAsynchTest {
-
-    /*
-     * We use an executer service to simulate the parallelism of multiple
-     * simultaneous requests
-     */
-    private static final int THREADPOOL_SIZE = 30;
-    private ExecutorService xService = Executors.newFixedThreadPool(THREADPOOL_SIZE);
+public class BulkheadAsynchTest extends Arquillian {
 
     /*
      * As the FaultTolerance annotation only work on business methods of
@@ -57,38 +51,45 @@ public class BulkheadAsynchTest {
      */
 
     @Inject
-    public BulkheadClassAsynchronousDefaultBean bhBeanClassAsynchronousDefault;
+    private BulkheadClassAsynchronousDefaultBean bhBeanClassAsynchronousDefault;
     @Inject
-    public BulkheadMethodAsynchronousDefaultBean bhBeanMethodAsynchronousDefault;
+    private BulkheadMethodAsynchronousDefaultBean bhBeanMethodAsynchronousDefault;
     @Inject
-    public BulkheadClassAsynchronous3Bean bhBeanClassAsynchronous3;
+    private BulkheadClassAsynchronous3Bean bhBeanClassAsynchronous3;
     @Inject
-    public BulkheadMethodAsynchronous3Bean bhBeanMethodAsynchronous3;
+    private BulkheadMethodAsynchronous3Bean bhBeanMethodAsynchronous3;
     @Inject
-    public BulkheadClassAsynchronous10Bean bhBeanClassAsynchronous10;
+    private BulkheadClassAsynchronous10Bean bhBeanClassAsynchronous10;
     @Inject
-    public BulkheadMethodAsynchronous10Bean bhBeanMethodAsynchronous10;
+    private BulkheadMethodAsynchronous10Bean bhBeanMethodAsynchronous10;
     @Inject
-    public BulkheadClassAsynchronousQueueingBean bhBeanClassAsynchronousQueueing;
+    private BulkheadClassAsynchronousQueueingBean bhBeanClassAsynchronousQueueing;
     @Inject
-    public BulkheadMethodAsynchronousQueueingBean bhBeanMethodAsynchronousQueueing;
-    
+    private BulkheadMethodAsynchronousQueueingBean bhBeanMethodAsynchronousQueueing;
+
     /**
-     * This is the Arquillian deploy method that controls the contents of the war
-     * that contains all the tests.
+     * This is the Arquillian deploy method that controls the contents of the
+     * war that contains all the tests.
      * 
-     * @return the test war "ftBulkheadTest.war"
+     * @return the test war "ftBulkheadAsynchTest.war"
      */
     @Deployment
     public static WebArchive deploy() {
-        JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftBulkheadTest.jar")
-                .addPackage(BulkheadClassSemaphore10Bean.class.getPackage())
+        JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftBulkheadAsynchTest.jar")
+                .addPackage(BulkheadClassAsynchronousDefaultBean.class.getPackage()).addClass(Utils.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml").as(JavaArchive.class);
-        WebArchive war = ShrinkWrap.create(WebArchive.class, "ftBulkheadTest.war").addAsLibrary(testJar);
+        WebArchive war = ShrinkWrap.create(WebArchive.class, "ftBulkheadAsynchTest.war").addAsLibrary(testJar);
         return war;
     }
 
-    public BulkheadAsynchTest() {
+    /**
+     * This method is called prior to every test. It waits for all workers to
+     * finish and resets the Checker's state.
+     */
+    @BeforeTest
+    public void beforeTest() {
+        Utils.quiesce();
+        Checker.reset();
     }
 
     /**
@@ -99,16 +100,45 @@ public class BulkheadAsynchTest {
     @Test()
     public void testBulkheadClassAsynchronous10() {
         loop(10, bhBeanClassAsynchronous10, 10);
-        check();
+        Utils.check();
     }
 
-    private void check() {
-        
+    /**
+     * Run a number of Callable's (usually Asynch's) in a loop on one thread
+     * 
+     * @param number
+     * @param test
+     * @param maxSimultaneousWorkers
+     * @param expectedTasksScheduled
+     */
+    private void loop(int number, BulkheadTestBackend test, int maxSimultaneousWorkers, int expectedTasksScheduled) {
+
+        Checker.setExpectedTasksScheduled(expectedTasksScheduled);
+        loop(number, test, maxSimultaneousWorkers);
     }
 
-    private void loop(int i, BulkheadTestBackend bhBean, int j, int k) {
-        // TODO Auto-generated method stub
-        
+    /**
+     * Run a number of Callable's (usually Asynch's) in a loop on one thread.
+     * Here we do not check that amount that were successfully through the
+     * Bulkhead
+     * 
+     * @param number
+     * @param test
+     * @param maxSimultaneousWorkers
+     */
+    private void loop(int number, BulkheadTestBackend test, int maxSimultaneousWorkers) {
+
+        Checker.setExpectedMaxWorkers(maxSimultaneousWorkers);
+        Checker.setExpectedInstances(number);
+        Checker.setExpectedTasksScheduled(number);
+
+        Future[] results = new Future[number];
+        for (int i = 0; i < number; i++) {
+            Utils.log("Starting test " + i);
+            results[i] = test.test(new Checker(5 * 1000));
+        }
+
+        Utils.handleResults(number, results);
     }
 
     /**
@@ -121,12 +151,7 @@ public class BulkheadAsynchTest {
     @Test()
     public void testBulkheadMethodAsynchronous10() {
         loop(10, bhBeanMethodAsynchronous10, 10);
-        check();
-    }
-
-    private void loop(int i, BulkheadTestBackend bhBean, int j) {
-        // TODO Auto-generated method stub
-        
+        Utils.check();
     }
 
     /**
@@ -137,7 +162,7 @@ public class BulkheadAsynchTest {
     @Test()
     public void testBulkheadClassAsynchronous3() {
         loop(10, bhBeanClassAsynchronous3, 3);
-        check();
+        Utils.check();
     }
 
     /**
@@ -148,7 +173,7 @@ public class BulkheadAsynchTest {
     @Test()
     public void testBulkheadMethodAsynchronous3() {
         loop(10, bhBeanMethodAsynchronous3, 3);
-        check();
+        Utils.check();
     }
 
     /**
@@ -159,7 +184,7 @@ public class BulkheadAsynchTest {
     @Test()
     public void testBulkheadClassAsynchronousDefault() {
         loop(10, bhBeanClassAsynchronousDefault, 10);
-        check();
+        Utils.check();
     }
 
     /**
@@ -170,7 +195,7 @@ public class BulkheadAsynchTest {
     @Test()
     public void testBulkheadMethodAsynchronousDefault() {
         loop(10, bhBeanMethodAsynchronousDefault, 10);
-        check();
+        Utils.check();
     }
 
     /**
@@ -181,7 +206,7 @@ public class BulkheadAsynchTest {
     @Test()
     public void testBulkheadClassAsynchronousQueueing10() {
         loop(20, bhBeanClassAsynchronousQueueing, 10, 20);
-        check();
+        Utils.check();
     }
 
     /**
@@ -192,6 +217,6 @@ public class BulkheadAsynchTest {
     @Test()
     public void testBulkheadMethodAsynchronousQueueing10() {
         loop(20, bhBeanMethodAsynchronousQueueing, 10, 20);
-        check();
+        Utils.check();
     }
 }

@@ -13,8 +13,6 @@
 **********************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -43,7 +41,7 @@ import org.testng.annotations.Test;
 /**
  * @author Gordon Hutchison
  */
-public class BulkheadTest extends Arquillian {
+public class BulkheadSynchTest extends Arquillian {
 
     /*
      * We use an executer service to simulate the parallelism of multiple
@@ -73,18 +71,28 @@ public class BulkheadTest extends Arquillian {
     private BulkheadMethodSemaphore10Bean bhBeanMethodSemaphore10;
 
     /**
-     * This is the Arquillian deploy method that controls the contents of the war
-     * that contains all the tests.
+     * This is the Arquillian deploy method that controls the contents of the
+     * war that contains all the tests.
      * 
-     * @return the test war "ftBulkheadTest.war"
+     * @return the test war "ftBulkheadSynchTest.war"
      */
     @Deployment
     public static WebArchive deploy() {
-        JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftBulkheadTest.jar")
-                .addPackage(BulkheadClassSemaphore10Bean.class.getPackage())
+        JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftBulkheadSynchTest.jar")
+                .addPackage(BulkheadClassSemaphoreDefaultBean.class.getPackage()).addClass(Utils.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml").as(JavaArchive.class);
-        WebArchive war = ShrinkWrap.create(WebArchive.class, "ftBulkheadTest.war").addAsLibrary(testJar);
+        WebArchive war = ShrinkWrap.create(WebArchive.class, "ftBulkheadSynchTest.war").addAsLibrary(testJar);
         return war;
+    }
+
+    /**
+     * This method is called prior to every test. It waits for all workers to
+     * finish and resets the Checker's state.
+     */
+    @BeforeTest
+    public void beforeTest() {
+        Utils.quiesce();
+        Checker.reset();
     }
 
     /**
@@ -95,7 +103,7 @@ public class BulkheadTest extends Arquillian {
     @Test()
     public void testBulkheadClassSemaphore3() {
         threads(20, bhBeanClassSemaphore3, 3);
-        check();
+        Utils.check();
     }
 
     /**
@@ -106,7 +114,7 @@ public class BulkheadTest extends Arquillian {
     @Test()
     public void testBulkheadClassSemaphore10() {
         threads(20, bhBeanClassSemaphore10, 10);
-        check();
+        Utils.check();
 
     }
 
@@ -120,7 +128,7 @@ public class BulkheadTest extends Arquillian {
     @Test()
     public void testBulkheadMethodSemaphore10() {
         threads(20, bhBeanMethodSemaphore10, 10);
-        check();
+        Utils.check();
     }
 
     /**
@@ -131,7 +139,7 @@ public class BulkheadTest extends Arquillian {
     @Test()
     public void testBulkheadMethodSemaphore3() {
         threads(20, bhBeanMethodSemaphore3, 3);
-        check();
+        Utils.check();
     }
 
     /**
@@ -142,7 +150,7 @@ public class BulkheadTest extends Arquillian {
     @Test()
     public void testBulkheadClassSemaphoreDefault() {
         threads(20, bhBeanClassSemaphoreDefault, 10);
-        check();
+        Utils.check();
 
     }
 
@@ -154,7 +162,7 @@ public class BulkheadTest extends Arquillian {
     @Test()
     public void testBulkheadMethodSemaphoreDefault() {
         threads(20, bhBeanMethodSemaphoreDefault, 10);
-        check();
+        Utils.check();
     }
 
     /**
@@ -170,146 +178,11 @@ public class BulkheadTest extends Arquillian {
         Checker.setExpectedInstances(number);
         Future[] results = new Future[number];
         for (int i = 0; i < number; i++) {
-            log("Starting test " + i);
+            Utils.log("Starting test " + i);
             results[i] = xService.submit(new ParrallelBulkheadTest(test));
         }
 
-        handleResults(number, results);
-    }
-
-    /**
-     * Run a number of Callable's (usually Asynch's) in a loop on one thread
-     * 
-     * @param number
-     * @param test
-     * @param maxSimultaneousWorkers
-     * @param expectedTasksScheduled
-     */
-    private void loop(int number, BulkheadTestBackend test, int maxSimultaneousWorkers, int expectedTasksScheduled) {
-
-        Checker.setExpectedTasksScheduled(expectedTasksScheduled);
-        loop(number, test, maxSimultaneousWorkers);
-    }
-
-    /**
-     * Run a number of Callable's (usually Asynch's) in a loop on one thread.
-     * Here we do not check that amount that were successfully through the
-     * Bulkhead
-     * 
-     * @param number
-     * @param test
-     * @param maxSimultaneousWorkers
-     */
-    private void loop(int number, BulkheadTestBackend test, int maxSimultaneousWorkers) {
-
-        Checker.setExpectedMaxWorkers(maxSimultaneousWorkers);
-        Checker.setExpectedInstances(number);
-        Checker.setExpectedTasksScheduled(number);
-
-        Future[] results = new Future[number];
-        for (int i = 0; i < number; i++) {
-            log("Starting test " + i);
-            results[i] = test.test(new Checker(5 * 1000));
-        }
-
-        handleResults(number, results);
-    }
-
-    /**
-     * Common function to check the returned results of the tests
-     * 
-     * @param number
-     * @param results
-     */
-    private void handleResults(int number, Future[] results) {
-        try {
-            boolean done = false;
-            // Wait for all the backends to finish
-            while (!done) {
-                done = true;
-                for (int i = 0; i < number; i++) {
-                    boolean thisDone = (results[i] == null || results[i].get() == null || ((Future) results[i]).isDone()
-                            || results[i].get() instanceof Future && ((Future) results[i].get()).isDone());
-                    done = done && thisDone;
-                    log("Result for " + i + (thisDone ? " (Done)" : " (NotDone)") + " is "
-                            + (((Future) results[i]).get() instanceof Future
-                                    ? ((Future) ((Future) results[i]).get()).get() : ((Future) results[i]).get()));
-
-                }
-                Thread.sleep(1000);
-            }
-        }
-        catch (Throwable e) {
-            log(e.toString());
-        }
-    }
-
-    /**
-     * A simple local logger. Messages are logged with a prefix of the threadId
-     * and the current time.
-     * 
-     * @param s
-     *            message
-     */
-    public static void log(String s) {
-        System.out.println(tid() + " " + hms() + ": " + s);
-    }
-
-    /**
-     * Get the time in simple format
-     * 
-     * @return
-     */
-    private static String hms() {
-        return DateTimeFormatter.ofPattern("HH:mm:ss:SS").format(LocalDateTime.now());
-    }
-
-    /**
-     * Get the Thread ID
-     * 
-     * @return
-     */
-    private static long tid() {
-        return Thread.currentThread().getId();
-    }
-
-    /**
-     * This method is called prior to every test. It waits for all workers to
-     * finish and resets the Checker's state.
-     */
-    @BeforeTest
-    public void beforeTest() {
-        quiesce();
-        Checker.reset();
-    }
-
-    /**
-     * Wait for the tests to finish and check the results
-     */
-    public void check() {
-        quiesce();
-        Checker.check();
-    }
-
-    /**
-     * Wait for the tests to finish. We avoid using 'isDone' that passes through
-     * the wrapping Future as we want to test this independently.
-     */
-    private void quiesce() {
-        try {
-            int waits = 0;
-            while (Checker.getWorkers() > 0) {
-                BulkheadTest.log("Waiting for " + Checker.getWorkers() + " workers to finish");
-                Thread.sleep(100);
-                if (waits++ > 100) {
-                    break;
-                }
-
-            }
-        }
-        catch (InterruptedException e) {
-            BulkheadTest.log(e.toString());
-        }
+        Utils.handleResults(number, results);
     }
 
 }

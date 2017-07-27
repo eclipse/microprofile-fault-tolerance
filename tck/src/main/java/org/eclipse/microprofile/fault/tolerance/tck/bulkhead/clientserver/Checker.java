@@ -17,7 +17,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.BulkheadTest;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
 import org.testng.Assert;
 
 /**
@@ -83,15 +83,16 @@ public class Checker implements BackendTestDelegate {
                 max = maxSimultaneousWorkers.get();
             }
 
-            BulkheadTest.log("Task " + taskId + " sleeping for " + millis + " milliseconds. " + now + " workers from "
+            Utils.log("Task " + taskId + " sleeping for " + millis + " milliseconds. " + now + " workers from "
                     + instances + " instances " + BAR.substring(0, now));
             Thread.sleep(millis);
 
-            BulkheadTest.log("woke");
+            Utils.log("woke");
         }
         catch (InterruptedException e) {
-            BulkheadTest.log(e.toString());
-        } finally {
+            Utils.log(e.toString());
+        } 
+        finally {
             workers.decrementAndGet();
         }
         CompletableFuture<String> result = new CompletableFuture<>();
@@ -126,7 +127,7 @@ public class Checker implements BackendTestDelegate {
         Assert.assertFalse(expectedTasksScheduled != 0 && tasksScheduled.get() < expectedTasksScheduled,
                 " Some tasks are missing, expected " + expectedTasksScheduled + " got " + tasksScheduled.get() + ". ");
 
-        BulkheadTest.log("Checks passed");
+        Utils.log("Checks passed");
     }
 
 
