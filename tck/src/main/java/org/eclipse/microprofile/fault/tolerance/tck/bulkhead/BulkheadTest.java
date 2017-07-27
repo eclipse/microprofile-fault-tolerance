@@ -1,22 +1,16 @@
-/*
- *******************************************************************************
- * Copyright (c) 2016-2017 Contributors to the Eclipse Foundation
- *
- * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *******************************************************************************/
+/**********************************************************************
+* Copyright (c) 2017 Contributors to the Eclipse Foundation 
+*
+* See the NOTICES file(s) distributed with this work for additional
+* information regarding copyright ownership.
+*
+* All rights reserved. This program and the accompanying materials 
+* are made available under the terms of the Apache License, Version 2.0
+* which accompanies this distribution and is available at
+* http://www.opensource.org/licenses/apache2.0.php
+*
+* SPDX-License-Identifier: Apache-2.0
+**********************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead;
 
 import java.time.LocalDateTime;
@@ -27,17 +21,9 @@ import java.util.concurrent.Future;
 
 import javax.inject.Inject;
 
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadClassAsynchronous10Bean;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadClassAsynchronous3Bean;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadClassAsynchronousDefaultBean;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadClassAsynchronousQueueingBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadClassSemaphore10Bean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadClassSemaphore3Bean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadClassSemaphoreDefaultBean;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadMethodAsynchronous10Bean;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadMethodAsynchronous3Bean;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadMethodAsynchronousDefaultBean;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadMethodAsynchronousQueueingBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadMethodSemaphore10Bean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadMethodSemaphore3Bean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadMethodSemaphoreDefaultBean;
@@ -59,40 +45,47 @@ import org.testng.annotations.Test;
  */
 public class BulkheadTest extends Arquillian {
 
+    /*
+     * We use an executer service to simulate the parallelism of multiple
+     * simultaneous requests
+     */
     private static final int THREADPOOL_SIZE = 30;
     private ExecutorService xService = Executors.newFixedThreadPool(THREADPOOL_SIZE);
 
+    /*
+     * As the FaultTolerance annotation only work on business methods of
+     * injected objects we need to inject a variety of these for use by the
+     * tests below. The naming convention indicates if the annotation is on a
+     * class or method, asynchronous or semaphore based, the size/value of
+     * the @Bulkhead and whether we have queueing or not.
+     */
     @Inject
     private BulkheadClassSemaphoreDefaultBean bhBeanClassSemaphoreDefault;
     @Inject
     private BulkheadMethodSemaphoreDefaultBean bhBeanMethodSemaphoreDefault;
     @Inject
-    private BulkheadClassAsynchronousDefaultBean bhBeanClassAsynchronousDefault;
-    @Inject
-    private BulkheadMethodAsynchronousDefaultBean bhBeanMethodAsynchronousDefault;
-
-    @Inject
     private BulkheadClassSemaphore3Bean bhBeanClassSemaphore3;
     @Inject
     private BulkheadMethodSemaphore3Bean bhBeanMethodSemaphore3;
     @Inject
-    private BulkheadClassAsynchronous3Bean bhBeanClassAsynchronous3;
-    @Inject
-    private BulkheadMethodAsynchronous3Bean bhBeanMethodAsynchronous3;
-
-    @Inject
     private BulkheadClassSemaphore10Bean bhBeanClassSemaphore10;
     @Inject
     private BulkheadMethodSemaphore10Bean bhBeanMethodSemaphore10;
-    @Inject
-    private BulkheadClassAsynchronous10Bean bhBeanClassAsynchronous10;
-    @Inject
-    private BulkheadMethodAsynchronous10Bean bhBeanMethodAsynchronous10;
 
-    @Inject
-    private BulkheadClassAsynchronousQueueingBean bhBeanClassAsynchronousQueueing;
-    @Inject
-    private BulkheadMethodAsynchronousQueueingBean bhBeanMethodAsynchronousQueueing;
+    /**
+     * This is the Arquillian deploy method that controls the contents of the war
+     * that contains all the tests.
+     * 
+     * @return the test war "ftBulkheadTest.war"
+     */
+    @Deployment
+    public static WebArchive deploy() {
+        JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftBulkheadTest.jar")
+                .addPackage(BulkheadClassSemaphore10Bean.class.getPackage())
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml").as(JavaArchive.class);
+        WebArchive war = ShrinkWrap.create(WebArchive.class, "ftBulkheadTest.war").addAsLibrary(testJar);
+        return war;
+    }
 
     /**
      * Tests the class synchronous Bulkhead3. This test will check that 3 and no
@@ -131,30 +124,6 @@ public class BulkheadTest extends Arquillian {
     }
 
     /**
-     * Tests the class asynchronous Bulkhead(10) This test will check that 10
-     * and no more than 10 asynchronous calls are allowed into a method that is
-     * a member of a @Bulkhead(10) Class.
-     */
-    @Test()
-    public void testBulkheadClassAsynchronous10() {
-        loop(10, bhBeanClassAsynchronous10, 10);
-        check();
-    }
-
-    /**
-     * Tests the method asynchronous Bulkhead(10). This test will check that 10
-     * and no more than 10 asynchronous calls are allowed into a method that has
-     * an individual
-     * 
-     * @Bulkhead(10) annotation
-     */
-    @Test()
-    public void testBulkheadMethodAsynchronous10() {
-        loop(10, bhBeanMethodAsynchronous10, 10);
-        check();
-    }
-
-    /**
      * Tests the method synchronous Bulkhead3. This test will check that 3 and
      * no more than 3 parallel synchronous calls are allowed into a method that
      * has an individual Bulkhead(3) annotation
@@ -162,28 +131,6 @@ public class BulkheadTest extends Arquillian {
     @Test()
     public void testBulkheadMethodSemaphore3() {
         threads(20, bhBeanMethodSemaphore3, 3);
-        check();
-    }
-
-    /**
-     * Tests the class asynchronous Bulkhead(3) This test will check that 3 and
-     * no more than 3 asynchronous calls are allowed into a method that is a
-     * member of a @Bulkhead(3) Class.
-     */
-    @Test()
-    public void testBulkheadClassAsynchronous3() {
-        loop(10, bhBeanClassAsynchronous3, 3);
-        check();
-    }
-
-    /**
-     * Tests the method asynchronous Bulkhead(3). This test will check that 3
-     * and no more than 3 asynchronous calls are allowed into a method that has
-     * an individual Bulkhead(3) annotation
-     */
-    @Test()
-    public void testBulkheadMethodAsynchronous3() {
-        loop(10, bhBeanMethodAsynchronous3, 3);
         check();
     }
 
@@ -207,50 +154,6 @@ public class BulkheadTest extends Arquillian {
     @Test()
     public void testBulkheadMethodSemaphoreDefault() {
         threads(20, bhBeanMethodSemaphoreDefault, 10);
-        check();
-    }
-
-    /**
-     * Tests the basic class asynchronous Bulkhead with defaulting value
-     * parameter. This will check that more than 1 but less than 10 calls get
-     * into the bulkhead at once.
-     */
-    @Test()
-    public void testBulkheadClassAsynchronousDefault() {
-        loop(10, bhBeanClassAsynchronousDefault, 10);
-        check();
-    }
-
-    /**
-     * Tests the basic method asynchronous Bulkhead with defaulting value
-     * parameter. This will check that more than 1 but less than 10 calls get
-     * into the bulkhead at once.
-     */
-    @Test()
-    public void testBulkheadMethodAsynchronousDefault() {
-        loop(10, bhBeanMethodAsynchronousDefault, 10);
-        check();
-    }
-
-    /**
-     * Tests the queueing class asynchronous Bulkhead with value parameter 10.
-     * This will check that more than 1 but less than 10 calls get into the
-     * bulkhead at once but that 10 threads can queue to get into the bulkhead
-     */
-    @Test()
-    public void testBulkheadClassAsynchronousQueueing10() {
-        loop(20, bhBeanClassAsynchronousQueueing, 10, 20);
-        check();
-    }
-
-    /**
-     * Tests the queueing method asynchronous Bulkhead with value parameter 10.
-     * This will check that more than 1 but less than 10 calls get into the
-     * bulkhead at once but that 10 threads can queue to get into the bulkhead
-     */
-    @Test()
-    public void testBulkheadMethodAsynchronousQueueing10() {
-        loop(20, bhBeanMethodAsynchronousQueueing, 10, 20);
         check();
     }
 
@@ -342,7 +245,8 @@ public class BulkheadTest extends Arquillian {
     }
 
     /**
-     * A simple local logger
+     * A simple local logger. Messages are logged with a prefix of the threadId
+     * and the current time.
      * 
      * @param s
      *            message
@@ -369,26 +273,28 @@ public class BulkheadTest extends Arquillian {
         return Thread.currentThread().getId();
     }
 
-    @Deployment
-    public static WebArchive deploy() {
-        JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftBulkheadTest.jar")
-                .addPackage(BulkheadClassSemaphore10Bean.class.getPackage())
-                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml").as(JavaArchive.class);
-        WebArchive war = ShrinkWrap.create(WebArchive.class, "ftBulkheadTest.war").addAsLibrary(testJar);
-        return war;
-    }
-
+    /**
+     * This method is called prior to every test. It waits for all workers to
+     * finish and resets the Checker's state.
+     */
     @BeforeTest
-    public void reset() {
+    public void beforeTest() {
         quiesce();
         Checker.reset();
     }
 
+    /**
+     * Wait for the tests to finish and check the results
+     */
     public void check() {
         quiesce();
         Checker.check();
     }
 
+    /**
+     * Wait for the tests to finish. We avoid using 'isDone' that passes through
+     * the wrapping Future as we want to test this independently.
+     */
     private void quiesce() {
         try {
             int waits = 0;

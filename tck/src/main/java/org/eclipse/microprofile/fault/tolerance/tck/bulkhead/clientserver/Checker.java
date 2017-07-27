@@ -1,3 +1,16 @@
+/**********************************************************************
+* Copyright (c) 2017 Contributors to the Eclipse Foundation 
+*
+* See the NOTICES file(s) distributed with this work for additional
+* information regarding copyright ownership.
+*
+* All rights reserved. This program and the accompanying materials 
+* are made available under the terms of the Apache License, Version 2.0
+* which accompanies this distribution and is available at
+* http://www.opensource.org/licenses/apache2.0.php
+*
+* SPDX-License-Identifier: Apache-2.0
+**********************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 
 import java.util.concurrent.CompletableFuture;
@@ -8,7 +21,18 @@ import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.BulkheadTest;
 import org.testng.Assert;
 
 /**
- * A simple sleeping test backend worker
+ * A simple sleeping test backend worker. Having this backend as a delegate
+ * means that we can perform more than one kind of test using a common
+ * 
+ * @Injected object that delegates to one of these that is passed in as a
+ *           parameter to the business method.
+ * 
+ *           There are a number of tests that this backend can perform:
+ *           <ul>
+ *           <li>expected number of instances created
+ *           <li>expected workers started via perform method
+ *           <li>max simultaneous workers not exceeded
+ *           </ul>
  * 
  * @author Gordon Hutchison
  */
@@ -23,17 +47,16 @@ public class Checker implements BackendTestDelegate {
     private static int expectedMaxSimultaneousWorkers;
     private static int expectedTasksScheduled;
 
-    public static void setExpectedInstances(int expectedInstances) {
-        Checker.expectedInstances = expectedInstances;
-    }
 
-    public static void setExpectedMaxWorkers(int expectedMaxWorkers) {
-        Checker.expectedMaxSimultaneousWorkers = expectedMaxWorkers;
-    }
-
+    /*
+     * This string is used for varying substr's barcharts in the log, for
+     * example for the number of concurrent workers.
+     */
     static final String BAR = "**************************************************************************************+++";
 
     /**
+     * Constructor
+     * 
      * @param i
      *            how long to sleep for in milliseconds
      */
@@ -43,7 +66,8 @@ public class Checker implements BackendTestDelegate {
     }
 
     /*
-     * Work
+     * Work this is the method that simulates the backend work inside the
+     * Bulkhead.
      * 
      * @see org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.
      * BulkheadTestAction#perform()
@@ -67,8 +91,7 @@ public class Checker implements BackendTestDelegate {
         }
         catch (InterruptedException e) {
             BulkheadTest.log(e.toString());
-        } 
-        finally {
+        } finally {
             workers.decrementAndGet();
         }
         CompletableFuture<String> result = new CompletableFuture<>();
@@ -77,7 +100,7 @@ public class Checker implements BackendTestDelegate {
     }
 
     /**
-     * Prepare the static state for the next test
+     * Prepare the state for the next test
      */
     public static void reset() {
         instances.set(0);
@@ -106,11 +129,20 @@ public class Checker implements BackendTestDelegate {
         BulkheadTest.log("Checks passed");
     }
 
+
+    public static int getWorkers() {
+        return workers.get();
+    }
+    
     public static void setExpectedTasksScheduled(int expected) {
         expectedTasksScheduled = expected;
     }
 
-    public static int getWorkers() {
-        return workers.get();
+    public static void setExpectedInstances(int expectedInstances) {
+        Checker.expectedInstances = expectedInstances;
+    }
+
+    public static void setExpectedMaxWorkers(int expectedMaxWorkers) {
+        Checker.expectedMaxSimultaneousWorkers = expectedMaxWorkers;
     }
 }
