@@ -56,6 +56,7 @@ public @interface Bulkhead {
      * Specify the maximum number of concurrent calls to an instance.
      * @return the limit of the concurrent calls
      */
+    
     short value() default 10;
     /**
      * Specify the waiting queue when a Thread pool style of bulkhead is used. This setting
