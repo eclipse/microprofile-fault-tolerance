@@ -61,12 +61,20 @@ public class Checker implements BackendTestDelegate {
 
             BulkheadTest.log("Task " + taskId + " sleeping for " + millis + " milliseconds. " + now + " workers from "
                     + instances + " instances " + BAR.substring(0, now));
-            Thread.sleep(millis);
-
+            if( millis < 0 ){
+                while(true){
+                    Thread.sleep(1000);                                    
+                    BulkheadTest.log("sleeping until interrupted");
+                }
+            }
+            else{
+                Thread.sleep(millis);                
+            }
             BulkheadTest.log("woke");
         }
         catch (InterruptedException e) {
             BulkheadTest.log(e.toString());
+            BulkheadTest.log("interupted");
         } 
         finally {
             workers.decrementAndGet();

@@ -24,6 +24,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
 
@@ -51,6 +53,7 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -252,6 +255,47 @@ public class BulkheadTest extends Arquillian {
     public void testBulkheadMethodAsynchronousQueueing10() {
         loop(20, bhBeanMethodAsynchronousQueueing, 10, 20);
         check();
+    }
+
+    /**
+     * Tests that the method on the Future that is returned from a asynchronous
+     * bulkhead work appropriately.
+     */
+    @Test()
+    public void testBulkheadFuture() {
+
+        Checker.setExpectedMaxWorkers(1);
+        Checker.setExpectedInstances(1);
+        Checker.setExpectedTasksScheduled(1);
+
+        Checker sulker = new Checker(5000);
+
+        Future result = bhBeanMethodAsynchronousDefault.test(sulker);
+        try {
+            result.get(1000, TimeUnit.MILLISECONDS);
+        }
+        catch (Throwable e) {
+           Assert.assertTrue(e instanceof TimeoutException, "result.get(1000) did not timeout for long running back-end");
+        }
+                
+        try {
+            BulkheadTest.log( "seeking answer" );
+            Object answer = result.get();
+            BulkheadTest.log( "answer was " + answer );
+        }
+        catch (Throwable e) {
+            BulkheadTest.log( e.toString() );
+        }
+
+        
+        
+        // result.get()
+        //
+        // result.cancel(mayInterruptIfRunning)
+        // result.isCancelled()
+        // result.isDone()
+        // result.
+
     }
 
     /**

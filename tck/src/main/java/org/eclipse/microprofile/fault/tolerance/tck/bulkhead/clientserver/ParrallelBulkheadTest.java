@@ -6,7 +6,7 @@ import java.util.concurrent.Future;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.BulkheadTest;
 
 /**
- * @author Gordon Hutchison 
+ * @author Gordon Hutchison
  *
  */
 public class ParrallelBulkheadTest implements Callable<Future> {
@@ -46,5 +46,17 @@ public class ParrallelBulkheadTest implements Callable<Future> {
         BulkheadTest.log("action " + action);
         BulkheadTest.log("target " + target);
         return target.test(action);
+        
     }
 }
+
+
+
+
+
+
+
+
+
+
+
