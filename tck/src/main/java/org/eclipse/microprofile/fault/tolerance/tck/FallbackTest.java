@@ -208,4 +208,46 @@ public class FallbackTest extends Arquillian {
         
         Assert.assertEquals(fallbackClient.getCounterForInvokingServiceC(), 2, "The execution count should be 2 (1 retry + 1)");
     }
+    
+    /**
+     * Test that a method in a Fallback service is driven after the specified number of retries are executed.
+     * 
+     * ServiceD specifies a method on a FallbackHandler. The test checks that the FallbackHandler method 
+     * has been driven and that the Service has been executed the correct number of times.
+     */
+    @Test
+    public void testFallbackMethodSuccess() {
+
+        try {
+            String result = fallbackClient.serviceD();
+            Assert.assertTrue(result.contains("method for serviceD"),
+                            "The message should be \"fallback method for serviceD\"");
+        }
+        catch (RuntimeException ex) {
+            Assert.fail("serviceD should not throw a RuntimeException in testFallbackMethodSuccess");
+        }
+        Assert.assertEquals(fallbackClient.getCounterForInvokingServiceD(), 2, "The execution count should be 2 (1 retry + 1)");
+        
+    }
+
+    /**
+     * Analogous to testFallbackMethodSuccess but serviceE has a pair of parameters.
+     * 
+     * ServiceE specifies a method on a FallbackHandler. The test checks that the FallbackHandler method 
+     * has been driven and that the Service has been executed the correct number of times.
+     */
+    @Test
+    public void testFallbackMethodWithArgsSuccess() {
+
+        try {
+            String result = fallbackClient.serviceE("serviceE", 42);
+            Assert.assertTrue(result.contains("method for serviceE"),
+                            "The message should be \"fallback method for serviceE\"");
+        }
+        catch (RuntimeException ex) {
+            Assert.fail("serviceE should not throw a RuntimeException in testFallbackMethodWithArgsSuccess");
+        }
+        Assert.assertEquals(fallbackClient.getCounterForInvokingServiceE(), 2, "The execution count should be 2 (1 retry + 1)");
+        
+    }
 }

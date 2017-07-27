@@ -206,4 +206,39 @@ public class CircuitBreakerRetryTest extends Arquillian {
         invokeCounter = clientForClassLevelCBWithRetry.getCounterForInvokingServiceB();
         Assert.assertEquals(invokeCounter, 3, "The number of executions should be 3");
     }
+    
+    /**
+     * Analagous to testCircuitOpenWithMoreRetries but execution failures are caused by timeouts.
+     */
+    @Test
+    public void testCircuitOpenWithMultiTimeouts() {
+        int invokeCounter = 0;
+        try {
+            clientForCBWithRetry.serviceC(1000);
+            
+            invokeCounter = clientForCBWithRetry.getCounterForInvokingServiceA();
+            if (invokeCounter < 4) {
+                Assert.fail("serviceC should retry in testCircuitOpenWithMoreRetries on iteration "
+                                + invokeCounter);
+            }
+        }
+        catch (CircuitBreakerOpenException cboe) {
+            // Expected on iteration 4
+            
+            invokeCounter = clientForCBWithRetry.getCounterForInvokingServiceC();
+            if (invokeCounter < 4) {
+                Assert.fail("serviceC should retry in testCircuitOpenWithMoreRetries on iteration "
+                                + invokeCounter);
+            }
+        }
+        catch (Exception ex) {
+            // Not Expected
+            invokeCounter = clientForCBWithRetry.getCounterForInvokingServiceC();
+            Assert.fail("serviceC should retry or throw a CircuitBreakerOpenException in testCircuitOpenWithMoreRetries on iteration "
+                            + invokeCounter);
+        }
+
+        invokeCounter = clientForCBWithRetry.getCounterForInvokingServiceC();
+        Assert.assertEquals(invokeCounter, 4, "The number of executions should be 4");
+    }
 }

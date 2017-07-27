@@ -17,24 +17,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
+package org.eclipse.microprofile.fault.tolerance.tck.illegalConfig;
 
-package org.eclipse.microprofile.fault.tolerance.tck.fallback.clientserver;
 
-import javax.enterprise.context.Dependent;
+import javax.enterprise.context.RequestScoped;
 
-import org.eclipse.microprofile.faulttolerance.ExecutionContext;
-import org.eclipse.microprofile.faulttolerance.FallbackHandler;
+import org.eclipse.microprofile.faulttolerance.Fallback;
+import org.eclipse.microprofile.faulttolerance.Retry;
 
 /**
- * A fallback handler to recover and return a string object.
- * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
+ * A client to demonstrate the fallback after doing retries
+ * 
+ * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  *
  */
-@Dependent
-public class StringFallbackHandler implements FallbackHandler<String> {
+@RequestScoped
+public class FallbackMethodClient {
 
-    @Override
-    public String handle(ExecutionContext context) {
-        return "fallback for " + context.getMethod().getName();
+    /**
+     * Retry 5 times and then fallback
+     */
+    @Retry(maxRetries = 4)
+    @Fallback(value = IncompatibleFallbackMethodHandler.class, fallbackMethod = "fallbackForServiceB")
+    public Integer serviceB() {
+        return 42;
+    }
+
+    /**
+     * Incompatible signature, only one parameter
+     */
+    public String fallbackForServiceB() {
+        return "fallback method for serviceB";
     }
 }

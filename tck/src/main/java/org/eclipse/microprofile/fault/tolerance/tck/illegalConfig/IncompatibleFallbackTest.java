@@ -33,7 +33,7 @@ import javax.inject.Inject;
 
 import static org.testng.Assert.fail;
 
-public class IllegalConfigTest extends Arquillian {
+public class IncompatibleFallbackTest extends Arquillian {
     private
     @Inject
     FallbackClient fallbackClient;
@@ -42,16 +42,22 @@ public class IllegalConfigTest extends Arquillian {
     @ShouldThrowException(DeploymentException.class)
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
-            .create(JavaArchive.class, "ftfallback.jar")
+            .create(JavaArchive.class, "ftInvalid.jar")
             .addClasses(FallbackClient.class, IncompatibleFallbackHandler.class)
             .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
             .as(JavaArchive.class);
 
         return ShrinkWrap
-            .create(WebArchive.class, "ftFallback.war")
+            .create(WebArchive.class, "ftInvalid.war")
             .addAsLibrary(testJar);
     }
 
+    /**
+     * Test that the deployment of an invalid FallbackHandler leads to a DeploymentException.
+     * 
+     * A Service is annotated with the IncompatibleFallbackHandler. While the Service returns an
+     * Integer, the IncompatibleFallbackHandler returns a String.
+     */
     @Test
     public void shouldNotBeCalled() {
         fail("This test should not have been called, deployment exception expected");

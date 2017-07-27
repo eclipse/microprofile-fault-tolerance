@@ -26,6 +26,8 @@ import javax.enterprise.context.RequestScoped;
 
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 import org.eclipse.microprofile.faulttolerance.Retry;
+import org.eclipse.microprofile.faulttolerance.Timeout;
+import org.eclipse.microprofile.faulttolerance.exceptions.TimeoutException;
 /**
  * A client to exercise Circuit Breaker thresholds using Retries.
  * 
@@ -36,6 +38,7 @@ import org.eclipse.microprofile.faulttolerance.Retry;
 public class CircuitBreakerClientWithRetry implements Serializable {
     private int counterForInvokingServiceA = 0;
     private int counterForInvokingServiceB = 0;
+    private int counterForInvokingServiceC = 0;
 
     public int getCounterForInvokingServiceA() {
         return counterForInvokingServiceA;
@@ -43,6 +46,10 @@ public class CircuitBreakerClientWithRetry implements Serializable {
     
     public int getCounterForInvokingServiceB() {
         return counterForInvokingServiceB;
+    }
+
+    public int getCounterForInvokingServiceC() {
+        return counterForInvokingServiceC;
     }
     
     @CircuitBreaker(successThreshold = 2, requestVolumeThreshold = 4, failureRatio = 0.75, delay = 50000)
@@ -60,6 +67,23 @@ public class CircuitBreakerClientWithRetry implements Serializable {
         Connection conn = null;
         counterForInvokingServiceB++;
         conn = connectionService();
+        return conn;
+    }
+    
+    @CircuitBreaker(successThreshold = 2, requestVolumeThreshold = 4, failureRatio = 0.75, delay = 50000)
+    @Retry(retryOn = {RuntimeException.class, TimeoutException.class}, maxRetries = 7)
+    @Timeout(500)
+    public Connection serviceC(long timeToSleep) {
+        Connection conn = null;
+        counterForInvokingServiceC++;
+
+        try {
+            Thread.sleep(timeToSleep);
+            throw new RuntimeException("Timeout did not interrupt");
+        } 
+        catch (InterruptedException e) {
+            //expected
+        }
         return conn;
     }
     
