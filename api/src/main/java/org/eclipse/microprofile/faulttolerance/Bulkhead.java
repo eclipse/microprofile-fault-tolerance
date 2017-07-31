@@ -53,15 +53,15 @@ import javax.interceptor.InterceptorBinding;
 public @interface Bulkhead {
 
     /**
-     * Specify the maximum number of concurrent calls to an instance.
+     * Specify the maximum number of concurrent calls to an instance. The value must be greater than 0.
      * @return the limit of the concurrent calls
      */
     
-    short value() default 10;
+    int value() default 10;
     /**
      * Specify the waiting queue when a Thread pool style of bulkhead is used. This setting
-     * has no effect when semaphore style of bulkhead is used.
+     * has no effect when semaphore style of bulkhead is used. The value must be greater than 0.
      * @return the waiting queue size
      */
-    short waitingThreadQueue() default 5;
+    int waitingThreadQueue() default 10;
 }
