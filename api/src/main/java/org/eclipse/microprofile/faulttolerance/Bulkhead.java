@@ -59,9 +59,9 @@ public @interface Bulkhead {
     
     int value() default 10;
     /**
-     * Specify the waiting queue when a Thread pool style of bulkhead is used. This setting
-     * has no effect when semaphore style of bulkhead is used. The value must be greater than 0.
+     * Specify the waiting task queue. This setting only takes effect on asynchronous invocation, achieved by using {@code Asynchronous}.
+     * The value must be greater than 0.
      * @return the waiting queue size
      */
-    int waitingThreadQueue() default 10;
+    int waitingTaskQueue() default 10;
 }
