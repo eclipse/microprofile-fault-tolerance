@@ -47,7 +47,7 @@ which is thread pool approach, limiting the maximum concurrent requests to 5 and
 ----
 // maximum 5 concurrent requests allowed, maximum 8 requests allowed in the waiting queue
 @Asynchronous
-@Bulkhead(value = 5, waitingThreadQueue = 8) 
+@Bulkhead(value = 5, waitingTaskQueue = 8) 
 public Future<Connection> serviceA() {
    Connection conn = null;
    counterForInvokingServiceA++;

@@ -34,7 +34,7 @@ import org.eclipse.microprofile.faulttolerance.Bulkhead;
 public class BulkheadMethodAsynchronousQueueingBean implements BulkheadTestBackend {
 
     @Override
-    @Bulkhead(value = 10, waitingThreadQueue = 10)
+    @Bulkhead(value = 10, waitingTaskQueue = 10)
     @Asynchronous
     public Future test(BackendTestDelegate action) {
         Utils.log("in bean " + this.getClass().getName() );
