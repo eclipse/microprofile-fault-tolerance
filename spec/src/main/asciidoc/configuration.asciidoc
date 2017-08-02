@@ -27,26 +27,26 @@ Set the environment variable of `MP_Fault_Tolerance_NonFallback_Enabled` with th
 
 === Config Fault Tolerance parameters
 
-This specification defines the annotations: `Asynchronous`, `Bulkhead`, `CircuitBreaker`, `Fallback`, `Retry` and `Timeout` . Each annotation except `Asynchnours` has parameters. All of the parameters are configurable. The value of each parameter can be overwritten individually or globally.
+This specification defines the annotations: `Asynchronous`, `Bulkhead`, `CircuitBreaker`, `Fallback`, `Retry` and `Timeout` . Each annotation except `Asynchronous` has parameters. All of the parameters are configurable. The value of each parameter can be overwritten individually or globally.
 
 * Overwrite individual parameters
-The annotation parameters can be overwritten via system properties in the naming convention of ft:<classname>/methodname/Annotation/parameter. 
+The annotation parameters can be overwritten via system properties in the naming convention of ft$<classname>/methodname/Annotation/parameter.
 
-In the following code snippet, in order to overwrite the maxRetries for serviceB invocation to 100, set the system property `ft:com.acme.test.MyClient/serviceB/Retry/maxRetries=100`
+In the following code snippet, in order to overwrite the maxRetries for serviceB invocation to 100, set the system property `ft$com.acme.test.MyClient/serviceB/Retry/maxRetries=100`
 Similarly to overwrite the maxDuration for ServiceA, set the system property
-`ft:com.acme.test.MyClient/serviceA/Retry/maxDuration=3000`
+`ft$com.acme.test.MyClient/serviceA/Retry/maxDuration=3000`
 
 * Overwrite parameters globally
-Sometimes, the parameters need to be configured with the same value. For an instance, all `Timeout` needs to be set to `100ms`. It can be tiresome to overwrite each occurrence of `Timeout`. In this circumstance, the system property `ft:Annotation/parameter` overwrites the corresponding parameter value for the specified annotation. For an instance, in order to overwrite the `maxRetries` for the `Retry` to be `30`, specify the system property `ft:Retry/maxRetries=30`.
+Sometimes, the parameters need to be configured with the same value. For an instance, all `Timeout` needs to be set to `100ms`. It can be tiresome to overwrite each occurrence of `Timeout`. In this circumstance, the system property `ft$Annotation/parameter` overwrites the corresponding parameter value for the specified annotation. For an instance, in order to overwrite the `maxRetries` for the `Retry` to be `30`, specify the system property `ft$Retry/maxRetries=30`.
 
-If both `ft:<classname>/methodname/Annotation/parameter` and `ft:Annotation/parameter` are present, the individual matching system property takes precedence.
+If both `ft$<classname>/methodname/Annotation/parameter` and `ft$Annotation/parameter` are present, the individual matching system property takes precedence.
 
 [source, java]
 ----
 package come.acme.test;
 public class MyClient{
     /**
-     * The configured the max retries is 90 but the max duration is 1000ms. 
+     * The configured the max retries is 90 but the max duration is 1000ms.
      * Once the duration is reached, no more retries should be performed,
      * even through it has not reached the max retries.
      */
@@ -54,9 +54,9 @@ public class MyClient{
     public void serviceB() {
         writingService();
     }
-    
+
     /**
-    * There should be 0-800ms (jitter is -400ms - 400ms) delays 
+    * There should be 0-800ms (jitter is -400ms - 400ms) delays
     * between each invocation.
     * there should be at least 4 retries but no more than 10 retries.
     */
@@ -64,7 +64,7 @@ public class MyClient{
     public Connection serviceA() {
         return connectionService();
     }
-    
+
     /**
     * Sets retry condition, which means Retry will be performed on
     * IOException.
@@ -73,7 +73,6 @@ public class MyClient{
     public void serviceB() {
         writingService();
     }
-    
+
 }
 ----
-
