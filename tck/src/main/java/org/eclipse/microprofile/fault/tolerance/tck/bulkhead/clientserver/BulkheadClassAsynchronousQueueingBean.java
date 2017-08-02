@@ -21,7 +21,7 @@ package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 
 import java.util.concurrent.Future;
 
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.BulkheadTest;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 
@@ -36,7 +36,7 @@ public class BulkheadClassAsynchronousQueueingBean implements BulkheadTestBacken
 
     @Override
     public Future test(BackendTestDelegate action) {
-        BulkheadTest.log("in bean " + this.getClass().getName());
+        Utils.log("in bean " + this.getClass().getName());
         return action.perform();
     }
 

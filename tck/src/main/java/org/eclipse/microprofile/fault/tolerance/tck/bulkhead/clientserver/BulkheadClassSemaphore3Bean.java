@@ -23,7 +23,7 @@ import java.util.concurrent.Future;
 
 import javax.enterprise.context.ApplicationScoped;
 
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.BulkheadTest;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 
 /**
@@ -36,7 +36,7 @@ public class BulkheadClassSemaphore3Bean implements BulkheadTestBackend {
 
     @Override
     public Future test(BackendTestDelegate action) {
-        BulkheadTest.log("in bean " + this.getClass().getName() );
+        Utils.log("in bean " + this.getClass().getName() );
         return action.perform();
     }
 

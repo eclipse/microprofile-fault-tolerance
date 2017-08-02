@@ -19,19 +19,16 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
 
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadClassSemaphore10Bean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadClassAsynchronousDefaultBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadMethodAsynchronousDefaultBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Checker;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.FutureChecker;
 import org.jboss.arquillian.container.test.api.Deployment;
-//import org.jboss.arquillian.core.api.Asynchronousing.ExecutorService;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
@@ -41,78 +38,179 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 /**
+ * This set of tests will test correct operation on the relevant methods of the
+ * Future object that is returned from the business method of a Asynchronous
+ * Method or Class. Note that this is not the same as the Future object that the
+ * users called method (which runs on the new thread) returns. So, for example,
+ * calls to 'isDone' will be done with respect to the users 'get' method having
+ * been completed and not delegated to the user's 'Future.isDone'
+ * implementation.
+ * 
  * @author Gordon Hutchison
  */
 public class BulkheadFutureTest extends Arquillian {
 
-    private static final int THREADPOOL_SIZE = 30;
-    private ExecutorService xService = Executors.newFixedThreadPool(THREADPOOL_SIZE);
-
+    private static final int SHORT_TIME = 100;
+    private static final int VERY_LONG_TIME = 300000;
     @Inject
     private BulkheadMethodAsynchronousDefaultBean bhBeanMethodAsynchronousDefault;
+    @Inject
+    private BulkheadClassAsynchronousDefaultBean bhBeanClassAsynchronousDefault;
 
     @Deployment
     public static WebArchive deploy() {
-        JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftBulkheadTest.jar")
-                .addPackage(BulkheadClassSemaphore10Bean.class.getPackage())
-                .addClass(BulkheadTest.class)
+        JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftBulkheadFutureTest.jar")
+                .addPackage(FutureChecker.class.getPackage()).addClass(Utils.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml").as(JavaArchive.class);
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftBulkheadTest.war").addAsLibrary(testJar);
         return war;
     }
 
     /**
-     * Tests that the method on the Future that is returned from a asynchronous
-     * bulkhead work appropriately.
+     * Tests that the Future that is returned from a asynchronous bulkhead method can
+     * be cancelled OK and that isCancelled works correctly.
      */
     @Test()
-    public void testBulkheadFuture() {
-
-        Checker.setExpectedMaxWorkers(1);
-        Checker.setExpectedInstances(1);
-        Checker.setExpectedTasksScheduled(1);
-
-        Checker sulker = new Checker(5000);
-
-        Future result = bhBeanMethodAsynchronousDefault.test(sulker);
-        try {
-            result.get(1000, TimeUnit.MILLISECONDS);
-        }
-        catch (Throwable e) {
-            Assert.assertTrue(e instanceof TimeoutException,
-                    "result.get(1000) did not timeout for long running back-end, e is a " + e.toString()
-                            + e.getMessage());
-        }
+    public void testBulkheadMethodAsynchFutureCancel() {
+        
+        // We want a long running backend that we can cancel
+        Checker fc = new FutureChecker(VERY_LONG_TIME);
+        
+        Future<String> result = bhBeanMethodAsynchronousDefault.test(fc);
+        Assert.assertFalse(result.isDone(), "Future reporting Done when not");
+        Assert.assertFalse(result.isCancelled(), "Future reporting Canceled when not");
+        
+        result.cancel(true);
+        
+        Utils.sleep(SHORT_TIME);
+        
+        Assert.assertTrue(result.isDone(), "Future reporting Done when not");
+        Assert.assertTrue(result.isCancelled(), "Future reporting not Cancelled when Cancelled");
 
         try {
-            BulkheadTest.log("seeking answer");
-            Object answer = result.get();
-            BulkheadTest.log("answer was: " + answer);
+            String rc = result.get();
+            Assert.assertNull(rc, "We should have gotten a CancelationException as cancelled");
         }
-        catch (Throwable e) {
-            BulkheadTest.log(e.toString());
+        catch (Throwable t) {
+            Assert.assertTrue(t instanceof CancellationException);
         }
+        Assert.assertTrue(result.isCancelled(), "Future cancel not reporting Cancelled after get");
+        Assert.assertTrue(result.isDone(), "Future not reporting Done when canceled after get");
 
-        Checker.reset();
-        
-        Future cancelResult = bhBeanMethodAsynchronousDefault.test(sulker);
-        boolean mayInterruptIfRunning = false;
-        boolean rc = result.cancel(mayInterruptIfRunning);
-       
-        Assert.assertFalse(rc, "we expected that the task is still running");
-        Assert.assertFalse(result.isCancelled(), "we expected that the task is not cancelled");
-        Assert.assertFalse(result.isDone(), "we expected that the task is not done, workers is " + Checker.getWorkers() );
+    }
 
-        
-        mayInterruptIfRunning = true;
-        rc = result.cancel(mayInterruptIfRunning);
-        Assert.assertTrue(rc, "after cancel, we expected that the task is still running");
-        Assert.assertTrue(result.isCancelled(), "after cancel, we expected that the task is cancelled");
-        Assert.assertTrue(result.isDone(), "after cancel, we expected that the task is done");
+    /**
+     * Tests that the Future that is returned from an asynchronous bulkhead method can
+     * be queried for Done OK after a goodpath .get()
+     */
+    @Test()
+    public void testBulkheadMethodAsynchFutureDoneAfterGet() {
 
+        Checker fc = new FutureChecker(SHORT_TIME);
+        Future<String> result = bhBeanMethodAsynchronousDefault.test(fc);
 
-        // result.
+        Assert.assertFalse(result.isDone(), "Future reporting Done when not");
+        try {
+            String rc = result.get();
+        }
+        catch (Throwable t) {
+            Assert.assertNull(t);
+        }
+        Assert.assertTrue(result.isDone(), "Future done not reporting true");
+    }
 
+    /**
+     * Tests that the Future that is returned from a asynchronous bulkhead method can
+     * be queried for Done OK even if the user never calls get to drive the backend
+     * (i.e. it is started anyway asynchronously)
+     */
+    @Test()
+    public void testBulkheadMethodAsynchFutureDoneWithoutGet() {
+
+        Checker fc = new FutureChecker(SHORT_TIME);
+        Future<String> result = bhBeanMethodAsynchronousDefault.test(fc);
+
+        Assert.assertFalse(result.isDone(), "Future reporting Done when not");
+        try {
+            Thread.sleep(SHORT_TIME + SHORT_TIME);
+        }
+        catch (Throwable t) {
+            Assert.assertNull(t);
+        }
+        Assert.assertTrue(result.isDone(), "Future done not reporting true");
+    }
+
+    /**
+     * Tests that the Future that is returned from a asynchronous bulkhead can
+     * be canceled OK and that isCancelled works correctly on a method in an
+     * asynchronous bulkhead annotated class
+     */
+    @Test()
+    public void testBulkheadClassAsynchFutureCancel() {
+        Checker fc = new FutureChecker(VERY_LONG_TIME);
+        Future<String> result = bhBeanClassAsynchronousDefault.test(fc);
+        Assert.assertFalse(result.isDone(), "Future reporting Done when not");
+        Assert.assertFalse(result.isCancelled(), "Future reporting Canceled when not");
+        result.cancel(true);
+        try {
+            Thread.sleep(SHORT_TIME);
+        }
+        catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        Assert.assertTrue(result.isDone(), "Future reporting not Done when Done");
+        Assert.assertTrue(result.isCancelled(), "Future reporting not Cancelled when Cancelled");
+
+        try {
+            String rc = result.get();
+            Assert.assertNull(rc, "We should have got a CancelationException");
+        }
+        catch (Throwable t) {
+            Assert.assertTrue(t instanceof CancellationException);
+        }
+        Assert.assertTrue(result.isCancelled(), "Future cancel not reporting called after get");
+        Assert.assertTrue(result.isDone(), "Future not reporting Done when canceled");
+
+    }
+
+    /**
+     * Tests that the Future that is returned from a asynchronous bulkhead can
+     * be queried for Done OK. This test is for the annotation on a method.
+     */
+    @Test()
+    public void testBulkheadClassAsynchFutureDoneAfterGet() {
+
+        Checker fc = new FutureChecker(SHORT_TIME);
+        Future<String> result = bhBeanClassAsynchronousDefault.test(fc);
+
+        Assert.assertFalse(result.isDone(), "Future reporting Done when not");
+        try {
+            String rc = result.get();
+        }
+        catch (Throwable t) {
+            Assert.assertNull(t);
+        }
+        Assert.assertTrue(result.isDone(), "Future done not reporting true");
+    }
+
+    /**
+     * Tests that the Future that is returned from a asynchronous bulkhead can
+     * be queried for Done OK. This test is for the annotation on a method.
+     */
+    @Test()
+    public void testBulkheadClassAsynchFutureDoneWithoutGet() {
+
+        Checker fc = new FutureChecker(SHORT_TIME);
+        Future<String> result = bhBeanMethodAsynchronousDefault.test(fc);
+
+        Assert.assertFalse(result.isDone(), "Future reporting Done when not");
+        try {
+            Thread.sleep(SHORT_TIME + SHORT_TIME);
+        }
+        catch (Throwable t) {
+            Assert.assertNull(t);
+        }
+        Assert.assertTrue(result.isDone(), "Future done not reporting true");
     }
 
 }
