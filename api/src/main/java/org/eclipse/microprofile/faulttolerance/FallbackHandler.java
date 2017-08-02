@@ -54,7 +54,9 @@ public interface FallbackHandler<T>{
     /**
      * Handle the previous calling failure and then call alternative methods
      * or perform any alternative operations.
-     * @param context the execution context 
+     * 
+     * @param context the execution context
+     * @return the result of the fallback 
      */
     T handle(ExecutionContext context);
 

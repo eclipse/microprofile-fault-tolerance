@@ -48,12 +48,10 @@ public @interface Fallback {
 
     /**
      * Create a default class so the value is not required to be set all the time.
-     * @param <T>
-     * @param <T>
      */
-    class  DEFAULT<T> implements FallbackHandler<T>{
+    class DEFAULT implements FallbackHandler<Void>{
         @Override
-        public T handle(ExecutionContext context) {
+        public Void handle(ExecutionContext context) {
             return null;
         }
     }
@@ -64,14 +62,15 @@ public @interface Fallback {
      * 
      * @return the fallback class
      */
-    @SuppressWarnings("rawtypes")
-    Class<? extends FallbackHandler> value() default DEFAULT.class;
+    Class<? extends FallbackHandler<?>> value() default DEFAULT.class;
+    
     /**
     * Specify the method name to be fallbacked to. This method belongs
     * to the same class as the method to fallback.
     * The method must have the exactly same arguments as the method being annotated.
     * The method return type must be assignable to the return type of the method the fallback is for. 
     * Otherwise, the {@link javax.enterprise.inject.spi.DeploymentException} must be thrown.
+    * 
     * @return the local method to fallback to
     */
     String fallbackMethod() default "";
