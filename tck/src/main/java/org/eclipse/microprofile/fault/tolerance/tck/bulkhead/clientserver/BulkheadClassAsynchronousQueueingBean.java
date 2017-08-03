@@ -30,7 +30,7 @@ import org.eclipse.microprofile.faulttolerance.Bulkhead;
  * 
  * @author Gordon Hutchison
  */
-@Bulkhead(value = 10, waitingThreadQueue = 10)
+@Bulkhead(value = 10, waitingTaskQueue = 10)
 @Asynchronous
 public class BulkheadClassAsynchronousQueueingBean implements BulkheadTestBackend {
 

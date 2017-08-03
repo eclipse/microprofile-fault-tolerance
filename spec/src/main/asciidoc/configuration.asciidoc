@@ -1,0 +1,79 @@
+//
+// Copyright (c) 2016-2017 Contributors to the Eclipse Foundation
+//
+// See the NOTICE file(s) distributed with this work for additional
+// information regarding copyright ownership.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// You may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// Contributors:
+// Emily Jiang
+
+[[configuration]]
+== Fault Tolerance configuration
+
+This specification defines the programming model to build a resilient microservice. Microservices developed using this feature are guaranteed to be resilient despite of running environments. In some service mash platform, e.g. Istio, has its own Fault Tolerance policy. The operation team might want to use the platform Fault Tolerance. In order to fulfil the requirement, MicroProfile Fault Tolerance provides a capability to have its resilient functionalities except `fallback` disabled. The reason `fallback` is special as the `fallback` business logic can only be defined by microservices not by any other platforms.
+
+Set the environment variable of `MP_Fault_Tolerance_NonFallback_Enabled` with the value of `false` means the Fault Tolerance is disabled, except `Fallback`. If the environment varaible is absent or with the value of `true`, it means that MicroProfile Fault Tolerance is enabled if any annotations are specified.
+
+=== Config Fault Tolerance parameters
+
+This specification defines the annotations: `Asynchronous`, `Bulkhead`, `CircuitBreaker`, `Fallback`, `Retry` and `Timeout` . Each annotation except `Asynchnours` has parameters. All of the parameters are configurable. The value of each parameter can be overwritten individually or globally.
+
+* Overwrite individual parameters
+The annotation parameters can be overwritten via system properties in the naming convention of ft:<classname>/methodname/Annotation/parameter. 
+
+In the following code snippet, in order to overwrite the maxRetries for serviceB invocation to 100, set the system property `ft:com.acme.test.MyClient/serviceB/Retry/maxRetries=100`
+Similarly to overwrite the maxDuration for ServiceA, set the system property
+`ft:com.acme.test.MyClient/serviceA/Retry/maxDuration=3000`
+
+* Overwrite parameters globally
+Sometimes, the parameters need to be configured with the same value. For an instance, all `Timeout` needs to be set to `100ms`. It can be tiresome to overwrite each occurrence of `Timeout`. In this circumstance, the system property `ft:Annotation/parameter` overwrites the corresponding parameter value for the specified annotation. For an instance, in order to overwrite the `maxRetries` for the `Retry` to be `30`, specify the system property `ft:Retry/maxRetries=30`.
+
+If both `ft:<classname>/methodname/Annotation/parameter` and `ft:Annotation/parameter` are present, the individual matching system property takes precedence.
+
+[source, java]
+----
+package come.acme.test;
+public class MyClient{
+    /**
+     * The configured the max retries is 90 but the max duration is 1000ms. 
+     * Once the duration is reached, no more retries should be performed,
+     * even through it has not reached the max retries.
+     */
+    @Retry(maxRetries = 90, maxDuration= 1000)
+    public void serviceB() {
+        writingService();
+    }
+    
+    /**
+    * There should be 0-800ms (jitter is -400ms - 400ms) delays 
+    * between each invocation.
+    * there should be at least 4 retries but no more than 10 retries.
+    */
+    @Retry(delay = 400, maxDuration= 3200, jitter= 400, maxRetries = 10)
+    public Connection serviceA() {
+        return connectionService();
+    }
+    
+    /**
+    * Sets retry condition, which means Retry will be performed on
+    * IOException.
+    */
+    @Retry(retryOn = {IOException.class})
+    public void serviceB() {
+        writingService();
+    }
+    
+}
+----
+

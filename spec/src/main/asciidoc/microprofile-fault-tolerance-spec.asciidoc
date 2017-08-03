@@ -57,6 +57,7 @@ include::circuitbreaker.asciidoc[]
 
 include::bulkhead.asciidoc[]
 
+include::configuration.asciidoc[]
 
 
 
