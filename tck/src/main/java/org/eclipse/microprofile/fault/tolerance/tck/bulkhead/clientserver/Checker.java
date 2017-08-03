@@ -44,15 +44,14 @@ import org.testng.Assert;
  */
 public class Checker implements BackendTestDelegate {
 
-    private int millis = 1;
-    private static AtomicInteger workers = new AtomicInteger(0);
-    private static AtomicInteger maxSimultaneousWorkers = new AtomicInteger(0);
-    private static AtomicInteger instances = new AtomicInteger(0);
-    private static AtomicInteger tasksScheduled = new AtomicInteger(0);
-    private static int expectedInstances;
-    private static int expectedMaxSimultaneousWorkers;
-    private static int expectedTasksScheduled;
-
+    protected int millis = 1;
+    protected static AtomicInteger workers = new AtomicInteger(0);
+    protected static AtomicInteger maxSimultaneousWorkers = new AtomicInteger(0);
+    protected static AtomicInteger instances = new AtomicInteger(0);
+    protected static AtomicInteger tasksScheduled = new AtomicInteger(0);
+    protected static int expectedInstances;
+    protected static int expectedMaxSimultaneousWorkers;
+    protected static int expectedTasksScheduled;
 
     /*
      * This string is used for varying substr's barcharts in the log, for

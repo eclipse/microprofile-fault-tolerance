@@ -153,4 +153,13 @@ public class Utils {
         return DateTimeFormatter.ofPattern("HH:mm:ss:SS").format(LocalDateTime.now());
     }
 
+    public static void sleep(int millis) {
+        try {
+            Thread.sleep(millis);
+        }
+        catch (InterruptedException e) {
+            log( e.getMessage());
+        }
+    }
+
 }
