@@ -21,6 +21,7 @@ package org.eclipse.microprofile.fault.tolerance.tck.bulkhead;
 
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -67,23 +68,23 @@ public class BulkheadFutureTest extends Arquillian {
     }
 
     /**
-     * Tests that the Future that is returned from a asynchronous bulkhead method can
-     * be cancelled OK and that isCancelled works correctly.
+     * Tests that the Future that is returned from a asynchronous bulkhead
+     * method can be cancelled OK and that isCancelled works correctly.
      */
     @Test()
     public void testBulkheadMethodAsynchFutureCancel() {
-        
+
         // We want a long running backend that we can cancel
         Checker fc = new FutureChecker(VERY_LONG_TIME);
-        
+
         Future<String> result = bhBeanMethodAsynchronousDefault.test(fc);
         Assert.assertFalse(result.isDone(), "Future reporting Done when not");
         Assert.assertFalse(result.isCancelled(), "Future reporting Canceled when not");
-        
+
         result.cancel(true);
-        
+
         Utils.sleep(SHORT_TIME);
-        
+
         Assert.assertTrue(result.isDone(), "Future reporting Done when not");
         Assert.assertTrue(result.isCancelled(), "Future reporting not Cancelled when Cancelled");
 
@@ -100,8 +101,8 @@ public class BulkheadFutureTest extends Arquillian {
     }
 
     /**
-     * Tests that the Future that is returned from an asynchronous bulkhead method can
-     * be queried for Done OK after a goodpath .get()
+     * Tests that the Future that is returned from an asynchronous bulkhead
+     * method can be queried for Done OK before and after a goodpath .get()
      */
     @Test()
     public void testBulkheadMethodAsynchFutureDoneAfterGet() {
@@ -111,7 +112,9 @@ public class BulkheadFutureTest extends Arquillian {
 
         Assert.assertFalse(result.isDone(), "Future reporting Done when not");
         try {
-            String rc = result.get();
+            String r;
+            Assert.assertTrue("GET.".equals(r = result.get()), r);
+            Assert.assertTrue("GET.GET_TO.".equals(r = result.get(1, TimeUnit.SECONDS)), r);
         }
         catch (Throwable t) {
             Assert.assertNull(t);
@@ -120,9 +123,9 @@ public class BulkheadFutureTest extends Arquillian {
     }
 
     /**
-     * Tests that the Future that is returned from a asynchronous bulkhead method can
-     * be queried for Done OK even if the user never calls get to drive the backend
-     * (i.e. it is started anyway asynchronously)
+     * Tests that the Future that is returned from a asynchronous bulkhead
+     * method can be queried for Done OK even if the user never calls get() to
+     * drive the backend (i.e. the method is called non-lazily)
      */
     @Test()
     public void testBulkheadMethodAsynchFutureDoneWithoutGet() {
@@ -151,7 +154,9 @@ public class BulkheadFutureTest extends Arquillian {
         Future<String> result = bhBeanClassAsynchronousDefault.test(fc);
         Assert.assertFalse(result.isDone(), "Future reporting Done when not");
         Assert.assertFalse(result.isCancelled(), "Future reporting Canceled when not");
+
         result.cancel(true);
+
         try {
             Thread.sleep(SHORT_TIME);
         }
@@ -168,14 +173,16 @@ public class BulkheadFutureTest extends Arquillian {
         catch (Throwable t) {
             Assert.assertTrue(t instanceof CancellationException);
         }
-        Assert.assertTrue(result.isCancelled(), "Future cancel not reporting called after get");
-        Assert.assertTrue(result.isDone(), "Future not reporting Done when canceled");
+        Assert.assertTrue(result.isCancelled(), "Future isCancelled not reporting true when called after cancel,get");
+        Assert.assertTrue(result.isDone(), "Future not reporting Done when called after cancel,get");
 
     }
 
     /**
      * Tests that the Future that is returned from a asynchronous bulkhead can
-     * be queried for Done OK. This test is for the annotation on a method.
+     * be queried for Done OK after a goodpath get with timeout and also
+     * multiple gets can be called ok. This test is for the annotation at a
+     * Class level.
      */
     @Test()
     public void testBulkheadClassAsynchFutureDoneAfterGet() {
@@ -185,7 +192,10 @@ public class BulkheadFutureTest extends Arquillian {
 
         Assert.assertFalse(result.isDone(), "Future reporting Done when not");
         try {
-            String rc = result.get();
+            String r;
+            Assert.assertTrue("GET_TO.".equals(r = result.get(1, TimeUnit.SECONDS)), r);
+            Assert.assertTrue("GET_TO.GET.".equals(r = result.get()), r);
+
         }
         catch (Throwable t) {
             Assert.assertNull(t);
@@ -195,7 +205,8 @@ public class BulkheadFutureTest extends Arquillian {
 
     /**
      * Tests that the Future that is returned from a asynchronous bulkhead can
-     * be queried for Done OK. This test is for the annotation on a method.
+     * be queried for Done OK when get() is not called. This test is for the
+     * annotation at a Class level.
      */
     @Test()
     public void testBulkheadClassAsynchFutureDoneWithoutGet() {

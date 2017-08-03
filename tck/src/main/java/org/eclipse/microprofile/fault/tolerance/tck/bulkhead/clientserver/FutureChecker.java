@@ -27,18 +27,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
 
 /**
- * A simple sleeping test backend worker. Having this backend as a delegate
- * means that we can perform more than one kind of test using a common
- * 
- * @Injected object that delegates to one of these that is passed in as a
- *           parameter to the business method.
- * 
- *           There are a number of tests that this backend can perform:
- *           <ul>
- *           <li>expected number of instances created
- *           <li>expected workers started via perform method
- *           <li>max simultaneous workers not exceeded
- *           </ul>
+ * A backend that is used in the tests of the operations on the Future returned
+ * by the user (only get() should be called).
  * 
  * @author Gordon Hutchison
  */
@@ -48,92 +38,83 @@ public class FutureChecker extends Checker {
         super(sleepMillis);
     }
 
-    public final class TestFuture implements Future<String> {
-
-        private AtomicBoolean cancelCalled = new AtomicBoolean(false);
-        private AtomicBoolean done = new AtomicBoolean(false);
-        private AtomicBoolean interrupted = new AtomicBoolean(false);
-        private String result;
-        private int millis;
-
-        public TestFuture(int millis) {
-            this.millis = millis;
-            try {
-                Thread.sleep(millis);
-            }
-            catch (InterruptedException e) {
-             Utils.log(e.toString());
-            }
-        }
-
-        @Override
-        public boolean cancel(boolean mayInterruptIfRunning) {
-            Utils.log("Cancel");
-            result = result + "CANCELED.";
-            cancelCalled.set(true);
-            done.set(true);
-            return true;
-        }
-
-        @Override
-        public boolean isCancelled() {
-            Utils.log("isCancelled");
-            result = result + "IS_CANCELED.";
-            return cancelCalled.get();
-        }
-
-        @Override
-        public boolean isDone() {
-            Utils.log("isDone");
-            result = result + "IS_DONE.";
-            return done.get();
-        }
-
-        @Override
-        public String get() throws InterruptedException, ExecutionException {
-            Utils.log("Get");
-            result = result + "GET.";
-            work();
-            done.set(true);
-            return result;
-        }
-
-        @Override
-        public String get(long timeout, TimeUnit unit) {
-            Utils.log("getTO");
-            result = result + "GET_TO.";
-            work();
-            done.set(true);
-            return result;
-        }
-
-        private void work() {
-            try {
-                if (!done.get()) {
-                //    Thread.sleep(millis);
-                }
-            }
-            catch (Throwable t) {
-                Utils.log(t.toString());
-                interrupted.set(true);
-            } 
-            finally {
-                done.set(true);
-            }
-        }
-
-    }
-
     /*
-     * Work this is the method that simulates the backend work inside the
-     * Bulkhead.
-     *
+     * This method is the one called from the business method of the injected
+     * object that has the annotations. We don't do anything here.
+     * 
      * @see org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.
      * BulkheadTestAction#perform()
      */
     @Override
     public Future<String> perform() {
-        return new TestFuture(millis);
+        try {
+            Thread.sleep(millis);
+        }
+        catch (InterruptedException e) {
+            Utils.log( e.toString());
+        }
+        return new TestFuture();
+    }
+
+    /**
+     * This test backend delegate does nothing except to complain
+     * with UnsupportedOperation exceptions if methods that are not
+     * expected to be called are called...The Future returned from
+     * a annotated method or class to a client is not expected to 
+     * pass on any method calls to the
+     * users underlying method result object apart from the get 
+     * and get with timeout methods. The semantics are that, for example,
+     * isDone()'s result are with respect to the operation of running the
+     * method, not as the result would be if it was delegated to
+     * the Future object that the method returns.
+     * 
+     * @author Gordon Hutchison
+     *
+     */
+    public final class TestFuture implements Future<String> {
+
+        private AtomicBoolean done = new AtomicBoolean(false);
+        private String result = "";
+
+        @Override
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean isCancelled() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean isDone() {
+            throw new UnsupportedOperationException();
+        }
+
+        /*
+         * We just return a string representing the methods we have seen called.
+         * @see java.util.concurrent.Future#get()
+         */
+        @Override
+        public String get() throws InterruptedException, ExecutionException {
+            result = result + "GET.";
+            Utils.log("Result is " + result);
+            return result;
+        }
+
+        /*
+         * We just return a string representing the methods we have seen called.
+         * 
+         * @see java.util.concurrent.Future#get(long,
+         * java.util.concurrent.TimeUnit)
+         */
+        @Override
+        public String get(long timeout, TimeUnit unit) {
+            result = result + "GET_TO.";
+            Utils.log("Result is " + result);
+            return result;
+        }
+
     }
 
 }
