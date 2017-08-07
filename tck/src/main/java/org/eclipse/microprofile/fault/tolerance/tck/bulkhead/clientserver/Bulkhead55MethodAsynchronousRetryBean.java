@@ -19,23 +19,33 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 
+import java.time.temporal.ChronoUnit;
 import java.util.concurrent.Future;
 
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
+import org.eclipse.microprofile.faulttolerance.Retry;
+import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
 
 /**
- * A simple class level Asychronous @Bulkhead(10)
- *
+ * This tests the class level annotations in Retry that will enable us to submit
+ * a set of tasks that will blow the bulkhead and its queue but which will get
+ * retried until they are done. Each backend sleeps for one second so we should
+ * get done in about 5 seconds as we allow 2 at once.
+ * 
  * @author Gordon Hutchison
  */
-@Bulkhead(10) @Asynchronous
-public class BulkheadClassAsynchronous10Bean implements BulkheadTestBackend {
+
+public class Bulkhead55MethodAsynchronousRetryBean implements BulkheadTestBackend {
 
     @Override
+    @Bulkhead(waitingTaskQueue = 5, value = 5)
+    @Asynchronous
+    @Retry(retryOn =
+    { BulkheadException.class }, delay = 1, delayUnit = ChronoUnit.SECONDS, maxRetries = 10)
     public Future test(BackendTestDelegate action) throws InterruptedException {
-        Utils.log("in business method of bean " + this.getClass().getName() );
+        Utils.log("in business method of bean " + this.getClass().getName());
         return action.perform();
     }
 

@@ -39,6 +39,7 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -140,8 +141,14 @@ public class BulkheadAsynchTest extends Arquillian {
 
         Future[] results = new Future[number];
         for (int i = 0; i < number; i++) {
-            Utils.log("Starting test " + i);
-            results[i] = test.test(new Checker(5 * 1000));
+            Utils.log("synchronous loop() starting test " + i);
+            try {
+                results[i] = test.test(new Checker(5 * 1000));
+            }
+            catch (InterruptedException e1) {
+                Assert.fail("Unexpected interruption", e1);
+            }
+
         }
 
         Utils.handleResults(number, results);

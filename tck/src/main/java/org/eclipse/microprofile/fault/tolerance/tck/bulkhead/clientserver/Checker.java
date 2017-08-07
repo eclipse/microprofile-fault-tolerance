@@ -23,6 +23,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.management.RuntimeErrorException;
+
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
 import org.testng.Assert;
 
@@ -45,6 +47,7 @@ import org.testng.Assert;
 public class Checker implements BackendTestDelegate {
 
     protected int millis = 1;
+    private int fails = 0;
     protected static AtomicInteger workers = new AtomicInteger(0);
     protected static AtomicInteger maxSimultaneousWorkers = new AtomicInteger(0);
     protected static AtomicInteger instances = new AtomicInteger(0);
@@ -52,6 +55,7 @@ public class Checker implements BackendTestDelegate {
     protected static int expectedInstances;
     protected static int expectedMaxSimultaneousWorkers;
     protected static int expectedTasksScheduled;
+    private static boolean maxFill = true;
 
     /*
      * This string is used for varying substr's barcharts in the log, for
@@ -70,6 +74,12 @@ public class Checker implements BackendTestDelegate {
         instances.incrementAndGet();
     }
 
+    public Checker(int sleepMillis, int fails) {
+        this.fails = fails;
+        this.millis = sleepMillis;
+        instances.incrementAndGet();
+    }
+
     /*
      * Work this is the method that simulates the backend work inside the
      * Bulkhead.
@@ -78,25 +88,33 @@ public class Checker implements BackendTestDelegate {
      * BulkheadTestAction#perform()
      */
     @Override
-    public Future<String> perform() {
+    public Future<String> perform() throws InterruptedException {
         try {
             int taskId = tasksScheduled.incrementAndGet();
             int now = workers.incrementAndGet();
             int max = maxSimultaneousWorkers.get();
 
+
             while ((now > max) && !maxSimultaneousWorkers.compareAndSet(max, now)) {
                 max = maxSimultaneousWorkers.get();
             }
+            if (fails > 0) {
+                Thread.sleep(millis/2);
+                fails--;
+                RuntimeErrorException e = new RuntimeErrorException(new Error("fake error for Retry Testing"));
+                Utils.log(e.toString());
+                throw e;
+            }
 
-            Utils.log("Task " + taskId + " sleeping for " + millis + " milliseconds. " + now + " workers from "
-                    + instances + " instances " + BAR.substring(0, now));
+            Utils.log("Task " + taskId + " sleeping for " + millis + " milliseconds. " + now
+                    + " workers inside Bulkhead from " + instances + " instances " + BAR.substring(0, now));
             Thread.sleep(millis);
 
-            Utils.log("woke");
+            Utils.log("Task " + taskId + " woke.");
         }
         catch (InterruptedException e) {
             Utils.log(e.toString());
-        } 
+        }
         finally {
             workers.decrementAndGet();
         }
@@ -113,6 +131,7 @@ public class Checker implements BackendTestDelegate {
         workers.set(0);
         maxSimultaneousWorkers.set(0);
         tasksScheduled.set(0);
+        maxFill = true;
     }
 
     /**
@@ -120,26 +139,29 @@ public class Checker implements BackendTestDelegate {
      */
     public static void check() {
         Assert.assertEquals(workers.get(), 0, "Some workers still active. ");
-        Assert.assertEquals(instances.get(), expectedInstances, " Not all workers launched. ");
+
+        Assert.assertFalse(expectedInstances != 0 && instances.get() < expectedInstances,
+                " Not all workers launched. " + instances.get() +"/"+expectedInstances );
+
         Assert.assertTrue(maxSimultaneousWorkers.get() <= expectedMaxSimultaneousWorkers,
-                " Bulkhead appears to have been breeched " + maxSimultaneousWorkers.get() + " workers, expected "
+                " Bulkhead appears to have been breeched " + maxSimultaneousWorkers + " workers, expected "
                         + expectedMaxSimultaneousWorkers + ". ");
         Assert.assertFalse(expectedMaxSimultaneousWorkers > 1 && maxSimultaneousWorkers.get() == 1,
                 " Workers are not in parrallel. ");
-        Assert.assertTrue(expectedMaxSimultaneousWorkers == maxSimultaneousWorkers.get(),
-                " Work is not being done simultaneously enough, only " + maxSimultaneousWorkers + ". "
-                        + " workers are once. Expecting " + expectedMaxSimultaneousWorkers + ". ");
+        Assert.assertTrue(!maxFill || expectedMaxSimultaneousWorkers == maxSimultaneousWorkers.get(),
+                " Work is not being done simultaneously enough, only " + maxSimultaneousWorkers + " "
+                        + " workers at once. Expecting " + expectedMaxSimultaneousWorkers + ". ");
         Assert.assertFalse(expectedTasksScheduled != 0 && tasksScheduled.get() < expectedTasksScheduled,
                 " Some tasks are missing, expected " + expectedTasksScheduled + " got " + tasksScheduled.get() + ". ");
 
-        Utils.log("Checks passed");
+        Utils.log("Checks passed: " + "tasks: " + tasksScheduled + "/" + expectedTasksScheduled + ", bulkhead: "
+                + maxSimultaneousWorkers + "/" + expectedMaxSimultaneousWorkers);
     }
-
 
     public static int getWorkers() {
         return workers.get();
     }
-    
+
     public static void setExpectedTasksScheduled(int expected) {
         expectedTasksScheduled = expected;
     }
@@ -151,4 +173,10 @@ public class Checker implements BackendTestDelegate {
     public static void setExpectedMaxWorkers(int expectedMaxWorkers) {
         Checker.expectedMaxSimultaneousWorkers = expectedMaxWorkers;
     }
+
+    public static void setExpectedMaxWorkers(int maxSimultaneousWorkers, boolean b) {
+        setExpectedMaxWorkers(maxSimultaneousWorkers);
+        maxFill = b;
+    }
+
 }

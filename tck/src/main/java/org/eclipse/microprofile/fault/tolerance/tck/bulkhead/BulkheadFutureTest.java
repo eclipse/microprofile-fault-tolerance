@@ -77,7 +77,14 @@ public class BulkheadFutureTest extends Arquillian {
         // We want a long running backend that we can cancel
         Checker fc = new FutureChecker(VERY_LONG_TIME);
 
-        Future<String> result = bhBeanMethodAsynchronousDefault.test(fc);
+        Future<String> result = null;
+        try {
+            result = bhBeanMethodAsynchronousDefault.test(fc);
+        }
+        catch (InterruptedException e1) {
+            Assert.fail("Unexpected interruption", e1);
+        }
+
         Assert.assertFalse(result.isDone(), "Future reporting Done when not");
         Assert.assertFalse(result.isCancelled(), "Future reporting Canceled when not");
 
@@ -108,7 +115,14 @@ public class BulkheadFutureTest extends Arquillian {
     public void testBulkheadMethodAsynchFutureDoneAfterGet() {
 
         Checker fc = new FutureChecker(SHORT_TIME);
-        Future<String> result = bhBeanMethodAsynchronousDefault.test(fc);
+        Future<String> result = null;
+
+        try {
+            result = bhBeanMethodAsynchronousDefault.test(fc);
+        }
+        catch (InterruptedException e1) {
+            Assert.fail("Unexpected interruption", e1);
+        }
 
         Assert.assertFalse(result.isDone(), "Future reporting Done when not");
         try {
@@ -131,7 +145,13 @@ public class BulkheadFutureTest extends Arquillian {
     public void testBulkheadMethodAsynchFutureDoneWithoutGet() {
 
         Checker fc = new FutureChecker(SHORT_TIME);
-        Future<String> result = bhBeanMethodAsynchronousDefault.test(fc);
+        Future<String> result = null;
+        try {
+            result = bhBeanMethodAsynchronousDefault.test(fc);
+        }
+        catch (InterruptedException e1) {
+            Assert.fail("Unexpected interruption", e1);
+        }
 
         Assert.assertFalse(result.isDone(), "Future reporting Done when not");
         try {
@@ -150,8 +170,16 @@ public class BulkheadFutureTest extends Arquillian {
      */
     @Test()
     public void testBulkheadClassAsynchFutureCancel() {
+
         Checker fc = new FutureChecker(VERY_LONG_TIME);
-        Future<String> result = bhBeanClassAsynchronousDefault.test(fc);
+        Future<String> result = null;
+        try {
+            result = bhBeanClassAsynchronousDefault.test(fc);
+        }
+        catch (InterruptedException e1) {
+            Assert.fail("Unexpected interruption", e1);
+        }
+
         Assert.assertFalse(result.isDone(), "Future reporting Done when not");
         Assert.assertFalse(result.isCancelled(), "Future reporting Canceled when not");
 
@@ -188,7 +216,14 @@ public class BulkheadFutureTest extends Arquillian {
     public void testBulkheadClassAsynchFutureDoneAfterGet() {
 
         Checker fc = new FutureChecker(SHORT_TIME);
-        Future<String> result = bhBeanClassAsynchronousDefault.test(fc);
+        Future<String> result = null;
+
+        try {
+            result = bhBeanClassAsynchronousDefault.test(fc);
+        }
+        catch (InterruptedException e1) {
+            Assert.fail("Unexpected interruption", e1);
+        }
 
         Assert.assertFalse(result.isDone(), "Future reporting Done when not");
         try {
@@ -212,8 +247,13 @@ public class BulkheadFutureTest extends Arquillian {
     public void testBulkheadClassAsynchFutureDoneWithoutGet() {
 
         Checker fc = new FutureChecker(SHORT_TIME);
-        Future<String> result = bhBeanMethodAsynchronousDefault.test(fc);
-
+        Future<String> result = null;
+        try {
+            result = bhBeanMethodAsynchronousDefault.test(fc);
+        }
+        catch (InterruptedException e1) {
+            Assert.fail("Unexpected interruption", e1);
+        }
         Assert.assertFalse(result.isDone(), "Future reporting Done when not");
         try {
             Thread.sleep(SHORT_TIME + SHORT_TIME);

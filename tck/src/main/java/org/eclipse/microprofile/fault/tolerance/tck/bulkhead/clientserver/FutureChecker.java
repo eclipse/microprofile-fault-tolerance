@@ -40,33 +40,48 @@ public class FutureChecker extends Checker {
 
     /*
      * This method is the one called from the business method of the injected
-     * object that has the annotations. We don't do anything here.
+     * object that has the annotations. In this class we just wait to be told
+     * what to do.
      * 
      * @see org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.
      * BulkheadTestAction#perform()
      */
     @Override
-    public Future<String> perform() {
+    public Future<String> perform() throws InterruptedException {
         try {
-            Thread.sleep(millis);
+            int left = millis;
+            int tick = 250;
+            while (left > 0 && !Thread.currentThread().isInterrupted()) {
+                if (left < tick) {
+                    Utils.log("tick(" + left + "),");
+                    Utils.sleep(left);
+                    left = 0;
+                }
+                else {
+                    Utils.log("tick(" + left + "),");
+                    Thread.sleep(tick);
+                    left = left - tick;
+                }
+            }
         }
         catch (InterruptedException e) {
-            Utils.log( e.toString());
+            Utils.log("FutureChecker interrupted " + e.toString());
+            if (millis > 60 * 1000) {
+                throw e;
+            }
         }
         return new TestFuture();
     }
 
     /**
-     * This test backend delegate does nothing except to complain
-     * with UnsupportedOperation exceptions if methods that are not
-     * expected to be called are called...The Future returned from
-     * a annotated method or class to a client is not expected to 
-     * pass on any method calls to the
-     * users underlying method result object apart from the get 
-     * and get with timeout methods. The semantics are that, for example,
-     * isDone()'s result are with respect to the operation of running the
-     * method, not as the result would be if it was delegated to
-     * the Future object that the method returns.
+     * This test backend delegate does nothing except to complain with
+     * UnsupportedOperation exceptions if methods that are not expected to be
+     * called are called...The Future returned from a annotated method or class
+     * to a client is not expected to pass on any method calls to the users
+     * underlying method result object apart from the get and get with timeout
+     * methods. The semantics are that, for example, isDone()'s result are with
+     * respect to the operation of running the method, not as the result would
+     * be if it was delegated to the Future object that the method returns.
      * 
      * @author Gordon Hutchison
      *
@@ -93,6 +108,7 @@ public class FutureChecker extends Checker {
 
         /*
          * We just return a string representing the methods we have seen called.
+         * 
          * @see java.util.concurrent.Future#get()
          */
         @Override

@@ -23,9 +23,11 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
+import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
+import org.junit.Assert;
 
 /**
- * @author Gordon Hutchison 
+ * @author Gordon Hutchison
  *
  */
 public class ParrallelBulkheadTest implements Callable<Future> {
@@ -61,9 +63,19 @@ public class ParrallelBulkheadTest implements Callable<Future> {
 
     @Override
     public Future call() throws Exception {
-        Utils.log("here");
         Utils.log("action " + action);
         Utils.log("target " + target);
-        return target.test(action);
+        Future result = null;
+
+        try {
+            result = target.test(action);
+        }
+        catch( BulkheadException b) {
+            Utils.log("Might expect a Bulkhead exception from some tests : " + b.toString() + b.getMessage());
+        }
+        catch( Throwable t ){
+            Assert.fail("Unexpected exception" +  t.getMessage() );
+        }
+        return result;
     }
 }
