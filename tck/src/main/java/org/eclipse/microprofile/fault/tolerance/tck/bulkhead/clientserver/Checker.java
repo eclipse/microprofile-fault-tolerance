@@ -56,6 +56,8 @@ public class Checker implements BackendTestDelegate {
     protected static int expectedMaxSimultaneousWorkers;
     protected static int expectedTasksScheduled;
     private static boolean maxFill = true;
+    private static int expectedTasksCompleted;
+    private static AtomicInteger tasksCompleted = new AtomicInteger(0);
 
     /*
      * This string is used for varying substr's barcharts in the log, for
@@ -131,6 +133,7 @@ public class Checker implements BackendTestDelegate {
         workers.set(0);
         maxSimultaneousWorkers.set(0);
         tasksScheduled.set(0);
+        tasksCompleted.set(0);
         maxFill = true;
     }
 
@@ -154,6 +157,9 @@ public class Checker implements BackendTestDelegate {
         Assert.assertFalse(expectedTasksScheduled != 0 && tasksScheduled.get() < expectedTasksScheduled,
                 " Some tasks are missing, expected " + expectedTasksScheduled + " got " + tasksScheduled.get() + ". ");
 
+        Assert.assertTrue(expectedTasksCompleted==0 || expectedTasksCompleted == tasksCompleted.get(),
+                " Expected work is not being completed " + tasksCompleted.get() + "/" + expectedTasksCompleted );
+  
         Utils.log("Checks passed: " + "tasks: " + tasksScheduled + "/" + expectedTasksScheduled + ", bulkhead: "
                 + maxSimultaneousWorkers + "/" + expectedMaxSimultaneousWorkers);
     }
@@ -177,6 +183,10 @@ public class Checker implements BackendTestDelegate {
     public static void setExpectedMaxWorkers(int maxSimultaneousWorkers, boolean b) {
         setExpectedMaxWorkers(maxSimultaneousWorkers);
         maxFill = b;
+    }
+
+    public static void setExpectedTasksCompleted(int i) {
+       Checker.expectedTasksCompleted = i;
     }
 
 }

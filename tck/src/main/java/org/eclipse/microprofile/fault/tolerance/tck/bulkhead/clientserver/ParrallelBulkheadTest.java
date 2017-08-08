@@ -24,7 +24,7 @@ import java.util.concurrent.Future;
 
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
 import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
-import org.junit.Assert;
+import org.testng.Assert;
 
 /**
  * @author Gordon Hutchison
