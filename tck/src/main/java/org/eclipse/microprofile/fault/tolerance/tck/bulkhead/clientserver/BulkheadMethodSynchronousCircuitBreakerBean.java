@@ -19,27 +19,27 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 
-import java.time.temporal.ChronoUnit;
 import java.util.concurrent.Future;
 
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
-import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
-import org.eclipse.microprofile.faulttolerance.Timeout;
+import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 
 /**
- * A simple class level Asynchronous Timeout @Bulkhead
+ * A simple method level Synchronous CircuitBreaker Bulkhead
  *
  * @author Gordon Hutchison
  */
-@Bulkhead( value=5, waitingTaskQueue=5)
-@Timeout(unit=ChronoUnit.SECONDS, value=1)
-@Asynchronous
-public class BulkheadClassAsynchronousTimeoutBean implements BulkheadTestBackend {
+
+public class BulkheadMethodSynchronousCircuitBreakerBean implements BulkheadTestBackend {
 
     @Override
+    @Bulkhead(value = 5, waitingTaskQueue = 5)
+    @CircuitBreaker(requestVolumeThreshold = 4, // evaluation window size
+            failureRatio = 0.39, // If 39% of the evaluation window fails we
+                                 // blow/open
+            successThreshold = 3, // Move out of half-open on three good calls
+            delay = 1000)
     public Future test(BackendTestDelegate action) throws InterruptedException {
-        Utils.log("in business method of bean " + this.getClass().getName());
         return action.perform();
     }
 

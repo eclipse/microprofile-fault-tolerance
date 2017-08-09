@@ -27,25 +27,11 @@ import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
 import org.testng.Assert;
 
 /**
- * A simple sleeping test backend worker. Having this backend as a delegate
- * means that we can perform more than one kind of test using a common
- * 
- * @Injected object that delegates to one of these that is passed in as a
- *           parameter to the business method.
- * 
- *           There are a number of tests that this backend can perform:
- *           <ul>
- *           <li>expected number of instances created
- *           <li>expected workers started via perform method
- *           <li>max simultaneous workers not exceeded
- *           </ul>
- * 
  * @author Gordon Hutchison
  */
-public class Checker implements BackendTestDelegate {
+public class CBBulkheadBackend implements BackendTestDelegate {
 
     protected int millis = 1;
-    private int fails = 0;
     private int instanceId;
     private boolean completed = false;
     private static boolean[] failSequence = null;
@@ -61,38 +47,15 @@ public class Checker implements BackendTestDelegate {
     private static int expectedTasksCompleted;
     private static AtomicInteger tasksCompleted = new AtomicInteger(0);
 
-    /*
-     * This string is used for varying substr's barcharts in the log, for
-     * example for the number of concurrent workers.
-     */
-    static final String BAR = "**************************************************************************************+++";
-
-    /**
-     * Constructor
-     * 
-     * @param i
-     *            how long to sleep for in milliseconds
-     */
-    public Checker(int sleepMillis) {
-        millis = sleepMillis;
-        instanceId = instances.incrementAndGet();
-    }
-
-    /**
-     * @param sleepMillis
-     * @param fails
-     */
-    public Checker(int sleepMillis, int fails) {
-        this.fails = fails;
-        this.millis = sleepMillis;
-        instanceId = instances.incrementAndGet();
+    public static int getTasksCompleted() {
+        return tasksCompleted.get();
     }
 
     /**
      * @param i
      * @param fails
      */
-    public Checker(int sleepMillis, boolean[] fails) {
+    public CBBulkheadBackend(int sleepMillis, boolean[] fails) {
         failSequence = fails;
         this.millis = sleepMillis;
         instanceId = instances.incrementAndGet();
@@ -116,29 +79,19 @@ public class Checker implements BackendTestDelegate {
                 max = maxSimultaneousWorkers.get();
             }
 
-            if (fails > 0) {
-                Thread.sleep(millis / 2);
-                fails--;
-                RuntimeException e = new RuntimeException("fake error for Retry Testing");
-                Utils.log("Retry " + e.toString());
+            int index = taskId % failSequence.length;
+            boolean fail = failSequence[index];
+            if (fail) {
+                RuntimeException e = new RuntimeException(
+                        "Task: " + taskId + " fake error for CircuitBreaker testing");
+                Utils.log("                       CircuitBreaker " + e.toString());
                 throw e;
             }
-
-            if (failSequence != null) {
-                int index = instanceId % failSequence.length;
-                boolean fail = failSequence[index];
-                if (fail) {
-                    RuntimeException e = new RuntimeException("Task: " + instanceId + " fake error for CircuitBreaker testing");
-                    Utils.log("CircuitBreaker " + e.toString());
-                    throw e;
-                }
+            else {
+                Utils.log("                                              CircuitBreaker Task " + taskId + " planing to succeed");
             }
 
-            Utils.log("Task " + taskId + " sleeping for " + millis + " milliseconds. " + now
-                    + " workers inside Bulkhead from " + instances + " instances " + BAR.substring(0, now));
             Thread.sleep(millis);
-
-            Utils.log("Task " + taskId + " woke.");
         }
         catch (InterruptedException e) {
             Utils.log(e.toString());
@@ -147,14 +100,16 @@ public class Checker implements BackendTestDelegate {
             workers.decrementAndGet();
         }
         CompletableFuture<String> result = new CompletableFuture<>();
-        completed  = true;
+        completed = true;
         result.complete(this.toString());
+        tasksCompleted.incrementAndGet();
         return result;
     }
 
-    public String toString(){
+    public String toString() {
         return "Instance " + instanceId + " completed: " + this.completed;
     }
+
     /**
      * Prepare the state for the next test
      */
@@ -206,11 +161,11 @@ public class Checker implements BackendTestDelegate {
     }
 
     public static void setExpectedInstances(int expectedInstances) {
-        Checker.expectedInstances = expectedInstances;
+        CBBulkheadBackend.expectedInstances = expectedInstances;
     }
 
     public static void setExpectedMaxWorkers(int expectedMaxWorkers) {
-        Checker.expectedMaxSimultaneousWorkers = expectedMaxWorkers;
+        CBBulkheadBackend.expectedMaxSimultaneousWorkers = expectedMaxWorkers;
     }
 
     public static void setExpectedMaxWorkers(int maxSimultaneousWorkers, boolean b) {
@@ -219,11 +174,11 @@ public class Checker implements BackendTestDelegate {
     }
 
     public static void setExpectedTasksCompleted(int i) {
-        Checker.expectedTasksCompleted = i;
+        CBBulkheadBackend.expectedTasksCompleted = i;
     }
 
     public static void setFailSequence(boolean[] bs) {
-        Checker.failSequence = bs;
+        CBBulkheadBackend.failSequence = bs;
     }
 
 }
