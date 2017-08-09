@@ -27,6 +27,7 @@ import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
 import org.testng.Assert;
 
 /**
+ * A backend that is tailored to circuit breaker and bulkhead testing
  * @author Gordon Hutchison
  */
 public class CBBulkheadBackend implements BackendTestDelegate {
@@ -52,8 +53,8 @@ public class CBBulkheadBackend implements BackendTestDelegate {
     }
 
     /**
-     * @param i
-     * @param fails
+     * @param sleepMillis
+     * @param fails an array which is cycled round and used to stimulate failures
      */
     public CBBulkheadBackend(int sleepMillis, boolean[] fails) {
         failSequence = fails;
