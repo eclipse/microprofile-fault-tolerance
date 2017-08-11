@@ -34,8 +34,8 @@ public class BulkheadMethodSemaphore10Bean implements BulkheadTestBackend {
 
     @Override
     @Bulkhead(10)
-    public Future test(BackendTestDelegate action) {
-        Utils.log("in bean " + this.getClass().getName() );
+    public Future test(BackendTestDelegate action) throws InterruptedException {
+        Utils.log("in business method of bean " + this.getClass().getName() );
         return action.perform();
     }
 

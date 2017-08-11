@@ -19,23 +19,33 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 
+import java.time.temporal.ChronoUnit;
 import java.util.concurrent.Future;
+
+import javax.enterprise.context.ApplicationScoped;
 
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
+import org.eclipse.microprofile.faulttolerance.Retry;
+import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
 
 /**
- * A simple class level Asychronous @Bulkhead(10)
+ * A simple method level Asynchronous @Bulkhead bean that has a retry option.
  *
  * @author Gordon Hutchison
  */
-@Bulkhead(10) @Asynchronous
-public class BulkheadClassAsynchronous10Bean implements BulkheadTestBackend {
+
+public class BulkheadRapidRetry55MethodSynchBean implements BulkheadTestBackend {
 
     @Override
+    @ApplicationScoped
+    @Bulkhead(waitingTaskQueue = 5, value = 5)
+    @Asynchronous
+    @Retry(retryOn =
+    { BulkheadException.class }, delay = 1, delayUnit = ChronoUnit.MILLIS, maxRetries = 10)
     public Future test(BackendTestDelegate action) throws InterruptedException {
-        Utils.log("in business method of bean " + this.getClass().getName() );
+        Utils.log("in business method of bean " + this.getClass().getName());
         return action.perform();
     }
 

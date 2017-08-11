@@ -19,24 +19,28 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
-import org.eclipse.microprofile.faulttolerance.Bulkhead;
 
 /**
- * A simple class level Asychronous @Bulkhead(10)
- *
+ * This class exists as a source of Asynchronicity for other tests.
+ * (for example when we want to get more than one thread into a bulkhead)
+ * We cannot use a Java EE managed executor (or anything that prereqs
+ * a Java EE environment) and for some tests using a vanilla executer service creates
+ * problems as threads cannot be branched from 'successfully'. 
+ * If we use a @Asynchronous to get a new thread then the framework that is
+ * being tested should implement this in a way that will work in either
+ * Java EE or Java SE whichever is appropriate for their environment.
+ * 
  * @author Gordon Hutchison
+ *
  */
-@Bulkhead(10) @Asynchronous
-public class BulkheadClassAsynchronous10Bean implements BulkheadTestBackend {
+@Asynchronous
+public class AsynchCallableCaller {
 
-    @Override
-    public Future test(BackendTestDelegate action) throws InterruptedException {
-        Utils.log("in business method of bean " + this.getClass().getName() );
-        return action.perform();
+    public Future call(Callable<Future> to) throws Exception {
+        return to.call();
     }
-
-};
+}
