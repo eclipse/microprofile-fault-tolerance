@@ -21,21 +21,26 @@ package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 
 import java.util.concurrent.Future;
 
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
+import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 
 /**
- * A simple class level Asychronous @Bulkhead(10)
+ * 
  *
  * @author Gordon Hutchison
  */
-@Bulkhead(10) @Asynchronous
-public class BulkheadClassAsynchronous10Bean implements BulkheadTestBackend {
+@Bulkhead( value=5, waitingTaskQueue=5)
+@Asynchronous
+@CircuitBreaker(
+        requestVolumeThreshold = 4,  // evaluation window size
+        failureRatio=0.39,           // If 39% of the evaluation window fails we blow/open
+        successThreshold = 3,        // Move out of half-open on three good calls
+        delay = 1000)
+public class BulkheadClassAsynchronousCircuitBreakerBean implements BulkheadTestBackend {
 
     @Override
     public Future test(BackendTestDelegate action) throws InterruptedException {
-        Utils.log("in business method of bean " + this.getClass().getName() );
         return action.perform();
     }
 

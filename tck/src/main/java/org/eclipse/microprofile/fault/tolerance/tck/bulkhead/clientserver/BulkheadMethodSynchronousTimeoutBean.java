@@ -19,21 +19,24 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 
+import java.time.temporal.ChronoUnit;
 import java.util.concurrent.Future;
 
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
-import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
+import org.eclipse.microprofile.faulttolerance.Timeout;
 
 /**
- * A simple class level Asychronous @Bulkhead(10)
+ * A simple method level Synchronous Timeout Bulkhead 
  *
  * @author Gordon Hutchison
  */
-@Bulkhead(10) @Asynchronous
-public class BulkheadClassAsynchronous10Bean implements BulkheadTestBackend {
+
+public class BulkheadMethodSynchronousTimeoutBean implements BulkheadTestBackend {
 
     @Override
+    @Bulkhead( value=5, waitingTaskQueue=5)
+    @Timeout(unit=ChronoUnit.SECONDS, value=1)
     public Future test(BackendTestDelegate action) throws InterruptedException {
         Utils.log("in business method of bean " + this.getClass().getName() );
         return action.perform();
