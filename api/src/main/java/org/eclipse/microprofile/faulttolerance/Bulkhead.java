@@ -27,6 +27,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import javax.enterprise.util.Nonbinding;
 import javax.interceptor.InterceptorBinding;
 
 /**
@@ -56,12 +57,13 @@ public @interface Bulkhead {
      * Specify the maximum number of concurrent calls to an instance. The value must be greater than 0.
      * @return the limit of the concurrent calls
      */
-    
+    @Nonbinding
     int value() default 10;
     /**
      * Specify the waiting task queue. This setting only takes effect on asynchronous invocation, achieved by using {@code Asynchronous}.
      * The value must be greater than 0.
      * @return the waiting queue size
      */
+    @Nonbinding
     int waitingTaskQueue() default 10;
 }

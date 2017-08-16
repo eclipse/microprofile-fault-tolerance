@@ -26,6 +26,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.time.temporal.ChronoUnit;
 
+import javax.enterprise.util.Nonbinding;
 import javax.interceptor.InterceptorBinding;
 
 /**
@@ -44,19 +45,21 @@ public @interface CircuitBreaker {
      * Define the failure criteria
      * @return the failure exception
      */
-    Class<? extends Throwable>[] failOn() default Throwable.class;
+    @Nonbinding
+    Class<? extends Throwable>[] failOn() default {Throwable.class};
 
     /**
      *
      * @return The delay time after the circuit is open
      */
+    @Nonbinding
     long delay() default 5000;
 
     /**
      *
      * @return The delay unit after the circuit is open
      */
-
+    @Nonbinding
     ChronoUnit delayUnit() default ChronoUnit.MILLIS;
 
 
@@ -66,6 +69,7 @@ public @interface CircuitBreaker {
      * @return the number of the consecutive requests in a rolling window
      *
      */
+    @Nonbinding
     int requestVolumeThreshold() default 20;
     /**
      * The failure threshold to trigger the circuit to open.
@@ -74,6 +78,7 @@ public @interface CircuitBreaker {
      * the circuit to open.
      * @return The failure threshold to open the circuit
      */
+    @Nonbinding
     double failureRatio() default .50;
 
     /**
@@ -81,6 +86,7 @@ public @interface CircuitBreaker {
      * is reached, the circuit is back to close again.
      * @return The success threshold to fully close the circuit
      */
+    @Nonbinding
     int successThreshold() default 1;
 
 }

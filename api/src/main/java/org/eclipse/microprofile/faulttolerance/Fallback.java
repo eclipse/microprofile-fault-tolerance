@@ -25,6 +25,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import javax.enterprise.util.Nonbinding;
 import javax.interceptor.InterceptorBinding;
 
 /**
@@ -62,6 +63,7 @@ public @interface Fallback {
      * 
      * @return the fallback class
      */
+    @Nonbinding
     Class<? extends FallbackHandler<?>> value() default DEFAULT.class;
     
     /**
@@ -73,5 +75,6 @@ public @interface Fallback {
     * 
     * @return the local method to fallback to
     */
+    @Nonbinding
     String fallbackMethod() default "";
 }
