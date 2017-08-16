@@ -26,6 +26,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.time.temporal.ChronoUnit;
 
+import javax.enterprise.util.Nonbinding;
 import javax.interceptor.InterceptorBinding;
 
 /**
@@ -45,30 +46,34 @@ public @interface Retry {
      * @return The max number of retries. -1 means retry forever. If less than -1, an IllegalArgumentException will be thrown.
      *
      */
+    @Nonbinding
     int maxRetries() default 3;
 
     /**
      * The delay between retries. Defaults to 0.
      * @return the delay time
      */
+    @Nonbinding
     long delay() default 0;
 
     /**
      *
      * @return the delay unit
      */
-
+    @Nonbinding
     ChronoUnit delayUnit() default ChronoUnit.MILLIS;
 
     /**
      * @return the maximum duration to perform retries for.
      */
+    @Nonbinding
     long maxDuration() default 2000;
 
     /**
      *
      * @return the duration unit
      */
+    @Nonbinding
     ChronoUnit durationUnit() default ChronoUnit.MILLIS;
 
     /**
@@ -76,12 +81,14 @@ public @interface Retry {
      * @return the jitter that randomly vary retry delays by. e.g. a jitter of 200 milliseconds
      * will randomly add between -200 and 200 milliseconds to each retry delay.
      */
+    @Nonbinding
     long jitter() default 200;
 
     /**
      *
      * @return the jitter delay unit.
      */
+    @Nonbinding
     ChronoUnit jitterDelayUnit() default ChronoUnit.MILLIS;
 
 
@@ -89,12 +96,14 @@ public @interface Retry {
      *
      * @return Specify the failure to retry on
      */
+    @Nonbinding
     Class<? extends Throwable>[] retryOn() default { Exception.class };
 
     /**
      *
      * @return Specify the failure to abort on
      */
+    @Nonbinding
     Class<? extends Throwable>[] abortOn() default {};
 
 }

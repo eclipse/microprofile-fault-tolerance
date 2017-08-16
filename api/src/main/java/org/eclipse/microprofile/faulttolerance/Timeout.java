@@ -26,6 +26,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.time.temporal.ChronoUnit;
 
+import javax.enterprise.util.Nonbinding;
 import javax.interceptor.InterceptorBinding;
 
 /**
@@ -44,12 +45,14 @@ public @interface Timeout {
      *
      * @return the timeout value
      */
+    @Nonbinding
     long value() default 1000;
 
     /**
      *
      * @return the timeout unit
      */
+    @Nonbinding
     ChronoUnit unit() default ChronoUnit.MILLIS;
 
 }
