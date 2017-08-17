@@ -23,27 +23,29 @@
 
 This specification defines the programming model to build a resilient microservice. Microservices developed using this feature are guaranteed to be resilient despite of running environments. In some service mash platform, e.g. Istio, has its own Fault Tolerance policy. The operation team might want to use the platform Fault Tolerance. In order to fulfil the requirement, MicroProfile Fault Tolerance provides a capability to have its resilient functionalities except `fallback` disabled. The reason `fallback` is special as the `fallback` business logic can only be defined by microservices not by any other platforms.
 
-Set the environment variable of `MP_Fault_Tolerance_NonFallback_Enabled` with the value of `false` means the Fault Tolerance is disabled, except `Fallback`. If the environment varaible is absent or with the value of `true`, it means that MicroProfile Fault Tolerance is enabled if any annotations are specified.
+Set the environment variable of `MP_Fault_Tolerance_NonFallback_Enabled` with the value of `false` means the Fault Tolerance is disabled, except `Fallback`. If the environment variable is absent or with the value of `true`, it means that MicroProfile Fault Tolerance is enabled if any annotations are specified.
 
 === Config Fault Tolerance parameters
 
-This specification defines the annotations: `Asynchronous`, `Bulkhead`, `CircuitBreaker`, `Fallback`, `Retry` and `Timeout` . Each annotation except `Asynchronous` has parameters. All of the parameters are configurable. The value of each parameter can be overwritten individually or globally.
+This specification defines the annotations: `Asynchronous`, `Bulkhead`, `CircuitBreaker`, `Fallback`, `Retry` and `Timeout` . Each annotation except `Asynchronous` has parameters. All of the parameters are configurable. The value of each parameter can be overridden individually or globally.
 
-* Overwrite individual parameters
-The annotation parameters can be overwritten via system properties in the naming convention of <classname>/<methodname>/<Annotation>/<parameter>.
+* Override individual parameters
+The annotation parameters can be overwritten via system properties in the naming convention of `<classname>/<methodname>/<annotation>/<parameter>`.
 
-In the following code snippet, in order to overwrite the maxRetries for serviceB invocation to 100, set the system property `com.acme.test.MyClient/serviceB/Retry/maxRetries=100`
-Similarly to overwrite the maxDuration for ServiceA, set the system property
+In the following code snippet, in order to override the `maxRetries` for serviceB invocation to 100, set the system property `com.acme.test.MyClient/serviceB/Retry/maxRetries=100`
+Similarly to override the `maxDuration` for ServiceA, set the system property
 `com.acme.test.MyClient/serviceA/Retry/maxDuration=3000`
 
-* Overwrite parameters globally
+* Override parameters globally
 
-If the parameters for a particular annotation need to be configured with the same value for a particular class, use the system property <classname>/<Annotation>/<parameter> for configuration. For an instance, use the following system property to overwrite all `maxRetries` for `Retry` specified on the class `MyClient` to 100.
+If the parameters for a particular annotation need to be configured with the same value for a particular class, use the system property `<classname>/<annotation>/<parameter>` for configuration. For an instance, use the following system property to override all `maxRetries` for `Retry` specified on the class `MyClient` to 100.
 `com.acme.test.MyClient/Retry/maxRetries=100` 
 
-Sometimes, the parameters need to be configured with the same value for the whole microservice. For an instance, all `Timeout` needs to be set to `100ms`. It can be cumbersome to overwrite each occurrence of `Timeout`. In this circumstance, the system property `Annotation/parameter` overwrites the corresponding parameter value for the specified annotation. For an instance, in order to overwrite the `maxRetries` for the `Retry` to be `30`, specify the system property `Retry/maxRetries=30`.
+Sometimes, the parameters need to be configured with the same value for the whole microservice. For an instance, all `Timeout` needs to be set to `100ms`. It can be cumbersome to override each occurrence of `Timeout`. In this circumstance, the system property `<annotation>/<parameter>` overrides the corresponding parameter value for the specified annotation. For an instance, in order to override the `maxRetries` for the `Retry` to be `30`, specify the system property `Retry/maxRetries=30`.
 
-When multiple system properties are present, the property `<classname>/<methodname>/<Annotation>/<parameter>` takes precedence over `<classname>/<methodname>/<Annotation>/<parameter>`, which is followed by `<Annotation>/<parameter>`.
+When multiple system properties are present, the property `<classname>/<methodname>/<annotation>/<parameter>` takes precedence over `<classname>/<annotation>/<parameter>`, which is followed by `<annotation>/<parameter>`.
+
+The override just changes the value of the corresponding parameter specified in the microservice and nothing more. If no annotation matches the specified parameter, the property will be ignored. For an instance, if the annotation `Retry` is specified on the class level for the class `com.acme.ClassA`, which has method methodB, the system property `com.acme.ClassA/methodB/Retry/maxRetries` will be ignored. In order to override the property, the system property `com.acme.ClassA/Retry/maxRetries` or `Retry/maxRetries` needs to be specified.
 
 [source, java]
 ----
