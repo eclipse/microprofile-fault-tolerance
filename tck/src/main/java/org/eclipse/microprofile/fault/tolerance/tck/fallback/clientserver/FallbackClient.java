@@ -90,7 +90,7 @@ public class FallbackClient {
     }
 
     @Retry(maxRetries = 1)
-    @Fallback(value = StringFallbackHandler.class, fallbackMethod = "fallbackForServiceD")
+    @Fallback(fallbackMethod = "fallbackForServiceD")
     public String serviceD() {
         counterForInvokingServiceD++;
         return nameService();
@@ -101,7 +101,7 @@ public class FallbackClient {
     }
 
     @Retry(maxRetries = 1)
-    @Fallback(value = StringFallbackHandler.class, fallbackMethod = "fallbackForServiceE")
+    @Fallback(fallbackMethod = "fallbackForServiceE")
     public String serviceE(String name, Integer type) {
         counterForInvokingServiceE++;
         return nameService();
