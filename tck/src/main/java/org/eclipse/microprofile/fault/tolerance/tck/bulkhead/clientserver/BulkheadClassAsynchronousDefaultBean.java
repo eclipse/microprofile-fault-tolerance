@@ -35,8 +35,8 @@ import org.eclipse.microprofile.faulttolerance.Bulkhead;
 public class BulkheadClassAsynchronousDefaultBean implements BulkheadTestBackend {
 
     @Override
-    public Future test(BackendTestDelegate action) {
-        Utils.log("in bean " + this.getClass().getName());
+    public Future test(BackendTestDelegate action) throws InterruptedException {
+        Utils.log("in business method of bean " + this.getClass().getName());
         return action.perform();
     }
 

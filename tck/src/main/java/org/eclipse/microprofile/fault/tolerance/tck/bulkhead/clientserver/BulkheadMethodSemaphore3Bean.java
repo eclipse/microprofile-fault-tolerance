@@ -36,8 +36,8 @@ public class BulkheadMethodSemaphore3Bean implements BulkheadTestBackend {
 
     @Override
     @Bulkhead(3)
-    public Future test(BackendTestDelegate action) {
-        Utils.log("in bean " + this.getClass().getName() );
+    public Future test(BackendTestDelegate action) throws InterruptedException   {
+        Utils.log("in business method of bean " + this.getClass().getName() );
         return action.perform();
     }
 

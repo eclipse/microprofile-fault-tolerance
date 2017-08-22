@@ -25,6 +25,7 @@ import java.util.concurrent.Future;
 
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadTestBackend;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Checker;
+import org.testng.Assert;
 
 public class Utils {
 
@@ -58,7 +59,7 @@ public class Utils {
                 if (waits++ > 100) {
                     break;
                 }
-    
+
             }
         }
         catch (InterruptedException e) {
@@ -85,7 +86,7 @@ public class Utils {
                     log("Result for " + i + (thisDone ? " (Done)" : " (NotDone)") + " is "
                             + (((Future) results[i]).get() instanceof Future
                                     ? ((Future) ((Future) results[i]).get()).get() : ((Future) results[i]).get()));
-    
+
                 }
                 Thread.sleep(1000);
             }
@@ -94,19 +95,20 @@ public class Utils {
             log(e.toString());
         }
     }
-    
+
     /**
      * Run a number of Callable's (usually Asynch's) in a loop on one thread
      * 
-     * @param number
+     * @param iterations
      * @param test
      * @param maxSimultaneousWorkers
      * @param expectedTasksScheduled
      */
-    private void loop(int number, BulkheadTestBackend test, int maxSimultaneousWorkers, int expectedTasksScheduled) {
+    public static void loop(int iterations, BulkheadTestBackend test, int maxSimultaneousWorkers,
+            int expectedTasksScheduled) {
 
         Checker.setExpectedTasksScheduled(expectedTasksScheduled);
-        loop(number, test, maxSimultaneousWorkers);
+        loop(iterations, test, maxSimultaneousWorkers);
     }
 
     /**
@@ -114,23 +116,28 @@ public class Utils {
      * Here we do not check that amount that were successfully through the
      * Bulkhead
      * 
-     * @param number
+     * @param iterations
      * @param test
      * @param maxSimultaneousWorkers
      */
-    private void loop(int number, BulkheadTestBackend test, int maxSimultaneousWorkers) {
+    public static void loop(int iterations, BulkheadTestBackend test, int maxSimultaneousWorkers) {
 
         Checker.setExpectedMaxWorkers(maxSimultaneousWorkers);
-        Checker.setExpectedInstances(number);
-        Checker.setExpectedTasksScheduled(number);
+        Checker.setExpectedInstances(iterations);
+        Checker.setExpectedTasksScheduled(iterations);
 
-        Future[] results = new Future[number];
-        for (int i = 0; i < number; i++) {
-            Utils.log("Starting test " + i);
-            results[i] = test.test(new Checker(5 * 1000));
+        Future[] results = new Future[iterations];
+        try {
+            for (int i = 0; i < iterations; i++) {
+                Utils.log("Starting test " + i);
+                results[i] = test.test(new Checker(1 * 1000));
+            }
+        }
+        catch (InterruptedException e1) {
+            Assert.fail("Unexpected interruption", e1);
         }
 
-        Utils.handleResults(number, results);
+        Utils.handleResults(iterations, results);
     }
 
     /**
@@ -153,4 +160,15 @@ public class Utils {
         return DateTimeFormatter.ofPattern("HH:mm:ss:SS").format(LocalDateTime.now());
     }
 
+    public static void sleep(int millis) {
+        try {
+            Thread.sleep(millis);
+        }
+        catch (InterruptedException e) {
+            log("woken" + e.getMessage());
+        }
+    }
+
+    private Utils() {
+    };
 }
