@@ -42,7 +42,7 @@ import javax.interceptor.InterceptorBinding;
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.METHOD, ElementType.TYPE })
+@Target({ ElementType.METHOD })
 @Inherited
 @InterceptorBinding
 public @interface Fallback {
