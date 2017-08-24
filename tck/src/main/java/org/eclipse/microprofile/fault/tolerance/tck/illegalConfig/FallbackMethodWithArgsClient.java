@@ -38,7 +38,7 @@ public class FallbackMethodWithArgsClient {
      * Retry 5 times and then fallback
      */
     @Retry(maxRetries = 4)
-    @Fallback(value = IncompatibleFallbackMethodHandler.class, fallbackMethod = "fallbackForServiceB")
+    @Fallback(fallbackMethod = "fallbackForServiceB")
     public Integer serviceB(String name, Integer type) {
         return 42;
     }

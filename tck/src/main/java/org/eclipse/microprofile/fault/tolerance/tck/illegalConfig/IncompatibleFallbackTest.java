@@ -19,7 +19,9 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.illegalConfig;
 
-import org.jboss.arquillian.container.spi.client.container.DeploymentException;
+import javax.enterprise.inject.spi.DefinitionException;
+import javax.inject.Inject;
+
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.ShouldThrowException;
 import org.jboss.arquillian.testng.Arquillian;
@@ -29,17 +31,13 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
-import javax.inject.Inject;
-
-import static org.testng.Assert.fail;
-
 public class IncompatibleFallbackTest extends Arquillian {
     private
     @Inject
     FallbackClient fallbackClient;
 
     @Deployment
-    @ShouldThrowException(DeploymentException.class)
+    @ShouldThrowException(DefinitionException.class)
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
             .create(JavaArchive.class, "ftInvalid.jar")
@@ -48,7 +46,7 @@ public class IncompatibleFallbackTest extends Arquillian {
             .as(JavaArchive.class);
 
         return ShrinkWrap
-            .create(WebArchive.class, "ftInvalid.war")
+            .create(WebArchive.class, "ftInvalidFallbackHandler.war")
             .addAsLibrary(testJar);
     }
 
@@ -59,7 +57,6 @@ public class IncompatibleFallbackTest extends Arquillian {
      * Integer, the IncompatibleFallbackHandler returns a String.
      */
     @Test
-    public void shouldNotBeCalled() {
-        fail("This test should not have been called, deployment exception expected");
+    public void test() {
     }
 }

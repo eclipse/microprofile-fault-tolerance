@@ -26,8 +26,7 @@ import javax.inject.Inject;
 import org.eclipse.microprofile.faulttolerance.ExecutionContext;
 import org.eclipse.microprofile.faulttolerance.FallbackHandler;
 
-//import org.eclipse.microprofile.faulttolerance.ExecutionContext;
-//import org.eclipse.microprofile.faulttolerance.FallbackHandler;
+
 /**
  * A fallback handler to recover and return a string object.
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>

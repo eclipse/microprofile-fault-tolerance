@@ -31,31 +31,30 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
-public class IncompatibleFallbackMethodWithArgsTest extends Arquillian {
+public class IncompatibleFallbackPolicies extends Arquillian {
     private
     @Inject
-    FallbackMethodWithArgsClient fallbackMethodClient;
+    FallbackClient fallbackClient;
 
     @Deployment
     @ShouldThrowException(DefinitionException.class)
-    public static WebArchive deployAnotherApp() {
+    public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
-                .create(JavaArchive.class, "ftInvalid.jar")
-                .addClasses(FallbackMethodWithArgsClient.class)
-                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
-                .as(JavaArchive.class);
+            .create(JavaArchive.class, "ftInvalid.jar")
+            .addClasses(FallbackClientWithBothFallbacks.class, IncompatibleFallbackHandler.class)
+            .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
+            .as(JavaArchive.class);
 
-        WebArchive war = ShrinkWrap
-                .create(WebArchive.class, "ftInvalidFallbackMethodWithArgs.war")
-                .addAsLibrary(testJar);
-        return war;
+        return ShrinkWrap
+            .create(WebArchive.class, "ftInvalidFallbackPolicy.war")
+            .addAsLibrary(testJar);
     }
 
     /**
-     * Test that the deployment of a FallbackHandler with an invalid Fallback Method leads to a DeploymentException.
+     * Test that the deployment of specifying both handler and fallback method causing deployment failure.
      * 
-     * A Service is annotated with the IncompatibleFallbackMethodHandler. While the Service returns an
-     * Integer, the IncompatibleFallbackMethodHandler's Fallback Method returns a String.
+     * A service in FallbackClientWithBothFallbacks has specified both fallback handler and fallback method. 
+     * 
      */
     @Test
     public void test() {

@@ -19,7 +19,9 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.illegalConfig;
 
-import org.jboss.arquillian.container.spi.client.container.DeploymentException;
+import javax.enterprise.inject.spi.DefinitionException;
+import javax.inject.Inject;
+
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.ShouldThrowException;
 import org.jboss.arquillian.testng.Arquillian;
@@ -29,26 +31,22 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
-import javax.inject.Inject;
-
-import static org.testng.Assert.fail;
-
 public class IncompatibleFallbackMethodTest extends Arquillian {
     private
     @Inject
     FallbackMethodClient fallbackMethodClient;
 
     @Deployment
-    @ShouldThrowException(DeploymentException.class)
+    @ShouldThrowException(DefinitionException.class)
     public static WebArchive deployAnotherApp() {
         JavaArchive testJar = ShrinkWrap
                 .create(JavaArchive.class, "ftInvalid.jar")
-                .addClasses(FallbackMethodClient.class, IncompatibleFallbackMethodHandler.class)
+                .addClasses(FallbackMethodClient.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                 .as(JavaArchive.class);
 
         WebArchive war = ShrinkWrap
-                .create(WebArchive.class, "ftInvalid.war")
+                .create(WebArchive.class, "ftInvalidFallbackMethod.war")
                 .addAsLibrary(testJar);
         return war;
     }
@@ -60,7 +58,7 @@ public class IncompatibleFallbackMethodTest extends Arquillian {
      * Integer, the IncompatibleFallbackMethodHandler's Fallback Method returns a String.
      */
     @Test
-    public void shouldNotBeCalled() {
-        fail("This test should not have been called, deployment exception expected");
+    public void test() {
+       
     }
 }

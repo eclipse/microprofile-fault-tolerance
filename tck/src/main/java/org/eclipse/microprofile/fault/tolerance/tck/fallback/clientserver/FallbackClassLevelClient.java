@@ -31,7 +31,6 @@ import org.eclipse.microprofile.faulttolerance.Retry;
  */
 @RequestScoped
 @Retry(maxRetries = 1)
-@Fallback(StringFallbackHandler.class)
 public class FallbackClassLevelClient {
     
     private int counterForInvokingServiceA = 0;
@@ -44,7 +43,7 @@ public class FallbackClassLevelClient {
     public int getCounterForInvokingServiceB() {
         return counterForInvokingServiceB;
     }
-    
+    @Fallback(StringFallbackHandler.class)
     public String serviceA() {
         counterForInvokingServiceA++;
        return nameService();
