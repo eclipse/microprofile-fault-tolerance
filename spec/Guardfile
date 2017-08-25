@@ -1,0 +1,15 @@
+require 'erb'
+require 'asciidoctor'
+require 'asciidoctor/cli'
+
+invoker = Asciidoctor::Cli::Invoker.new(%W(src/main/asciidoc/microprofile-fault-tolerance-spec.asciidoc -o ./target/generated-docs/microprofile-fault-tolerance-spec.html))
+
+invoker.invoke!
+
+guard :shell do
+  watch (/^.+\.(asciidoc|puml)$/) { |m| invoker.invoke! }
+end
+
+guard 'livereload' do
+  watch(%r{.+\.(css|js|html?|php|inc|theme)$})
+end
