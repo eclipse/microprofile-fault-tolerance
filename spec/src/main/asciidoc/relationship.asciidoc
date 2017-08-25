@@ -20,18 +20,27 @@
 
 [[relationship]]
 == Relationship to other specifications
-This specification defines a set of annotations to be used by classes or methods. The annotations are interceptor bindings. Therefore, this specification depends on the JavaEE specification of Java Interceptors and Contexts and Dependency Injection.
+
+This specification defines a set of annotations to be used by classes or methods.
+The annotations are interceptor bindings.
+Therefore, this specification depends on the Java Interceptors and Contexts and Dependency Injection specifications define in Java EE platform.
 
 
 === Relationship to Java Interceptors
 
-The Java Interceptors specification defines the basic programming model and semantics for interceptors. This specification ustilises the typesafe interceptor bindings. The annotations of `Asynchronous`, `Bulkhead`, `CircuitBreaker`, `Fallback`, `Retry` and `Timeout` are all interceptor bindings. 
+The Java Interceptors specification defines the basic programming model and semantics for interceptors.
+This specification uses the typesafe interceptor bindings.
+The annotations `@Asynchronous`, `@Bulkhead`, `@CircuitBreaker`, `@Fallback`, `@Retry` and `@Timeout` are all interceptor bindings.
 
-These annotations may be bound at the class level or method level. The annotations adhere to the rules of interceptor binding defined by Java Interceptors specification. 
+These annotations may be bound at the class level or method level.
+The annotations adhere to the interceptor binding rules defined by Java Interceptors specification.
 
-For an instance, if the annotation is bound to the class level, it applies to all business methods of the class. If the component class declares or inherits a class level interceptor binding, it must not be declared final, or have any static, private, or final methods. If a non-static, non-private method of a component class declares a method level interceptor binding, neither the method nor the component class may be declared final.
+For instance, if the annotation is bound to the class level, it applies to all business methods of the class.
+If the component class declares or inherits a class level interceptor binding, it must not be declared final, or have any static, private, or final methods.
+If a non-static, non-private method of a component class declares a method level interceptor binding, neither the method nor the component class may be declared final.
 
 === Relationship to Contexts and Dependency Injection
 
-The Contexts and Dependency Injection (CDI) specification defines a powerful component model to enable loosely coupled architecture design. This specification explores the rich SPI provided by CDI to register an interceptor so that the Fault Tolerance policies can be applied to the method invocation.
+The Contexts and Dependency Injection (CDI) specification defines a powerful component model to enable loosely coupled architecture design.
+This specification explores the rich SPI provided by CDI to register an interceptor so that the Fault Tolerance policies can be applied to the method invocation.
 

@@ -26,9 +26,12 @@ This specification defines an easy to use and flexible system for building resil
 
 === Rational
 
-It is increasingly important to build fault tolerant microservices. Fault tolerance is about leveraging different strategies to guide the execution and result of some logic. Retry policies, bulkheads, and circuit breakers are popular concepts in this area. They dictate whether and when executions should take place, and fallbacks offer an alternative result when an execution does not complete successfully.
+It is increasingly important to build fault tolerant microservices.
+Fault tolerance is about leveraging different strategies to guide the execution and result of some logic.
+Retry policies, bulkheads, and circuit breakers are popular concepts in this area.
+They dictate whether and when executions should take place, and fallbacks offer an alternative result when an execution does not complete successfully.
 
-As mentioned above, the Fault Tolerance proposal is to focus the aspects: TimeOut, Retry, Fallback, bulkhead and circuit breaker:
+As mentioned above, the Fault Tolerance specification is to focus one the following aspects:
 
 * `Timeout`: Define a duration for timeout
 
@@ -40,11 +43,13 @@ As mentioned above, the Fault Tolerance proposal is to focus the aspects: TimeOu
 
 * `Bulkhead`: isolate failures in part of the system while the rest part of the system can still function.
 
-The main design is to separate execution logic from execution. The execution can be configured with fault tolerance policies, such as RetryPolicy, fallback, Bulkhead and CircuitBreaker.
+The main design is to separate execution logic from execution.
+The execution can be configured with fault tolerance policies, such as RetryPolicy, fallback, Bulkhead and CircuitBreaker.
 
-Hystrix and Failsafe are two popular libraries for handling failures. This proposal is to define a standard API and approach for applications to follow in order to achieve the fault tolerance.
+Hystrix and Failsafe are two popular libraries for handling failures.
+This specification is to define a standard API and approach for applications to follow in order to achieve the fault tolerance.
 
-This specification introduces the following interceptor bindings.
+This specification introduces the following interceptor bindings:
 
 * `Timeout`
 
@@ -58,5 +63,5 @@ This specification introduces the following interceptor bindings.
 
 * `Asynchronous`
 
-Refer to Interceptor Specification for more information on interceptor bindings. 
+Refer to Interceptor Specification for more information on interceptor bindings.
 
