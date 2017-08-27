@@ -17,7 +17,9 @@
 
 [[retry]]
 == Retry Policy
-In order to recover from a brief network glitch, `Retry` can be used to invoke the same operation again. The `Retry` policy allows to configure :
+
+In order to recover from a brief network glitch, `Retry` can be used to invoke the same operation again.
+The `Retry` policy allows to configure :
 
 * `maxRetries`: the maximum retries
 * `delay`: delays between each retry
@@ -28,14 +30,18 @@ In order to recover from a brief network glitch, `Retry` can be used to invoke t
 * `jitterDelayUnit`: the jitter unit
 * `retryOn`: specify the failure to retry on
 * `abortOn`: specify the failure to abort on
- 
+
 === Retry usage
-`Retry` can be applied to the class or method level. If applied to a class, it means the all methods in the class will have the `Retry` policy applied. If applied to a method, it means  that method will have `Retry` policy applied. If the `Retry` policy applied on a class level and on a method level within that class, the method level `Retry` will override the class-level `Retry` policy for that particular method. 
+
+`Retry` can be applied to the class or method level.
+If applied to a class, it means the all methods in the class will have the `Retry` policy applied.
+If applied to a method, it means  that method will have `Retry` policy applied.
+If the `Retry` policy applied on a class level and on a method level within that class, the method level `Retry` will override the class-level `Retry` policy for that particular method.
 
 [source, java]
 ----
     /**
-     * The configured the max retries is 90 but the max duration is 1000ms. 
+     * The configured the max retries is 90 but the max duration is 1000ms.
      * Once the duration is reached, no more retries should be performed,
      * even through it has not reached the max retries.
      */
@@ -43,9 +49,9 @@ In order to recover from a brief network glitch, `Retry` can be used to invoke t
     public void serviceB() {
         writingService();
     }
-    
+
     /**
-    * There should be 0-800ms (jitter is -400ms - 400ms) delays 
+    * There should be 0-800ms (jitter is -400ms - 400ms) delays
     * between each invocation.
     * there should be at least 4 retries but no more than 10 retries.
     */
@@ -53,7 +59,7 @@ In order to recover from a brief network glitch, `Retry` can be used to invoke t
     public Connection serviceA() {
         return connectionService();
     }
-    
+
     /**
     * Sets retry condition, which means Retry will be performed on
     * IOException.
@@ -63,5 +69,7 @@ In order to recover from a brief network glitch, `Retry` can be used to invoke t
         writingService();
     }
 ----
- 
-The `Retry` annotation can be used together with `Fallback`, `CircuitBreaker`, `Asynchronous`, `Bulkhead` and `Timeout`. A `Fallback` can be specified and it will be invoked if the `Retry` still fails. If `Retry` is used together with `Timeout`, the `TimoutException` will trigger the retry. 
+
+The `Retry` annotation can be used together with `Fallback`, `CircuitBreaker`, `Asynchronous`, `Bulkhead` and `Timeout`.
+A `Fallback` can be specified and it will be invoked if the `Retry` still fails.
+If `Retry` is used together with `Timeout`, the `TimoutException` will trigger the retry.

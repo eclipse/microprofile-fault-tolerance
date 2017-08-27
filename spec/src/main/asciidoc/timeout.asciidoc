@@ -20,8 +20,8 @@
 
 [[timeout]]
 == Timeout
-`Timeout` prevents from the execution from waiting forever. It is recommended that
-a microservice invocation should have timeout associated with.
+`Timeout` prevents from the execution from waiting forever.
+It is recommended that a microservice invocation should have timeout associated with.
 
 === Timeout Usage
 
@@ -38,8 +38,11 @@ public Connection serviceA() {
 }
 ----
 
-The above code-snippet means the method serviceA applies the `Timeout` policy, 
+The above code-snippet means the method serviceA applies the `Timeout` policy,
 which is to fail the execution if the execution takes more than 400ms to complete even if it successfully returns.
 
-When a timeout occurs, A `TimeoutException` must be thrown. 
-The `Timeout` annotation can be used together with `Fallback`, `CircuitBreaker`, `Asynchronous`, `Bulkhead` and `Retry`. A `Fallback` can be specified and it will be invoked if the `TimeoutException` is thrown. If `Timeout` is used together with `Retry`, the `TimoutException` will trigger the retry. When `Timeout` is used with `CircuitBreaker` and if a `TimeoutException` occurs, the failure will contribute towards the circuit open.
+When a timeout occurs, A `TimeoutException` must be thrown.
+The `Timeout` annotation can be used together with `Fallback`, `CircuitBreaker`, `Asynchronous`, `Bulkhead` and `Retry`.
+A `Fallback` can be specified and it will be invoked if the `TimeoutException` is thrown.
+If `Timeout` is used together with `Retry`, the `TimoutException` will trigger the retry.
+When `Timeout` is used with `CircuitBreaker` and if a `TimeoutException` occurs, the failure will contribute towards the circuit open.

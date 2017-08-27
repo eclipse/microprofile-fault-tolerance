@@ -20,6 +20,9 @@
 
 [[execution]]
 == Execution
-Use interceptor and annotation to specify the execution and policy configuration. An annotation of Asynchronous has to be specified for any asynchronous calls. Otherwise, synchronous execution is assumed. 
+
+Use interceptor and annotation to specify the execution and policy configuration.
+An annotation of Asynchronous has to be specified for any asynchronous calls.
+Otherwise, synchronous execution is assumed.
 
 

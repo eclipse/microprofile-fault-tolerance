@@ -20,14 +20,21 @@
 
 [[circuitbreaker]]
 == Circuit Breaker
+
 Circuit Breaker prevents repeating timeout, so that invoking dysfunctional services or APIs fail fast.
 There are three circuit states:
 
-* Closed: the service functions well. If a failure occurs, the circuit breaker keeps the record, after the specified failures are reached, the circuit will be opened.
+* Closed: the service functions well.
+If a failure occurs, the circuit breaker keeps the record.
+After the specified failures are reached, the circuit will be opened.
 
-* Open: calls to the circuit breaker fail immediately. After the specified timeout is reached, the circuit transitions to half open state.
+* Open: calls to the circuit breaker fail immediately.
+After the specified timeout is reached, the circuit transitions to half open state.
 
-* Half-open: one call to the circuit is allowed. If it fails, the circuit will remain open. Otherwise, subsequent calls are allowed. After the specified successful execution, the circuit will be closed.
+* Half-open: one call to the circuit is allowed.
+If it fails, the circuit will remain open.
+Otherwise, subsequent calls are allowed.
+After the specified successful execution, the circuit will be closed.
 
 === Circuit Breaker Usage
 
@@ -44,9 +51,12 @@ public Connection serviceA() {
 }
 ----
 
-The above code-snippet means the method serviceA applies the `CircuitBreaker` policy, 
+The above code-snippet means the method serviceA applies the `CircuitBreaker` policy,
 which is to open the circuit once 3 (4x0.75) failures occur among the rolling window of 4 consecutive invocation.
-The circuit will stay open for 1000ms and then back to half open. After 10 consecutive successful invocations, the circuit will be back to close again. 
+The circuit will stay open for 1000ms and then back to half open.
+After 10 consecutive successful invocations, the circuit will be back to close again.
 
-When a circuit is open, A `CircuitBreakerOpenException` must be thrown. 
-The `CircuitBreaker` annotation can be used together with `Timeout`, `Fallback`, `Asynchronous`, `Bulkhead` and `Retry`. A `fallback` can be specified and it will be invoked if the `CircuitBreakerOpenException` is thrown. `Timeout` can be configured to fail an operation if it takes longer than the `Timeout` value to complete.
+When a circuit is open, A `CircuitBreakerOpenException` must be thrown.
+The `CircuitBreaker` annotation can be used together with `Timeout`, `Fallback`, `Asynchronous`, `Bulkhead` and `Retry`.
+A `fallback` can be specified and it will be invoked if the `CircuitBreakerOpenException` is thrown.
+`Timeout` can be configured to fail an operation if it takes longer than the `Timeout` value to complete.
