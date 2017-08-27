@@ -31,7 +31,7 @@ Fault tolerance is about leveraging different strategies to guide the execution 
 Retry policies, bulkheads, and circuit breakers are popular concepts in this area.
 They dictate whether and when executions should take place, and fallbacks offer an alternative result when an execution does not complete successfully.
 
-As mentioned above, the Fault Tolerance specification is to focus one the following aspects:
+As mentioned above, the Fault Tolerance specification is to focus on the following aspects:
 
 * `Timeout`: Define a duration for timeout
 
