@@ -56,7 +56,7 @@ FallbackHandlers are meant to be CDI managed, and should follow the life cycle o
 The above code snippet means when the method failed and retry reaches its maximum retry, the fallback operation will be performed.
 The method `StringFallbackHandler.handle(ExecutionContext context)` will be invoked.
 The return type of `StringFallbackHandler.handle(ExecutionContext context)` must be `String`.
-Otherwise, a deployment exception will be thrown.
+Otherwise, the `FaultToleranceDefinitionException` exception will be thrown.
 
 
 ==== Specify the fallbackMethod
@@ -82,10 +82,10 @@ This is used if the fallbackMethod is on the same class as the method to call fa
 The above code snippet means when the method failed and retry reaches its maximum retry, the fallback operation will be performed.
 The method `fallbackForServiceB` will be invoked.
 The return type of `fallbackForServiceB` must be `String` and the argument list for `fallbackForServiceB` must be the same as `ServiceB`.
-Otherwise, a deployment exception will be thrown.
+Otherwise, the `FaultToleranceDefinitionException` exception will be thrown.
 
 The parameter `value` and `fallbackMethod` on `Fallback` cannot be specified at the same time.
-Otherwise, a deployment exception will be thrown.
+Otherwise, the `FaultToleranceDefinitionException` exception will be thrown.
 
 The fallback should be triggered when an exception occurs.
 For instance, `BulkheadException`, `CircuitBreakerOpenException`, `TimeoutException` should trigger the fallback.

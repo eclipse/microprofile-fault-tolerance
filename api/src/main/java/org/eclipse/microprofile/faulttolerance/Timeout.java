@@ -42,7 +42,7 @@ import javax.interceptor.InterceptorBinding;
 public @interface Timeout {
 
     /**
-     *
+     * The timeout value. The value must be greater than 0.
      * @return the timeout value
      */
     @Nonbinding
