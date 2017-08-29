@@ -28,7 +28,7 @@ This thread should have the correct security context or naming context associate
 === Asynchronous Usage
 
 A method or a class can be annotated with `@Asynchronous`, which means the method or the methods under the class will be invoked by a separate thread.
-The method annotated with `Asynchronous` must return a `Future`, otherwise, `javax.enterprise.inject.spi.DeploymentException` occurs.
+The method annotated with `Asynchronous` must return a `Future`, otherwise, `FaultToleranceDefinitionException` occurs.
 
 [source, java]
 ----
