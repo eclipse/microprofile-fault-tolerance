@@ -60,7 +60,7 @@ public @interface Fallback {
      * Specify the fallback class to be used. An new instance of the fallback class
      * is returned. The instance is unmanaged. The type parameter of the fallback class must be assignable to the
      * return type of the annotated method. 
-     * Otherwise, {@link org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException} must be thrown.
+     * Otherwise, {@link org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException} occurs.
      * 
      * @return the fallback class
      */

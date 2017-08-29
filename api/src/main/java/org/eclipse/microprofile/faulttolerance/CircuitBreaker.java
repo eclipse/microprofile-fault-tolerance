@@ -49,7 +49,7 @@ public @interface CircuitBreaker {
     Class<? extends Throwable>[] failOn() default {Throwable.class};
 
     /**
-     * The delay unit. The value must be greater than or equal to 0.
+     * The delay. The value must be greater than or equal to 0. 0 means no delay.
      * @return The delay time after the circuit is open
      */
     @Nonbinding
@@ -83,7 +83,7 @@ public @interface CircuitBreaker {
 
     /**
      * For an open circuit, after the delay period is reached, once the successThreshold
-     * is reached, the circuit is back to close again. The value must be greater than or equal to 0.
+     * is reached, the circuit is back to close again. The value must be greater than or equal to 1.
      * @return The success threshold to fully close the circuit
      */
     @Nonbinding
