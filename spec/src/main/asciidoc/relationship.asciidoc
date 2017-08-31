@@ -44,3 +44,14 @@ If a non-static, non-private method of a component class declares a method level
 The Contexts and Dependency Injection (CDI) specification defines a powerful component model to enable loosely coupled architecture design.
 This specification explores the rich SPI provided by CDI to register an interceptor so that the Fault Tolerance policies can be applied to the method invocation.
 
+== Relationship to MicroProfile Config
+
+The MicroProfile config specification defines a flexible config model to enable microservice
+configurable and achieve the strict separation of config from code. All parameters on the
+annotations/interceptor bindings are config properties. They can be configured externally either
+via other predefined config sources (e.g. environment variables, system properties or other sources). For an instance,
+the `maxRetries` parameter on the `Retry` annotation is a configuration property. It can be configured externally.
+
+
+
+
