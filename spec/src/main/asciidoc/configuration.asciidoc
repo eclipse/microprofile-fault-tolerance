@@ -29,7 +29,10 @@ In order to fulfil the requirement, MicroProfile Fault Tolerance provides a capa
 The reason `fallback` is special as the `fallback` business logic can only be defined by microservices not by any other platforms.
 
 Set the config property of `MP_Fault_Tolerance_NonFallback_Enabled` with the value of `false` means the Fault Tolerance is disabled, except `Fallback`.
-If the property is absent or with the value of `true`, it means that MicroProfile Fault Tolerance is enabled if any annotations are specified. For more information about how to set config properties, refer to MicroProfile Config specification.
+If the property is absent or with the value of `true`, it means that MicroProfile Fault Tolerance is enabled if any annotations are specified.  For more information about how to set config properties, refer to MicroProfile Config specification.
+
+In order to prevent from any unexpected behaviours, the property `MP_Fault_Tolerance_NonFallback_Enabled` will only be read on application starting. 
+Any dynamic changes afterwards will be ignored until  the application restarting.
 
 === Config Fault Tolerance parameters
 

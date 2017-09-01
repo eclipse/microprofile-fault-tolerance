@@ -17,11 +17,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
+package org.eclipse.microprofile.fault.tolerance.tck.invalidParameters;
+
+import java.sql.Connection;
+import javax.enterprise.context.RequestScoped;
+
+import org.eclipse.microprofile.faulttolerance.Retry;
 
 /**
- * <p>Exceptions for Microprofile Fault Tolerance
+ * A client to demonstrate the validation of the combination of the delay and maxDuration attributes on @Retry
+ * 
+ * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  *
  */
-@org.osgi.annotation.versioning.Version("1.0")
-package org.eclipse.microprofile.faulttolerance.exceptions;
+@RequestScoped
+public class RetryClientForValidationDelayDuration {
 
+    @Retry(delay = 1000, maxDuration = 500)
+    public Connection serviceA() {
+        return null;
+    }
+}

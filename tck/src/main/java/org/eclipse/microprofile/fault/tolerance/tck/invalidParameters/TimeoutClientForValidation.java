@@ -17,11 +17,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
+package org.eclipse.microprofile.fault.tolerance.tck.invalidParameters;
+
+import java.sql.Connection;
+
+import javax.enterprise.context.RequestScoped;
+
+import org.eclipse.microprofile.faulttolerance.Timeout;
 
 /**
- * <p>Exceptions for Microprofile Fault Tolerance
+ * A client to demonstrate the validation of the value on @Timeout
+ * 
+ * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  *
  */
-@org.osgi.annotation.versioning.Version("1.0")
-package org.eclipse.microprofile.faulttolerance.exceptions;
+@RequestScoped
+public class TimeoutClientForValidation {
 
+    @Timeout(-1)
+    public Connection serviceA() {
+        return null;
+    }
+}
