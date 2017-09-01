@@ -20,6 +20,7 @@
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -56,6 +57,7 @@ public class Checker implements BackendTestDelegate {
     protected static int expectedMaxSimultaneousWorkers;
     protected static int expectedTasksScheduled;
     private static boolean maxFill = true;
+    private static CountDownLatch latch = null;
 
     /*
      * This string is used for varying substr's barcharts in the log, for
@@ -94,6 +96,9 @@ public class Checker implements BackendTestDelegate {
             int now = workers.incrementAndGet();
             int max = maxSimultaneousWorkers.get();
 
+            if( latch != null ){
+                latch.countDown();
+            }
 
             while ((now > max) && !maxSimultaneousWorkers.compareAndSet(max, now)) {
                 max = maxSimultaneousWorkers.get();
@@ -177,6 +182,10 @@ public class Checker implements BackendTestDelegate {
     public static void setExpectedMaxWorkers(int maxSimultaneousWorkers, boolean b) {
         setExpectedMaxWorkers(maxSimultaneousWorkers);
         maxFill = b;
+    }
+
+    public static void setLatch(CountDownLatch cdl) {
+        latch = cdl;
     }
 
 }

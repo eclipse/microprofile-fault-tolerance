@@ -19,9 +19,11 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -117,7 +119,14 @@ public class BulkheadSynchRetryTest extends Arquillian {
     public void testBulkheadClassSynchronousPassiveRetry55() {
         int threads = 10;
         int maxSimultaneousWorkers = 5;
-        threads(threads, classBean, maxSimultaneousWorkers);
+        CountDownLatch latch = new CountDownLatch(threads);
+        threads(threads, classBean, maxSimultaneousWorkers, threads, latch);
+        try {
+            latch.await(50000, TimeUnit.MILLISECONDS);
+        }
+        catch (InterruptedException e) {
+            Utils.log(e.getLocalizedMessage());
+        }
         Utils.check();
     }
 
@@ -138,7 +147,9 @@ public class BulkheadSynchRetryTest extends Arquillian {
         // bulkhead 'filled up'. We will still check we don't get more than the bulkhead
         // at one time.
         Checker.setExpectedMaxWorkers(maxSimultaneousWorkers, false);
-        
+        Checker.setExpectedTasksScheduled(0);
+        CountDownLatch latch = new CountDownLatch(threads);
+        Checker.setLatch(latch);
 
         for (int i = 0; i < threads; i++) {
             Utils.log("Starting test " + i);
@@ -146,6 +157,14 @@ public class BulkheadSynchRetryTest extends Arquillian {
             results[i] = xService.submit(new ParrallelBulkheadTest(rrClassBean, failOnce));
         }
 
+        try {
+            latch.await(50000, TimeUnit.MILLISECONDS);
+        }
+        catch (InterruptedException e) {
+            Utils.log(e.getLocalizedMessage());
+        }
+        
+        Utils.check();
         Utils.handleResults(threads, results);
         Utils.check();
     }
@@ -161,6 +180,7 @@ public class BulkheadSynchRetryTest extends Arquillian {
         int maxSimultaneousWorkers = 5;
         Checker.setExpectedInstances(threads);
         Checker.setExpectedMaxWorkers(0);
+        Checker.setLatch(null);
         Future[] results = new Future[threads];
         Checker.setExpectedMaxWorkers(maxSimultaneousWorkers, false);
 
@@ -189,7 +209,14 @@ public class BulkheadSynchRetryTest extends Arquillian {
     public void testBulkheadMethodSynchronousRetry55() {
         int threads = 20;
         int maxSimultaneousWorkers = 5;
-        threads(threads, methodBean, maxSimultaneousWorkers);
+        CountDownLatch latch = new CountDownLatch(threads);
+        threads(threads, methodBean, maxSimultaneousWorkers, threads, latch);
+        try {
+            latch.await(50000, TimeUnit.MILLISECONDS);
+        }
+        catch (InterruptedException e) {
+            Utils.log(e.getLocalizedMessage());
+        }
         Utils.check();
     }
 
@@ -201,7 +228,15 @@ public class BulkheadSynchRetryTest extends Arquillian {
     public void testBulkheadPassiveRetryMethodSynchronous55() {
         int threads = 10;
         int maxSimultaneousWorkers = 5;
-        threads(threads, methodBean, maxSimultaneousWorkers);
+        int expectedTasks = threads;
+        CountDownLatch latch = new CountDownLatch(expectedTasks);
+        threads(threads, methodBean, maxSimultaneousWorkers, expectedTasks, latch);
+        try {
+            latch.await(50000, TimeUnit.MILLISECONDS);
+        }
+        catch (InterruptedException e) {
+            Utils.log(e.getLocalizedMessage());
+        }
         Utils.check();
     }
 
@@ -217,7 +252,15 @@ public class BulkheadSynchRetryTest extends Arquillian {
         int expectedTasks = 15; // We Retry just long enough for the first
                                 // generation to finish.
         int maxSimultaneousWorkers = 5;
-        threads(threads, classBean, maxSimultaneousWorkers, expectedTasks);
+        CountDownLatch latch = new CountDownLatch(expectedTasks);
+        threads(threads, classBean, maxSimultaneousWorkers, expectedTasks, latch);
+        try {
+            latch.await(50000, TimeUnit.MILLISECONDS);
+        }
+        catch (InterruptedException e) {
+            Utils.log(e.getLocalizedMessage());
+        }
+    
         Utils.check();
     }
 
@@ -230,7 +273,15 @@ public class BulkheadSynchRetryTest extends Arquillian {
         int threads = 30;
         int maxSimultaneousWorkers = 5;
         int expectedTasks = 10;
-        threads(threads, zeroRetryBean, maxSimultaneousWorkers, expectedTasks);
+        CountDownLatch latch = new CountDownLatch(expectedTasks);
+        threads(threads, zeroRetryBean, maxSimultaneousWorkers, expectedTasks, latch);
+        try {
+            latch.await(50000, TimeUnit.MILLISECONDS);
+        }
+        catch (InterruptedException e) {
+            Utils.log(e.getLocalizedMessage());
+        }
+    
         Utils.check();
     }
 
@@ -242,10 +293,13 @@ public class BulkheadSynchRetryTest extends Arquillian {
      * @param test
      * @param maxSimultaneousWorkers
      */
-    private void threads(int number, BulkheadTestBackend test, int maxSimultaneousWorkers) {
+    private void threads(int number, BulkheadTestBackend test, int maxSimultaneousWorkers, int expectedTasks, CountDownLatch latch) {
 
         Checker.setExpectedMaxWorkers(maxSimultaneousWorkers);
         Checker.setExpectedInstances(number);
+        Checker.setExpectedTasksScheduled(expectedTasks);
+        Checker.setLatch(latch);
+        
         Future[] results = new Future[number];
         for (int i = 0; i < number; i++) {
             Utils.log("Starting test " + i);
@@ -254,19 +308,4 @@ public class BulkheadSynchRetryTest extends Arquillian {
 
         Utils.handleResults(number, results);
     }
-
-    /**
-     * Front end to threads(x,y,z) method above that allows to set explicitly the number
-     * of tasks we expect to get through to the backend.
-     * 
-     * @param threads
-     * @param bean
-     * @param maxSimultaneousWorkers
-     * @param expectedTasks
-     */
-    private void threads(int threads, BulkheadTestBackend bean, int maxSimultaneousWorkers, int expectedTasks) {
-        Checker.setExpectedTasksScheduled(expectedTasks);
-        threads(threads, bean, maxSimultaneousWorkers);
-    }
-
 }

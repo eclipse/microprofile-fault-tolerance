@@ -21,6 +21,7 @@ package org.eclipse.microprofile.fault.tolerance.tck.bulkhead;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadTestBackend;
@@ -97,21 +98,6 @@ public class Utils {
     }
 
     /**
-     * Run a number of Callable's (usually Asynch's) in a loop on one thread
-     * 
-     * @param iterations
-     * @param test
-     * @param maxSimultaneousWorkers
-     * @param expectedTasksScheduled
-     */
-    public static void loop(int iterations, BulkheadTestBackend test, int maxSimultaneousWorkers,
-            int expectedTasksScheduled) {
-
-        Checker.setExpectedTasksScheduled(expectedTasksScheduled);
-        loop(iterations, test, maxSimultaneousWorkers);
-    }
-
-    /**
      * Run a number of Callable's (usually Asynch's) in a loop on one thread.
      * Here we do not check that amount that were successfully through the
      * Bulkhead
@@ -119,12 +105,15 @@ public class Utils {
      * @param iterations
      * @param test
      * @param maxSimultaneousWorkers
+     * @param expectedTasksScheduled
+     * @param latch
      */
-    public static void loop(int iterations, BulkheadTestBackend test, int maxSimultaneousWorkers) {
+    public static void loop(int iterations, BulkheadTestBackend test, int maxSimultaneousWorkers, int expectedTasksScheduled, CountDownLatch latch ) {
 
         Checker.setExpectedMaxWorkers(maxSimultaneousWorkers);
         Checker.setExpectedInstances(iterations);
-        Checker.setExpectedTasksScheduled(iterations);
+        Checker.setExpectedTasksScheduled(expectedTasksScheduled);
+        Checker.setLatch(latch);
 
         Future[] results = new Future[iterations];
         try {
@@ -170,5 +159,6 @@ public class Utils {
     }
 
     private Utils() {
-    };
+    }
+
 }
