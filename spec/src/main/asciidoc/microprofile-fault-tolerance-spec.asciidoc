@@ -32,6 +32,7 @@
 :toc: left
 :toclevels: 4
 :sectnumlevels: 4
+:numbered:
 ifdef::backend-pdf[]
 :pagenums:
 endif::[]

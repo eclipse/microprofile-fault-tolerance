@@ -29,7 +29,8 @@ import javax.interceptor.InterceptorBinding;
 
 /**
  * Wrap the execution and invoke it asynchronously.
- * Any methods marked with this annotation must return {@link java.util.concurrent.Future}.
+ * Any methods marked with this annotation must return {@link java.util.concurrent.Future}. 
+ * Otherwise, {@link org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException} occurs.
  * Example usage:
  * 
  * <pre>

@@ -42,7 +42,8 @@ import javax.interceptor.InterceptorBinding;
 public @interface Timeout {
 
     /**
-     *
+     * The timeout value. The value must be greater than or equal to 0. 0 means no timeout configured.
+     * Otherwise, {@link org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException} occurs.
      * @return the timeout value
      */
     @Nonbinding

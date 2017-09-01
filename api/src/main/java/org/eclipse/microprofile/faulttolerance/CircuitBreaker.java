@@ -49,7 +49,7 @@ public @interface CircuitBreaker {
     Class<? extends Throwable>[] failOn() default {Throwable.class};
 
     /**
-     *
+     * The delay. The value must be greater than or equal to 0. 0 means no delay.
      * @return The delay time after the circuit is open
      */
     @Nonbinding
@@ -65,7 +65,7 @@ public @interface CircuitBreaker {
 
     /**
      * The number of consecutive requests in a rolling window
-     * that will trip the circuit.
+     * that will trip the circuit. The value must be greater than or equal to 1.
      * @return the number of the consecutive requests in a rolling window
      *
      */
@@ -75,7 +75,7 @@ public @interface CircuitBreaker {
      * The failure threshold to trigger the circuit to open.
      * e.g. if the requestVolumeThreshold is 20 and failureRation is .50,
      * more than 10 failures in 20 consecutive requests will trigger
-     * the circuit to open.
+     * the circuit to open. The value must be between 0 and 1 inclusive.
      * @return The failure threshold to open the circuit
      */
     @Nonbinding
@@ -83,7 +83,7 @@ public @interface CircuitBreaker {
 
     /**
      * For an open circuit, after the delay period is reached, once the successThreshold
-     * is reached, the circuit is back to close again.
+     * is reached, the circuit is back to close again. The value must be greater than or equal to 1.
      * @return The success threshold to fully close the circuit
      */
     @Nonbinding

@@ -20,13 +20,22 @@
 
 [[bulkhead]]
 == Bulkhead
-The `Bulkhead` pattern is to prevent faults in one part of the system from cascading to the entire system, which might bring down the whole system. The implementation is to limit the number of concurrent requests accessing to an instance.
+
+The `Bulkhead` pattern is to prevent faults in one part of the system from cascading to the entire system, which might bring down the whole system.
+The implementation is to limit the number of concurrent requests accessing to an instance.
 
 === Bulkhead Usage
-A method or class can be annotated with `@Bulkhead`, which means the method or the methods under the class will have Bulkhead policy applied correspondingly. There are two different approaches to the bulkhead: thread pool isolation and semaphore isolation. When `Bulkhead` used together with `Asynchronous`, the thread pool isolation approach is in use. If `Bulkhead` is used without `Asynchronous`, it means the semaphore approach. The thread pool approach allows to configure the maximum concurrent requests together with the waiting queue size, while the semaphore approach only allows the concurrent number of requests configuration.
-* Semaphore style Bulkhead
-The below code-snippet means the method serviceA applies the `Bulkhead` policy, 
-which is semaphore approach, limiting the maximum concurrent requests to 5.
+A method or class can be annotated with `@Bulkhead`, which means the method or the methods under the class will have Bulkhead policy applied correspondingly.
+There are two different approaches to the bulkhead: thread pool isolation and semaphore isolation.
+When `@Bulkhead` is used with `@Asynchronous`, the thread pool isolation approach will be used.
+If `@Bulkhead` is used without `@Asynchronous`, the semaphore isolation approach will be used.
+The thread pool approach allows to configure the maximum concurrent requests together with the waiting queue size.
+The semaphore approach only allows the concurrent number of requests configuration.
+
+==== Semaphore style Bulkhead
+
+The below code-snippet means the method serviceA applies the `Bulkhead` policy, which is semaphore approach, limiting the maximum concurrent requests to 5.
+
 [source, java]
 ----
 @Bulkhead(5) // maximum 5 concurrent requests allowed
@@ -38,16 +47,18 @@ public Connection serviceA() {
 }
 ----
 
+When using the semaphore approach, on reaching maximum request counter, the extra request will fail with `BulkheadException`.
 
-* Thread pool style Bulkhead
-The below code-snippet means the method serviceA applies the `Bulkhead` policy, 
-which is thread pool approach, limiting the maximum concurrent requests to 5 and the waiting queue size to 8.
+
+==== Thread pool style Bulkhead
+
+The below code-snippet means the method serviceA applies the `Bulkhead` policy, which is thread pool approach, limiting the maximum concurrent requests to 5 and the waiting queue size to 8.
 
 [source, java]
 ----
 // maximum 5 concurrent requests allowed, maximum 8 requests allowed in the waiting queue
 @Asynchronous
-@Bulkhead(value = 5, waitingTaskQueue = 8) 
+@Bulkhead(value = 5, waitingTaskQueue = 8)
 public Future<Connection> serviceA() {
    Connection conn = null;
    counterForInvokingServiceA++;
@@ -57,5 +68,7 @@ public Future<Connection> serviceA() {
 ----
 
 
-In the semaphore approach, on reaching maximum request counter, the extra request will fail with `BulkheadException`. In the thread pool approach, when a request cannot be added to the waiting queue, `BulkheadException` will be thrown.
-The `Bulkhead` annotation can be used together with `Fallback`, `CircuitBreaker`, `Asynchronous`, `Timeout` and `Retry`. A `Fallback` can be specified, so that it can be invoked if the `BulkheadException` is thrown. 
+When using the thread pool approach, when a request cannot be added to the waiting queue, `BulkheadException` will be thrown.
+
+The `@Bulkhead` annotation can be used together with `@Fallback`, `@CircuitBreaker`, `@Asynchronous`, `@Timeout` and `@Retry`.
+If a `@Fallback` is specified, it will be invoked if the `BulkheadException` is thrown.

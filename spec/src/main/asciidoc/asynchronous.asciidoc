@@ -20,13 +20,15 @@
 
 [[asynchronous]]
 == Asynchronous
+
 `Asynchronous` means the execution of the client request will be on a separate thread.
 This thread should have the correct security context or naming context associated with.
 
 
 === Asynchronous Usage
 
-A method or a class can be annotated with `@Asynchronous`, which means the method or the methods under the class will be invoked by a separate thread. The method annotated with `Asynchronous` must return a `Future`. Otherwise, `javax.enterprise.inject.spi.DeploymentException` occurs.
+A method or a class can be annotated with `@Asynchronous`, which means the method or the methods under the class will be invoked by a separate thread.
+The method annotated with `Asynchronous` must return a `Future`, otherwise, `FaultToleranceDefinitionException` occurs.
 
 [source, java]
 ----
@@ -39,7 +41,7 @@ public Future<Connection> serviceA() {
 }
 ----
 
-The above code-snippet means the method serviceA applies the `Asynchronous` policy, 
-which means the invocation will be done by a different thread.
+The above code-snippet means the method serviceA applies the `Asynchronous` policy, which means the invocation will be done by a different thread.
 
-The `Asynchronous` annotation can be used together with `Timeout`, `Fallback`, `Asynchronous`, `Bulkhead` and `Retry`, which means the method being annotated will be invoked by a different thread.
+The `@Asynchronous` annotation can be used together with `@Timeout`, `@Fallback`, `@Bulkhead` and `@Retry`.
+Method innvocation will occur in a different thread.
