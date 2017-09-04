@@ -38,7 +38,7 @@ Any dynamic changes afterwards will be ignored until  the application restarting
 
 This specification defines the annotations: `@Asynchronous`, `@Bulkhead`, `@CircuitBreaker`, `@Fallback`, `@Retry` and `@Timeout`.
 Each annotation except `@Asynchronous` has parameters.
-All of the parameters are configurable.
+All of the parameters are configurable. 
 The value of each parameter can be overridden individually or globally.
 
 * Override individual parameters
@@ -104,3 +104,5 @@ public class MyClient{
 
 }
 ----
+
+If an annotation is not present, the configured properties are ignored. For an instance, the property `com.acme.ClassA/methodB/Retry/maxRetries` will be ignored if `Retry` annotation is not specified on the `methodB` of `com.acme.ClassA`. Similarly, the proeprty `com.acme.ClassA/Retry/maxRetries` will be ignored if `Retry` annotation is not specified on the class `com.acme.ClassA` as a class-level annotation.
