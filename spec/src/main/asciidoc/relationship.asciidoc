@@ -26,6 +26,12 @@ The annotations are interceptor bindings.
 Therefore, this specification depends on the Java Interceptors and Contexts and Dependency Injection specifications define in Java EE platform.
 
 
+=== Relationship to Contexts and Dependency Injection
+
+The Contexts and Dependency Injection (CDI) specification defines a powerful component model to enable loosely coupled architecture design.
+This specification explores the rich SPI provided by CDI to register an interceptor so that the Fault Tolerance policies can be applied to the method invocation.
+
+
 === Relationship to Java Interceptors
 
 The Java Interceptors specification defines the basic programming model and semantics for interceptors.
@@ -39,10 +45,13 @@ For instance, if the annotation is bound to the class level, it applies to all b
 If the component class declares or inherits a class level interceptor binding, it must not be declared final, or have any static, private, or final methods.
 If a non-static, non-private method of a component class declares a method level interceptor binding, neither the method nor the component class may be declared final.
 
-=== Relationship to Contexts and Dependency Injection
+Since this specification depends on CDI and interceptors specifications, fault tolerance operations have the following restrictions:
 
-The Contexts and Dependency Injection (CDI) specification defines a powerful component model to enable loosely coupled architecture design.
-This specification explores the rich SPI provided by CDI to register an interceptor so that the Fault Tolerance policies can be applied to the method invocation.
+* Fault tolerance interceptors bindings must applied on a bean class or bean class method otherwise it is ignored,
+
+* invocation must be business method invocation as defined in http://docs.jboss.org/cdi/spec/1.2/cdi-spec.html#biz_method[CDI specification^].
+
+* if a method and its containing class don't have any fault tolerance interceptor binding, it won't considered as a fault tolerance operation
 
 == Relationship to MicroProfile Config
 
