@@ -51,7 +51,7 @@ Since this specification depends on CDI and interceptors specifications, fault t
 
 * invocation must be business method invocation as defined in http://docs.jboss.org/cdi/spec/1.2/cdi-spec.html#biz_method[CDI specification^].
 
-* if a method and its containing class don't have any fault tolerance interceptor binding, it won't considered as a fault tolerance operation
+* if a method and its containing class don't have any fault tolerance interceptor binding, it won't considered as a fault tolerance operation.
 
 == Relationship to MicroProfile Config
 
