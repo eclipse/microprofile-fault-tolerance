@@ -19,6 +19,7 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -105,7 +106,7 @@ public class BulkheadSynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadClassSemaphore3() {
-        TestData td = new TestData();
+        TestData td = new TestData(new CountDownLatch(3));
         threads(20, bhBeanClassSemaphore3, 3, td);
         td.check();
     }
@@ -117,7 +118,7 @@ public class BulkheadSynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadClassSemaphore10() {
-        TestData td = new TestData();
+        TestData td = new TestData(new CountDownLatch(10));
 
         threads(20, bhBeanClassSemaphore10, 10, td);
         td.check();
@@ -133,7 +134,7 @@ public class BulkheadSynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadMethodSemaphore10() {
-        TestData td = new TestData();
+        TestData td = new TestData(new CountDownLatch(10));
 
         threads(20, bhBeanMethodSemaphore10, 10, td);
         td.check();
@@ -146,7 +147,7 @@ public class BulkheadSynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadMethodSemaphore3() {
-        TestData td = new TestData();
+        TestData td = new TestData(new CountDownLatch(3));
 
         threads(20, bhBeanMethodSemaphore3, 3, td);
         td.check();
@@ -159,7 +160,7 @@ public class BulkheadSynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadClassSemaphoreDefault() {
-        TestData td = new TestData();
+        TestData td = new TestData(new CountDownLatch(10));
 
         threads(20, bhBeanClassSemaphoreDefault, 10, td);
         td.check();
@@ -168,12 +169,12 @@ public class BulkheadSynchTest extends Arquillian {
 
     /**
      * Tests the basic method synchronous Bulkhead with defaulting value
-     * parameter. This will check that more than 1 but less than 10 threads get
+     * parameter. This will check that more than 1 but not more than 10 threads get
      * into the bulkhead at once.
      */
     @Test()
     public void testBulkheadMethodSemaphoreDefault() {
-        TestData td = new TestData();
+        TestData td = new TestData(new CountDownLatch(10));
 
         threads(20, bhBeanMethodSemaphoreDefault, 10, td);
         td.check();
