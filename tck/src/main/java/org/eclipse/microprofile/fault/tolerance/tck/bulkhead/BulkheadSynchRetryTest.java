@@ -206,11 +206,11 @@ public class BulkheadSynchRetryTest extends Arquillian {
 
     /**
      * Test no regression due to passive Retry. The Bulkhead is 5
-     * so the Retry should not come into effect for 10 Tasks.
+     * so the Retry should not come into effect.
      */
     @Test()
     public void testBulkheadPassiveRetryMethodSynchronous55() {
-        int threads = 10;
+        int threads = 5;
         int maxSimultaneousWorkers = 5;
         int expectedTasks = threads;
         TestData td = new TestData(new CountDownLatch(expectedTasks));
