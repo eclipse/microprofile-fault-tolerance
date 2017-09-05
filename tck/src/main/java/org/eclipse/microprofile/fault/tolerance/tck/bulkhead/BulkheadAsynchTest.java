@@ -128,7 +128,7 @@ public class BulkheadAsynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadClassAsynchronous3() {
-        TestData td = new TestData(new CountDownLatch(3));
+        TestData td = new TestData(new CountDownLatch(10));
         loop(10, bhBeanClassAsynchronous3, 3, td);
         td.check();
     }
@@ -140,7 +140,7 @@ public class BulkheadAsynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadMethodAsynchronous3() {
-        TestData td = new TestData(new CountDownLatch(3));
+        TestData td = new TestData(new CountDownLatch(10));
         loop(10, bhBeanMethodAsynchronous3, 3, td);
         td.check();
     }
