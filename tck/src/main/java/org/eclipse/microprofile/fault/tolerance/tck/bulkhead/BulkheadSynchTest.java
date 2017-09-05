@@ -32,8 +32,9 @@ import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhe
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadMethodSemaphore3Bean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadMethodSemaphoreDefaultBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadTestBackend;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Checker;
+
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.ParrallelBulkheadTest;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.TestData;
 import org.jboss.arquillian.container.test.api.Deployment;
 //import org.jboss.arquillian.core.api.Asynchronousing.ExecutorService;
 import org.jboss.arquillian.testng.Arquillian;
@@ -41,6 +42,7 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.testng.ITestContext;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -91,14 +93,9 @@ public class BulkheadSynchTest extends Arquillian {
         return war;
     }
 
-    /**
-     * This method is called prior to every test. It waits for all workers to
-     * finish and resets the Checker's state.
-     */
     @BeforeTest
-    public void beforeTest() {
-        Utils.quiesce();
-        Checker.reset();
+    public void beforeTest(final ITestContext testContext) {
+        Utils.log("Testmathod: " + testContext.getName());
     }
 
     /**
@@ -108,8 +105,9 @@ public class BulkheadSynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadClassSemaphore3() {
-        threads(20, bhBeanClassSemaphore3, 3);
-        Utils.check();
+        TestData td = new TestData();
+        threads(20, bhBeanClassSemaphore3, 3, td);
+        td.check();
     }
 
     /**
@@ -119,8 +117,10 @@ public class BulkheadSynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadClassSemaphore10() {
-        threads(20, bhBeanClassSemaphore10, 10);
-        Utils.check();
+        TestData td = new TestData();
+
+        threads(20, bhBeanClassSemaphore10, 10, td);
+        td.check();
 
     }
 
@@ -133,8 +133,10 @@ public class BulkheadSynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadMethodSemaphore10() {
-        threads(20, bhBeanMethodSemaphore10, 10);
-        Utils.check();
+        TestData td = new TestData();
+
+        threads(20, bhBeanMethodSemaphore10, 10, td);
+        td.check();
     }
 
     /**
@@ -144,8 +146,10 @@ public class BulkheadSynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadMethodSemaphore3() {
-        threads(20, bhBeanMethodSemaphore3, 3);
-        Utils.check();
+        TestData td = new TestData();
+
+        threads(20, bhBeanMethodSemaphore3, 3, td);
+        td.check();
     }
 
     /**
@@ -155,8 +159,10 @@ public class BulkheadSynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadClassSemaphoreDefault() {
-        threads(20, bhBeanClassSemaphoreDefault, 10);
-        Utils.check();
+        TestData td = new TestData();
+
+        threads(20, bhBeanClassSemaphoreDefault, 10, td);
+        td.check();
 
     }
 
@@ -167,8 +173,10 @@ public class BulkheadSynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadMethodSemaphoreDefault() {
-        threads(20, bhBeanMethodSemaphoreDefault, 10);
-        Utils.check();
+        TestData td = new TestData();
+
+        threads(20, bhBeanMethodSemaphoreDefault, 10, td);
+        td.check();
     }
 
     /**
@@ -178,14 +186,14 @@ public class BulkheadSynchTest extends Arquillian {
      * @param test
      * @param maxSimultaneousWorkers
      */
-    private void threads(int number, BulkheadTestBackend test, int maxSimultaneousWorkers) {
+    private void threads(int number, BulkheadTestBackend test, int maxSimultaneousWorkers, TestData td) {
 
-        Checker.setExpectedMaxWorkers(maxSimultaneousWorkers);
-        Checker.setExpectedInstances(number);
+        td.setExpectedMaxSimultaneousWorkers(maxSimultaneousWorkers);
+        td.setExpectedInstances(number);
         Future[] results = new Future[number];
         for (int i = 0; i < number; i++) {
             Utils.log("Starting test " + i);
-            results[i] = xService.submit(new ParrallelBulkheadTest(test));
+            results[i] = xService.submit(new ParrallelBulkheadTest(test, td));
         }
 
         Utils.handleResults(number, results);

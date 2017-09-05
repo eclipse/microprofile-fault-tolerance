@@ -34,8 +34,12 @@ import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
  */
 public class FutureChecker extends Checker {
 
+    public FutureChecker(int sleepMillis, TestData td) {
+        super(sleepMillis, td);
+    }
+
     public FutureChecker(int sleepMillis) {
-        super(sleepMillis);
+        super( sleepMillis, new TestData());
     }
 
     /*
@@ -49,7 +53,7 @@ public class FutureChecker extends Checker {
     @Override
     public Future<String> perform() throws InterruptedException {
         try {
-            int left = millis;
+            int left = getSleep();
             int tick = 250;
             while (left > 0 && !Thread.currentThread().isInterrupted()) {
                 if (left < tick) {
@@ -66,7 +70,7 @@ public class FutureChecker extends Checker {
         }
         catch (InterruptedException e) {
             Utils.log("FutureChecker interrupted " + e.toString());
-            if (millis > 60 * 1000) {
+            if (getSleep() > 60 * 1000) {
                 throw e;
             }
         }

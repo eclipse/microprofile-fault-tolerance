@@ -21,11 +21,11 @@ package org.eclipse.microprofile.fault.tolerance.tck.bulkhead;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadTestBackend;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Checker;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.TestData;
 import org.testng.Assert;
 
 public class Utils {
@@ -37,35 +37,6 @@ public class Utils {
      */
     private static long tid() {
         return Thread.currentThread().getId();
-    }
-
-    /**
-     * Wait for the tests to finish and check the results
-     */
-    public static void check() {
-        quiesce();
-        Checker.check();
-    }
-
-    /**
-     * Wait for the tests to finish. We avoid using 'isDone' that passes through
-     * the wrapping Future as we want to test this independently.
-     */
-    static void quiesce() {
-        try {
-            int waits = 0;
-            while (Checker.getWorkers() > 0) {
-                Utils.log("Waiting for " + Checker.getWorkers() + " workers to finish");
-                Thread.sleep(100);
-                if (waits++ > 100) {
-                    break;
-                }
-
-            }
-        }
-        catch (InterruptedException e) {
-            log(e.toString());
-        }
     }
 
     /**
@@ -106,20 +77,20 @@ public class Utils {
      * @param test
      * @param maxSimultaneousWorkers
      * @param expectedTasksScheduled
-     * @param latch
+     * @param td 
      */
-    public static void loop(int iterations, BulkheadTestBackend test, int maxSimultaneousWorkers, int expectedTasksScheduled, CountDownLatch latch ) {
+    public static void loop(int iterations, BulkheadTestBackend test, int maxSimultaneousWorkers, int expectedTasksScheduled, TestData td ) {
 
-        Checker.setExpectedMaxWorkers(maxSimultaneousWorkers);
-        Checker.setExpectedInstances(iterations);
-        Checker.setExpectedTasksScheduled(expectedTasksScheduled);
-        Checker.setLatch(latch);
+        
+        td.setExpectedMaxSimultaneousWorkers(maxSimultaneousWorkers);
+        td.setExpectedInstances(iterations);
+        td.setExpectedTasksScheduled(expectedTasksScheduled);
 
         Future[] results = new Future[iterations];
         try {
             for (int i = 0; i < iterations; i++) {
                 Utils.log("Starting test " + i);
-                results[i] = test.test(new Checker(1 * 1000));
+                results[i] = test.test(new Checker(1 * 1000, td));
             }
         }
         catch (InterruptedException e1) {

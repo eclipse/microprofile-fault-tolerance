@@ -36,6 +36,8 @@ import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.Assert;
+import org.testng.ITestContext;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 /**
@@ -65,6 +67,11 @@ public class BulkheadFutureTest extends Arquillian {
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml").as(JavaArchive.class);
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftBulkheadTest.war").addAsLibrary(testJar);
         return war;
+    }
+
+    @BeforeTest
+    public void beforeTest(final ITestContext testContext) {
+        Utils.log("Testmathod: " + testContext.getName());
     }
 
     /**
