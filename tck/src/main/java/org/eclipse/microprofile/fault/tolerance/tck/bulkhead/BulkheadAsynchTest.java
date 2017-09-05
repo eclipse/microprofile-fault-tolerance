@@ -19,6 +19,7 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 
 import javax.inject.Inject;
@@ -33,6 +34,7 @@ import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhe
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadMethodAsynchronousQueueingBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadTestBackend;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Checker;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.TestData;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -40,6 +42,7 @@ import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.Assert;
+import org.testng.ITestContext;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -89,14 +92,9 @@ public class BulkheadAsynchTest extends Arquillian {
         return war;
     }
 
-    /**
-     * This method is called prior to every test. It waits for all workers to
-     * finish and resets the Checker's state.
-     */
     @BeforeTest
-    public void beforeTest() {
-        Utils.quiesce();
-        Checker.reset();
+    public void beforeTest(final ITestContext testContext) {
+        Utils.log("Testmathod: " + testContext.getName());
     }
 
     /**
@@ -106,65 +104,21 @@ public class BulkheadAsynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadClassAsynchronous10() {
-        loop(10, bhBeanClassAsynchronous10, 10);
-        Utils.check();
-    }
-
-    /**
-     * Run a number of Callable's (usually Asynch's) in a loop on one thread
-     * 
-     * @param number
-     * @param test
-     * @param maxSimultaneousWorkers
-     * @param expectedTasksScheduled
-     */
-    private void loop(int number, BulkheadTestBackend test, int maxSimultaneousWorkers, int expectedTasksScheduled) {
-
-        Checker.setExpectedTasksScheduled(expectedTasksScheduled);
-        loop(number, test, maxSimultaneousWorkers);
-    }
-
-    /**
-     * Run a number of Callable's (usually Asynch's) in a loop on one thread.
-     * Here we do not check that amount that were successfully through the
-     * Bulkhead
-     * 
-     * @param number
-     * @param test
-     * @param maxSimultaneousWorkers
-     */
-    private void loop(int number, BulkheadTestBackend test, int maxSimultaneousWorkers) {
-
-        Checker.setExpectedMaxWorkers(maxSimultaneousWorkers);
-        Checker.setExpectedInstances(number);
-        Checker.setExpectedTasksScheduled(number);
-
-        Future[] results = new Future[number];
-        for (int i = 0; i < number; i++) {
-            Utils.log("synchronous loop() starting test " + i);
-            try {
-                results[i] = test.test(new Checker(5 * 1000));
-            }
-            catch (InterruptedException e1) {
-                Assert.fail("Unexpected interruption", e1);
-            }
-
-        }
-
-        Utils.handleResults(number, results);
+        TestData td = new TestData(new CountDownLatch(10));
+        loop(10, bhBeanClassAsynchronous10, 10, td);
+        td.check();
     }
 
     /**
      * Tests the method asynchronous Bulkhead(10). This test will check that 10
      * and no more than 10 asynchronous calls are allowed into a method that has
-     * an individual
-     * 
-     * @Bulkhead(10) annotation
+     * an individual @Bulkhead(10) annotation
      */
     @Test()
     public void testBulkheadMethodAsynchronous10() {
-        loop(10, bhBeanMethodAsynchronous10, 10);
-        Utils.check();
+        TestData td = new TestData(new CountDownLatch(10));
+        loop(10, bhBeanMethodAsynchronous10, 10, td);
+        td.check();
     }
 
     /**
@@ -174,8 +128,9 @@ public class BulkheadAsynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadClassAsynchronous3() {
-        loop(10, bhBeanClassAsynchronous3, 3);
-        Utils.check();
+        TestData td = new TestData(new CountDownLatch(10));
+        loop(10, bhBeanClassAsynchronous3, 3, td);
+        td.check();
     }
 
     /**
@@ -185,8 +140,9 @@ public class BulkheadAsynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadMethodAsynchronous3() {
-        loop(10, bhBeanMethodAsynchronous3, 3);
-        Utils.check();
+        TestData td = new TestData(new CountDownLatch(10));
+        loop(10, bhBeanMethodAsynchronous3, 3, td);
+        td.check();
     }
 
     /**
@@ -196,8 +152,9 @@ public class BulkheadAsynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadClassAsynchronousDefault() {
-        loop(10, bhBeanClassAsynchronousDefault, 10);
-        Utils.check();
+        TestData td = new TestData(new CountDownLatch(10));
+        loop(10, bhBeanClassAsynchronousDefault, 10, td);
+        td.check();
     }
 
     /**
@@ -207,8 +164,9 @@ public class BulkheadAsynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadMethodAsynchronousDefault() {
-        loop(10, bhBeanMethodAsynchronousDefault, 10);
-        Utils.check();
+        TestData td = new TestData(new CountDownLatch(10));
+        loop(10, bhBeanMethodAsynchronousDefault, 10, td);
+        td.check();
     }
 
     /**
@@ -218,8 +176,9 @@ public class BulkheadAsynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadClassAsynchronousQueueing10() {
-        loop(20, bhBeanClassAsynchronousQueueing, 10, 20);
-        Utils.check();
+        TestData td = new TestData(new CountDownLatch(20));
+        loop(20, bhBeanClassAsynchronousQueueing, 10, 20, td);
+        td.check();
     }
 
     /**
@@ -229,7 +188,55 @@ public class BulkheadAsynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadMethodAsynchronousQueueing10() {
-        loop(20, bhBeanMethodAsynchronousQueueing, 10, 20);
-        Utils.check();
+        TestData td = new TestData(new CountDownLatch(20));
+        loop(20, bhBeanMethodAsynchronousQueueing, 10, 20, td);
+        td.check();
     }
+
+    /**
+     * Run a number of Callable's (usually Asynch's) in a loop on one thread.
+     * Here we do not check that amount that were successfully through the
+     * Bulkhead
+     * 
+     * @param loops
+     * @param test
+     * @param maxSimultaneousWorkers
+     * @param td
+     */
+    private void loop(int loops, BulkheadTestBackend test, int maxSimultaneousWorkers, TestData td) {
+
+        td.setExpectedMaxSimultaneousWorkers(maxSimultaneousWorkers);
+        td.setExpectedInstances(loops);
+        td.setExpectedTasksScheduled(loops);
+
+        Future[] results = new Future[loops];
+        for (int i = 0; i < loops; i++) {
+            Utils.log("synchronous loop() starting test " + i);
+            try {
+                results[i] = test.test(new Checker(5 * 1000, td));
+            }
+            catch (InterruptedException e1) {
+                Assert.fail("Unexpected interruption", e1);
+            }
+
+        }
+
+        Utils.handleResults(loops, results);
+    }
+
+    /**
+     * Run a number of Callable's (usually Asynch's) in a loop on one thread
+     *
+     * @param number
+     * @param test
+     * @param maxSimultaneousWorkers
+     * @param expectedTasksScheduled
+     * @param td
+     */
+    private void loop(int number, BulkheadTestBackend test, int maxSimultaneousWorkers, int expectedTasksScheduled,
+            TestData td) {
+        td.setExpectedTasksScheduled(expectedTasksScheduled);
+        loop(number, test, maxSimultaneousWorkers, td);
+    }
+
 }

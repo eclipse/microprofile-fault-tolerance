@@ -19,13 +19,15 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead;
 
+import java.util.concurrent.CountDownLatch;
+
 import javax.inject.Inject;
 
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead55ClassAsynchronousRetryBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead55MethodAsynchronousRetryBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadRapidRetry55ClassAsynchBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadRapidRetry55MethodAsynchBean;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Checker;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.TestData;
 import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
@@ -34,6 +36,7 @@ import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.Assert;
+import org.testng.ITestContext;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -43,8 +46,8 @@ import org.testng.annotations.Test;
 
 /**
  * This collection of tests tests that failures, particularly Asynchronous
- * Bulkhead exception related failures will cause the Retry annotation logic to work
- * correctly.
+ * Bulkhead exception related failures will cause the Retry annotation logic to
+ * work correctly.
  *
  * @author Gordon Hutchison
  *
@@ -70,7 +73,7 @@ public class BulkheadAsynchRetryTest extends Arquillian {
     private BulkheadRapidRetry55ClassAsynchBean rrClassBean;
     @Inject
     private BulkheadRapidRetry55MethodAsynchBean rrMethodBean;
-    
+
     /**
      * This is the Arquillian deploy method that controls the contents of the
      * war that contains all the tests.
@@ -86,14 +89,9 @@ public class BulkheadAsynchRetryTest extends Arquillian {
         return war;
     }
 
-    /**
-     * This method is called prior to every test. It waits for all workers to
-     * finish and resets the Checker's state.
-     */
     @BeforeTest
-    public void beforeTest() {
-        Utils.quiesce();
-        Checker.reset();
+    public void beforeTest(final ITestContext testContext) {
+        Utils.log("Testmathod: " + testContext.getName());
     }
 
     /**
@@ -104,8 +102,9 @@ public class BulkheadAsynchRetryTest extends Arquillian {
     public void testBulkheadClassAsynchronousPassiveRetry55() {
         int iterations = 10;
         int expectedTasksScheduled = iterations;
-        Utils.loop(iterations, classBean, 5, expectedTasksScheduled);
-        Utils.check();
+        TestData td = new TestData(new CountDownLatch(expectedTasksScheduled));
+        Utils.loop(iterations, classBean, 5, expectedTasksScheduled, td);
+        td.check();
     }
 
     /**
@@ -119,8 +118,9 @@ public class BulkheadAsynchRetryTest extends Arquillian {
         int iterations = 20;
         int expectedTasksScheduled = iterations;
         int maxSimultaneousWorkers = 5;
-        Utils.loop(iterations, methodBean, maxSimultaneousWorkers, expectedTasksScheduled);
-        Utils.check();
+        TestData td = new TestData(new CountDownLatch(expectedTasksScheduled));
+        Utils.loop(iterations, methodBean, maxSimultaneousWorkers, expectedTasksScheduled, td);
+        td.check();
     }
 
     /**
@@ -128,41 +128,46 @@ public class BulkheadAsynchRetryTest extends Arquillian {
      * a method level test. The bean here does not delay its retries so there is
      * not enough time for the first generation of workers and queued workers to
      * progress.
+     * 
+     * @throws InterruptedException
      */
     @Test()
-    public void testBulkheadMethodAsynchronousRetry55Trip() {
+    public void testBulkheadMethodAsynchronousRetry55Trip() throws InterruptedException {
         int iterations = 11;
         int maxSimultaneousWorkers = 5;
+        TestData td = new TestData();
 
         boolean tripped;
         try {
-            Utils.loop(iterations, rrMethodBean, maxSimultaneousWorkers);
+            Utils.loop(iterations, rrMethodBean, maxSimultaneousWorkers, 0, td);
             tripped = false;
         }
         catch (BulkheadException bhe) {
             tripped = true;
-            Utils.log("Class Bulkhead que not long enough as expected " + bhe.getMessage());
+            Utils.log("Class Bulkhead queue not long enough as expected " + bhe.getMessage());
         }
         Assert.assertTrue(tripped,
                 "Asynchronous class Bulkead Retry not throwing Bulkhead exception when retry limit just exceeded");
 
-        Checker.setExpectedTasksScheduled(DONT_CHECK);
-        Checker.setExpectedInstances(DONT_CHECK);
-        Utils.check();
+        td.setExpectedTasksScheduled(DONT_CHECK);
+        td.setExpectedInstances(DONT_CHECK);
+        td.check();
     }
 
     /**
      * Tests overloading the Retries by firing lots of work at a full Method
      * bulkhead
+     * 
+     * @throws InterruptedException
      */
     @Test()
-    public void testBulkheadMethodAsynchronous55RetryOverload() {
+    public void testBulkheadMethodAsynchronous55RetryOverload() throws InterruptedException {
         int iterations = 1000;
-        int expectedTasksScheduled = iterations;
         int maxSimultaneousWorkers = 5;
+        TestData td = new TestData();
         boolean blown;
         try {
-            Utils.loop(iterations, rrMethodBean, maxSimultaneousWorkers, expectedTasksScheduled);
+            Utils.loop(iterations, rrMethodBean, maxSimultaneousWorkers, 0, td);
             blown = false;
         }
         catch (BulkheadException bhe) {
@@ -183,9 +188,11 @@ public class BulkheadAsynchRetryTest extends Arquillian {
         int iterations = 1000;
         int expectedTasksScheduled = iterations;
         int maxSimultaneousWorkers = 5;
+        TestData td = new TestData();
+
         boolean blown;
         try {
-            Utils.loop(iterations, rrClassBean, maxSimultaneousWorkers, expectedTasksScheduled);
+            Utils.loop(iterations, rrClassBean, maxSimultaneousWorkers, expectedTasksScheduled, td);
             blown = false;
         }
         catch (BulkheadException bhe) {
@@ -204,8 +211,9 @@ public class BulkheadAsynchRetryTest extends Arquillian {
     public void testBulkheadPassiveRetryMethodAsynchronous55() {
         int iterations = 10;
         int expectedTasksScheduled = iterations;
-        Utils.loop(iterations, methodBean, 5, expectedTasksScheduled);
-        Utils.check();
+        TestData td = new TestData(new CountDownLatch(expectedTasksScheduled));
+        Utils.loop(iterations, methodBean, 5, expectedTasksScheduled, td);
+        td.check();
     }
 
     /**
@@ -218,8 +226,9 @@ public class BulkheadAsynchRetryTest extends Arquillian {
         int iterations = 20;
         int expectedTasksScheduled = iterations;
         int maxSimultaneousWorkers = 5;
-        Utils.loop(iterations, classBean, maxSimultaneousWorkers, expectedTasksScheduled);
-        Utils.check();
+        TestData td = new TestData(new CountDownLatch(expectedTasksScheduled));
+        Utils.loop(iterations, classBean, maxSimultaneousWorkers, expectedTasksScheduled, td);
+        td.check();
     }
 
 }

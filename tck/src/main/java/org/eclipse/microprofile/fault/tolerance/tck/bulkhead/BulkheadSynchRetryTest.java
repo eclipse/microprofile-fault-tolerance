@@ -19,6 +19,7 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -34,18 +35,16 @@ import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhe
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadTestBackend;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Checker;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.ParrallelBulkheadTest;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.TestData;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.testng.ITestContext;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-
-/**
- * @author Gordon Hutchison
- */
 
 /**
  * This collection of tests tests that failures, particularly Synchronous
@@ -57,6 +56,7 @@ import org.testng.annotations.Test;
  */
 public class BulkheadSynchRetryTest extends Arquillian {
 
+    private static final int DONT_CHECK = 0;
     /*
      * We use an executer service to simulate the parallelism of multiple*
      * simultaneous requests
@@ -99,14 +99,9 @@ public class BulkheadSynchRetryTest extends Arquillian {
         return war;
     }
 
-    /**
-     * This method is called prior to every test. It waits for all workers to
-     * finish and resets the Checker's state.
-     */
     @BeforeTest
-    public void beforeTest() {
-        Utils.quiesce();
-        Checker.reset();
+    public void beforeTest(final ITestContext testContext) {
+        Utils.log("Testmathod: " + testContext.getName());
     }
 
     /**
@@ -117,99 +112,113 @@ public class BulkheadSynchRetryTest extends Arquillian {
     public void testBulkheadClassSynchronousPassiveRetry55() {
         int threads = 10;
         int maxSimultaneousWorkers = 5;
-        threads(threads, classBean, maxSimultaneousWorkers);
-        Utils.check();
+        TestData td = new TestData(new CountDownLatch(threads));
+        threads(threads, classBean, maxSimultaneousWorkers, threads, td);
+        td.check();
     }
 
     /**
      * Check we do not loose anything from the queue due to exceptions covered
      * by Retry at the class level. The Checker backends will throw an exception
-     * the first time their 'perform' method is called but will run OK when retried.
+     * the first time their 'perform' method is called but will run OK when
+     * retried.
      */
     @Test()
     public void testBulkheadQueReplacesDueToClassRetryFailures() {
         int threads = 10;
-        Checker.setExpectedInstances(threads);
         int maxSimultaneousWorkers = 5;
         Future[] results = new Future[threads];
-        
-        // As we are causing workers to get 'blown up' we cannot know that we get
+
+        TestData td = new TestData(new CountDownLatch(threads));
+        td.setExpectedInstances(threads);
+        // As we are causing workers to get 'blown up' we cannot know that we
+        // get
         // a full set at once, so we switch off the test that checks that the
-        // bulkhead 'filled up'. We will still check we don't get more than the bulkhead
+        // bulkhead 'filled up'. We will still check we don't get more than the
+        // bulkhead
         // at one time.
-        Checker.setExpectedMaxWorkers(maxSimultaneousWorkers, false);
-        
+        td.setExpectedMaxSimultaneousWorkers(maxSimultaneousWorkers);
+        td.setMaxFill(false);
+        td.setExpectedTasksScheduled(DONT_CHECK);
 
         for (int i = 0; i < threads; i++) {
             Utils.log("Starting test " + i);
-            BackendTestDelegate failOnce = new Checker(1, 1);
+            BackendTestDelegate failOnce = new Checker(1, td, 1);
             results[i] = xService.submit(new ParrallelBulkheadTest(rrClassBean, failOnce));
         }
 
+        td.check();
         Utils.handleResults(threads, results);
-        Utils.check();
     }
 
     /**
      * Check we do not loose anything from the queue due to exceptions covered
-     * by Retry at the method level. The Checker backends will throw an exception
-     * the first time their 'perform' method is called but will run OK when retried.
+     * by Retry at the method level. The Checker backends will throw an
+     * exception the first time their 'perform' method is called but will run OK
+     * when retried.
      */
     @Test()
     public void testBulkheadQueReplacesDueToMethodRetryFailures() {
         int threads = 10;
         int maxSimultaneousWorkers = 5;
-        Checker.setExpectedInstances(threads);
-        Checker.setExpectedMaxWorkers(0);
+        TestData td = new TestData();
+        td.setExpectedInstances(threads);
+        td.setExpectedMaxSimultaneousWorkers(5);
+        td.setMaxFill(false);
+        td.setLatch(null);
         Future[] results = new Future[threads];
-        Checker.setExpectedMaxWorkers(maxSimultaneousWorkers, false);
 
-        // As we are causing workers to get 'blown up' we cannot know that we get
+        // As we are causing workers to get 'blown up' we cannot know that we
+        // get
         // a full set at once, so we switch off the test that checks that the
-        // bulkhead 'filled up'. We still check we don't get more than the bulkhead
+        // bulkhead 'filled up'. We still check we don't get more than the
+        // bulkhead
         // at one time.
 
         for (int i = 0; i < threads; i++) {
             Utils.log("Starting test " + i);
-            BackendTestDelegate failOnce = new Checker(1, 1);
+            BackendTestDelegate failOnce = new Checker(1, td, 1);
             results[i] = xService.submit(new ParrallelBulkheadTest(rrMethodBean, failOnce));
         }
 
         Utils.handleResults(threads, results);
-        Utils.check();
+        td.check();
     }
 
     /**
      * Test that Retry can be used to prevent receiving Bulkhead exceptions from
      * a method level test. The retries are delayed by one second and will be
-     * done 10 times so this gives 10 seconds of retrying, which is enough to
+     * done 20 times so this gives 20 seconds of retrying, which is enough to
      * get the calls through the bulkhead.
      */
     @Test()
     public void testBulkheadMethodSynchronousRetry55() {
         int threads = 20;
         int maxSimultaneousWorkers = 5;
-        threads(threads, methodBean, maxSimultaneousWorkers);
-        Utils.check();
+        TestData td = new TestData(new CountDownLatch(20));
+        threads(threads, methodBean, maxSimultaneousWorkers, threads, td);
+        td.check();
     }
 
     /**
-     * Test no regression due to passive Retry. The Bulkhead is 5, but has a
-     * queue of 5, so the Retry should not come into effect for 10 Tasks.
+     * Test no regression due to passive Retry. The Bulkhead is 5
+     * so the Retry should not come into effect.
      */
     @Test()
     public void testBulkheadPassiveRetryMethodSynchronous55() {
-        int threads = 10;
+        int threads = 5;
         int maxSimultaneousWorkers = 5;
-        threads(threads, methodBean, maxSimultaneousWorkers);
-        Utils.check();
+        int expectedTasks = threads;
+        TestData td = new TestData(new CountDownLatch(expectedTasks));
+        threads(threads, methodBean, maxSimultaneousWorkers, expectedTasks, td);
+        td.check();
     }
 
     /**
      * Test that Retry can be used to prevent receiving Bulkhead exceptions from
      * a method level test. There is enough retrying in the Bean to cover the
-     * queue overflow to allow only ONE extra generation so we should loose
-     * 5 calls. 
+     * queue overflow to allow only ONE extra generation so we should loose 5
+     * calls.
      */
     @Test()
     public void testBulkheadRetryClassSynchronous55() {
@@ -217,8 +226,9 @@ public class BulkheadSynchRetryTest extends Arquillian {
         int expectedTasks = 15; // We Retry just long enough for the first
                                 // generation to finish.
         int maxSimultaneousWorkers = 5;
-        threads(threads, classBean, maxSimultaneousWorkers, expectedTasks);
-        Utils.check();
+        TestData td = new TestData(new CountDownLatch(expectedTasks));
+        threads(threads, classBean, maxSimultaneousWorkers, expectedTasks, td);
+        td.check();
     }
 
     /**
@@ -230,10 +240,10 @@ public class BulkheadSynchRetryTest extends Arquillian {
         int threads = 30;
         int maxSimultaneousWorkers = 5;
         int expectedTasks = 10;
-        threads(threads, zeroRetryBean, maxSimultaneousWorkers, expectedTasks);
-        Utils.check();
+        TestData td = new TestData(new CountDownLatch(expectedTasks));
+        threads(threads, zeroRetryBean, maxSimultaneousWorkers, expectedTasks, td);
+        td.check();
     }
-
 
     /**
      * Run a number of Callable's in parallel
@@ -242,31 +252,19 @@ public class BulkheadSynchRetryTest extends Arquillian {
      * @param test
      * @param maxSimultaneousWorkers
      */
-    private void threads(int number, BulkheadTestBackend test, int maxSimultaneousWorkers) {
+    private void threads(int number, BulkheadTestBackend test, int maxSimultaneousWorkers, int expectedTasks,
+            TestData td) {
 
-        Checker.setExpectedMaxWorkers(maxSimultaneousWorkers);
-        Checker.setExpectedInstances(number);
+        td.setExpectedMaxSimultaneousWorkers(maxSimultaneousWorkers);
+        td.setExpectedInstances(number);
+        td.setExpectedTasksScheduled(expectedTasks);
+
         Future[] results = new Future[number];
         for (int i = 0; i < number; i++) {
             Utils.log("Starting test " + i);
-            results[i] = xService.submit(new ParrallelBulkheadTest(test));
+            results[i] = xService.submit(new ParrallelBulkheadTest(test, td));
         }
 
         Utils.handleResults(number, results);
     }
-
-    /**
-     * Front end to threads(x,y,z) method above that allows to set explicitly the number
-     * of tasks we expect to get through to the backend.
-     * 
-     * @param threads
-     * @param bean
-     * @param maxSimultaneousWorkers
-     * @param expectedTasks
-     */
-    private void threads(int threads, BulkheadTestBackend bean, int maxSimultaneousWorkers, int expectedTasks) {
-        Checker.setExpectedTasksScheduled(expectedTasks);
-        threads(threads, bean, maxSimultaneousWorkers);
-    }
-
 }

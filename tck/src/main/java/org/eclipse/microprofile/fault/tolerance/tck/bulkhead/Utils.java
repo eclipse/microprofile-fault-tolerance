@@ -25,6 +25,7 @@ import java.util.concurrent.Future;
 
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadTestBackend;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Checker;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.TestData;
 import org.testng.Assert;
 
 public class Utils {
@@ -36,35 +37,6 @@ public class Utils {
      */
     private static long tid() {
         return Thread.currentThread().getId();
-    }
-
-    /**
-     * Wait for the tests to finish and check the results
-     */
-    public static void check() {
-        quiesce();
-        Checker.check();
-    }
-
-    /**
-     * Wait for the tests to finish. We avoid using 'isDone' that passes through
-     * the wrapping Future as we want to test this independently.
-     */
-    static void quiesce() {
-        try {
-            int waits = 0;
-            while (Checker.getWorkers() > 0) {
-                Utils.log("Waiting for " + Checker.getWorkers() + " workers to finish");
-                Thread.sleep(100);
-                if (waits++ > 100) {
-                    break;
-                }
-
-            }
-        }
-        catch (InterruptedException e) {
-            log(e.toString());
-        }
     }
 
     /**
@@ -97,21 +69,6 @@ public class Utils {
     }
 
     /**
-     * Run a number of Callable's (usually Asynch's) in a loop on one thread
-     * 
-     * @param iterations
-     * @param test
-     * @param maxSimultaneousWorkers
-     * @param expectedTasksScheduled
-     */
-    public static void loop(int iterations, BulkheadTestBackend test, int maxSimultaneousWorkers,
-            int expectedTasksScheduled) {
-
-        Checker.setExpectedTasksScheduled(expectedTasksScheduled);
-        loop(iterations, test, maxSimultaneousWorkers);
-    }
-
-    /**
      * Run a number of Callable's (usually Asynch's) in a loop on one thread.
      * Here we do not check that amount that were successfully through the
      * Bulkhead
@@ -119,18 +76,21 @@ public class Utils {
      * @param iterations
      * @param test
      * @param maxSimultaneousWorkers
+     * @param expectedTasksScheduled
+     * @param td - used to hold expected results
      */
-    public static void loop(int iterations, BulkheadTestBackend test, int maxSimultaneousWorkers) {
+    public static void loop(int iterations, BulkheadTestBackend test, int maxSimultaneousWorkers, int expectedTasksScheduled, TestData td ) {
 
-        Checker.setExpectedMaxWorkers(maxSimultaneousWorkers);
-        Checker.setExpectedInstances(iterations);
-        Checker.setExpectedTasksScheduled(iterations);
+        
+        td.setExpectedMaxSimultaneousWorkers(maxSimultaneousWorkers);
+        td.setExpectedInstances(iterations);
+        td.setExpectedTasksScheduled(expectedTasksScheduled);
 
         Future[] results = new Future[iterations];
         try {
             for (int i = 0; i < iterations; i++) {
                 Utils.log("Starting test " + i);
-                results[i] = test.test(new Checker(1 * 1000));
+                results[i] = test.test(new Checker(1 * 1000, td));
             }
         }
         catch (InterruptedException e1) {
@@ -144,8 +104,7 @@ public class Utils {
      * A simple local logger. Messages are logged with a prefix of the threadId
      * and the current time.
      * 
-     * @param s
-     *            message
+     * @param s - message
      */
     public static void log(String s) {
         System.out.println(tid() + " " + hms() + ": " + s);
@@ -160,6 +119,9 @@ public class Utils {
         return DateTimeFormatter.ofPattern("HH:mm:ss:SS").format(LocalDateTime.now());
     }
 
+    /**
+     * @param millis
+     */
     public static void sleep(int millis) {
         try {
             Thread.sleep(millis);
@@ -169,6 +131,10 @@ public class Utils {
         }
     }
 
+    /**
+     * Prevent instances being constructed
+     */
     private Utils() {
-    };
+    }
+
 }
