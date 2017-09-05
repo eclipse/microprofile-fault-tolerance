@@ -47,10 +47,6 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 /**
- * @author Gordon Hutchison
- */
-
-/**
  * This collection of tests tests that failures, particularly Synchronous
  * Bulkhead related failures will cause the Retry annotation logic to work
  * correctly.

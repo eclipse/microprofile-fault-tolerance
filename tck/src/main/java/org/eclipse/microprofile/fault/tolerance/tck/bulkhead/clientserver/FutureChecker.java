@@ -85,9 +85,7 @@ public class FutureChecker extends Checker {
      * underlying method result object apart from the get and get with timeout
      * methods. The semantics are that, for example, isDone()'s result are with
      * respect to the operation of running the method, not as the result would
-     * be if it was delegated to the Future object that the method returns.
-     * 
-     * @author Gordon Hutchison
+     * be if it was delegated to the Future object that the method returns
      *
      */
     public final class TestFuture implements Future<String> {

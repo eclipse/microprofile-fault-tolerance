@@ -77,7 +77,7 @@ public class Utils {
      * @param test
      * @param maxSimultaneousWorkers
      * @param expectedTasksScheduled
-     * @param td 
+     * @param td - used to hold expected results
      */
     public static void loop(int iterations, BulkheadTestBackend test, int maxSimultaneousWorkers, int expectedTasksScheduled, TestData td ) {
 
@@ -104,8 +104,7 @@ public class Utils {
      * A simple local logger. Messages are logged with a prefix of the threadId
      * and the current time.
      * 
-     * @param s
-     *            message
+     * @param s - message
      */
     public static void log(String s) {
         System.out.println(tid() + " " + hms() + ": " + s);
@@ -120,6 +119,9 @@ public class Utils {
         return DateTimeFormatter.ofPattern("HH:mm:ss:SS").format(LocalDateTime.now());
     }
 
+    /**
+     * @param millis
+     */
     public static void sleep(int millis) {
         try {
             Thread.sleep(millis);
@@ -129,6 +131,9 @@ public class Utils {
         }
     }
 
+    /**
+     * Prevent instances being constructed
+     */
     private Utils() {
     }
 

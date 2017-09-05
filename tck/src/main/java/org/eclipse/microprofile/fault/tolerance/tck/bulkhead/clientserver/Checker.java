@@ -28,17 +28,9 @@ import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
 
 /**
  * A simple sleeping test backend worker. Having this backend as a delegate
- * means that we can perform more than one kind of test using a common
- * 
+ * means that we can perform more than one kind of test using a common 
  * @Injected object that delegates to one of these that is passed in as a
- *           parameter to the business method.
- * 
- *           There are a number of tests that this backend can perform:
- *           <ul>
- *           <li>expected number of instances created
- *           <li>expected workers started via perform method
- *           <li>max simultaneous workers not exceeded
- *           </ul>
+ * parameter to the business method.
  * 
  * @author Gordon Hutchison
  */
@@ -73,7 +65,7 @@ public class Checker implements BackendTestDelegate {
     }
 
     /*
-     * Work this is the method that simulates the backend work inside the
+     * This is the method that simulates the backend work inside the
      * Bulkhead.
      * 
      * @see org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.
@@ -85,10 +77,6 @@ public class Checker implements BackendTestDelegate {
             int taskId = td.getTasksScheduled().incrementAndGet();
             int now = td.getWorkers().incrementAndGet();
             int max = td.getMaxSimultaneousWorkers().get();
-
-            // if( latch != null ){
-            // latch.countDown();
-            // }
 
             while ((now > max) && !td.getMaxSimultaneousWorkers().compareAndSet(max, now)) {
                 max = td.getMaxSimultaneousWorkers().get();
@@ -127,6 +115,9 @@ public class Checker implements BackendTestDelegate {
         return result;
     }
 
+    /**
+     * @return how long do we sleep for
+     */
     public int getSleep(){
         return millis;
     }

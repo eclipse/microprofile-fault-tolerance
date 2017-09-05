@@ -27,7 +27,7 @@ import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
 import org.testng.Assert;
 
 /**
- * A class to hold data that is has the scope of a test.
+ * A class to hold a set of data that is has the scope of a test.
  * 
  * @author Gordon Hutchison
  */
