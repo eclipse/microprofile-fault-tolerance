@@ -44,4 +44,4 @@ public Future<Connection> serviceA() {
 The above code-snippet means the method serviceA applies the `Asynchronous` policy, which means the invocation will be done by a different thread.
 
 The `@Asynchronous` annotation can be used together with `@Timeout`, `@Fallback`, `@Bulkhead` and `@Retry`.
-Method innvocation will occur in a different thread.
+Method invocation will occur in a different thread.
