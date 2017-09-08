@@ -57,6 +57,6 @@ The circuit will stay open for 1000ms and then back to half open.
 After 10 consecutive successful invocations, the circuit will be back to close again.
 
 When a circuit is open, A `CircuitBreakerOpenException` must be thrown.
-The `CircuitBreaker` annotation can be used together with `Timeout`, `Fallback`, `Asynchronous`, `Bulkhead` and `Retry`.
-A `fallback` can be specified and it will be invoked if the `CircuitBreakerOpenException` is thrown.
-`Timeout` can be configured to fail an operation if it takes longer than the `Timeout` value to complete.
+The `@CircuitBreaker` annotation can be used together with `@Timeout`, `@Fallback`, `@Asynchronous`, `@Bulkhead` and `@Retry`.
+A `@Fallback` can be specified and it will be invoked if the `CircuitBreakerOpenException` is thrown.
+`@Timeout` can be configured to fail an operation if it takes longer than the `Timeout` value to complete.

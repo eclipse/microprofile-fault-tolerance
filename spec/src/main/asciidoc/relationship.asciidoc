@@ -53,13 +53,13 @@ Since this specification depends on CDI and interceptors specifications, fault t
 
 * if a method and its containing class don't have any fault tolerance interceptor binding, it won't be considered as a fault tolerance operation.
 
-== Relationship to MicroProfile Config
+=== Relationship to MicroProfile Config
 
 The MicroProfile config specification defines a flexible config model to enable microservice
 configurable and achieve the strict separation of config from code. All parameters on the
 annotations/interceptor bindings are config properties. They can be configured externally either
 via other predefined config sources (e.g. environment variables, system properties or other sources). For an instance,
-the `maxRetries` parameter on the `Retry` annotation is a configuration property. It can be configured externally.
+the `maxRetries` parameter on the `@Retry` annotation is a configuration property. It can be configured externally.
 
 
 
