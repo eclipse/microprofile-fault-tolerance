@@ -27,6 +27,7 @@ import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
+import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.Assert;
@@ -34,6 +35,10 @@ import org.testng.annotations.Test;
 
 /**
  * Test the impact of the MP_Fault_Tolerance_NonFallback_Enabled environment variable.
+ * 
+ * The test assumes that the container supports both the MicroProfile Configuration API and the MicroProfile
+ * Fault Tolerance API. The MP_Fault_Tolerance_NonFallback_Enabled Variable is set to "false" in the manifest 
+ * of the deployed application.
  * 
  * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  *
@@ -45,13 +50,15 @@ public class DisableTest extends Arquillian {
     @Deployment
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
-                .create(JavaArchive.class, "ftDisableRetry.jar")
+                .create(JavaArchive.class, "ftDisableAllButFallback.jar")
                 .addClasses(DisableClient.class, StringFallbackHandler.class)
+                .addAsManifestResource(new StringAsset("MP_Fault_Tolerance_NonFallback_Enabled=false"),
+                    "microprofile-config.properties")
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                 .as(JavaArchive.class);
 
         WebArchive war = ShrinkWrap
-                .create(WebArchive.class, "ftDisableRetry.war")
+                .create(WebArchive.class, "ftDisableAllButFallback.war")
                 .addAsLibrary(testJar);
         return war;
     }
@@ -62,7 +69,7 @@ public class DisableTest extends Arquillian {
      * ServiceA is annotated with maxRetries = 1 so serviceA is expected to execute 2 times but if MP_Fault_Tolerance_NonFallback_Enabled 
      * is set to false in the Container environment, then no retries should be attempted.
      */
-    @Test (enabled = false)
+    @Test
     public void testRetryDisabled() {
         try {
             disableClient.serviceA();
@@ -81,7 +88,7 @@ public class DisableTest extends Arquillian {
      * is set to false in the Container environment, then no retries should be attempted HOWEVER the Fallback should still be driven
      * successfully, so the test checks that a Fallback was driven after serviceB fails.
      */
-    @Test (enabled = false)
+    @Test
     public void testFallbackSuccess() {
 
         try {
@@ -103,7 +110,7 @@ public class DisableTest extends Arquillian {
      * If MP_Fault_Tolerance_NonFallback_Enabled is set to false in the Container environment, then the CircuitBreaker 
      * will not operate, no CircuitBreakerOpenExceptions will be thrown and execution will fail 7 times.
      */
-    @Test (enabled = false)
+    @Test
     public void testCircuitClosedThenOpen() {
         for (int i = 0; i < 7; i++) {
 
@@ -132,7 +139,7 @@ public class DisableTest extends Arquillian {
      * environment, then no Timeout will occur and a RuntimeException will be thrown after 3 seconds.
      * 
      */
-    @Test (enabled = false)
+    @Test
     public void testTimeout() {
         try {
             disableClient.serviceD(3000);
