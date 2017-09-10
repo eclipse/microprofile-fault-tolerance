@@ -61,7 +61,7 @@ Otherwise, the `FaultToleranceDefinitionException` exception will be thrown.
 
 ==== Specify the fallbackMethod
 
-This is used if the fallbackMethod is on the same class as the method to call fall back.
+This is used if the `fallbackMethod` is on the same class as the method to call fall back.
 
 [source, java]
 ----
@@ -84,7 +84,7 @@ The method `fallbackForServiceB` will be invoked.
 The return type of `fallbackForServiceB` must be `String` and the argument list for `fallbackForServiceB` must be the same as `ServiceB`.
 Otherwise, the `FaultToleranceDefinitionException` exception will be thrown.
 
-The parameter `value` and `fallbackMethod` on `Fallback` cannot be specified at the same time.
+The parameter `value` and `fallbackMethod` on `@Fallback` cannot be specified at the same time.
 Otherwise, the `FaultToleranceDefinitionException` exception will be thrown.
 
 The fallback should be triggered when an exception occurs.
