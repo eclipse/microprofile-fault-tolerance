@@ -44,7 +44,7 @@ public class BulkheadRapidRetry550MethodSynchBean implements BulkheadTestBackend
     @Asynchronous
     @Retry(retryOn =
      { BulkheadException.class }, delay = 1, delayUnit = ChronoUnit.MICROS,
-     maxRetries = 0 )
+     maxRetries = 0, maxDuration=999999 )
     public Future test(BackendTestDelegate action) throws InterruptedException {
         Utils.log("in business method of bean " + this.getClass().getName());
         return action.perform();
