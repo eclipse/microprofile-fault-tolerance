@@ -22,7 +22,7 @@
 == Bulkhead
 
 The `Bulkhead` pattern is to prevent faults in one part of the system from cascading to the entire system, which might bring down the whole system.
-The implementation is to limit the number of concurrent requests accessing to an instance.
+The implementation is to limit the number of concurrent requests accessing to an instance. Therefore, `Bulkhead` pattern is only effective when applying `@Bulkhead` to a component that can be accessed from multiple contexts.
 
 === Bulkhead Usage
 A method or class can be annotated with `@Bulkhead`, which means the method or the methods under the class will have Bulkhead policy applied correspondingly.
