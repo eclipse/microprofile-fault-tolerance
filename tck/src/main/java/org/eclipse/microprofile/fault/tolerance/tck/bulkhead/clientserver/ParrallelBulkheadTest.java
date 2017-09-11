@@ -24,7 +24,7 @@ import java.util.concurrent.Future;
 
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
 import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
-import org.junit.Assert;
+import org.testng.Assert;
 
 /**
  * @author Gordon Hutchison
@@ -56,9 +56,9 @@ public class ParrallelBulkheadTest implements Callable<Future> {
      * @param target
      *            the backend bulkheaded test class
      */
-    public ParrallelBulkheadTest(BulkheadTestBackend target) {
+    public ParrallelBulkheadTest(BulkheadTestBackend target, TestData td) {
         this.target = target;
-        this.action = new Checker(1000);
+        this.action = new Checker(1000, td);
     }
 
     @Override
