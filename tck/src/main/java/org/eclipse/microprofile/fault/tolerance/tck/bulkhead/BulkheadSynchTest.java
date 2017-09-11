@@ -96,7 +96,7 @@ public class BulkheadSynchTest extends Arquillian {
 
     @BeforeTest
     public void beforeTest(final ITestContext testContext) {
-        Utils.log("Testmathod: " + testContext.getName());
+        Utils.log("Testmethod: " + testContext.getName());
     }
 
     /**

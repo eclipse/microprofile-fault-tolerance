@@ -43,18 +43,14 @@ import org.testng.annotations.Test;
 /**
  * This set of tests will test correct operation on the relevant methods of the
  * Future object that is returned from the business method of a Asynchronous
- * Method or Class. Note that this is not the same as the Future object that the
- * users called method (which runs on the new thread) returns. So, for example,
- * calls to 'isDone' will be done with respect to the users 'get' method having
- * been completed and not delegated to the user's 'Future.isDone'
- * implementation.
+ * Method or Class.
  * 
  * @author Gordon Hutchison
  */
 public class BulkheadFutureTest extends Arquillian {
 
     private static final int SHORT_TIME = 100;
-    private static final int VERY_LONG_TIME = 300000;
+    private static final int LONG_TIME = 3000;
     @Inject
     private BulkheadMethodAsynchronousDefaultBean bhBeanMethodAsynchronousDefault;
     @Inject
@@ -71,7 +67,7 @@ public class BulkheadFutureTest extends Arquillian {
 
     @BeforeTest
     public void beforeTest(final ITestContext testContext) {
-        Utils.log("Testmathod: " + testContext.getName());
+        Utils.log("Testmethod: " + testContext.getName());
     }
 
     /**
@@ -82,7 +78,7 @@ public class BulkheadFutureTest extends Arquillian {
     public void testBulkheadMethodAsynchFutureCancel() {
 
         // We want a long running backend that we can cancel
-        Checker fc = new FutureChecker(VERY_LONG_TIME);
+        Checker fc = new FutureChecker(LONG_TIME);
 
         Future<String> result = null;
         try {
@@ -178,7 +174,7 @@ public class BulkheadFutureTest extends Arquillian {
     @Test()
     public void testBulkheadClassAsynchFutureCancel() {
 
-        Checker fc = new FutureChecker(VERY_LONG_TIME);
+        Checker fc = new FutureChecker(LONG_TIME);
         Future<String> result = null;
         try {
             result = bhBeanClassAsynchronousDefault.test(fc);

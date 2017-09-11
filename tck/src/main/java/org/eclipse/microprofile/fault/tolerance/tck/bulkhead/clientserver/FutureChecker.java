@@ -28,7 +28,7 @@ import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
 
 /**
  * A backend that is used in the tests of the operations on the Future returned
- * by the user (only get() should be called).
+ * by the user.
  * 
  * @author Gordon Hutchison
  */
@@ -39,13 +39,12 @@ public class FutureChecker extends Checker {
     }
 
     public FutureChecker(int sleepMillis) {
-        super( sleepMillis, new TestData());
+        super(sleepMillis, new TestData());
     }
 
     /*
      * This method is the one called from the business method of the injected
-     * object that has the annotations. In this class we just wait to be told
-     * what to do.
+     * object that has the annotations.
      * 
      * @see org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.
      * BulkheadTestAction#perform()
@@ -77,35 +76,30 @@ public class FutureChecker extends Checker {
         return new TestFuture();
     }
 
-    /**
-     * This test backend delegate does nothing except to complain with
-     * UnsupportedOperation exceptions if methods that are not expected to be
-     * called are called...The Future returned from a annotated method or class
-     * to a client is not expected to pass on any method calls to the users
-     * underlying method result object apart from the get and get with timeout
-     * methods. The semantics are that, for example, isDone()'s result are with
-     * respect to the operation of running the method, not as the result would
-     * be if it was delegated to the Future object that the method returns
-     *
-     */
     public final class TestFuture implements Future<String> {
 
         private AtomicBoolean done = new AtomicBoolean(false);
         private String result = "";
+        private boolean isCancelCalled;
+        private boolean isDoneCalled;
+        private boolean isIsCancelledCalled;
 
         @Override
         public boolean cancel(boolean mayInterruptIfRunning) {
-            throw new UnsupportedOperationException();
+            isCancelCalled = true;
+            return true;
         }
 
         @Override
         public boolean isCancelled() {
-            throw new UnsupportedOperationException();
+            isIsCancelledCalled = true;
+            return isCancelCalled;
         }
 
         @Override
         public boolean isDone() {
-            throw new UnsupportedOperationException();
+            isDoneCalled = true;
+            return true;
         }
 
         /*
