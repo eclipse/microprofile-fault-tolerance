@@ -9,15 +9,11 @@ PackageHomePage: http://www.eclipse.org/microprofile
 PackageLicenseDeclared: Apache-2.0
 
 PackageCopyrightText: <text>
-Emily Jiang, IBM
-Neil Young, IBM
-Gordon Hutchison, IBM
-John Ament,
-Antoine Sabot-Durand, Rehat
-Tom Evans, IBM
-Kevin Sutter, IBM
-Ondro Mihalyi, Payara
-Martin Kouba, Redhat
-Ken Finnagan, Redhat
-Gaurav Gupta, Payara
+Emily Jiang, emijiang@uk.ibm.com
+Neil Young, neil_young@uk.ibm.com
+Gordon Hutchison, Gordon.Hutchison@gmail.com
+John Ament, john.d.ament@gmail.com
+Antoine Sabot-Durand, antoine@sabot-durand.net
+Tom Evans, tevans@uk.ibm.com
+Martin Kouba, mkouba@redhat.com
 </text>
