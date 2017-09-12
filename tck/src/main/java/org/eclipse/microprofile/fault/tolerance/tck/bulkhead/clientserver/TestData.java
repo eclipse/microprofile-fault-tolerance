@@ -149,7 +149,7 @@ public class TestData {
         Assert.assertTrue(getMaxSimultaneousWorkers().get() <= getExpectedMaxSimultaneousWorkers(),
                 " Bulkhead appears to have been breeched " + getMaxSimultaneousWorkers() + " workers, expected "
                         + getExpectedMaxSimultaneousWorkers() + ". ");
-        Assert.assertFalse(getExpectedMaxSimultaneousWorkers() > 1 && getMaxSimultaneousWorkers().get() == 1,
+        Assert.assertFalse(isMaxFill() && getExpectedMaxSimultaneousWorkers() > 1 && getMaxSimultaneousWorkers().get() == 1,
                 " Workers are not in parrallel. ");
         Assert.assertTrue(
                 !isMaxFill() || getExpectedMaxSimultaneousWorkers() == getMaxSimultaneousWorkers().get(),

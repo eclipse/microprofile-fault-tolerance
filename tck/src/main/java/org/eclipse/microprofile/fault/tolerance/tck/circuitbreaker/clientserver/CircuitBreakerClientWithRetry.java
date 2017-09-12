@@ -71,7 +71,7 @@ public class CircuitBreakerClientWithRetry implements Serializable {
     }
     
     @CircuitBreaker(successThreshold = 2, requestVolumeThreshold = 4, failureRatio = 0.75, delay = 50000)
-    @Retry(retryOn = {RuntimeException.class, TimeoutException.class}, maxRetries = 7)
+    @Retry(retryOn = {RuntimeException.class, TimeoutException.class}, maxRetries = 7, maxDuration = 20000)
     @Timeout(500)
     public Connection serviceC(long timeToSleep) {
         Connection conn = null;

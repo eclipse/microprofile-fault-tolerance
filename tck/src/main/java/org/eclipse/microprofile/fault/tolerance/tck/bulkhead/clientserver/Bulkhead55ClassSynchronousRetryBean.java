@@ -38,7 +38,7 @@ import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
 @Bulkhead(waitingTaskQueue = 5, value = 5)
 @Asynchronous
 @Retry(retryOn =
-{ BulkheadException.class }, delay = 500, delayUnit = ChronoUnit.MILLIS, maxRetries = 12)
+{ BulkheadException.class }, delay = 500, delayUnit = ChronoUnit.MILLIS, maxRetries = 12, maxDuration=999999)
 public class Bulkhead55ClassSynchronousRetryBean implements BulkheadTestBackend {
 
     public Future test(BackendTestDelegate action) throws InterruptedException {
