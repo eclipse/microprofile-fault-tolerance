@@ -69,7 +69,7 @@ public @interface Retry {
      * @return the maximum duration to perform retries for.
      */
     @Nonbinding
-    long maxDuration() default 60000;
+    long maxDuration() default 180000;
 
     /**
      *
