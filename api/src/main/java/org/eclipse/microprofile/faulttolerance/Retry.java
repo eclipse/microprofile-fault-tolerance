@@ -65,11 +65,11 @@ public @interface Retry {
     ChronoUnit delayUnit() default ChronoUnit.MILLIS;
 
     /**
-     * The max duration. The value must be greater than the delay if set. 0 means not set.
+     * The max duration. The max duration must be greater than the delay duration if set. 0 means not set.
      * @return the maximum duration to perform retries for.
      */
     @Nonbinding
-    long maxDuration() default 2000;
+    long maxDuration() default 60000;
 
     /**
      *
