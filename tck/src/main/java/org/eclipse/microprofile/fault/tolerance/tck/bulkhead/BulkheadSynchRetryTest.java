@@ -143,7 +143,7 @@ public class BulkheadSynchRetryTest extends Arquillian {
 
         for (int i = 0; i < threads; i++) {
             Utils.log("Starting test " + i);
-            BackendTestDelegate failOnce = new Checker(1, td, 1);
+            BackendTestDelegate failOnce = new Checker(100, td, 1);
             results[i] = xService.submit(new ParrallelBulkheadTest(rrClassBean, failOnce));
         }
 
@@ -163,21 +163,19 @@ public class BulkheadSynchRetryTest extends Arquillian {
         int maxSimultaneousWorkers = 5;
         TestData td = new TestData();
         td.setExpectedInstances(threads);
-        td.setExpectedMaxSimultaneousWorkers(5);
-        td.setMaxFill(false);
+        td.setExpectedMaxSimultaneousWorkers(maxSimultaneousWorkers);
         td.setLatch(null);
         Future[] results = new Future[threads];
 
         // As we are causing workers to get 'blown up' we cannot know that we
-        // get
-        // a full set at once, so we switch off the test that checks that the
-        // bulkhead 'filled up'. We still check we don't get more than the
-        // bulkhead
-        // at one time.
+        // get a full set at once, so we switch off the test that checks that
+        // the bulkhead 'filled up'. We still check we don't get more than the
+        // bulkhead at one time.
+        td.setMaxFill(false);
 
         for (int i = 0; i < threads; i++) {
             Utils.log("Starting test " + i);
-            BackendTestDelegate failOnce = new Checker(1, td, 1);
+            BackendTestDelegate failOnce = new Checker(100, td, 1);
             results[i] = xService.submit(new ParrallelBulkheadTest(rrMethodBean, failOnce));
         }
 
@@ -201,8 +199,8 @@ public class BulkheadSynchRetryTest extends Arquillian {
     }
 
     /**
-     * Test no regression due to passive Retry. The Bulkhead is 5
-     * so the Retry should not come into effect.
+     * Test no regression due to passive Retry. The Bulkhead is 5 so the Retry
+     * should not come into effect.
      */
     @Test()
     public void testBulkheadPassiveRetryMethodSynchronous55() {

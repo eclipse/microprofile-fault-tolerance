@@ -40,7 +40,7 @@ public class Bulkhead55MethodSynchronousRetryBean implements BulkheadTestBackend
     @Override
     @Bulkhead(value = 5)
     @Retry(retryOn =
-    { BulkheadException.class }, delay = 1, delayUnit = ChronoUnit.SECONDS, maxRetries = 20)
+    { BulkheadException.class }, delay = 1, delayUnit = ChronoUnit.SECONDS, maxRetries = 20, maxDuration=999999)
     public Future test(BackendTestDelegate action) throws InterruptedException {
         Utils.log("in business method of bean " + this.getClass().getName());
         return action.perform();
