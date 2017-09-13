@@ -21,6 +21,8 @@
     <artifactId>microprofile-fault-tolerance-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
+    
+    <name>MicroProfile Fault Tolerance</name>
     <description>Eclipse MicroProfile Falt Tolerance Feature</description>
 
     <url>http://microprofile.io</url>
