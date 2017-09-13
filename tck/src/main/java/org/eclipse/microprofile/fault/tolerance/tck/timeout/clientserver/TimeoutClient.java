@@ -36,6 +36,8 @@ public class TimeoutClient {
 
     /**
      * serviceA uses the default Fault Tolerance timeout of 1 second.
+     * @param timeToSleep How long should the execution take in millis
+     * @return null or exception is raised
      */    
     @Timeout
     public Connection serviceA(long timeToSleep) {
@@ -51,6 +53,8 @@ public class TimeoutClient {
 
     /**
      * serviceB specifies a Timeout longer than the default, at 2 seconds
+     * @param timeToSleep How long should the execution take in millis
+     * @return null or exception is raised
      */
     @Timeout(2000)
     public Connection serviceB(long timeToSleep) {
@@ -66,6 +70,8 @@ public class TimeoutClient {
 
     /**
      * serviceC specifies a Timeout shorter than the default, at .5 seconds
+     * @param timeToSleep How long should the execution take in millis
+     * @return null or exception is raised
      */
     @Timeout(500)
     public Connection serviceC(long timeToSleep) {
@@ -82,6 +88,8 @@ public class TimeoutClient {
     /**
      * serviceD specifies a Timeout longer than the default, at 2 
      * seconds 
+     * @param timeToSleepInMillis  How long should the execution take in millis
+     * @return null or exception is raised
      */
     @Timeout(value = 2, unit = ChronoUnit.SECONDS)
     public Connection serviceD(long timeToSleepInMillis) {

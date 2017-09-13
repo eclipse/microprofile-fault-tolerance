@@ -33,7 +33,7 @@ public class Utils {
     /**
      * Get the Thread ID
      * 
-     * @return
+     * @return thread id
      */
     private static long tid() {
         return Thread.currentThread().getId();
@@ -42,8 +42,8 @@ public class Utils {
     /**
      * Common function to check the returned results of the tests
      * 
-     * @param number
-     * @param results
+     * @param number number of futures in results
+     * @param results futures of background processes
      */
     static void handleResults(int number, Future[] results) {
         try {
@@ -73,10 +73,10 @@ public class Utils {
      * Here we do not check that amount that were successfully through the
      * Bulkhead
      * 
-     * @param iterations
-     * @param test
-     * @param maxSimultaneousWorkers
-     * @param expectedTasksScheduled
+     * @param iterations number of iterations
+     * @param test test instance
+     * @param maxSimultaneousWorkers simultaneous workers
+     * @param expectedTasksScheduled expected tasks scheduled
      * @param td - used to hold expected results
      */
     public static void loop(int iterations, BulkheadTestBackend test, int maxSimultaneousWorkers, int expectedTasksScheduled, TestData td ) {
@@ -120,7 +120,7 @@ public class Utils {
     }
 
     /**
-     * @param millis
+     * @param millis how log to sleep
      */
     public static void sleep(int millis) {
         try {

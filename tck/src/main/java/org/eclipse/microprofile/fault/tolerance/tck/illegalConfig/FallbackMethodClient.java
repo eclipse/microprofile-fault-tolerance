@@ -36,6 +36,7 @@ public class FallbackMethodClient {
 
     /**
      * Retry 5 times and then fallback
+     * @return a dummy number
      */
     @Retry(maxRetries = 4)
     @Fallback(fallbackMethod = "fallbackForServiceB")
@@ -44,7 +45,8 @@ public class FallbackMethodClient {
     }
 
     /**
-     * Incompatible signature, only one parameter
+     * Fallback method with incompatible signature, different return type
+     * @return dummy string
      */
     public String fallbackForServiceB() {
         return "fallback method for serviceB";

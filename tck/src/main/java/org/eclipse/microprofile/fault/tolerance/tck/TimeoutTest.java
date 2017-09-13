@@ -232,14 +232,14 @@ public class TimeoutTest extends Arquillian {
     public void testTimeoutClassLevel() {
         try {
             clientForDefaultTimeout.serviceA(20000);
-            Assert.fail("serviceA should throw a testTimeoutClassLevel in testTimeout");
+            Assert.fail("serviceA should throw a TimeoutException in testTimeout");
         } 
         catch (TimeoutException ex) {
             // Expected
         } 
         catch (RuntimeException ex) {
             // Not Expected
-            Assert.fail("serviceA should throw a testTimeoutClassLevel in testTimeout not a RuntimeException");
+            Assert.fail("serviceA should throw a TimeoutException in testTimeout not a RuntimeException");
         }
     }
 

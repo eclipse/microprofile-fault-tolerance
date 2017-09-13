@@ -36,6 +36,8 @@ public class ShorterTimeoutClient {
 
     /**
      * serviceA uses the class scoped Fault Tolerance timeout of 0.5 seconds.
+     * @param timeToSleep How long should the execution take in millis
+     * @return null or exception is raised
      */    
     public Connection serviceA(long timeToSleep) {
         try {
@@ -50,6 +52,8 @@ public class ShorterTimeoutClient {
     
     /**
      * serviceB specifies a an overriding Timeout longer than the default, at 2 seconds
+     * @param timeToSleep How long should the execution take in millis
+     * @return null or exception is raised
      */
     @Timeout(2000)
     public Connection serviceB(long timeToSleep) {

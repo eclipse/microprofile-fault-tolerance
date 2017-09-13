@@ -41,6 +41,10 @@ public class DisableClient {
     private int counterForInvokingServiceB = 0;
     private int counterForInvokingServiceC = 0;
 
+    /**
+     * Invokes connection service and increases the counter for invocations the connection service
+     * @return Always throws exception
+     */
     @Retry(maxRetries = 1)
     public Connection serviceA() {
         try {
@@ -52,6 +56,10 @@ public class DisableClient {
         return connectionService();
     }
     
+    /**
+     * Invokes name service and increases the counter for invocations of serviceB
+     * @return Always throws exception
+     */
     @Retry(maxRetries = 1)
     @Fallback(StringFallbackHandler.class)
     public String serviceB() {
@@ -59,6 +67,10 @@ public class DisableClient {
         return nameService();
     }
        
+    /**
+     * Invokes connection service and increases the counter for invocations of serviceC and connection service
+     * @return Always throws exception
+     */
     @CircuitBreaker(successThreshold = 2, requestVolumeThreshold = 4, failureRatio = 0.75, delay = 50000)
     public Connection serviceC() {
         Connection conn = null;
@@ -70,6 +82,8 @@ public class DisableClient {
     
     /**
      * serviceD uses the default Fault Tolerance timeout of 1 second.
+     * @param timeToSleep How long should the execution take in millis
+     * @return null or exception is raised
      */    
     @Timeout
     public Connection serviceD(long timeToSleep) {

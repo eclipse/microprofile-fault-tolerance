@@ -64,7 +64,7 @@ public class BulkheadSynchTest extends Arquillian {
      * injected objects we need to inject a variety of these for use by the
      * tests below. The naming convention indicates if the annotation is on a
      * class or method, asynchronous or semaphore based, the size/value of
-     * the @Bulkhead and whether we have queueing or not.
+     * the {@code @Bulkhead} and whether we have queueing or not.
      */
     @Inject
     private BulkheadClassSemaphoreDefaultBean bhBeanClassSemaphoreDefault;
@@ -102,7 +102,7 @@ public class BulkheadSynchTest extends Arquillian {
     /**
      * Tests the class synchronous Bulkhead3. This test will check that 3 and no
      * more than 3 parallel synchronous calls are allowed into a method that is
-     * a member of a @Bulkhead(3) Class.
+     * a member of a {@code @Bulkhead(3)} Class.
      */
     @Test()
     public void testBulkheadClassSemaphore3() {
@@ -114,7 +114,7 @@ public class BulkheadSynchTest extends Arquillian {
     /**
      * Tests the class synchronous Bulkhead10. This test will check that 10 and
      * no more than 10 parallel synchronous calls are allowed into a method that
-     * is a member of a @Bulkhead(10) Class.
+     * is a member of a {@code @Bulkhead(10)} Class.
      */
     @Test()
     public void testBulkheadClassSemaphore10() {
@@ -130,7 +130,7 @@ public class BulkheadSynchTest extends Arquillian {
      * no more than 10 parallel synchronous calls are allowed into a method that
      * has an individual
      * 
-     * @Bulkhead(10) annotation
+     * {@code @Bulkhead(10)} annotation
      */
     @Test()
     public void testBulkheadMethodSemaphore10() {
@@ -156,7 +156,7 @@ public class BulkheadSynchTest extends Arquillian {
     /**
      * Tests the basic class synchronous Bulkhead. This test will check that 10
      * and no more than 10 parallel synchronous calls are allowed into a method
-     * that is a member of a @Bulkhead(10) Class.
+     * that is a member of a {@code @Bulkhead(10)} Class.
      */
     @Test()
     public void testBulkheadClassSemaphoreDefault() {

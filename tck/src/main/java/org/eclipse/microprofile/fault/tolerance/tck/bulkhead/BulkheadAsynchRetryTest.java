@@ -129,7 +129,7 @@ public class BulkheadAsynchRetryTest extends Arquillian {
      * not enough time for the first generation of workers and queued workers to
      * progress.
      * 
-     * @throws InterruptedException
+     * @throws InterruptedException when interrupted
      */
     @Test()
     public void testBulkheadMethodAsynchronousRetry55Trip() throws InterruptedException {
@@ -158,7 +158,7 @@ public class BulkheadAsynchRetryTest extends Arquillian {
      * Tests overloading the Retries by firing lots of work at a full Method
      * bulkhead
      * 
-     * @throws InterruptedException
+     * @throws InterruptedException when interrupted
      */
     @Test()
     public void testBulkheadMethodAsynchronous55RetryOverload() throws InterruptedException {

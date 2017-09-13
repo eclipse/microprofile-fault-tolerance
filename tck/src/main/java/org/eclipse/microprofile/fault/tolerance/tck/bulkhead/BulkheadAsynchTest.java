@@ -57,7 +57,7 @@ public class BulkheadAsynchTest extends Arquillian {
      * injected objects we need to inject a variety of these for use by the
      * tests below. The naming convention indicates if the annotation is on a
      * class or method, asynchronous or semaphore based, the size/value of
-     * the @Bulkhead and whether we have queueing or not.
+     * the {@code @Bulkhead} and whether we have queueing or not.
      */
 
     @Inject
@@ -100,7 +100,7 @@ public class BulkheadAsynchTest extends Arquillian {
     /**
      * Tests the class asynchronous Bulkhead(10) This test will check that 10
      * and no more than 10 asynchronous calls are allowed into a method that is
-     * a member of a @Bulkhead(10) Class.
+     * a member of a {@code @Bulkhead(10)} Class.
      */
     @Test()
     public void testBulkheadClassAsynchronous10() {
@@ -112,7 +112,7 @@ public class BulkheadAsynchTest extends Arquillian {
     /**
      * Tests the method asynchronous Bulkhead(10). This test will check that 10
      * and no more than 10 asynchronous calls are allowed into a method that has
-     * an individual @Bulkhead(10) annotation
+     * an individual {@code @Bulkhead(10)} annotation
      */
     @Test()
     public void testBulkheadMethodAsynchronous10() {
@@ -124,7 +124,7 @@ public class BulkheadAsynchTest extends Arquillian {
     /**
      * Tests the class asynchronous Bulkhead(3) This test will check that 3 and
      * no more than 3 asynchronous calls are allowed into a method that is a
-     * member of a @Bulkhead(3) Class.
+     * member of a {@code @Bulkhead(3)} Class.
      */
     @Test()
     public void testBulkheadClassAsynchronous3() {
