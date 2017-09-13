@@ -53,7 +53,7 @@ git clean -f
 ##    </server>
 ##
 
-mvn --batch-mode -DaltDeploymentRepository="$TARGET_MAVEN_REPO" --projects .,api,tck -Prelease clean deploy
+mvn --batch-mode --projects .,api,tck -Prelease clean deploy
 
 # don't continue if the mvn command fails or aborted
 if [[ x$? != x0 ]]
