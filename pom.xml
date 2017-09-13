@@ -32,7 +32,10 @@
 
         <checkstyle.version>2.17</checkstyle.version>
         <checkstyle.methodNameFormat>^_?[a-z][a-zA-Z0-9]*$</checkstyle.methodNameFormat>
+        <!-- whether autorelease maven central staging repositories - default true to allow review and manually release repositories -->
         <autorelease>false</autorelease>
+        <!-- keeping closed repos with failure - default is false because the errors are visible in the maven output, but true will leave the repo open for investigation in Sonatype Nexus -->
+        <keepStagingReposOnFailure>false</keepStagingReposOnFailure>
     </properties>
 
     <licenses>
@@ -298,6 +301,7 @@
                             <nexusUrl>https://oss.sonatype.org/</nexusUrl>
                             <serverId>ossrh</serverId>
                             <autoReleaseAfterClose>${autorelease}</autoReleaseAfterClose>
+                            <keepStagingRepositoryOnCloseRuleFailure>${keepStagingReposOnFailure}</keepStagingRepositoryOnCloseRuleFailure>
                         </configuration>
                     </plugin>
                     <plugin>
