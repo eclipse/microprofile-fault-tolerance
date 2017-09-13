@@ -31,6 +31,7 @@
 
         <checkstyle.version>2.17</checkstyle.version>
         <checkstyle.methodNameFormat>^_?[a-z][a-zA-Z0-9]*$</checkstyle.methodNameFormat>
+        <autorelease>false</autorelease>
     </properties>
 
     <licenses>
@@ -42,7 +43,7 @@
         </license>
     </licenses>
 
-<organization>
+    <organization>
         <name>Eclipse Foundation</name>
         <url>http://www.eclipse.org/</url>
     </organization>
@@ -116,7 +117,7 @@
         </pluginRepository>
     </pluginRepositories>
     <build>
-<pluginManagement>
+        <pluginManagement>
             <plugins>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -191,7 +192,7 @@
                             <module name="FileTabCharacter" />
                             <module name="TreeWalker">
                                 <module name="FileContentsHolder" />
-                               <module name="ConstantName">
+                                <module name="ConstantName">
                                     <property name="format" value="^(([A-Z][A-Z0-9]*(_[A-Z0-9]+)*))$" />
                                 </module>
                                 <module name="LocalVariableName" />
@@ -262,7 +263,9 @@
                 <executions>
                     <execution>
                         <id>rat-check</id>
-                        <goals><goal>check</goal></goals>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
                     </execution>
                 </executions>
                 <configuration>
@@ -279,4 +282,39 @@
 
         </plugins>
     </build>
+    
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <version>1.6.3</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                            <serverId>ossrh</serverId>
+                            <autoReleaseAfterClose>${autorelease}</autoReleaseAfterClose>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.6</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
