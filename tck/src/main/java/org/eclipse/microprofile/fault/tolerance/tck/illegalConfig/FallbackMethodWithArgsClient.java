@@ -36,6 +36,9 @@ public class FallbackMethodWithArgsClient {
 
     /**
      * Retry 5 times and then fallback
+     * @param name a string
+     * @param type an Integer
+     * @return a dummy number
      */
     @Retry(maxRetries = 4)
     @Fallback(fallbackMethod = "fallbackForServiceB")
@@ -44,7 +47,9 @@ public class FallbackMethodWithArgsClient {
     }
     
     /**
-     * Incompatible signature, only one parameter
+     * Fallback method with incompatible signature, only one parameter
+     * @param name a string
+     * @return a dummy number
      */
     public Integer fallbackForServiceB(String name) {
         return 42;

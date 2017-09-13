@@ -32,7 +32,7 @@ public interface BackendTestDelegate {
      * Called once per test from inside the Bulkhead
      * 
      * @return the 'Future' result
-     * @throws InterruptedException 
+     * @throws InterruptedException if interrupted
      */
     public Future perform() throws InterruptedException;
 }

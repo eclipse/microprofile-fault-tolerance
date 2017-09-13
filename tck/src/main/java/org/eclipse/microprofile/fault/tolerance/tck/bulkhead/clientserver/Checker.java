@@ -29,7 +29,7 @@ import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
 /**
  * A simple sleeping test backend worker. Having this backend as a delegate
  * means that we can perform more than one kind of test using a common 
- * @Injected object that delegates to one of these that is passed in as a
+ * {@code @Inject}-ed object that delegates to one of these that is passed in as a
  * parameter to the business method.
  * 
  * @author Gordon Hutchison
@@ -48,8 +48,8 @@ public class Checker implements BackendTestDelegate {
     /**
      * Constructor
      * 
-     * @param i
-     *            how long to sleep for in milliseconds
+     * @param sleepMillis  how long to sleep for in milliseconds
+     * @param td test data
      */
     public Checker(int sleepMillis, TestData td) {
         this.millis = sleepMillis;

@@ -36,6 +36,7 @@ public class FallbackClientWithBothFallbacks {
 
     /**
      * Retry 5 times and then fallback
+     * @return a dummy number
      */
     @Retry(maxRetries = 4)
     @Fallback(value = IncompatibleFallbackHandler.class, fallbackMethod="serviceBFallback")

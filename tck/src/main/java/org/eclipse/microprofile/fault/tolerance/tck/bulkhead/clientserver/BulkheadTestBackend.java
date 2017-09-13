@@ -34,8 +34,9 @@ public interface BulkheadTestBackend {
     /**
      * Perform the test
      * 
-     * @param action
+     * @param action test to execute
      * @return a Future compatible with @Asynchronous @Bulkhead tests.
+     * @throws InterruptedException if interrupted
      */
     public Future test(BackendTestDelegate action) throws InterruptedException;
 

@@ -139,8 +139,8 @@ public class RetryTest extends Arquillian {
     }
 
     /**
-     * Analogous to testRetryMaxDuration, testing whether the @Retry annotation on method serviceB overrides the Class level
-     * @Retry annotation.
+     * Analogous to testRetryMaxDuration, testing whether the {@code @Retry} annotation on method serviceB overrides the Class level
+     * {@code @Retry} annotation.
      * 
      * Ensure that serviceB is executed more than the maxRetries of 2 specified at the Class level.
      */
@@ -159,13 +159,13 @@ public class RetryTest extends Arquillian {
         int retryCountforWritingService = clientForClassLevelMaxRetry.getRetryCountForWritingService();        
         Assert.assertTrue(retryCountforWritingService< 11, "The max retry counter should be less than 11");
         
-        // Further test that we have retried more than the maximum number of retries specified in the Class level @Retry annotation
+        // Further test that we have retried more than the maximum number of retries specified in the Class level {@code @Retry} annotation
         Assert.assertTrue(retryCountforWritingService> 3, "The max retry counter should be greater than 3");      
     }
 
     /**
-     * Analogous to testRetryMaxDurationSeconds, testing whether the @Retry annotation on method serviceB overrides the Class level
-     * @Retry annotation.
+     * Analogous to testRetryMaxDurationSeconds, testing whether the {@code @Retry} annotation on method serviceB overrides the Class level
+     * {@code @Retry} annotation.
      * 
      * Ensure that serviceB is executed more than the maxRetries of 2 specified at the Class level.
      */
