@@ -23,7 +23,7 @@
     <packaging>pom</packaging>
     
     <name>MicroProfile Fault Tolerance</name>
-    <description>Eclipse MicroProfile Falt Tolerance Feature</description>
+    <description>Eclipse MicroProfile Fault Tolerance Feature</description>
 
     <url>http://microprofile.io</url>
 
