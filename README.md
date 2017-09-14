@@ -18,6 +18,8 @@
  */
 # Fault Tolerance
 
+[![Join the chat at https://gitter.im/eclipse/microprofile-fault-tolerance](https://badges.gitter.im/eclipse/microprofile-fault-tolerance.svg)](https://gitter.im/eclipse/microprofile-fault-tolerance?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 * Proposal: [MP-0004](0004-FaultTolerance.md)
 * Authors: [Emily Jiang](https://github.com/Emily-Jiang), [Jonathan Halterman](https://github.com/jhalterman/), [Antoine Sabot-Durand](https://github.com/antoinesd), [John Ament](https://github.com/johnament)
 * Status: **Awaiting review**
