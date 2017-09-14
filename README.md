@@ -16,6 +16,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+[![Join the chat at https://gitter.im/eclipse/microprofile-fault-tolerance](https://badges.gitter.im/eclipse/microprofile-fault-tolerance.svg)](https://gitter.im/eclipse/microprofile-fault-tolerance)
+
 # Fault Tolerance
 
 * Proposal: [MP-0004](0004-FaultTolerance.md)
