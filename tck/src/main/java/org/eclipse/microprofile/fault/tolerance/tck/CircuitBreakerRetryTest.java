@@ -216,9 +216,9 @@ public class CircuitBreakerRetryTest extends Arquillian {
         try {
             clientForCBWithRetry.serviceC(1000);
             
-            invokeCounter = clientForCBWithRetry.getCounterForInvokingServiceA();
+            invokeCounter = clientForCBWithRetry.getCounterForInvokingServiceC();
             if (invokeCounter < 4) {
-                Assert.fail("serviceC should retry in testCircuitOpenWithMoreRetries on iteration "
+                Assert.fail("serviceC should retry in testCircuitOpenWithMultiTimeouts on iteration "
                                 + invokeCounter);
             }
         }
@@ -227,15 +227,15 @@ public class CircuitBreakerRetryTest extends Arquillian {
             
             invokeCounter = clientForCBWithRetry.getCounterForInvokingServiceC();
             if (invokeCounter < 4) {
-                Assert.fail("serviceC should retry in testCircuitOpenWithMoreRetries on iteration "
+                Assert.fail("serviceC should retry in testCircuitOpenWithMultiTimeouts on iteration "
                                 + invokeCounter);
             }
         }
         catch (Exception ex) {
             // Not Expected
             invokeCounter = clientForCBWithRetry.getCounterForInvokingServiceC();
-            Assert.fail("serviceC should retry or throw a CircuitBreakerOpenException in testCircuitOpenWithMoreRetries on iteration "
-                            + invokeCounter);
+            Assert.fail("serviceC should retry or throw a CircuitBreakerOpenException in testCircuitOpenWithMultiTimeouts on iteration "
+                            + invokeCounter + ", caught exception: " + ex);
         }
 
         invokeCounter = clientForCBWithRetry.getCounterForInvokingServiceC();
