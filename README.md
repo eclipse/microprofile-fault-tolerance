@@ -20,9 +20,9 @@
 
 # Fault Tolerance
 
-* Proposal: [MP-0004](0004-FaultTolerance.md)
+* Proposal: [MP-0004](spec/src/main/asciidoc/microprofile-fault-tolerance-spec.asciidoc)
 * Authors: [Emily Jiang](https://github.com/Emily-Jiang), [Jonathan Halterman](https://github.com/jhalterman/), [Antoine Sabot-Durand](https://github.com/antoinesd), [John Ament](https://github.com/johnament)
-* Status: **Awaiting review**
+* Status: **v1.0 released**
 
 *During the review process, add the following fields as needed:*
 
