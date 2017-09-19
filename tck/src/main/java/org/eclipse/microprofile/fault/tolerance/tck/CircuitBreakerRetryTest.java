@@ -66,11 +66,12 @@ public class CircuitBreakerRetryTest extends Arquillian {
         int invokeCounter = 0;
         try {
             clientForCBWithRetry.serviceA();
+            
+            // serviceA should retry until the CB threshold is reached. At that point a CircuitBreakerOpenException
+            // should be thrown. Assert if this does not happen.
             invokeCounter = clientForCBWithRetry.getCounterForInvokingServiceA();
-            if (invokeCounter < 4) {
-                Assert.fail("serviceA should retry in testCircuitOpenWithMoreRetries on iteration "
-                                + invokeCounter);
-            }
+            Assert.fail("serviceA should retry in testCircuitOpenWithMoreRetries on iteration "
+                            + invokeCounter);
         }
         catch (CircuitBreakerOpenException cboe) {
             // Expected on iteration 4
@@ -100,11 +101,12 @@ public class CircuitBreakerRetryTest extends Arquillian {
         int invokeCounter = 0;
         try {
             clientForCBWithRetry.serviceB();
+            
+            // serviceB should retry until the CB threshold is reached. At that point a CircuitBreakerOpenException
+            // should be thrown. Assert if this does not happen.
             invokeCounter = clientForCBWithRetry.getCounterForInvokingServiceB();
-            if (invokeCounter < 3) {
-                Assert.fail("serviceB should retry in testCircuitOpenWithFewRetries on iteration "
-                                + invokeCounter);
-            }
+            Assert.fail("serviceB should retry in testCircuitOpenWithFewRetries on iteration "
+                            + invokeCounter);
         }
         catch (CircuitBreakerOpenException cboe) {
             // Not Expected
@@ -141,11 +143,12 @@ public class CircuitBreakerRetryTest extends Arquillian {
         int invokeCounter = 0;
         try {
             clientForClassLevelCBWithRetry.serviceA();
+            
+            // serviceA should retry until the CB threshold is reached. At that point a CircuitBreakerOpenException
+            // should be thrown. Assert if this does not happen.
             invokeCounter = clientForClassLevelCBWithRetry.getCounterForInvokingServiceA();
-            if (invokeCounter < 4) {
-                Assert.fail("serviceA should retry in testClassLevelCircuitOpenWithMoreRetries on iteration "
-                                + invokeCounter);
-            }
+            Assert.fail("serviceA should retry in testClassLevelCircuitOpenWithMoreRetries on iteration "
+                            + invokeCounter);
         }
         catch (CircuitBreakerOpenException cboe) {
             // Expected on iteration 4
@@ -175,11 +178,12 @@ public class CircuitBreakerRetryTest extends Arquillian {
         int invokeCounter = 0;
         try {
             clientForClassLevelCBWithRetry.serviceB();
+            
+            // serviceB should retry until the CB threshold is reached. At that point a CircuitBreakerOpenException
+            // should be thrown. Assert if this does not happen.
             invokeCounter = clientForClassLevelCBWithRetry.getCounterForInvokingServiceB();
-            if (invokeCounter < 3) {
-                Assert.fail("serviceB should retry in testClassLevelCircuitOpenWithFewRetries on iteration "
-                                + invokeCounter);
-            }
+            Assert.fail("serviceB should retry in testClassLevelCircuitOpenWithFewRetries on iteration "
+                            + invokeCounter);
         }
         catch (CircuitBreakerOpenException cboe) {
             // Not Expected
@@ -208,7 +212,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
     }
     
     /**
-     * Analagous to testCircuitOpenWithMoreRetries but execution failures are caused by timeouts.
+     * Analogous to testCircuitOpenWithMoreRetries but execution failures are caused by timeouts.
      */
     @Test
     public void testCircuitOpenWithMultiTimeouts() {
@@ -216,15 +220,15 @@ public class CircuitBreakerRetryTest extends Arquillian {
         try {
             clientForCBWithRetry.serviceC(1000);
             
+            // serviceC should retry until the CB threshold is reached. At that point a CircuitBreakerOpenException
+            // should be thrown. Assert if this does not happen.
             invokeCounter = clientForCBWithRetry.getCounterForInvokingServiceC();
-            if (invokeCounter < 4) {
-                Assert.fail("serviceC should retry in testCircuitOpenWithMultiTimeouts on iteration "
+            Assert.fail("serviceC should retry in testCircuitOpenWithMultiTimeouts on iteration "
                                 + invokeCounter);
-            }
+            
         }
         catch (CircuitBreakerOpenException cboe) {
-            // Expected on iteration 4
-            
+            // Expected on iteration 4          
             invokeCounter = clientForCBWithRetry.getCounterForInvokingServiceC();
             if (invokeCounter < 4) {
                 Assert.fail("serviceC should retry in testCircuitOpenWithMultiTimeouts on iteration "
