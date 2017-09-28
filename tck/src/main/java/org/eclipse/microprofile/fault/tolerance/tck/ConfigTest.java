@@ -25,14 +25,15 @@ import org.eclipse.microprofile.fault.tolerance.tck.config.clientserver.ConfigCl
 import org.eclipse.microprofile.fault.tolerance.tck.config.clientserver.ConfigClassLevelMaxDurationClient;
 import org.eclipse.microprofile.fault.tolerance.tck.config.clientserver.ConfigClient;
 import org.jboss.arquillian.container.test.api.Deployment;
-import org.jboss.arquillian.testng.Arquillian;
+import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.testng.Assert;
-import org.testng.annotations.Test;
 /**
  * Test that Fault Tolerance values configured through annotations can be overridden by configuration properties.
  *
@@ -42,7 +43,8 @@ import org.testng.annotations.Test;
  * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  *
  */
-public class ConfigTest extends Arquillian {
+@RunWith(Arquillian.class)
+public class ConfigTest {
 
     private @Inject ConfigClient clientForConfig;
     private @Inject ConfigClassLevelClient clientForClassLevelConfig;

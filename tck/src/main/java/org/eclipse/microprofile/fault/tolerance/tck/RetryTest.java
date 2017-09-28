@@ -25,13 +25,14 @@ import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClas
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClientForMaxRetries;
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClientWithDelay;
 import org.jboss.arquillian.container.test.api.Deployment;
-import org.jboss.arquillian.testng.Arquillian;
+import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.testng.Assert;
-import org.testng.annotations.Test;
 /**
  * Test when maxDuration is reached, no more retries will be perfomed.
  * Test the delay and jitter were taken into consideration.
@@ -39,7 +40,8 @@ import org.testng.annotations.Test;
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  *
  */
-public class RetryTest extends Arquillian {
+@RunWith(Arquillian.class)
+public class RetryTest {
 
     private @Inject RetryClientForMaxRetries clientForMaxRetry;
     private @Inject RetryClientWithDelay clientForDelay;

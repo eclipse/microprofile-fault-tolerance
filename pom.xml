@@ -20,7 +20,7 @@
     <artifactId>microprofile-fault-tolerance-parent</artifactId>
     <version>1.1-SNAPSHOT</version>
     <packaging>pom</packaging>
-    
+
     <name>MicroProfile Fault Tolerance</name>
     <description>Eclipse MicroProfile Fault Tolerance Feature</description>
 
@@ -275,6 +275,7 @@
                 </executions>
                 <configuration>
                     <excludes>
+                        <exclude>src/main/resources/META-INF/services/org.eclipse.microprofile.fault.tolerance.tck.TckArchiveProvider</exclude>
                         <exclude>.travis.yml.*</exclude>
                         <exclude>bnd.bnd</exclude>
                         <exclude>*.log</exclude>
@@ -287,7 +288,7 @@
 
         </plugins>
     </build>
-    
+
     <profiles>
         <profile>
             <id>release</id>

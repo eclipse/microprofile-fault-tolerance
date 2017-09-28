@@ -24,29 +24,31 @@ import javax.inject.Inject;
 import org.eclipse.microprofile.fault.tolerance.tck.fallback.clientserver.StringFallbackHandler;
 import org.eclipse.microprofile.faulttolerance.exceptions.TimeoutException;
 import org.jboss.arquillian.container.test.api.Deployment;
-import org.jboss.arquillian.testng.Arquillian;
+import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.testng.Assert;
-import org.testng.annotations.Test;
 
 /**
  * Test the impact of the MP_Fault_Tolerance_NonFallback_Enabled environment variable.
- * 
+ *
  * The test assumes that the container supports both the MicroProfile Configuration API and the MicroProfile
- * Fault Tolerance API. The MP_Fault_Tolerance_NonFallback_Enabled Variable is set to "false" in the manifest 
+ * Fault Tolerance API. The MP_Fault_Tolerance_NonFallback_Enabled Variable is set to "false" in the manifest
  * of the deployed application.
- * 
+ *
  * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  *
  */
-public class DisableTest extends Arquillian {
+@RunWith(Arquillian.class)
+public class DisableTest {
 
     private @Inject DisableClient disableClient;
-    
+
     @Deployment
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
@@ -62,11 +64,11 @@ public class DisableTest extends Arquillian {
                 .addAsLibrary(testJar);
         return war;
     }
-    
+
     /**
-     * Test maxRetries on @Retry. 
-     * 
-     * ServiceA is annotated with maxRetries = 1 so serviceA is expected to execute 2 times but if MP_Fault_Tolerance_NonFallback_Enabled 
+     * Test maxRetries on @Retry.
+     *
+     * ServiceA is annotated with maxRetries = 1 so serviceA is expected to execute 2 times but if MP_Fault_Tolerance_NonFallback_Enabled
      * is set to false in the Container environment, then no retries should be attempted.
      */
     @Test
@@ -83,8 +85,8 @@ public class DisableTest extends Arquillian {
 
     /**
      * Test that a Fallback service is driven when a Service fails.
-     *  
-     * ServiceB is annotated with maxRetries = 1 so serviceB is expected to execute 2 times but if MP_Fault_Tolerance_NonFallback_Enabled 
+     *
+     * ServiceB is annotated with maxRetries = 1 so serviceB is expected to execute 2 times but if MP_Fault_Tolerance_NonFallback_Enabled
      * is set to false in the Container environment, then no retries should be attempted HOWEVER the Fallback should still be driven
      * successfully, so the test checks that a Fallback was driven after serviceB fails.
      */
@@ -103,11 +105,11 @@ public class DisableTest extends Arquillian {
         Assert.assertEquals(disableClient.getCounterForInvokingServiceB(), 1, "The execution count should be 1 (0 retries + 1)");
 
     }
-    
+
     /**
      * A test to exercise Circuit Breaker thresholds, with a default SuccessThreshold
-     * 
-     * If MP_Fault_Tolerance_NonFallback_Enabled is set to false in the Container environment, then the CircuitBreaker 
+     *
+     * If MP_Fault_Tolerance_NonFallback_Enabled is set to false in the Container environment, then the CircuitBreaker
      * will not operate, no CircuitBreakerOpenExceptions will be thrown and execution will fail 7 times.
      */
     @Test
@@ -122,7 +124,7 @@ public class DisableTest extends Arquillian {
             }
             catch (Exception ex) {
                 // Not Expected
-                Assert.fail("serviceC should throw a RuntimeException in testCircuitClosedThenOpen on iteration " + i + 
+                Assert.fail("serviceC should throw a RuntimeException in testCircuitClosedThenOpen on iteration " + i +
                                 " but caught exception " + ex);
             }
         }
@@ -130,27 +132,27 @@ public class DisableTest extends Arquillian {
 
         Assert.assertEquals(serviceCExecutions, 7, "The number of executions should be 7");
     }
-    
+
     /**
-     * A test to exercise the default timeout. 
-     * 
+     * A test to exercise the default timeout.
+     *
      * In normal operation, the default Fault Tolerance timeout is 1 second but serviceD will attempt to sleep for 3 seconds, so
-     * would be expected to throw a TimeoutException. However, if MP_Fault_Tolerance_NonFallback_Enabled is set to false in the Container 
+     * would be expected to throw a TimeoutException. However, if MP_Fault_Tolerance_NonFallback_Enabled is set to false in the Container
      * environment, then no Timeout will occur and a RuntimeException will be thrown after 3 seconds.
-     * 
+     *
      */
     @Test
     public void testTimeout() {
         try {
             disableClient.serviceD(3000);
             Assert.fail("serviceD should throw a TimeoutException in testTimeout");
-        } 
+        }
         catch (TimeoutException ex) {
             // Not Expected
             Assert.fail("serviceD should throw a RuntimeException in testTimeout not a TimeoutException");
-        } 
+        }
         catch (RuntimeException ex) {
-            // Expected       
+            // Expected
         }
     }
 }

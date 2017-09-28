@@ -20,17 +20,19 @@
 package org.eclipse.microprofile.fault.tolerance.tck.invalidParameters;
 
 import javax.enterprise.inject.spi.DefinitionException;
+
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.ShouldThrowException;
-import org.jboss.arquillian.testng.Arquillian;
+import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-import org.testng.annotations.Test;
-
-public class InvalidBulkheadValueTest extends Arquillian {
+@RunWith(Arquillian.class)
+public class InvalidBulkheadValueTest {
 
     @Deployment
     @ShouldThrowException(DefinitionException.class)
@@ -45,10 +47,10 @@ public class InvalidBulkheadValueTest extends Arquillian {
             .create(WebArchive.class, "ftInvalidBulkhead1.war")
             .addAsLibrary(testJar);
     }
-    
+
     /**
      * Test that the deployment of an invalid @Bulkhead parameter leads to a DeploymentException.
-     * 
+     *
      * A Service is annotated with a @Bulkhead annotation with a negative value.
      */
     @Test

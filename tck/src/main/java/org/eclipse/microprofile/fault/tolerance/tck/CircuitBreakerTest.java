@@ -21,20 +21,21 @@ package org.eclipse.microprofile.fault.tolerance.tck;
 
 import javax.inject.Inject;
 
-import org.eclipse.microprofile.faulttolerance.exceptions.CircuitBreakerOpenException;
 import org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver.CircuitBreakerClassLevelClientWithDelay;
 import org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver.CircuitBreakerClientDefaultSuccessThreshold;
 import org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver.CircuitBreakerClientHigherSuccessThreshold;
 import org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver.CircuitBreakerClientNoDelay;
 import org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver.CircuitBreakerClientWithDelay;
+import org.eclipse.microprofile.faulttolerance.exceptions.CircuitBreakerOpenException;
 import org.jboss.arquillian.container.test.api.Deployment;
-import org.jboss.arquillian.testng.Arquillian;
+import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.testng.Assert;
-import org.testng.annotations.Test;
 
 /**
  * Test CircuitBreaker Thresholds and delays.
@@ -43,7 +44,8 @@ import org.testng.annotations.Test;
  *
  */
 
-public class CircuitBreakerTest extends Arquillian {
+@RunWith(Arquillian.class)
+public class CircuitBreakerTest {
 
     private @Inject CircuitBreakerClientWithDelay clientForCBWithDelay;
     private @Inject CircuitBreakerClassLevelClientWithDelay clientForClassLevelCBWithDelay;

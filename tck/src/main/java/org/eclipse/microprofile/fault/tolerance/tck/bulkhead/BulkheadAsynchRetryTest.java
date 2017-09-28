@@ -30,15 +30,14 @@ import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhe
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.TestData;
 import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
 import org.jboss.arquillian.container.test.api.Deployment;
-import org.jboss.arquillian.testng.Arquillian;
+import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.testng.Assert;
-import org.testng.ITestContext;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
 
 /**
  * @author Gordon Hutchison
@@ -52,7 +51,8 @@ import org.testng.annotations.Test;
  * @author Gordon Hutchison
  *
  */
-public class BulkheadAsynchRetryTest extends Arquillian {
+@RunWith(Arquillian.class)
+public class BulkheadAsynchRetryTest {
 
     /*
      * As the FaultTolerance annotation only works on business methods of
@@ -77,7 +77,7 @@ public class BulkheadAsynchRetryTest extends Arquillian {
     /**
      * This is the Arquillian deploy method that controls the contents of the
      * war that contains all the tests.
-     * 
+     *
      * @return the test war "ftBulkheadAsynchTest.war"
      */
     @Deployment
@@ -87,11 +87,6 @@ public class BulkheadAsynchRetryTest extends Arquillian {
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml").as(JavaArchive.class);
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftBulkheadAsynchRetryTest.war").addAsLibrary(testJar);
         return war;
-    }
-
-    @BeforeTest
-    public void beforeTest(final ITestContext testContext) {
-        Utils.log("Testmethod: " + testContext.getName());
     }
 
     /**
@@ -128,7 +123,7 @@ public class BulkheadAsynchRetryTest extends Arquillian {
      * a method level test. The bean here does not delay its retries so there is
      * not enough time for the first generation of workers and queued workers to
      * progress.
-     * 
+     *
      * @throws InterruptedException when interrupted
      */
     @Test()
@@ -157,7 +152,7 @@ public class BulkheadAsynchRetryTest extends Arquillian {
     /**
      * Tests overloading the Retries by firing lots of work at a full Method
      * bulkhead
-     * 
+     *
      * @throws InterruptedException when interrupted
      */
     @Test()
@@ -179,7 +174,7 @@ public class BulkheadAsynchRetryTest extends Arquillian {
     }
 
     /**
-     * 
+     *
      * Tests overloading the Retries by firing lots of work at a full Class
      * bulkhead
      */

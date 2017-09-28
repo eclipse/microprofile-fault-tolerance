@@ -24,14 +24,16 @@ import javax.inject.Inject;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.ShouldThrowException;
-import org.jboss.arquillian.testng.Arquillian;
+import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.testng.annotations.Test;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-public class IncompatibleFallbackPolicies extends Arquillian {
+@RunWith(Arquillian.class)
+public class IncompatibleFallbackPolicies {
     private
     @Inject
     FallbackClient fallbackClient;
@@ -52,9 +54,9 @@ public class IncompatibleFallbackPolicies extends Arquillian {
 
     /**
      * Test that the deployment of specifying both handler and fallback method causing deployment failure.
-     * 
-     * A service in FallbackClientWithBothFallbacks has specified both fallback handler and fallback method. 
-     * 
+     *
+     * A service in FallbackClientWithBothFallbacks has specified both fallback handler and fallback method.
+     *
      */
     @Test
     public void test() {

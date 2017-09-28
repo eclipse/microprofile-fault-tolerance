@@ -26,13 +26,14 @@ import org.eclipse.microprofile.fault.tolerance.tck.timeout.clientserver.Shorter
 import org.eclipse.microprofile.fault.tolerance.tck.timeout.clientserver.TimeoutClient;
 import org.eclipse.microprofile.faulttolerance.exceptions.TimeoutException;
 import org.jboss.arquillian.container.test.api.Deployment;
-import org.jboss.arquillian.testng.Arquillian;
+import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.testng.Assert;
-import org.testng.annotations.Test;
 
 /**
  * Tests to exercise Fault Tolerance Timeouts.
@@ -40,7 +41,8 @@ import org.testng.annotations.Test;
  * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  *
  */
-public class TimeoutTest extends Arquillian {
+@RunWith(Arquillian.class)
+public class TimeoutTest {
 
     private @Inject TimeoutClient clientForTimeout;
     private @Inject DefaultTimeoutClient clientForDefaultTimeout;

@@ -26,13 +26,14 @@ import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClas
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClientAbortOn;
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClientRetryOn;
 import org.jboss.arquillian.container.test.api.Deployment;
-import org.jboss.arquillian.testng.Arquillian;
+import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.testng.Assert;
-import org.testng.annotations.Test;
 /**
  * Test the retryOn and abortOn conditions.
  * If retryOn condition is not met, no retry will be performed.
@@ -40,7 +41,8 @@ import org.testng.annotations.Test;
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  *
  */
-public class RetryConditionTest extends Arquillian {
+@RunWith(Arquillian.class)
+public class RetryConditionTest {
 
     private @Inject RetryClientRetryOn clientForRetryOn;
     private @Inject RetryClientAbortOn clientForAbortOn;

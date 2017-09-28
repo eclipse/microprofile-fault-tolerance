@@ -24,20 +24,22 @@ import javax.inject.Inject;
 import org.eclipse.microprofile.fault.tolerance.tck.retrytimeout.clientserver.RetryTimeoutClient;
 import org.eclipse.microprofile.faulttolerance.exceptions.TimeoutException;
 import org.jboss.arquillian.container.test.api.Deployment;
-import org.jboss.arquillian.testng.Arquillian;
+import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.testng.Assert;
-import org.testng.annotations.Test;
 /**
  * Test the combination of the @Retry and @Timeout annotations.
  *
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  *
  */
-public class RetryTimeoutTest extends Arquillian {
+@RunWith(Arquillian.class)
+public class RetryTimeoutTest {
 
     private @Inject RetryTimeoutClient clientForRetryTimeout;
 
