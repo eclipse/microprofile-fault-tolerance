@@ -37,14 +37,13 @@ import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Checke
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.ParrallelBulkheadTest;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.TestData;
 import org.jboss.arquillian.container.test.api.Deployment;
-import org.jboss.arquillian.testng.Arquillian;
+import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.testng.ITestContext;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * This collection of tests tests that failures, particularly Synchronous
@@ -54,7 +53,8 @@ import org.testng.annotations.Test;
  * @author Gordon Hutchison
  *
  */
-public class BulkheadSynchRetryTest extends Arquillian {
+@RunWith(Arquillian.class)
+public class BulkheadSynchRetryTest {
 
     private static final int DONT_CHECK = 0;
     /*
@@ -87,7 +87,7 @@ public class BulkheadSynchRetryTest extends Arquillian {
     /**
      * This is the Arquillian deploy method that controls the contents of the
      * war that contains all the tests.
-     * 
+     *
      * @return the test war "ftBulkheadSynchRetryTest.war"
      */
     @Deployment
@@ -97,11 +97,6 @@ public class BulkheadSynchRetryTest extends Arquillian {
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml").as(JavaArchive.class);
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftBulkheadSynchRetryTest.war").addAsLibrary(testJar);
         return war;
-    }
-
-    @BeforeTest
-    public void beforeTest(final ITestContext testContext) {
-        Utils.log("Testmethod: " + testContext.getName());
     }
 
     /**
@@ -245,7 +240,7 @@ public class BulkheadSynchRetryTest extends Arquillian {
 
     /**
      * Run a number of Callable's in parallel
-     * 
+     *
      * @param number
      * @param test
      * @param maxSimultaneousWorkers

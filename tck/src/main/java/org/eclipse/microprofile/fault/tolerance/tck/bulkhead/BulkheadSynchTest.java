@@ -33,24 +33,24 @@ import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhe
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadMethodSemaphore3Bean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadMethodSemaphoreDefaultBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadTestBackend;
-
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.ParrallelBulkheadTest;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.TestData;
 import org.jboss.arquillian.container.test.api.Deployment;
-//import org.jboss.arquillian.core.api.Asynchronousing.ExecutorService;
-import org.jboss.arquillian.testng.Arquillian;
+import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.testng.ITestContext;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+//import org.jboss.arquillian.core.api.Asynchronousing.ExecutorService;
 
 /**
  * @author Gordon Hutchison
  */
-public class BulkheadSynchTest extends Arquillian {
+@RunWith(Arquillian.class)
+public class BulkheadSynchTest {
 
     /*
      * We use an executer service to simulate the parallelism of multiple
@@ -82,7 +82,7 @@ public class BulkheadSynchTest extends Arquillian {
     /**
      * This is the Arquillian deploy method that controls the contents of the
      * war that contains all the tests.
-     * 
+     *
      * @return the test war "ftBulkheadSynchTest.war"
      */
     @Deployment
@@ -92,11 +92,6 @@ public class BulkheadSynchTest extends Arquillian {
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml").as(JavaArchive.class);
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftBulkheadSynchTest.war").addAsLibrary(testJar);
         return war;
-    }
-
-    @BeforeTest
-    public void beforeTest(final ITestContext testContext) {
-        Utils.log("Testmethod: " + testContext.getName());
     }
 
     /**
@@ -129,7 +124,7 @@ public class BulkheadSynchTest extends Arquillian {
      * Tests the method synchronous Bulkhead10. This test will check that 10 and
      * no more than 10 parallel synchronous calls are allowed into a method that
      * has an individual
-     * 
+     *
      * {@code @Bulkhead(10)} annotation
      */
     @Test()
@@ -182,7 +177,7 @@ public class BulkheadSynchTest extends Arquillian {
 
     /**
      * Run a number of Callable's in parallel
-     * 
+     *
      * @param number
      * @param test
      * @param maxSimultaneousWorkers

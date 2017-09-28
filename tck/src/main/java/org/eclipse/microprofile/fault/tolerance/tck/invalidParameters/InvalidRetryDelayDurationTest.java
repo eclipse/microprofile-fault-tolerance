@@ -20,17 +20,19 @@
 package org.eclipse.microprofile.fault.tolerance.tck.invalidParameters;
 
 import javax.enterprise.inject.spi.DefinitionException;
+
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.ShouldThrowException;
-import org.jboss.arquillian.testng.Arquillian;
+import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-import org.testng.annotations.Test;
-
-public class InvalidRetryDelayDurationTest extends Arquillian {
+@RunWith(Arquillian.class)
+public class InvalidRetryDelayDurationTest {
 
     @Deployment
     @ShouldThrowException(DefinitionException.class)
@@ -45,10 +47,10 @@ public class InvalidRetryDelayDurationTest extends Arquillian {
             .create(WebArchive.class, "ftInvalidRetry3.war")
             .addAsLibrary(testJar);
     }
-    
+
     /**
      * Test that the deployment of an invalid @Retry parameter leads to a DeploymentException.
-     * 
+     *
      * A Service is annotated with a @Retry annotation with a maxDuration that is less than the delay.
      */
     @Test

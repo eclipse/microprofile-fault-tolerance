@@ -17,19 +17,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.eclipse.microprofile.fault.tolerance.tck;
+package org.testng;
 
+import org.eclipse.microprofile.fault.tolerance.tck.TckArchiveProvider;
+import org.jboss.shrinkwrap.api.Archive;
+import org.jboss.shrinkwrap.api.ShrinkWrap;
+import org.jboss.shrinkwrap.api.spec.JavaArchive;
 
 /**
- * Verify the asynchronous invocation
- *
- *
+ * Self provided TckArchiveProvider adding the wrapper org.testng.Assert class to artifact under test.
+ * This must be removed once full move to junit is done.
  */
-public class AsynchronousInvocation {
-
-    /**
-     * @Todo test the asynchronous behaviour
-     *
-     */
-
+public class ArquillianTestNGArchiveProvider implements TckArchiveProvider {
+    @Override
+    public Archive<?> additional() {
+        JavaArchive archive = ShrinkWrap.create(JavaArchive.class);
+        archive.addClass(Assert.class);
+        return archive;
+    }
 }

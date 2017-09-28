@@ -17,19 +17,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.eclipse.microprofile.fault.tolerance.tck;
-
+package org.testng;
 
 /**
- * Verify the asynchronous invocation
- *
- *
+ * @deprecated only for temporary switch to junit
  */
-public class AsynchronousInvocation {
+@Deprecated
+public class Assert {
+    private Assert() {
+        // ignore
+    }
+    public static void fail(String message) {
+        org.junit.Assert.fail(message);
+    }
 
-    /**
-     * @Todo test the asynchronous behaviour
-     *
-     */
+    public static void fail(String message, Throwable ignore) {
+        org.junit.Assert.fail(message);
+    }
 
+    public static void assertEquals(int actual, int expected, String message) {
+        org.junit.Assert.assertEquals(message, expected, actual);
+    }
+
+    public static void assertTrue(boolean condition, String message) {
+        org.junit.Assert.assertTrue(message, condition);
+    }
+
+    public static void assertFalse(boolean condition, String message) {
+        org.junit.Assert.assertFalse(message, condition);
+    }
+
+    public static void assertNull(Object o) {
+        org.junit.Assert.assertNull(o);
+    }
 }

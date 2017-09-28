@@ -24,14 +24,16 @@ import javax.inject.Inject;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.ShouldThrowException;
-import org.jboss.arquillian.testng.Arquillian;
+import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.testng.annotations.Test;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-public class IncompatibleFallbackTest extends Arquillian {
+@RunWith(Arquillian.class)
+public class IncompatibleFallbackTest {
     private
     @Inject
     FallbackClient fallbackClient;
@@ -52,7 +54,7 @@ public class IncompatibleFallbackTest extends Arquillian {
 
     /**
      * Test that the deployment of an invalid FallbackHandler leads to a DeploymentException.
-     * 
+     *
      * A Service is annotated with the IncompatibleFallbackHandler. While the Service returns an
      * Integer, the IncompatibleFallbackHandler returns a String.
      */

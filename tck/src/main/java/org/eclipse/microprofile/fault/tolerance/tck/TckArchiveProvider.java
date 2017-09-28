@@ -19,17 +19,13 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck;
 
+import org.jboss.shrinkwrap.api.Archive;
 
 /**
- * Verify the asynchronous invocation
- *
- *
+ * Simple producer to provide additional archive to be included in tck webapp tests.
+ * Producers implementing this interface will be called via {@link java.util.ServiceLoader} during initialization
+ * of Arquillian tests to be integrated into the @{@link org.jboss.arquillian.container.test.api.Deployment} under test.
  */
-public class AsynchronousInvocation {
-
-    /**
-     * @Todo test the asynchronous behaviour
-     *
-     */
-
+public interface TckArchiveProvider {
+    Archive<?> additional();
 }

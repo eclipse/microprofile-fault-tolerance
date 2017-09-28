@@ -29,24 +29,24 @@ import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhe
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Checker;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.FutureChecker;
 import org.jboss.arquillian.container.test.api.Deployment;
-import org.jboss.arquillian.testng.Arquillian;
+import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.testng.Assert;
-import org.testng.ITestContext;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
 
 /**
  * This set of tests will test correct operation on the relevant methods of the
  * Future object that is returned from the business method of a Asynchronous
  * Method or Class.
- * 
+ *
  * @author Gordon Hutchison
  */
-public class BulkheadFutureTest extends Arquillian {
+@RunWith(Arquillian.class)
+public class BulkheadFutureTest {
 
     private static final int SHORT_TIME = 100;
     private static final int LONG_TIME = 3000;
@@ -62,11 +62,6 @@ public class BulkheadFutureTest extends Arquillian {
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml").as(JavaArchive.class);
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftBulkheadTest.war").addAsLibrary(testJar);
         return war;
-    }
-
-    @BeforeTest
-    public void beforeTest(final ITestContext testContext) {
-        Utils.log("Testmethod: " + testContext.getName());
     }
 
     /**
@@ -124,7 +119,7 @@ public class BulkheadFutureTest extends Arquillian {
         }
         Assert.assertTrue(result.isDone(), "Future done not reporting true");
     }
-  
+
     /**
      * Tests that the Future that is returned from a asynchronous bulkhead can
      * be queried for Done OK after a goodpath get with timeout and also

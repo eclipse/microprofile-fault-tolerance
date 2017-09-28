@@ -19,17 +19,24 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck;
 
+import java.util.ServiceLoader;
 
-/**
- * Verify the asynchronous invocation
- *
- *
- */
-public class AsynchronousInvocation {
+import org.jboss.shrinkwrap.api.spec.WebArchive;
+
+public class TckAdditions {
+    private TckAdditions() {
+        // ignore
+    }
 
     /**
-     * @Todo test the asynchronous behaviour
-     *
+     * Loads via {@link ServiceLoader} additional archive producers. Delegate to each of them the addition of an archive
+     * to the @{@link org.jboss.arquillian.container.test.api.Deployment} under test.
+     * @param web the Arquillian {@link WebArchive} to enhance with additional libraries
+     * @return the modified {@link WebArchive}
      */
-
+    public static WebArchive decorate(WebArchive web) {
+        ServiceLoader<TckArchiveProvider> providers = ServiceLoader.load(TckArchiveProvider.class);
+        providers.forEach(p -> web.addAsLibrary(p.additional()));
+        return web;
+    }
 }

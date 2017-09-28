@@ -25,29 +25,31 @@ import org.eclipse.microprofile.fault.tolerance.tck.config.clientserver.ConfigCl
 import org.eclipse.microprofile.fault.tolerance.tck.config.clientserver.ConfigClassLevelMaxDurationClient;
 import org.eclipse.microprofile.fault.tolerance.tck.config.clientserver.ConfigClient;
 import org.jboss.arquillian.container.test.api.Deployment;
-import org.jboss.arquillian.testng.Arquillian;
+import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.testng.Assert;
-import org.testng.annotations.Test;
 /**
  * Test that Fault Tolerance values configured through annotations can be overridden by configuration properties.
- *  
+ *
  * The test assumes that the container supports both the MicroProfile Configuration API and the MicroProfile
  * Fault Tolerance API. Configuration Properties are provided in the manifest of the deployed application.
- * 
+ *
  * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  *
  */
-public class ConfigTest extends Arquillian {
+@RunWith(Arquillian.class)
+public class ConfigTest {
 
     private @Inject ConfigClient clientForConfig;
     private @Inject ConfigClassLevelClient clientForClassLevelConfig;
     private @Inject ConfigClassLevelMaxDurationClient clientForClassLevelMaxDurationConfig;
-    
+
     @Deployment
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
@@ -65,15 +67,15 @@ public class ConfigTest extends Arquillian {
         WebArchive war = ShrinkWrap
                 .create(WebArchive.class, "ftConfig.war")
                 .addAsLibrary(testJar);
-        return war;
+        return TckAdditions.decorate(war);
     }
 
     /**
-     * Test the configuration of maxRetries on a specific method. 
-     * 
+     * Test the configuration of maxRetries on a specific method.
+     *
      * The serviceA is annotated with maxRetries = 5, but a configuration property overrides it with a value of 3,
      * so serviceA should be executed 4 times.
-     * 
+     *
      * The test assumes that the container has been configured with the property,
      * org.eclipse.microprofile.fault.tolerance.tck.config.clientserver.ConfigClient/serviceA/Retry/maxRetries=3
      */
@@ -81,7 +83,7 @@ public class ConfigTest extends Arquillian {
     public void testConfigMaxRetries() {
         try {
             clientForConfig.serviceA();
-            
+
             Assert.fail("serviceA should throw a RuntimeException in testConfigMaxRetries");
         }
         catch(RuntimeException ex) {
@@ -90,13 +92,13 @@ public class ConfigTest extends Arquillian {
         int count = clientForConfig.getCounterForInvokingConnectionService();
         Assert.assertEquals(count, 4, "The max number of execution should be 4");
     }
-    
+
     /**
-     * Test the configuration of maxRetries on a class. 
-     * 
+     * Test the configuration of maxRetries on a class.
+     *
      * The class is annotated with maxRetries = 5, but a configuration property overrides it with a value of 3,
      * so serviceA should be executed 4 times.
-     * 
+     *
      * The test assumes that the container has been configured with the property,
      * org.eclipse.microprofile.fault.tolerance.tck.config.clientserver.ConfigClassLevelClient/Retry/maxRetries=3
      */
@@ -104,7 +106,7 @@ public class ConfigTest extends Arquillian {
     public void testClassLevelConfigMaxRetries() {
         try {
             clientForClassLevelConfig.serviceA();
-            
+
             Assert.fail("serviceA should throw a RuntimeException in testClassLevelConfigMaxRetries");
         }
         catch(RuntimeException ex) {
@@ -113,13 +115,13 @@ public class ConfigTest extends Arquillian {
         int count = clientForClassLevelConfig.getCounterForInvokingConnectionService();
         Assert.assertEquals(count, 4, "The max number of execution should be 4");
     }
-    
+
     /**
-     * Test the configuration of maxRetries on a class. 
-     * 
+     * Test the configuration of maxRetries on a class.
+     *
      * The class is annotated with maxRetries = 5. A configuration property overrides it with a value of 3 but serviceB
      * has its own annotation and should be executed 2 times.
-     * 
+     *
      * The test assumes that the container has been configured with the property,
      * org.eclipse.microprofile.fault.tolerance.tck.config.clientserver.ConfigClassLevelClient/Retry/maxRetries=3
      */
@@ -127,7 +129,7 @@ public class ConfigTest extends Arquillian {
     public void testClassLevelConfigMethodOverrideMaxRetries() {
         try {
             clientForClassLevelConfig.serviceB();
-            
+
             Assert.fail("serviceB should throw a RuntimeException in testClassLevelConfigMethodOverrideMaxRetries");
         }
         catch(RuntimeException ex) {
@@ -138,11 +140,11 @@ public class ConfigTest extends Arquillian {
     }
 
     /**
-     * Test the configuration of maxDuration on a specific method. 
-     * 
+     * Test the configuration of maxDuration on a specific method.
+     *
      * The serviceA is annotated with maxDuration=3000 but a configuration property overrides it with a value of 1000,
      * so serviceA should be executed less than 11 times.
-     * 
+     *
      * The test assumes that the container has been configured with the property,
      * org.eclipse.microprofile.fault.tolerance.tck.config.clientserver.ConfigClient/serviceC/Retry/maxDuration=1000
      */
@@ -156,18 +158,18 @@ public class ConfigTest extends Arquillian {
             // Expected
         }
 
-        //The writing service invocation takes 100ms plus a jitter of 0-200ms with the max duration of 1000ms, 
+        //The writing service invocation takes 100ms plus a jitter of 0-200ms with the max duration of 1000ms,
         //the max invocation should be less than 10
         int count = clientForConfig.getRetryCountForWritingService();
         Assert.assertTrue(count< 11, "The max retry counter should be less than 11");
     }
 
     /**
-     * Test the configuration of maxDuration on a class. 
-     * 
+     * Test the configuration of maxDuration on a class.
+     *
      * The class is annotated with maxDuration=3000 but a configuration property overrides it with a value of 1000
      * so serviceA should be executed less than 11 times.
-     * 
+     *
      * The test assumes that the container has been configured with the property,
      * org.eclipse.microprofile.fault.tolerance.tck.config.clientserver.ConfigClassLevelMaxDurationClient/Retry/maxDuration=1000
      */
@@ -181,9 +183,9 @@ public class ConfigTest extends Arquillian {
             // Expected
         }
 
-        //The writing service invocation takes 100ms plus a jitter of 0-200ms with the max duration of 1000ms, 
+        //The writing service invocation takes 100ms plus a jitter of 0-200ms with the max duration of 1000ms,
         //the max invocation should be less than 10
-        int retryCountforWritingService = clientForClassLevelMaxDurationConfig.getRetryCountForWritingService();        
+        int retryCountforWritingService = clientForClassLevelMaxDurationConfig.getRetryCountForWritingService();
         Assert.assertTrue(retryCountforWritingService< 11, "The max retry counter should be less than 11");
     }
 }

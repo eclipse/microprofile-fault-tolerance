@@ -30,21 +30,23 @@ import org.eclipse.microprofile.fault.tolerance.tck.fallback.clientserver.String
 import org.eclipse.microprofile.fault.tolerance.tck.fallback.clientserver.StringFallbackHandlerWithBean;
 import org.eclipse.microprofile.faulttolerance.exceptions.TimeoutException;
 import org.jboss.arquillian.container.test.api.Deployment;
-import org.jboss.arquillian.testng.Arquillian;
+import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.testng.Assert;
-import org.testng.annotations.Test;
 
 /**
  * Test fallback was invoked correctly; fallback handler supporting CDI injection; type safety on fallback class.
- * 
+ *
  * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  *
  */
-public class FallbackTest extends Arquillian {
+@RunWith(Arquillian.class)
+public class FallbackTest {
 
     private @Inject FallbackClient fallbackClient;
     private @Inject FallbackWithBeanClient fallbackWithBeanClient;
@@ -62,13 +64,13 @@ public class FallbackTest extends Arquillian {
 
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftFallback.war")
                         .addAsLibrary(testJar);
-        return war;
+        return TckAdditions.decorate(war);
     }
 
     /**
      * Test that a Fallback service is driven after the specified number of retries are executed.
-     * 
-     * Each of serviceA and serviceB specify the same FallbackHandler. The test checks that the 
+     *
+     * Each of serviceA and serviceB specify the same FallbackHandler. The test checks that the
      * handler has been driven in the correct ExecutionContext and that the Service has been
      * executed the correct number of times.
      */
@@ -97,8 +99,8 @@ public class FallbackTest extends Arquillian {
 
     /**
      * A refinement on testFallbackSuccess to test that a bean may be injected in the FallbackHandler.
-     * 
-     * Each of serviceA and serviceB specify the same FallbackHandler. The test checks that the 
+     *
+     * Each of serviceA and serviceB specify the same FallbackHandler. The test checks that the
      * handler has been driven in the correct ExecutionContext and that the Service has been
      * executed the correct number of times.
      */
@@ -121,7 +123,7 @@ public class FallbackTest extends Arquillian {
             String result = fallbackWithBeanClient.serviceB();
             Assert.assertTrue(result.contains("serviceB"),
                             "The message should be \"fallback for serviceB\"");
-            //MyBean should be injected to the fallbackA, MyBean is application scoped, 
+            //MyBean should be injected to the fallbackA, MyBean is application scoped,
             //so the same instance should be injected to the fallback handler
             Assert.assertTrue(result.contains("35"),
                             "The message should be \"fallback for serviceB myBean.getCount()=35\"");
@@ -134,7 +136,7 @@ public class FallbackTest extends Arquillian {
 
     /**
      * Analogous to testFallbackSuccess with Class level annotations that are inherited by serviceA
-     * but overridden by serviceB. 
+     * but overridden by serviceB.
      */
     @Test
     public void testClassLevelFallbackSuccess() {
@@ -158,10 +160,10 @@ public class FallbackTest extends Arquillian {
         }
         Assert.assertEquals(fallbackClassLevelClient.getCounterForInvokingServiceB(), 3, "The execution count should be 3 (2 retries + 1)");
     }
-    
+
     /**
      * Test that a Fallback service is driven after the specified number of retries are executed.
-     * 
+     *
      * A timeout is configured for serviceC but the service should fail before the timeout is reached
      * and generate a RuntimeException. After a retry the Fallback will be executed.
      */
@@ -171,22 +173,22 @@ public class FallbackTest extends Arquillian {
             String result = fallbackClient.serviceC(10);
             Assert.assertTrue(result.contains("serviceC"),
                             "The message should be \"fallback for serviceC\"");
-        } 
+        }
         catch (TimeoutException ex) {
             // Not Expected
             Assert.fail("serviceC should not throw a TimeoutException in testFallbacktNoTimeout");
-        } 
+        }
         catch (RuntimeException ex) {
             // Not expected
             Assert.fail("serviceC should not throw a RuntimeException in testFallbacktNoTimeout");
-        }        
+        }
 
         Assert.assertEquals(fallbackClient.getCounterForInvokingServiceC(), 2, "The execution count should be 2 (1 retry + 1)");
     }
-    
+
     /**
      * Test that a Fallback service is driven after the specified number of retries are executed.
-     * 
+     *
      * A timeout is configured for serviceC and in this case the service should generate Timeout exceptions.
      * After a retry the Fallback will be executed.
      */
@@ -196,23 +198,23 @@ public class FallbackTest extends Arquillian {
             String result = fallbackClient.serviceC(1000);
             Assert.assertTrue(result.contains("serviceC"),
                             "The message should be \"fallback for serviceC\"");
-        } 
+        }
         catch (TimeoutException ex) {
             // Not Expected
             Assert.fail("serviceC should not throw a TimeoutException in testFallbackTimeout");
-        } 
+        }
         catch (RuntimeException ex) {
             // Not Expected
             Assert.fail("serviceC should not throw a RuntimeException in testFallbackTimeout");
         }
-        
+
         Assert.assertEquals(fallbackClient.getCounterForInvokingServiceC(), 2, "The execution count should be 2 (1 retry + 1)");
     }
-    
+
     /**
      * Test that a method in a Fallback service is driven after the specified number of retries are executed.
-     * 
-     * ServiceD specifies a method on a FallbackHandler. The test checks that the FallbackHandler method 
+     *
+     * ServiceD specifies a method on a FallbackHandler. The test checks that the FallbackHandler method
      * has been driven and that the Service has been executed the correct number of times.
      */
     @Test
@@ -227,13 +229,13 @@ public class FallbackTest extends Arquillian {
             Assert.fail("serviceD should not throw a RuntimeException in testFallbackMethodSuccess");
         }
         Assert.assertEquals(fallbackClient.getCounterForInvokingServiceD(), 2, "The execution count should be 2 (1 retry + 1)");
-        
+
     }
 
     /**
      * Analogous to testFallbackMethodSuccess but serviceE has a pair of parameters.
-     * 
-     * ServiceE specifies a method on a FallbackHandler. The test checks that the FallbackHandler method 
+     *
+     * ServiceE specifies a method on a FallbackHandler. The test checks that the FallbackHandler method
      * has been driven and that the Service has been executed the correct number of times.
      */
     @Test
@@ -248,6 +250,6 @@ public class FallbackTest extends Arquillian {
             Assert.fail("serviceE should not throw a RuntimeException in testFallbackMethodWithArgsSuccess");
         }
         Assert.assertEquals(fallbackClient.getCounterForInvokingServiceE(), 2, "The execution count should be 2 (1 retry + 1)");
-        
+
     }
 }

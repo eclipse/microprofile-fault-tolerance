@@ -36,21 +36,21 @@ import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhe
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Checker;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.TestData;
 import org.jboss.arquillian.container.test.api.Deployment;
-import org.jboss.arquillian.testng.Arquillian;
+import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.testng.Assert;
-import org.testng.ITestContext;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
 
 /**
  * @author Gordon Hutchison
  */
 
-public class BulkheadAsynchTest extends Arquillian {
+@RunWith(Arquillian.class)
+public class BulkheadAsynchTest {
 
     /*
      * As the FaultTolerance annotation only work on business methods of
@@ -80,7 +80,7 @@ public class BulkheadAsynchTest extends Arquillian {
     /**
      * This is the Arquillian deploy method that controls the contents of the
      * war that contains all the tests.
-     * 
+     *
      * @return the test war "ftBulkheadAsynchTest.war"
      */
     @Deployment
@@ -90,11 +90,6 @@ public class BulkheadAsynchTest extends Arquillian {
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml").as(JavaArchive.class);
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftBulkheadAsynchTest.war").addAsLibrary(testJar);
         return war;
-    }
-
-    @BeforeTest
-    public void beforeTest(final ITestContext testContext) {
-        Utils.log("Testmethod: " + testContext.getName());
     }
 
     /**
@@ -197,7 +192,7 @@ public class BulkheadAsynchTest extends Arquillian {
      * Run a number of Callable's (usually Asynch's) in a loop on one thread.
      * Here we do not check that amount that were successfully through the
      * Bulkhead
-     * 
+     *
      * @param loops
      * @param test
      * @param maxSimultaneousWorkers
