@@ -33,14 +33,14 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 /**
  * Test the combination of the @Retry and @Timeout annotations.
- * 
+ *
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  *
  */
 public class RetryTimeoutTest extends Arquillian {
 
     private @Inject RetryTimeoutClient clientForRetryTimeout;
-    
+
     @Deployment
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
@@ -52,52 +52,52 @@ public class RetryTimeoutTest extends Arquillian {
         WebArchive war = ShrinkWrap
                 .create(WebArchive.class, "ftRetryTimeout.war")
                 .addAsLibrary(testJar);
-        return war;
+        return TckAdditions.decorate(war);
     }
-   
+
     /**
      * Test that a Service is retried the expected number of times.
-     * 
+     *
      * A timeout is configured for serviceA and in this case the service should generate Timeout exceptions.
-     * 
+     *
      * The service should be retried.
      */
     @Test
     public void testRetryTimeout() {
         try {
             String result = clientForRetryTimeout.serviceA(1000);
-        } 
+        }
         catch (TimeoutException ex) {
             // Expected
-        } 
+        }
         catch (RuntimeException ex) {
             // Not Expected
             Assert.fail("serviceA should not throw a RuntimeException in testRetryTimeout");
         }
-        
+
         Assert.assertEquals(clientForRetryTimeout.getCounterForInvokingServiceA(), 2, "The execution count should be 2 (1 retry + 1)");
     }
-    
+
     /**
      * Test that a Service is retried the expected number of times.
-     * 
+     *
      * A timeout is configured for serviceA but the service should fail before the timeout is reached
-     * and generate a RuntimeException.  
-     * 
+     * and generate a RuntimeException.
+     *
      * The service should be retried.
      */
     @Test
     public void testRetryNoTimeout() {
         try {
             String result = clientForRetryTimeout.serviceA(10);
-        } 
+        }
         catch (TimeoutException ex) {
             // Not Expected
             Assert.fail("serviceA should not throw a TimeoutException in testRetrytNoTimeout");
-        } 
+        }
         catch (RuntimeException ex) {
             // Expected
-        }        
+        }
 
         Assert.assertEquals(clientForRetryTimeout.getCounterForInvokingServiceA(), 2, "The execution count should be 2 (1 retry + 1)");
     }

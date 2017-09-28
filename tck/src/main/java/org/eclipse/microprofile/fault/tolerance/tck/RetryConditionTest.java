@@ -46,7 +46,7 @@ public class RetryConditionTest extends Arquillian {
     private @Inject RetryClientAbortOn clientForAbortOn;
     private @Inject RetryClassLevelClientRetryOn clientForClassLevelRetryOn;
     private @Inject RetryClassLevelClientAbortOn clientForClassLevelAbortOn;
-    
+
     @Deployment
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftRetryCondition.jar")
@@ -59,12 +59,12 @@ public class RetryConditionTest extends Arquillian {
         WebArchive war = ShrinkWrap
                 .create(WebArchive.class, "ftRetryCondition.war")
                 .addAsLibrary(testJar);
-        return war;
+        return TckAdditions.decorate(war);
     }
 
     /**
      * Test that retries are executed where a failure declared as "retry on" in the {@code @Retry} annotation is encountered.
-     *  
+     *
      * serviceA is configured to retry on a RuntimeException. The service should be retried 3 times.
      */
     @Test
@@ -82,9 +82,9 @@ public class RetryConditionTest extends Arquillian {
     /**
      * Test that no retries are executed where a failure declared as "retry on" in the {@code @Retry} annotation
      * is NOT encountered.
-     *  
+     *
      * serviceB is configured to retry on an IOException. In practice the only exception that the service
-     * will throw is a RuntimeException, therefore no retries should be executed. 
+     * will throw is a RuntimeException, therefore no retries should be executed.
      */
     @Test
     public void testRetryOnFalse() {
@@ -102,9 +102,9 @@ public class RetryConditionTest extends Arquillian {
     /**
      * Test that the default number of retries are executed where a failure declared as "abort on" in the {@code @Retry} annotation
      * is NOT encountered.
-     *  
+     *
      * serviceA is configured to abort on an IOException. In practice the only exception that the service
-     * will throw is a RuntimeException, therefore the default number of 3 retries should be executed. 
+     * will throw is a RuntimeException, therefore the default number of 3 retries should be executed.
      */
     @Test
     public void testRetryWithAbortOnFalse() {
@@ -121,7 +121,7 @@ public class RetryConditionTest extends Arquillian {
     /**
      * Test that no retries are executed where a failure declared as "abort on" in the {@code @Retry} annotation
      * is encountered.
-     *  
+     *
      * serviceB is configured to abort on a RuntimeException. The service should not be retried.
      */
     @Test
@@ -139,7 +139,7 @@ public class RetryConditionTest extends Arquillian {
 
     /**
      * Analogous to testRetryOnTrue but using a Class level rather than method level annotation.
-     * 
+     *
      * serviceA is configured to retry on a RuntimeException. The service should be retried 3 times.
      */
     @Test
@@ -153,13 +153,13 @@ public class RetryConditionTest extends Arquillian {
         }
         Assert.assertEquals(clientForClassLevelRetryOn.getRetryCountForConnectionService(), 4, "The execution count should be 4 (3 retries + 1)");
     }
-    
+
     /**
      * Analogous to testRetryonFalse, testing whether the {@code @Retry} annotation on method serviceB overrides the Class level
      * {@code @Retry} annotation.
-     *  
+     *
      * serviceB is configured to retry on an IOException. In practice the only exception that the service
-     * will throw is a RuntimeException, therefore no retries should be executed. 
+     * will throw is a RuntimeException, therefore no retries should be executed.
      */
     @Test
     public void testClassLevelRetryOnFalse() {
@@ -173,14 +173,14 @@ public class RetryConditionTest extends Arquillian {
         Assert.assertEquals(clientForClassLevelRetryOn.getRetryCountForWritingService(), 1,
             "The execution count should be 1 as the retry condition is false");
     }
-    
+
     /**
      * Analogous to testRetryWithAbortOnFalse but using a Class level rather than method level {@code @Retry} annotation.
      * Test that the default number of retries are executed where a failure declared as "abort on" in the {@code @Retry} annotation
      * is NOT encountered.
-     *  
+     *
      * The Class, and therefore serviceA, is configured to abort on an IOException. In practice the only exception that the service
-     * will throw is a RuntimeException, therefore the default number of 3 retries should be executed. 
+     * will throw is a RuntimeException, therefore the default number of 3 retries should be executed.
      */
     @Test
     public void testClassLevelRetryWithAbortOnFalse() {
@@ -197,10 +197,10 @@ public class RetryConditionTest extends Arquillian {
     /**
      * Analogous to testRetryWithAbortOnTrue, testing whether the {@code @Retry} annotation on method serviceB overrides the Class level
      * {@code @Retry} annotation.
-     * 
+     *
      * Test that no retries are executed where a failure declared as "abort on" in the {@code @Retry} annotation
      * is encountered.
-     *  
+     *
      * serviceB is configured to abort on a RuntimeException. The service should not be retried.
      */
     @Test

@@ -35,7 +35,7 @@ import org.testng.annotations.Test;
 /**
  * Test when maxDuration is reached, no more retries will be perfomed.
  * Test the delay and jitter were taken into consideration.
- * 
+ *
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  *
  */
@@ -44,7 +44,7 @@ public class RetryTest extends Arquillian {
     private @Inject RetryClientForMaxRetries clientForMaxRetry;
     private @Inject RetryClientWithDelay clientForDelay;
     private @Inject RetryClassLevelClientForMaxRetries clientForClassLevelMaxRetry;
-    
+
     @Deployment
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
@@ -56,12 +56,12 @@ public class RetryTest extends Arquillian {
         WebArchive war = ShrinkWrap
                 .create(WebArchive.class, "ftRetry.war")
                 .addAsLibrary(testJar);
-        return war;
+        return TckAdditions.decorate(war);
     }
 
     /**
-     * Test maxRetries. 
-     * 
+     * Test maxRetries.
+     *
      * As serviceA is annotated with maxRetries = 5, serviceA should be executed 6 times.
      */
     @Test
@@ -75,7 +75,7 @@ public class RetryTest extends Arquillian {
         }
         Assert.assertEquals(clientForMaxRetry.getRetryCountForConnectionService(), 6, "The max number of execution should be 6");
     }
-    
+
     @Test
     public void testRetryMaxDuration() {
         try {
@@ -86,7 +86,7 @@ public class RetryTest extends Arquillian {
             // Expected
         }
 
-        //The writing service invocation takes 100ms plus a jitter of 0-200ms with the max duration of 1000ms, 
+        //The writing service invocation takes 100ms plus a jitter of 0-200ms with the max duration of 1000ms,
         //the max invocation should be less than 10
         Assert.assertTrue(clientForMaxRetry.getRetryCountForWritingService()< 11, "The max retry counter should be less than 11");
     }
@@ -101,11 +101,11 @@ public class RetryTest extends Arquillian {
             // Expected
         }
 
-        //The writing service invocation takes 100ms plus a jitter of 0-200ms with the max duration of 1000ms, 
+        //The writing service invocation takes 100ms plus a jitter of 0-200ms with the max duration of 1000ms,
         //the max invocation should be less than 10
         Assert.assertTrue(clientForMaxRetry.getRetryCountForWritingService()< 11, "The max retry counter should be less than 11");
     }
-    
+
     @Test
     public void testRetryWithDelay() {
         try {
@@ -123,7 +123,7 @@ public class RetryTest extends Arquillian {
     /**
      * Analogous to testRetryMaxRetries but using a Class level rather
      * than method level annotation.
-     * 
+     *
      * With maxRetries = 2, serviceA should be executed 3 times.
      */
     @Test
@@ -141,7 +141,7 @@ public class RetryTest extends Arquillian {
     /**
      * Analogous to testRetryMaxDuration, testing whether the {@code @Retry} annotation on method serviceB overrides the Class level
      * {@code @Retry} annotation.
-     * 
+     *
      * Ensure that serviceB is executed more than the maxRetries of 2 specified at the Class level.
      */
     @Test
@@ -154,19 +154,19 @@ public class RetryTest extends Arquillian {
             // Expected
         }
 
-        //The writing service invocation takes 100ms plus a jitter of 0-200ms with the max duration of 1000ms, 
+        //The writing service invocation takes 100ms plus a jitter of 0-200ms with the max duration of 1000ms,
         //the max invocation should be less than 10
-        int retryCountforWritingService = clientForClassLevelMaxRetry.getRetryCountForWritingService();        
+        int retryCountforWritingService = clientForClassLevelMaxRetry.getRetryCountForWritingService();
         Assert.assertTrue(retryCountforWritingService< 11, "The max retry counter should be less than 11");
-        
+
         // Further test that we have retried more than the maximum number of retries specified in the Class level {@code @Retry} annotation
-        Assert.assertTrue(retryCountforWritingService> 3, "The max retry counter should be greater than 3");      
+        Assert.assertTrue(retryCountforWritingService> 3, "The max retry counter should be greater than 3");
     }
 
     /**
      * Analogous to testRetryMaxDurationSeconds, testing whether the {@code @Retry} annotation on method serviceB overrides the Class level
      * {@code @Retry} annotation.
-     * 
+     *
      * Ensure that serviceB is executed more than the maxRetries of 2 specified at the Class level.
      */
     @Test
@@ -179,7 +179,7 @@ public class RetryTest extends Arquillian {
             // Expected
         }
 
-        //The writing service invocation takes 100ms plus a jitter of 0-200ms with the max duration of 1000ms, 
+        //The writing service invocation takes 100ms plus a jitter of 0-200ms with the max duration of 1000ms,
         //the max invocation should be less than 10
         Assert.assertTrue(clientForClassLevelMaxRetry.getRetryCountForWritingService()< 11, "The max retry counter should be less than 11");
     }
