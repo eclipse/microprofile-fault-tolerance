@@ -35,7 +35,7 @@ public class Assert {
         org.junit.Assert.fail(message);
     }
 
-    public static void assertEquals(int expected, int actual, String message) {
+    public static void assertEquals(int actual, int expected, String message) {
         org.junit.Assert.assertEquals(message, expected, actual);
     }
 
