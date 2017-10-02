@@ -49,7 +49,7 @@ documentation:
   - title: Bulkhead
     file: spec/src/main/asciidoc/bulkhead.asciidoc
     
-   - title: Configuration
+  - title: Configuration
     file: spec/src/main/asciidoc/configuration.asciidoc
     
   - title: License
