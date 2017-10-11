@@ -72,4 +72,4 @@ If the `@Retry` policy applied on a class level and on a method level within tha
 
 The `@Retry` annotation can be used together with `@Fallback`, `@CircuitBreaker`, `@Asynchronous`, `@Bulkhead` and `@Timeout`.
 A `@Fallback` can be specified and it will be invoked if the `@Retry` still fails.
-If `@Retry` is used together with `@Timeout`, the `TimoutException` will trigger the retry.
+If `@Retry` is used together with `@Timeout`, it is recommended  `TimoutException` being part of `retryOn` so that `TimeoutException` triggers retry.
