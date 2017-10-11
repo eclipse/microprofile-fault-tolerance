@@ -19,9 +19,9 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.illegalConfig;
 
-import javax.enterprise.inject.spi.DefinitionException;
 import javax.inject.Inject;
 
+import org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.ShouldThrowException;
 import org.jboss.arquillian.testng.Arquillian;
@@ -37,7 +37,7 @@ public class IncompatibleFallbackTest extends Arquillian {
     FallbackClient fallbackClient;
 
     @Deployment
-    @ShouldThrowException(DefinitionException.class)
+    @ShouldThrowException(FaultToleranceDefinitionException.class)
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
             .create(JavaArchive.class, "ftInvalid.jar")
