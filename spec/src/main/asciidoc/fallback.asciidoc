@@ -30,7 +30,7 @@ When the Circuit is open, the Fallback is always invoked.
 
 === Fallback usage
 
-A method or a class can be annotated with `@Fallback`, which means the method or the methods under the class will have Fallback policy applied.
+A method can be annotated with `@Fallback`, which means the method will have Fallback policy applied.
 There are two ways to specify fallback:
 
 * Specify a FallbackHandler class
