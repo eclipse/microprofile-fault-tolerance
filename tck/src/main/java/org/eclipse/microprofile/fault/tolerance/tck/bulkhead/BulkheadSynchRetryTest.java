@@ -29,6 +29,7 @@ import javax.inject.Inject;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BackendTestDelegate;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead55ClassSynchronousRetryBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead55MethodSynchronousRetryBean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadRapidRetry50MethodSynchBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadRapidRetry550MethodSynchBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadRapidRetry55ClassSynchBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadRapidRetry55MethodSynchBean;
@@ -82,7 +83,10 @@ public class BulkheadSynchRetryTest extends Arquillian {
     private BulkheadRapidRetry55MethodSynchBean rrMethodBean;
 
     @Inject
-    private BulkheadRapidRetry550MethodSynchBean zeroRetryBean;
+    private BulkheadRapidRetry50MethodSynchBean zeroRetryBean;
+    
+    @Inject
+    private BulkheadRapidRetry550MethodSynchBean zeroRetryWaitingQueueBean;
 
     /**
      * This is the Arquillian deploy method that controls the contents of the
@@ -240,6 +244,21 @@ public class BulkheadSynchRetryTest extends Arquillian {
         int expectedTasks = 5;
         TestData td = new TestData(new CountDownLatch(expectedTasks));
         threads(threads, zeroRetryBean, maxSimultaneousWorkers, expectedTasks, td);
+        td.check();
+    }
+    
+    /**
+     * Test that that the waitingTaskQueue parameter is ignored due to the absence of 
+     * the Asynchronous annotation. Only 5 tasks should go through, as the waiting
+     * queue size should be ignored.
+     */
+    @Test()
+    public void testIgnoreWaitingTaskQueueBulkhead() {
+        int threads = 30;
+        int maxSimultaneousWorkers = 5;
+        int expectedTasks = 5;
+        TestData td = new TestData(new CountDownLatch(expectedTasks));
+        threads(threads, zeroRetryWaitingQueueBean, maxSimultaneousWorkers, expectedTasks, td);
         td.check();
     }
 
