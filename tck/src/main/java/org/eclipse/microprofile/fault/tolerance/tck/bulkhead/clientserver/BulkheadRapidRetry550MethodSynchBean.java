@@ -39,7 +39,7 @@ public class BulkheadRapidRetry550MethodSynchBean implements BulkheadTestBackend
 
     @Override
     @ApplicationScoped
-    @Bulkhead(waitingTaskQueue = 5, value = 5)
+    @Bulkhead(value = 5)
     @Retry(retryOn =
      { BulkheadException.class }, delay = 1, delayUnit = ChronoUnit.MICROS,
      maxRetries = 0, maxDuration=999999 )

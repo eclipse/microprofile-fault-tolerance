@@ -237,7 +237,7 @@ public class BulkheadSynchRetryTest extends Arquillian {
     public void testNoRetriesBulkhead() {
         int threads = 30;
         int maxSimultaneousWorkers = 5;
-        int expectedTasks = 10;
+        int expectedTasks = 5;
         TestData td = new TestData(new CountDownLatch(expectedTasks));
         threads(threads, zeroRetryBean, maxSimultaneousWorkers, expectedTasks, td);
         td.check();
