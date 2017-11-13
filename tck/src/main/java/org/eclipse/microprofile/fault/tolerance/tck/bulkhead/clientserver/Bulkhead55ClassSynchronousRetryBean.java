@@ -30,7 +30,7 @@ import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
 
 /**
- * A simple method level Synchronous @Bulkhead bean that has a retry option.
+ * A simple class level Synchronous @Bulkhead bean that has a retry option.
  * @author Gordon Hutchison
  */
 @ApplicationScoped
