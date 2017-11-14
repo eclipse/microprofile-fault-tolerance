@@ -19,6 +19,8 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck;
 
+import static org.eclipse.microprofile.fault.tolerance.tck.Misc.Ints.contains;
+
 import javax.inject.Inject;
 
 import org.eclipse.microprofile.faulttolerance.exceptions.CircuitBreakerOpenException;
@@ -58,7 +60,8 @@ public class CircuitBreakerTest extends Arquillian {
                                         CircuitBreakerClientNoDelay.class,
                                         CircuitBreakerClassLevelClientWithDelay.class,
                                         CircuitBreakerClientDefaultSuccessThreshold.class,
-                                        CircuitBreakerClientHigherSuccessThreshold.class)
+                                        CircuitBreakerClientHigherSuccessThreshold.class,
+                                        Misc.class)
                         .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                         .as(JavaArchive.class);
 
@@ -86,23 +89,26 @@ public class CircuitBreakerTest extends Arquillian {
      */
     @Test
     public void testCircuitClosedThenOpen() {
-        for (int i = 0; i < 7; i++) {
+        for (int i = 1; i < 8; i++) {
 
             try {
                 clientForCBWithDelay.serviceA();
 
-                if (i < 4) {
+                if (i < 5) {
                     Assert.fail("serviceA should throw an Exception in testCircuitClosedThenOpen on iteration " + i);
                 }
             }
             catch (CircuitBreakerOpenException cboe) {
-                // Expected on iteration 4
-                if (i < 4) {
+                // Expected on iteration 5
+                if (i < 5) {
                     Assert.fail("serviceA should throw a RuntimeException in testCircuitClosedThenOpen on iteration " + i);
                 }
             }
             catch (RuntimeException ex) {
                 // Expected
+                if (!contains(new int[]{1, 2, 3, 4}, i)) {
+                    Assert.fail("serviceA should not throw a RuntimeException on iteration " + i);
+                }
             }
             catch (Exception ex) {
                 // Not Expected
@@ -134,13 +140,11 @@ public class CircuitBreakerTest extends Arquillian {
      */
     @Test
     public void testCircuitReClose() {
-        for (int i = 0; i < 7; i++) {
+        for (int i = 1; i < 8; i++) {
             try {
-                // Pause to allow the circuit breaker to half-open on iteration
-                // 4
-                // This is conservative when the circuit breaker has a minimal
-                // delay.
-                if (i == 4) {
+                // Pause to allow the circuit breaker to half-open on iteration 5
+                // This is conservative when the circuit breaker has a minimal delay.
+                if (i == 5) {
                     try {
                         Thread.sleep(500);
                     }
@@ -149,7 +153,7 @@ public class CircuitBreakerTest extends Arquillian {
                     }
                 }
                 clientForCBNoDelay.serviceA();
-                if (i < 4) {
+                if (i < 5) {
                     Assert.fail("serviceA should throw an Exception in testCircuitReClose on iteration " + i);
                 }
             }
@@ -161,6 +165,9 @@ public class CircuitBreakerTest extends Arquillian {
             }
             catch (RuntimeException ex) {
                 // Expected
+                if (!contains(new int[]{1, 2, 3, 4}, i)) {
+                    Assert.fail("serviceA should not throw a RuntimeException on iteration " + i);
+                }
             }
             catch (Exception ex) {
                 // Not Expected
@@ -187,11 +194,11 @@ public class CircuitBreakerTest extends Arquillian {
      * 4         RunTimeException
      * 5         CircuitBreakerOpenException
      * Pause for longer than CircuitBreaker delay, so that it transitions to half-open
-     * 6         SUCCEED (CircuitBreaker will be re-closed as successThreshold is 2)
+     * 6         SUCCEED (CircuitBreaker will be re-closed as successThreshold is 1)
      * 7         RunTimeException
      * 8         RunTimeException
      * 9         RunTimeException
-     * 10        RunTimeException
+     * 10        CircuitBreakerOpenException
      * 11        CircuitBreakerOpenException
      *
      */
@@ -202,15 +209,14 @@ public class CircuitBreakerTest extends Arquillian {
             try {
                 clientForCBDefaultSuccess.serviceA();
 
-                if (i < 5 || (i > 6 && i < 12)) {
+                if (i != 6) {
                     Assert.fail("serviceA should throw an Exception in testCircuitDefaultSuccessThreshold on iteration " + i);
                 }
             }
             catch (CircuitBreakerOpenException cboe) {
-                // Expected on execution 5 and iteration 10
-
-                if (i < 5) {
-                    Assert.fail("serviceA should throw a RuntimeException in testCircuitDefaultSuccessThreshold on iteration " + i);
+                // Expected on execution 5, 10 & 11
+                if (!contains(new int[]{5, 10, 11}, i)) {
+                    Assert.fail("in serviceA no CircuitBreakerOpenException should be fired on iteration " + i);
                 }
                 else if (i == 5) {
                     // Pause to allow the circuit breaker to half-open
@@ -224,6 +230,9 @@ public class CircuitBreakerTest extends Arquillian {
             }
             catch (RuntimeException ex) {
                 // Expected
+                if (!contains(new int[]{1, 2, 3, 4, 7, 8 , 9}, i)) {
+                    Assert.fail("serviceA should not throw a RuntimeException on iteration " + i);
+                }
             }
             catch (Exception ex) {
                 // Not Expected
@@ -233,7 +242,7 @@ public class CircuitBreakerTest extends Arquillian {
         }
         int serviceAExecutions = clientForCBDefaultSuccess.getCounterForInvokingServiceA();
 
-        Assert.assertEquals(serviceAExecutions, 9, "The number of serviceA executions should be 9");
+        Assert.assertEquals(serviceAExecutions, 8, "The number of serviceA executions should be 8");
     }
 
     /**
@@ -269,22 +278,27 @@ public class CircuitBreakerTest extends Arquillian {
                 }
             }
             catch (CircuitBreakerOpenException cboe) {
-                // Expected on iteration 4 and iteration 10
-                if (i < 5) {
-                    Assert.fail("serviceA should throw a RuntimeException in testCircuitHighSuccessThreshold on iteration " + i);
+                // Expected on iteration 5 and iteration 9
+                if (i == 5 || i == 9) {
+                    if (i == 5) {
+                        // Pause to allow the circuit breaker to half-open
+                        try {
+                            Thread.sleep(2000);
+                        }
+                        catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
-                else if (i == 5) {
-                    // Pause to allow the circuit breaker to half-open
-                    try {
-                        Thread.sleep(2000);
-                    }
-                    catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                else {
+                    Assert.fail("serviceA should not throw a CircuitBreakerOpenException in testCircuitHighSuccessThreshold on iteration " + i);
                 }
             }
             catch (RuntimeException ex) {
-                // Expected
+                // Check expected iterations
+                if (!Misc.Ints.contains(new int[] {1, 2, 3, 4, 8}, i)) {
+                    Assert.fail("serviceA should not have thrown a RuntimeException in testCircuitHighSuccessThreshold on iteration " + i);
+                }
             }
             catch (Exception ex) {
                 // Not Expected
@@ -316,24 +330,27 @@ public class CircuitBreakerTest extends Arquillian {
      */
     @Test
     public void testClassLevelCircuitBase() {
-        for (int i = 0; i < 7; i++) {
+        for (int i = 1; i < 8; i++) {
 
             try {
                 clientForClassLevelCBWithDelay.serviceA();
 
-                if (i < 4) {
+                if (i < 5) {
                     Assert.fail("serviceA should throw an Exception in testClassLevelCircuitBase");
                 }
             }
             catch (CircuitBreakerOpenException cboe) {
-                // Expected on iteration 4
+                // Expected on iteration 5
 
-                if (i < 4) {
+                if (i < 5) {
                     Assert.fail("serviceA should throw a RuntimeException in testClassLevelCircuitBase on iteration " + i);
                 }
             }
             catch (RuntimeException ex) {
                 // Expected
+                if (!contains(new int[]{1, 2, 3, 4}, i)) {
+                    Assert.fail("serviceA should not throw a RuntimeException on iteration " + i);
+                }
             }
             catch (Exception ex) {
                 // Not Expected
@@ -365,22 +382,25 @@ public class CircuitBreakerTest extends Arquillian {
      */
     @Test
     public void testClassLevelCircuitOverride() {
-        for (int i = 0; i < 7; i++) {
+        for (int i = 1; i < 8; i++) {
             try {
                 clientForClassLevelCBWithDelay.serviceC();
 
-                if (i < 2) {
+                if (i < 3) {
                     Assert.fail("serviceC should throw an Exception in testClassLevelCircuitOverride on iteration " + i);
                 }
             }
             catch (CircuitBreakerOpenException cboe) {
-                // Expected on iteration 4
-                if (i < 2) {
+                // Expected starting from iteration 3
+                if (i < 3) {
                     Assert.fail("serviceC should throw a RuntimeException in testClassLevelCircuitOverride on iteration " + i);
                 }
             }
             catch (RuntimeException ex) {
                 // Expected
+                if (!contains(new int[]{1, 2}, i)) {
+                    Assert.fail("serviceC should not throw a RuntimeException on iteration " + i);
+                }
             }
             catch (Exception ex) {
                 // Not Expected
@@ -414,13 +434,12 @@ public class CircuitBreakerTest extends Arquillian {
      */
     @Test
     public void testClassLevelCircuitOverrideNoDelay() {
-        for (int i = 0; i < 7; i++) {
+        for (int i = 1; i < 8; i++) {
             try {
-                // Pause to allow the circuit breaker to half-open on iteration
-                // 4
+                // Pause to allow the circuit breaker to half-open on iteration 5
                 // This is conservative when the circuit breaker has a minimal
                 // delay.
-                if (i == 4) {
+                if (i == 5) {
                     try {
                         Thread.sleep(500);
                     }
@@ -429,7 +448,7 @@ public class CircuitBreakerTest extends Arquillian {
                     }
                 }
                 clientForClassLevelCBWithDelay.serviceD();
-                if (i < 4) {
+                if (i < 5) {
                     Assert.fail("serviceA should throw an Exception in testClassLevelCircuitOverrideNoDelay on iteration " + i);
                 }
             }
@@ -441,6 +460,9 @@ public class CircuitBreakerTest extends Arquillian {
             }
             catch (RuntimeException ex) {
                 // Expected
+                if (!contains(new int[]{1, 2, 3, 4}, i)) {
+                    Assert.fail("serviceD should not throw a RuntimeException on iteration " + i);
+                }
             }
             catch (Exception ex) {
                 // Not Expected
