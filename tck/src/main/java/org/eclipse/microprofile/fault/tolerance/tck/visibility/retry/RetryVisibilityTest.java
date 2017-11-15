@@ -84,21 +84,21 @@ public class RetryVisibilityTest extends Arquillian {
     public void serviceOverrideClassLevelUsesClassLevelAnnotation() {
         int nbExpectedRetries = 4;  // see RetryServiceOverrideClassLevel class annotation
 
-        checkServiceCall(nbExpectedRetries, this.baseService, "serviceOverrideClassLevelUsesClassLevelAnnotation");
+        checkServiceCall(nbExpectedRetries, serviceOverrideClassLevel, "serviceOverrideClassLevelUsesClassLevelAnnotation");
     }
 
     @Test
     public void serviceOverrideMethodLevelUsesMethodLevelAnnotation() {
         int nbExpectedRetries = 4;   // see RetryServiceOverrideMethodLevel#service() method annotation
 
-        checkServiceCall(nbExpectedRetries, this.baseService, "serviceOverrideMethodLevelUsesMethodLevelAnnotation");
+        checkServiceCall(nbExpectedRetries, serviceOverrideMethodLevel, "serviceOverrideMethodLevelUsesMethodLevelAnnotation");
     }
     
     @Test
     public void serviceRetryRemovedAtMethodLevel() {
         int nbExpectedRetries = 0;  // see RetryServiceMethodSuppressLevel#service() method with no annotation
 
-        checkServiceCall(nbExpectedRetries, this.baseService, "serviceRetryRemovedAtMethodLevel");
+        checkServiceCall(nbExpectedRetries, serviceSuppressMethodLevel, "serviceRetryRemovedAtMethodLevel");
     }
 
     private void checkServiceCall(int nbExpectedRetries, RetryService service, String testName) {
