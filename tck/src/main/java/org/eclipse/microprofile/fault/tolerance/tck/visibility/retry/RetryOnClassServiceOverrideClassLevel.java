@@ -19,19 +19,12 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.visibility.retry;
 
-import java.io.IOException;
-import java.sql.Connection;
-
 import javax.enterprise.context.RequestScoped;
 
+import org.eclipse.microprofile.faulttolerance.Retry;
+
 @RequestScoped
-@RS(RetryServiceType.METHOD_SUPPRESS)
-public class RetryServiceMethodSuppressLevel extends BaseRetryService {
-    @Override
-    public Connection service() throws IOException {
-        // no annotation specified only one call expected
-        return super.service();
-    }
+@RS(RetryServiceType.BASE_ROC_RETRY_REDEFINED_ON_CLASS)
+@Retry(maxRetries = 4)
+public class RetryOnClassServiceOverrideClassLevel extends BaseRetryOnClassService {
 }
-
-

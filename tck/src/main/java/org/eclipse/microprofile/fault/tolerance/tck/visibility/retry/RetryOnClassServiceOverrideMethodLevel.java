@@ -19,12 +19,27 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.visibility.retry;
 
+import java.io.IOException;
+import java.sql.Connection;
+
 import javax.enterprise.context.RequestScoped;
 
 import org.eclipse.microprofile.faulttolerance.Retry;
 
 @RequestScoped
-@RS(RetryServiceType.CLASS_OVERRIDE)
-@Retry(maxRetries = 4)
-public class RetryServiceOverrideClassLevel extends BaseRetryService {
+@RS(RetryServiceType.BASE_ROC_RETRY_REDEFINED_ON_METHOD)
+@Retry(maxRetries = 5)
+/*
+    we define a Retry annotation here to be sure that it is not taken into account during resolution
+    of the annotation retrieval on the method.
+    Tests will ensure that 'maxRetries' for the service method will not be 5 (defined on class) nor 4 defined on parent class
+ */
+public class RetryOnClassServiceOverrideMethodLevel extends BaseRetryOnClassService {
+    @Override
+    @Retry(maxRetries = 4)
+    public Connection service() throws IOException {
+        return super.service();
+    }
 }
+
+

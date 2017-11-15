@@ -24,14 +24,10 @@ import java.sql.Connection;
 
 import javax.enterprise.context.RequestScoped;
 
-import org.eclipse.microprofile.faulttolerance.Retry;
-
 @RequestScoped
-@RS(RetryServiceType.METHOD_OVERRIDE)
-@Retry(maxRetries = 5)
-public class RetryServiceOverrideMethodLevel extends BaseRetryService {
+@RS(RetryServiceType.BASE_ROC_RETRY_MISSING_ON_METHOD)
+public class RetryOnClassServiceNoAnnotationOnOveriddenMethod extends BaseRetryOnClassService {
     @Override
-    @Retry(maxRetries = 4)
     public Connection service() throws IOException {
         return super.service();
     }

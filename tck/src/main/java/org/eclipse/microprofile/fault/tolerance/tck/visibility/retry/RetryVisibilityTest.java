@@ -46,10 +46,10 @@ public class RetryVisibilityTest extends Arquillian {
                         RS.class, 
                         RetryServiceType.class,
                         RetryService.class, 
-                        BaseRetryService.class, 
-                        RetryServiceOverrideClassLevel.class, 
-                        RetryServiceOverrideMethodLevel.class, 
-                        RetryServiceMethodSuppressLevel.class
+                        BaseRetryOnClassService.class,
+                        RetryOnClassServiceOverrideClassLevel.class,
+                        RetryOnClassServiceOverrideMethodLevel.class,
+                        RetryOnClassServiceNoAnnotationOnOveriddenMethod.class
                 )
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                 .as(JavaArchive.class);
@@ -61,42 +61,42 @@ public class RetryVisibilityTest extends Arquillian {
         return war;
     }
     
-    @Inject @RS(RetryServiceType.BASE)
-    private BaseRetryService baseService;
+    @Inject @RS(RetryServiceType.BASE_ROC)
+    private BaseRetryOnClassService baseService;
     
-    @Inject @RS(RetryServiceType.CLASS_OVERRIDE)
-    private RetryServiceOverrideClassLevel serviceOverrideClassLevel;
+    @Inject @RS(RetryServiceType.BASE_ROC_RETRY_REDEFINED_ON_CLASS)
+    private RetryOnClassServiceOverrideClassLevel serviceOverrideClassLevel;
     
-    @Inject @RS(RetryServiceType.METHOD_OVERRIDE)
-    private RetryServiceOverrideMethodLevel serviceOverrideMethodLevel;
+    @Inject @RS(RetryServiceType.BASE_ROC_RETRY_REDEFINED_ON_METHOD)
+    private RetryOnClassServiceOverrideMethodLevel serviceOverrideMethodLevel;
     
-    @Inject @RS(RetryServiceType.METHOD_SUPPRESS)
-    private RetryServiceMethodSuppressLevel serviceSuppressMethodLevel;
+    @Inject @RS(RetryServiceType.BASE_ROC_RETRY_MISSING_ON_METHOD)
+    private RetryOnClassServiceNoAnnotationOnOveriddenMethod serviceSuppressMethodLevel;
     
     @Test
     public void baseRetryServiceUsesDefaults() {
-        int nbExpectedRetries = 3; // see BaseRetryService class annotation
+        int nbExpectedRetries = 3; // see BaseRetryOnClassService class annotation
 
         checkServiceCall(nbExpectedRetries, this.baseService, "baseRetryServiceUsesDefaults");
     }
 
     @Test
     public void serviceOverrideClassLevelUsesClassLevelAnnotation() {
-        int nbExpectedRetries = 4;  // see RetryServiceOverrideClassLevel class annotation
+        int nbExpectedRetries = 4;  // see RetryOnClassServiceOverrideClassLevel class annotation
 
         checkServiceCall(nbExpectedRetries, serviceOverrideClassLevel, "serviceOverrideClassLevelUsesClassLevelAnnotation");
     }
 
     @Test
     public void serviceOverrideMethodLevelUsesMethodLevelAnnotation() {
-        int nbExpectedRetries = 4;   // see RetryServiceOverrideMethodLevel#service() method annotation
+        int nbExpectedRetries = 4;   // see RetryOnClassServiceOverrideMethodLevel#service() method annotation
 
         checkServiceCall(nbExpectedRetries, serviceOverrideMethodLevel, "serviceOverrideMethodLevelUsesMethodLevelAnnotation");
     }
     
     @Test
     public void serviceRetryRemovedAtMethodLevel() {
-        int nbExpectedRetries = 0;  // see RetryServiceMethodSuppressLevel#service() method with no annotation
+        int nbExpectedRetries = 0;  // see RetryOnClassServiceNoAnnotationOnOveriddenMethod#service() method with no annotation
 
         checkServiceCall(nbExpectedRetries, serviceSuppressMethodLevel, "serviceRetryRemovedAtMethodLevel");
     }

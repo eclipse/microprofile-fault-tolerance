@@ -27,9 +27,9 @@ import javax.enterprise.context.RequestScoped;
 import org.eclipse.microprofile.faulttolerance.Retry;
 
 @RequestScoped
-@RS(RetryServiceType.BASE)
+@RS(RetryServiceType.BASE_ROC)
 @Retry
-public class BaseRetryService implements RetryService {
+public class BaseRetryOnClassService implements RetryService {
     private int nbCalls = 0;
 
     @Override

@@ -20,5 +20,22 @@
 package org.eclipse.microprofile.fault.tolerance.tck.visibility.retry;
 
 public enum RetryServiceType {
-    BASE, CLASS_OVERRIDE, METHOD_OVERRIDE, METHOD_SUPPRESS;
+    // Services with inheritance from a super class defining retry at the top class level
+    // ROC => Retry On Class
+    BASE_ROC,                                           // Retry defined at class level
+    BASE_ROC_RETRY_REDEFINED_ON_CLASS,                  // derived class with Retry redefined at class level, no service method overridden
+    BASE_ROC_RETRY_REDEFINED_ON_CLASS_METHOD_OVERRIDE,  // TODO derived class with Retry redefined at class level, service method overridden
+    BASE_ROC_RETRY_REDEFINED_ON_METHOD,                 // derived class with Retry redefined on overridden service method
+    BASE_ROC_RETRY_MISSING_ON_METHOD,                   // derived class with no Retry annotation on overridden service method
+    BASE_ROC_DERIVED_CLASS_NO_REDEFINITION,             // TODO derived class, no annotation at class level, no service method overridden
+
+    // Services with inheritance from a super class defining retry at the method level
+    // ROM => Retry On Method
+    BASE_ROM,                                           // TODO class with Retry on service method
+    BASE_ROM_RETRY_REDEFINED_ON_CLASS,                  // TODO derived class with Retry redefined at class level, no service method overridden
+    BASE_ROM_RETRY_REDEFINED_ON_CLASS_METHOD_OVERRIDE,  // TODO derived class with Retry redefined at class level, service method overridden
+    BASE_ROM_RETRY_REDEFINED_ON_METHOD,                 // TODO derived class with Retry redefined on overridden service method
+    BASE_ROM_RETRY_MISSING_ON_METHOD,                   // TODO derived class with no Retry annotation on overridden service method
+    BASE_ROM_DERIVED_CLASS_NO_REDEFINITION,             // TODO derived class, no annotation at class level, no service method overridden
+    ;
 }

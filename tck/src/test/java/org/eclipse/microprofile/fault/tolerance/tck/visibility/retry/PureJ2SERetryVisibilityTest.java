@@ -27,27 +27,29 @@ import org.testng.annotations.Test;
 
 /**
  * Checks standard Java annotation retrievals for Retry annotation.
+ *
+ *  @author <a href="mailto:matthieu@brouillard.fr">Matthieu Brouillard</a>
  */
 public class PureJ2SERetryVisibilityTest {
     @Test
     public void checkRetryVisibilityOnRetryServiceMethodSuppressLevel() throws Exception {
         Retry foundAnnotation;
-        Method m = RetryServiceMethodSuppressLevel.class.getDeclaredMethod("service");
+        Method m = RetryOnClassServiceNoAnnotationOnOveriddenMethod.class.getDeclaredMethod("service");
 
         foundAnnotation = m.getDeclaredAnnotation(Retry.class);
         Assert.assertNull(foundAnnotation,
-                "no Retry annotation should be found on RetryServiceMethodSuppressLevel#service() via getDeclaredAnnotation()");
+                "no Retry annotation should be found on RetryOnClassServiceNoAnnotationOnOveriddenMethod#service() via getDeclaredAnnotation()");
 
         foundAnnotation = m.getAnnotation(Retry.class);
         Assert.assertNull(foundAnnotation,
-                "no Retry annotation should be found on RetryServiceMethodSuppressLevel#service() via getAnnotation()");
+                "no Retry annotation should be found on RetryOnClassServiceNoAnnotationOnOveriddenMethod#service() via getAnnotation()");
 
-        foundAnnotation = RetryServiceMethodSuppressLevel.class.getDeclaredAnnotation(Retry.class);
+        foundAnnotation = RetryOnClassServiceNoAnnotationOnOveriddenMethod.class.getDeclaredAnnotation(Retry.class);
         Assert.assertNull(foundAnnotation,
-                "no Retry annotation should be found on RetryServiceMethodSuppressLevel class via getDeclaredAnnotation()");
+                "no Retry annotation should be found on RetryOnClassServiceNoAnnotationOnOveriddenMethod class via getDeclaredAnnotation()");
 
-        foundAnnotation = RetryServiceMethodSuppressLevel.class.getAnnotation(Retry.class);
+        foundAnnotation = RetryOnClassServiceNoAnnotationOnOveriddenMethod.class.getAnnotation(Retry.class);
         Assert.assertNotNull(foundAnnotation,
-                "a Retry annotation should have been found because of inheritance on RetryServiceMethodSuppressLevel class via getAnnotation()");
+                "a Retry annotation should have been found because of inheritance on RetryOnClassServiceNoAnnotationOnOveriddenMethod class via getAnnotation()");
     }
 }
