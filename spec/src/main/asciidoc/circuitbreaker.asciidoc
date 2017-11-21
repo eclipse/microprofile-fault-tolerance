@@ -21,20 +21,23 @@
 [[circuitbreaker]]
 == Circuit Breaker
 
-Circuit Breaker prevents repeating timeout, so that invoking dysfunctional services or APIs fail fast.
+A Circuit Breaker prevents repeated failures, so that dysfunctional services or APIs fail fast.
 There are three circuit states:
 
-* Closed: the service functions well.
-If a failure occurs, the circuit breaker keeps the record.
-After the specified failures are reached, the circuit will be opened.
+* Closed: In normal operation, the circuit is closed. If a failure occurs, the Circuit Breaker records the event. In closed 
+state the requestVolumeThreshold and failureRatio parameters may be configured in order to specify the conditions under which the breaker
+will transition the circuit to open. If the failure conditions are met, the circuit will be opened.
 
-* Open: calls to the circuit breaker fail immediately.
-After the specified timeout is reached, the circuit transitions to half open state.
+* Open: When the circuit is open, calls to the service operating under the circuit breaker will fail immediately. A delay may be configured
+for the Circuit Breaker. After the specified delay, the circuit transitions to half-open state.
 
-* Half-open: one call to the circuit is allowed.
-If it fails, the circuit will remain open.
-Otherwise, subsequent calls are allowed.
-After the specified successful execution, the circuit will be closed.
+* Half-open: In half-open state, trial executions of the service are allowed. By default one trial call to the service is permitted. If the call fails, 
+the circuit will return to open state. The successThreshold parameter allows the configuration of the number of trial executions that must
+succeed before the circuit can be closed. After the specified number of successful executions, the circuit will be closed. If a failure occurs
+before the successThreshold is reached the circuit will transition to open. 
+
+Note that circuit state transitions will reset the Circuit Breaker's records. For example, when the circuit transitions to closed a new
+rolling failure window is created with the configured requestVolumeThreshold and failureRatio.
 
 === Circuit Breaker Usage
 

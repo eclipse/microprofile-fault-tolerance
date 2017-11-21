@@ -19,6 +19,8 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver;
 
+import static org.eclipse.microprofile.fault.tolerance.tck.Misc.Ints.contains;
+
 import java.io.Serializable;
 import java.sql.Connection;
 
@@ -45,18 +47,18 @@ public class CircuitBreakerClientDefaultSuccessThreshold implements Serializable
         }
 
         @CircuitBreaker(successThreshold = 1, requestVolumeThreshold = 4, failureRatio=0.75, delay = 1000)
-    public Connection serviceA() {
+    public Connection serviceA(int [] successSet) {
         Connection conn = null;
         counterForInvokingServiceA++;
-        conn = connectionService();
+        conn = connectionService(successSet);
         
         return conn;
     }
 
     //simulate a backend service
-    private Connection connectionService() {
-        // Only one execution succeeds
-        if(counterForInvokingServiceA != 5) {
+    private Connection connectionService(int [] successSet) {
+        // Determine if execution succeeds
+        if (!contains(successSet, counterForInvokingServiceA)) {
                 throw new RuntimeException("Connection failed");
         }
                 
