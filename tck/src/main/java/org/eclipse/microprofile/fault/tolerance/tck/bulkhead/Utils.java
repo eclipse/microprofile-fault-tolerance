@@ -55,9 +55,10 @@ public class Utils {
                     boolean thisDone = (results[i] == null || results[i].get() == null || ((Future) results[i]).isDone()
                             || results[i].get() instanceof Future && ((Future) results[i].get()).isDone());
                     done = done && thisDone;
+                    
                     log("Result for " + i + (thisDone ? " (Done)" : " (NotDone)") + " is "
-                            + (((Future) results[i]).get() instanceof Future
-                                    ? ((Future) ((Future) results[i]).get()).get() : ((Future) results[i]).get()));
+                            + ((results[i] == null || results[i].get() == null)?"null":""+(((Future) results[i]).get() instanceof Future
+                                    ? ((Future) ((Future) results[i]).get()).get() : ((Future) results[i]).get())));
 
                 }
                 Thread.sleep(1000);
@@ -80,24 +81,25 @@ public class Utils {
      * @param td - used to hold expected results
      */
     public static void loop(int iterations, BulkheadTestBackend test, int maxSimultaneousWorkers, int expectedTasksScheduled, TestData td ) {
-
-        
-        td.setExpectedMaxSimultaneousWorkers(maxSimultaneousWorkers);
-        td.setExpectedInstances(iterations);
-        td.setExpectedTasksScheduled(expectedTasksScheduled);
-
         Future[] results = new Future[iterations];
         try {
-            for (int i = 0; i < iterations; i++) {
-                Utils.log("Starting test " + i);
-                results[i] = test.test(new Checker(1 * 1000, td));
+            td.setExpectedMaxSimultaneousWorkers(maxSimultaneousWorkers);
+            td.setExpectedInstances(iterations);
+            td.setExpectedTasksScheduled(expectedTasksScheduled);
+
+            try {
+                for (int i = 0; i < iterations; i++) {
+                    Utils.log("Starting test " + i);
+                    results[i] = test.test(new Checker(1 * 1000, td));
+                }
+            }
+            catch (InterruptedException e1) {
+                Assert.fail("Unexpected interruption", e1);
             }
         }
-        catch (InterruptedException e1) {
-            Assert.fail("Unexpected interruption", e1);
+        finally {
+            Utils.handleResults(iterations, results);
         }
-
-        Utils.handleResults(iterations, results);
     }
 
     /**
