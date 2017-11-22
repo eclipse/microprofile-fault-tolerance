@@ -37,7 +37,7 @@ public class IncompatibleFallbackTest extends Arquillian {
     FallbackClient fallbackClient;
 
     @Deployment
-    @ShouldThrowException(DefinitionException.class)
+    @ShouldThrowException(value = DefinitionException.class, testable = true)
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
             .create(JavaArchive.class, "ftInvalid.jar")

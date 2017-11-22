@@ -37,7 +37,7 @@ public class IncompatibleFallbackMethodWithArgsTest extends Arquillian {
     FallbackMethodWithArgsClient fallbackMethodClient;
 
     @Deployment
-    @ShouldThrowException(DefinitionException.class)
+    @ShouldThrowException(value = DefinitionException.class, testable = true)
     public static WebArchive deployAnotherApp() {
         JavaArchive testJar = ShrinkWrap
                 .create(JavaArchive.class, "ftInvalid.jar")
