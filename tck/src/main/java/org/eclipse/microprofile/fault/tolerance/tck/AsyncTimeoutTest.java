@@ -126,6 +126,9 @@ public class AsyncTimeoutTest extends Arquillian {
         end = System.currentTimeMillis();
 
         duration = end - start;
+        if (duration < TEST_TIMEOUT_SERVICEA) { // duration should be greater than the timeout configured on the service 
+            throw new AssertionError("testAsyncTimeout: the service duration was less than the configured timeout - " + duration);
+        }
     }
 
     /**
@@ -227,5 +230,8 @@ public class AsyncTimeoutTest extends Arquillian {
         end = System.currentTimeMillis();
 
         duration = end - start;
+        if (duration < TEST_TIMEOUT_SERVICEA) { // duration should be greater than the timeout configured on the service 
+            throw new AssertionError("testAsyncClassLevelTimeout: the service duration was less than the configured timeout - " + duration);
+        }
     }
 }

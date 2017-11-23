@@ -46,8 +46,11 @@ public class AsyncClassLevelTimeoutClient {
      */
     public Future<Connection> serviceA() throws InterruptedException {
 
-        Thread.sleep(5000);
         Connection conn = new Connection() {
+            {
+                Thread.sleep(5000);
+            }
+            
             @Override
             public String getData() {
                 return "serviceA DATA";

@@ -46,8 +46,11 @@ public class AsyncTimeoutClient {
     @Asynchronous
     public Future<Connection> serviceA() throws InterruptedException {
 
-        Thread.sleep(5000);
         Connection conn = new Connection() {
+            {
+                Thread.sleep(5000);
+            }
+            
             @Override
             public String getData() {
                 return "serviceA DATA";
@@ -64,9 +67,12 @@ public class AsyncTimeoutClient {
     @Timeout(2000)
     @Asynchronous
     public Future<Connection> serviceB() throws InterruptedException {
- 
-        Thread.sleep(500);
+
         Connection conn = new Connection() {
+            {
+                Thread.sleep(500);
+            }
+            
             @Override
             public String getData() {
                 return "serviceB DATA";
