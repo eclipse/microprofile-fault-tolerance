@@ -52,6 +52,8 @@ When `@Timeout` is used without `@Asynchronous`, the current thread will be inte
 
 In the above situations, it is impossible to suspend the execution. The execution thread will finish its process. If the execution takes longer than the specified timeout, the `TimeoutException` will be thrown and the execution result will be discarded.
 
+When `@Timeout` is used with `@Asynchronous`, then a separate thread will be spawned to perform the work in the annotated method or methods, while a `Future` is returned on the main thread. If the work on the spawned thread does timeout, then a get() call to the `Future` on the main thread should throw an `ExecutionException` that wraps a fault tolerance `TimeoutException`.
+
 A `@Fallback` can be specified and it will be invoked if the `TimeoutException` is thrown.
 If `@Timeout` is used together with `@Retry`, the `TimoutException` will trigger the retry.
 When `@Timeout` is used with `@CircuitBreaker` and if a `TimeoutException` occurs, the failure will contribute towards the circuit open.
