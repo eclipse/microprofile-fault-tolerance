@@ -28,7 +28,7 @@
     <version>1.1-SNAPSHOT</version>
 
     <properties>
-        <arquillian.version>1.1.13.Final</arquillian.version>
+        <arquillian.version>1.1.14.Final</arquillian.version>
         <checkstyle.methodNameFormat>^_?[a-z][a-zA-Z0-9_]*$</checkstyle.methodNameFormat>
     </properties>
 

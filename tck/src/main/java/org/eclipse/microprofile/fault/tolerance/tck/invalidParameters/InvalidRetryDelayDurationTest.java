@@ -33,7 +33,7 @@ import org.testng.annotations.Test;
 public class InvalidRetryDelayDurationTest extends Arquillian {
 
     @Deployment
-    @ShouldThrowException(DefinitionException.class)
+    @ShouldThrowException(value = DefinitionException.class, testable = true)
     public static WebArchive deploy2() {
         JavaArchive testJar = ShrinkWrap
             .create(JavaArchive.class, "ftInvalidRetry3.jar")

@@ -33,7 +33,7 @@ import org.testng.annotations.Test;
 public class InvalidBulkheadValueTest extends Arquillian {
 
     @Deployment
-    @ShouldThrowException(DefinitionException.class)
+    @ShouldThrowException(value = DefinitionException.class, testable = true)
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
             .create(JavaArchive.class, "ftInvalidBulkhead1.jar")
