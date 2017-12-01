@@ -44,6 +44,8 @@ The value of each parameter can be overridden individually or globally.
 * Override individual parameters
 The annotation parameters can be overwritten via config properties in the naming convention of `<classname>/<methodname>/<annotation>/<parameter>`.
 
+The `<classname>` and `<methodname>` must be the class name and method name where the annotation is declared upon. 
+
 In the following code snippet, in order to override the `maxRetries` for serviceB invocation to 100, set the config property `com.acme.test.MyClient/serviceB/Retry/maxRetries=100`
 Similarly to override the `maxDuration` for ServiceA, set the config property
 
