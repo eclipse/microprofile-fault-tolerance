@@ -52,4 +52,18 @@ public class PureJ2SERetryVisibilityTest {
         Assert.assertNotNull(foundAnnotation,
                 "a Retry annotation should have been found because of inheritance on RetryOnClassServiceNoAnnotationOnOveriddenMethod class via getAnnotation()");
     }
+
+    @Test
+    public void check_BASE_ROM_RETRY_MISSING_ON_METHOD() throws Exception {
+        Retry foundAnnotation;
+        Method m = RetryOnMethodServiceNoAnnotationOnOverridedMethod.class.getDeclaredMethod("service");
+        
+        foundAnnotation = m.getDeclaredAnnotation(Retry.class);
+        Assert.assertNull(foundAnnotation,
+                "no Retry annotation should be found on RetryOnMethodServiceNoAnnotationOnOverridedMethod#service() via getDeclaredAnnotation()");
+
+        foundAnnotation = m.getAnnotation(Retry.class);
+        Assert.assertNull(foundAnnotation,
+                "no Retry annotation should be found on RetryOnMethodServiceNoAnnotationOnOverridedMethod#service() via getAnnotation()");
+    }
 }
