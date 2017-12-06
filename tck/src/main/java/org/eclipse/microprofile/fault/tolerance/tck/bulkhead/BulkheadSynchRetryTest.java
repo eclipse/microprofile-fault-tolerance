@@ -27,12 +27,12 @@ import java.util.concurrent.Future;
 import javax.inject.Inject;
 
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BackendTestDelegate;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead55ClassSynchronousRetryBean;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead55MethodSynchronousRetryBean;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadRapidRetry50MethodSynchBean;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadRapidRetry550MethodSynchBean;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadRapidRetry55ClassSynchBean;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadRapidRetry55MethodSynchBean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead5ClassSynchronousRetry12Bean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead5MethodSynchronousRetry20Bean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead5RapidRetry0MethodSynchBean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead5RapidRetry12MethodSynchBean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead55RapidRetry10ClassSynchBean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead55RapidRetryMethodSynchBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadTestBackend;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Checker;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.ParrallelBulkheadTest;
@@ -73,20 +73,20 @@ public class BulkheadSynchRetryTest extends Arquillian {
      * the @Bulkhead and whether we have queueing or not.
      */
     @Inject
-    private Bulkhead55MethodSynchronousRetryBean methodBean;
+    private Bulkhead5MethodSynchronousRetry20Bean methodBean;
     @Inject
-    private Bulkhead55ClassSynchronousRetryBean classBean;
+    private Bulkhead5ClassSynchronousRetry12Bean classBean;
 
     @Inject
-    private BulkheadRapidRetry55ClassSynchBean rrClassBean;
+    private Bulkhead55RapidRetry10ClassSynchBean rrClassBean;
     @Inject
-    private BulkheadRapidRetry55MethodSynchBean rrMethodBean;
+    private Bulkhead55RapidRetryMethodSynchBean rrMethodBean;
 
     @Inject
-    private BulkheadRapidRetry50MethodSynchBean zeroRetryBean;
+    private Bulkhead5RapidRetry0MethodSynchBean zeroRetryBean;
     
     @Inject
-    private BulkheadRapidRetry550MethodSynchBean zeroRetryWaitingQueueBean;
+    private Bulkhead5RapidRetry12MethodSynchBean zeroRetryWaitingQueueBean;
 
     /**
      * This is the Arquillian deploy method that controls the contents of the
@@ -97,7 +97,7 @@ public class BulkheadSynchRetryTest extends Arquillian {
     @Deployment
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftBulkheadSynchRetryTest.jar")
-                .addPackage(Bulkhead55ClassSynchronousRetryBean.class.getPackage()).addClass(Utils.class)
+                .addPackage(Bulkhead5ClassSynchronousRetry12Bean.class.getPackage()).addClass(Utils.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml").as(JavaArchive.class);
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftBulkheadSynchRetryTest.war").addAsLibrary(testJar);
         return war;
@@ -109,12 +109,12 @@ public class BulkheadSynchRetryTest extends Arquillian {
     }
 
     /**
-     * Test no regression due to passive Retry. The Bulkhead is 5, but also has
-     * a queue of 5, so the Retry should not come into effect for 10 tasks
+     * Test no regression due to passive Retry. The Bulkhead is 5
+     * so the Retry should not come into effect for 5 tasks
      */
     @Test()
     public void testBulkheadClassSynchronousPassiveRetry55() {
-        int threads = 10;
+        int threads = 5;
         int maxSimultaneousWorkers = 5;
         TestData td = new TestData(new CountDownLatch(threads));
         threads(threads, classBean, maxSimultaneousWorkers, threads, td);
@@ -218,8 +218,8 @@ public class BulkheadSynchRetryTest extends Arquillian {
 
     /**
      * Test that Retry can be used to prevent receiving Bulkhead exceptions from
-     * a method level test. There is enough retrying in the Bean to cover the
-     * queue overflow to allow only ONE extra generation so we should loose 5
+     * a class level Bulkhead. There is enough retrying in the Bean to cover the
+     * bulkhead overflow to allow only ONE extra generation so we should loose 5
      * calls.
      */
     @Test()

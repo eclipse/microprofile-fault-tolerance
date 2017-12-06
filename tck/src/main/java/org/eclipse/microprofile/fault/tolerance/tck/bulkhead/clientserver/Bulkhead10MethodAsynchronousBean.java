@@ -31,7 +31,7 @@ import org.eclipse.microprofile.faulttolerance.Bulkhead;
  * @author Gordon Hutchison
  */
 
-public class BulkheadMethodAsynchronous10Bean implements BulkheadTestBackend {
+public class Bulkhead10MethodAsynchronousBean implements BulkheadTestBackend {
 
     @Override
     @Bulkhead(10)

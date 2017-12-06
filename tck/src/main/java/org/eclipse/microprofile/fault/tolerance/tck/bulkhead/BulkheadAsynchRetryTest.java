@@ -25,8 +25,8 @@ import javax.inject.Inject;
 
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead55ClassAsynchronousRetryBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead55MethodAsynchronousRetryBean;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadRapidRetry55ClassAsynchBean;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadRapidRetry55MethodAsynchBean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead55RapidRetry10ClassAsynchBean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead55RapidRetry10MethodAsynchBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.TestData;
 import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -70,9 +70,9 @@ public class BulkheadAsynchRetryTest extends Arquillian {
     private Bulkhead55ClassAsynchronousRetryBean classBean;
 
     @Inject
-    private BulkheadRapidRetry55ClassAsynchBean rrClassBean;
+    private Bulkhead55RapidRetry10ClassAsynchBean rrClassBean;
     @Inject
-    private BulkheadRapidRetry55MethodAsynchBean rrMethodBean;
+    private Bulkhead55RapidRetry10MethodAsynchBean rrMethodBean;
 
     /**
      * This is the Arquillian deploy method that controls the contents of the

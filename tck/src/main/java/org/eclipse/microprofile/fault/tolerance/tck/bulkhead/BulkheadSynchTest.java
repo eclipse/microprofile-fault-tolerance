@@ -26,11 +26,11 @@ import java.util.concurrent.Future;
 
 import javax.inject.Inject;
 
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadClassSemaphore10Bean;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadClassSemaphore3Bean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead10ClassSemaphoreBean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead3ClassSemaphoreBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadClassSemaphoreDefaultBean;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadMethodSemaphore10Bean;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadMethodSemaphore3Bean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead10MethodSemaphoreBean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead3MethodSemaphoreBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadMethodSemaphoreDefaultBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadTestBackend;
 
@@ -71,13 +71,13 @@ public class BulkheadSynchTest extends Arquillian {
     @Inject
     private BulkheadMethodSemaphoreDefaultBean bhBeanMethodSemaphoreDefault;
     @Inject
-    private BulkheadClassSemaphore3Bean bhBeanClassSemaphore3;
+    private Bulkhead3ClassSemaphoreBean bhBeanClassSemaphore3;
     @Inject
-    private BulkheadMethodSemaphore3Bean bhBeanMethodSemaphore3;
+    private Bulkhead3MethodSemaphoreBean bhBeanMethodSemaphore3;
     @Inject
-    private BulkheadClassSemaphore10Bean bhBeanClassSemaphore10;
+    private Bulkhead10ClassSemaphoreBean bhBeanClassSemaphore10;
     @Inject
-    private BulkheadMethodSemaphore10Bean bhBeanMethodSemaphore10;
+    private Bulkhead10MethodSemaphoreBean bhBeanMethodSemaphore10;
 
     /**
      * This is the Arquillian deploy method that controls the contents of the

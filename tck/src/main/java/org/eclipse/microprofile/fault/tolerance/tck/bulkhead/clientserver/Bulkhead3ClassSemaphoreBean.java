@@ -32,7 +32,7 @@ import org.eclipse.microprofile.faulttolerance.Bulkhead;
  * @author Gordon Hutchison
  */
 @Bulkhead(3) @ApplicationScoped
-public class BulkheadClassSemaphore3Bean implements BulkheadTestBackend {
+public class Bulkhead3ClassSemaphoreBean implements BulkheadTestBackend {
 
     @Override
     public Future test(BackendTestDelegate action) throws InterruptedException {

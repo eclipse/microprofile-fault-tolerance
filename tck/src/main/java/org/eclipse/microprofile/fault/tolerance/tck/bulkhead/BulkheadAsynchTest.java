@@ -24,12 +24,12 @@ import java.util.concurrent.Future;
 
 import javax.inject.Inject;
 
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadClassAsynchronous10Bean;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadClassAsynchronous3Bean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead10ClassAsynchronousBean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead3ClassAsynchronousBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadClassAsynchronousDefaultBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadClassAsynchronousQueueingBean;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadMethodAsynchronous10Bean;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadMethodAsynchronous3Bean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead10MethodAsynchronousBean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead3MethodAsynchronousBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadMethodAsynchronousDefaultBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadMethodAsynchronousQueueingBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadTestBackend;
@@ -65,13 +65,13 @@ public class BulkheadAsynchTest extends Arquillian {
     @Inject
     private BulkheadMethodAsynchronousDefaultBean bhBeanMethodAsynchronousDefault;
     @Inject
-    private BulkheadClassAsynchronous3Bean bhBeanClassAsynchronous3;
+    private Bulkhead3ClassAsynchronousBean bhBeanClassAsynchronous3;
     @Inject
-    private BulkheadMethodAsynchronous3Bean bhBeanMethodAsynchronous3;
+    private Bulkhead3MethodAsynchronousBean bhBeanMethodAsynchronous3;
     @Inject
-    private BulkheadClassAsynchronous10Bean bhBeanClassAsynchronous10;
+    private Bulkhead10ClassAsynchronousBean bhBeanClassAsynchronous10;
     @Inject
-    private BulkheadMethodAsynchronous10Bean bhBeanMethodAsynchronous10;
+    private Bulkhead10MethodAsynchronousBean bhBeanMethodAsynchronous10;
     @Inject
     private BulkheadClassAsynchronousQueueingBean bhBeanClassAsynchronousQueueing;
     @Inject
