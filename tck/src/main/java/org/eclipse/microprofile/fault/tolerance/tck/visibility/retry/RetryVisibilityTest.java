@@ -42,15 +42,16 @@ public class RetryVisibilityTest extends Arquillian {
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
                 .create(JavaArchive.class, "ftRetryVisibility.jar")
-                .addClasses(
-                        RS.class, 
-                        RetryServiceType.class,
-                        RetryService.class, 
-                        BaseRetryOnClassService.class,
-                        RetryOnClassServiceOverrideClassLevel.class,
-                        RetryOnClassServiceOverrideMethodLevel.class,
-                        RetryOnClassServiceNoAnnotationOnOveriddenMethod.class
-                )
+//                .addClasses(
+//                        RS.class, 
+//                        RetryServiceType.class,
+//                        RetryService.class, 
+//                        BaseRetryOnClassService.class,
+//                        RetryOnClassServiceOverrideClassLevel.class,
+//                        RetryOnClassServiceOverrideMethodLevel.class,
+//                        RetryOnClassServiceNoAnnotationOnOveriddenMethod.class
+//                )
+                .addPackage("org.eclipse.microprofile.fault.tolerance.tck.visibility.retry")
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                 .as(JavaArchive.class);
 
@@ -62,16 +63,55 @@ public class RetryVisibilityTest extends Arquillian {
     }
     
     @Inject @RS(RetryServiceType.BASE_ROC)
-    private BaseRetryOnClassService baseService;
+    private RetryService baseService;
+    
+    @Inject @RS(RetryServiceType.BASE_ROC_DERIVED_CLASS_NO_REDEFINITION)
+    private RetryService serviceDerivedClassNoRedefinition;
     
     @Inject @RS(RetryServiceType.BASE_ROC_RETRY_REDEFINED_ON_CLASS)
-    private RetryOnClassServiceOverrideClassLevel serviceOverrideClassLevel;
+    private RetryService serviceOverrideClassLevel;
+
+    @Inject @RS(RetryServiceType.BASE_ROC_RETRY_REDEFINED_ON_CLASS_METHOD_OVERRIDE)
+    private RetryService serviceOverrideClassLevelMethodOverride;
     
     @Inject @RS(RetryServiceType.BASE_ROC_RETRY_REDEFINED_ON_METHOD)
-    private RetryOnClassServiceOverrideMethodLevel serviceOverrideMethodLevel;
-    
+    private RetryService serviceOverrideMethodLevel;
+
     @Inject @RS(RetryServiceType.BASE_ROC_RETRY_MISSING_ON_METHOD)
-    private RetryOnClassServiceNoAnnotationOnOveriddenMethod serviceSuppressMethodLevel;
+    private RetryService serviceSuppressMethodLevel;
+
+    @Inject @RS(RetryServiceType.BASE_ROM)
+    private RetryService serviceBaseROM;
+
+    @Inject @RS(RetryServiceType.BASE_ROM_RETRY_MISSING_ON_METHOD)
+    private RetryService serviceBaseROMRetryMissingOnMethod;
+
+    @Inject @RS(RetryServiceType.BASE_ROM_RETRY_REDEFINED_ON_CLASS)
+    private RetryService serviceBaseROMOverridedClassLevelNoMethodOverride;
+
+    @Inject @RS(RetryServiceType.BASE_ROM_RETRY_REDEFINED_ON_CLASS_METHOD_OVERRIDE)
+    private RetryService serviceBaseROMOverridedClassLevelMethodOverride;
+
+    @Inject @RS(RetryServiceType.BASE_ROM_RETRY_REDEFINED_ON_METHOD)
+    private RetryService serviceBaseROMOverridedMethodLevel;
+
+    @Inject @RS(RetryServiceType.BASE_ROM_DERIVED_CLASS_NO_REDEFINITION)
+    private RetryService serviceBaseROMNoRedefinition;
+
+    @Inject @RS(RetryServiceType.BASE_ROCM)
+    private RetryService serviceBaseROCM;
+
+    @Inject @RS(RetryServiceType.BASE_ROCM_DERIVED_CLASS_NO_REDEFINITION)
+    private RetryService serviceBaseROCMNoRedefinition;
+
+    @Inject @RS(RetryServiceType.BASE_ROCM_RETRY_REDEFINED_ON_CLASS)
+    private RetryService serviceBaseROCMOverridedClassLevelNoMethodOverride;
+
+    @Inject @RS(RetryServiceType.BASE_ROCM_RETRY_REDEFINED_ON_CLASS_METHOD_OVERRIDE)
+    private RetryService serviceBaseROCMOverridedClassLevelMethodOverride;
+
+    @Inject @RS(RetryServiceType.BASE_ROCM_RETRY_MISSING_ON_METHOD)
+    private RetryService serviceBaseROCMRetryMissingOnMethod;
     
     @Test
     public void baseRetryServiceUsesDefaults() {
@@ -81,10 +121,28 @@ public class RetryVisibilityTest extends Arquillian {
     }
 
     @Test
+    public void serviceDerivedClassNoRedefinition() {
+        int nbExpectedRetries = 3;  // see RetryOnClassServiceNoRedefinition class
+
+        checkServiceCall(nbExpectedRetries, serviceDerivedClassNoRedefinition, "serviceDerivedClassNoRedefinition");
+    }
+    
+    @Test
     public void serviceOverrideClassLevelUsesClassLevelAnnotation() {
         int nbExpectedRetries = 4;  // see RetryOnClassServiceOverrideClassLevel class annotation
 
         checkServiceCall(nbExpectedRetries, serviceOverrideClassLevel, "serviceOverrideClassLevelUsesClassLevelAnnotation");
+    }
+
+    @Test
+    public void serviceOverrideClassLevelUsesClassLevelAnnotationWithMethodOverride() {
+        int nbExpectedRetries = 4;  // see RetryOnClassServiceOverrideClassLevelMethodOverride class annotation
+
+        checkServiceCall(
+                nbExpectedRetries
+                , serviceOverrideClassLevelMethodOverride
+                , "serviceOverrideClassLevelUsesClassLevelAnnotationWithMethodOverride"
+        );
     }
 
     @Test
@@ -99,6 +157,83 @@ public class RetryVisibilityTest extends Arquillian {
         int nbExpectedRetries = 0;  // see RetryOnClassServiceNoAnnotationOnOveriddenMethod#service() method with no annotation
 
         checkServiceCall(nbExpectedRetries, serviceSuppressMethodLevel, "serviceRetryRemovedAtMethodLevel");
+    }
+
+    @Test
+    public void serviceBaseROM() {
+        int nbExpectedRetries = 3;
+
+        checkServiceCall(nbExpectedRetries, serviceBaseROM, "serviceBaseROM");
+    }
+
+    @Test
+    public void serviceBaseROMRetryMissingOnMethod() {
+        int nbExpectedRetries = 0;
+
+        checkServiceCall(nbExpectedRetries, serviceBaseROMRetryMissingOnMethod, "serviceBaseROMRetryMissingOnMethod");
+    }
+
+    @Test
+    public void serviceBaseROMOverridedClassLevelNoMethodOverride() {
+        int nbExpectedRetries = 4;
+
+        checkServiceCall(nbExpectedRetries, serviceBaseROMOverridedClassLevelNoMethodOverride, "serviceBaseROMOverridedClassLevelNoMethodOverride");
+    }
+
+    @Test
+    public void serviceBaseROMOverridedClassLevelMethodOverride() {
+        int nbExpectedRetries = 4;
+
+        checkServiceCall(nbExpectedRetries, serviceBaseROMOverridedClassLevelMethodOverride, "serviceBaseROMOverridedClassLevelMethodOverride");
+    }
+
+    @Test
+    public void serviceBaseROMOverridedMethodLevel() {
+        int nbExpectedRetries = 4;
+
+        checkServiceCall(nbExpectedRetries, serviceBaseROMOverridedMethodLevel, "serviceBaseROMOverridedMethodLevel");
+    }
+
+    @Test
+    public void serviceBaseROMNoRedefinition() {
+        int nbExpectedRetries = 0;
+
+        checkServiceCall(nbExpectedRetries, serviceBaseROMNoRedefinition, "serviceBaseROMNoRedefinition");
+    }
+
+    @Test
+    public void serviceBaseROCM() {
+        int nbExpectedRetries = 4;
+
+        checkServiceCall(nbExpectedRetries, serviceBaseROCM, "serviceBaseROCM");
+    }
+
+    @Test
+    public void serviceBaseROCMNoRedefinition() {
+        int nbExpectedRetries = 3;
+
+        checkServiceCall(nbExpectedRetries, serviceBaseROCMNoRedefinition, "serviceBaseROCMNoRedefinition");
+    }
+
+    @Test
+    public void serviceBaseROCMOverridedClassLevelNoMethodOverride() {
+        int nbExpectedRetries = 5;
+
+        checkServiceCall(nbExpectedRetries, serviceBaseROCMOverridedClassLevelNoMethodOverride, "serviceBaseROCMOverridedClassLevelNoMethodOverride");
+    }
+
+    @Test
+    public void serviceBaseROCMOverridedClassLevelMethodOverride() {
+        int nbExpectedRetries = 5;
+
+        checkServiceCall(nbExpectedRetries, serviceBaseROCMOverridedClassLevelMethodOverride, "serviceBaseROCMOverridedClassLevelMethodOverride");
+    }
+
+    @Test
+    public void serviceBaseROCMRetryMissingOnMethod() {
+        int nbExpectedRetries = 3;
+
+        checkServiceCall(nbExpectedRetries, serviceBaseROCMRetryMissingOnMethod, "serviceBaseROCMRetryMissingOnMethod");
     }
 
     private void checkServiceCall(int nbExpectedRetries, RetryService service, String testName) {
