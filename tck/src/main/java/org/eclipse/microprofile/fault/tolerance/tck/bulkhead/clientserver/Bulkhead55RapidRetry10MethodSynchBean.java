@@ -35,7 +35,7 @@ import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
  * @author Gordon Hutchison
  */
 
-public class Bulkhead55RapidRetryMethodSynchBean implements BulkheadTestBackend {
+public class Bulkhead55RapidRetry10MethodSynchBean implements BulkheadTestBackend {
 
     @Override
     @ApplicationScoped

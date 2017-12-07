@@ -32,7 +32,7 @@ import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhe
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead5RapidRetry0MethodSynchBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead5RapidRetry12MethodSynchBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead55RapidRetry10ClassSynchBean;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead55RapidRetryMethodSynchBean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead55RapidRetry10MethodSynchBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadTestBackend;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Checker;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.ParrallelBulkheadTest;
@@ -78,10 +78,11 @@ public class BulkheadSynchRetryTest extends Arquillian {
     private Bulkhead5ClassSynchronousRetry12Bean classBean;
 
     @Inject
-    private Bulkhead55RapidRetry10ClassSynchBean rrClassBean;
-    @Inject
-    private Bulkhead55RapidRetryMethodSynchBean rrMethodBean;
+    private Bulkhead55RapidRetry10MethodSynchBean rrMethodBean;
 
+    @Inject
+    private Bulkhead55RapidRetry10ClassSynchBean rrClassBean;
+    
     @Inject
     private Bulkhead5RapidRetry0MethodSynchBean zeroRetryBean;
     
@@ -122,47 +123,13 @@ public class BulkheadSynchRetryTest extends Arquillian {
     }
 
     /**
-     * Check we do not loose anything from the queue due to exceptions covered
-     * by Retry at the class level. The Checker backends will throw an exception
-     * the first time their 'perform' method is called but will run OK when
-     * retried.
-     */
-    @Test()
-    public void testBulkheadQueReplacesDueToClassRetryFailures() {
-        int threads = 10;
-        int maxSimultaneousWorkers = 5;
-        Future[] results = new Future[threads];
-
-        TestData td = new TestData(new CountDownLatch(threads));
-        td.setExpectedInstances(threads);
-        // As we are causing workers to get 'blown up' we cannot know that we
-        // get
-        // a full set at once, so we switch off the test that checks that the
-        // bulkhead 'filled up'. We will still check we don't get more than the
-        // bulkhead
-        // at one time.
-        td.setExpectedMaxSimultaneousWorkers(maxSimultaneousWorkers);
-        td.setMaxFill(false);
-        td.setExpectedTasksScheduled(DONT_CHECK);
-
-        for (int i = 0; i < threads; i++) {
-            Utils.log("Starting test " + i);
-            BackendTestDelegate failOnce = new Checker(100, td, 1);
-            results[i] = xService.submit(new ParrallelBulkheadTest(rrClassBean, failOnce));
-        }
-
-        td.check();
-        Utils.handleResults(threads, results);
-    }
-
-    /**
-     * Check we do not loose anything from the queue due to exceptions covered
+     * Check we do not loose anything due to exceptions covered
      * by Retry at the method level. The Checker backends will throw an
      * exception the first time their 'perform' method is called but will run OK
      * when retried.
      */
     @Test()
-    public void testBulkheadQueReplacesDueToMethodRetryFailures() {
+    public void testBulkheadRetriedMethodDueToFailures() {
         int threads = 10;
         int maxSimultaneousWorkers = 5;
         TestData td = new TestData();
@@ -181,6 +148,38 @@ public class BulkheadSynchRetryTest extends Arquillian {
             Utils.log("Starting test " + i);
             BackendTestDelegate failOnce = new Checker(100, td, 1);
             results[i] = xService.submit(new ParrallelBulkheadTest(rrMethodBean, failOnce));
+        }
+
+        Utils.handleResults(threads, results);
+        td.check();
+    }
+    
+    /**
+     * Check we do not loose anything due to exceptions covered
+     * by Retry at the class level. The Checker backends will throw an
+     * exception the first time their 'perform' method is called but will run OK
+     * when retried.
+     */
+    @Test()
+    public void testBulkheadRetriedClassDueToFailures() {
+        int threads = 10;
+        int maxSimultaneousWorkers = 5;
+        TestData td = new TestData();
+        td.setExpectedInstances(threads);
+        td.setExpectedMaxSimultaneousWorkers(maxSimultaneousWorkers);
+        td.setLatch(null);
+        Future[] results = new Future[threads];
+
+        // As we are causing workers to get 'blown up' we cannot know that we
+        // get a full set at once, so we switch off the test that checks that
+        // the bulkhead 'filled up'. We still check we don't get more than the
+        // bulkhead at one time.
+        td.setMaxFill(false);
+
+        for (int i = 0; i < threads; i++) {
+            Utils.log("Starting test " + i);
+            BackendTestDelegate failOnce = new Checker(100, td, 1);
+            results[i] = xService.submit(new ParrallelBulkheadTest(rrClassBean, failOnce));
         }
 
         Utils.handleResults(threads, results);
