@@ -38,7 +38,6 @@ import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
 public class Bulkhead5RapidRetry0MethodSynchBean implements BulkheadTestBackend {
 
     @Override
-    @ApplicationScoped
     @Bulkhead(value = 5)
     @Retry(retryOn =
      { BulkheadException.class }, delay = 1, delayUnit = ChronoUnit.MICROS,
