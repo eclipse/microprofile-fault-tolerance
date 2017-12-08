@@ -22,17 +22,20 @@ package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 import java.util.concurrent.Future;
 
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
+import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 
 /**
- * A simple class level Semaphore @Bulkhead(10)
- * 
+ * A simple method level Asynchronous @Bulkhead(10)
+ *
  * @author Gordon Hutchison
  */
-@Bulkhead(10)
-public class BulkheadClassSemaphore10Bean implements BulkheadTestBackend {
+
+public class Bulkhead10MethodAsynchronousBean implements BulkheadTestBackend {
 
     @Override
+    @Bulkhead(10)
+    @Asynchronous
     public Future test(BackendTestDelegate action) throws InterruptedException {
         Utils.log("in business method of bean " + this.getClass().getName() );
         return action.perform();

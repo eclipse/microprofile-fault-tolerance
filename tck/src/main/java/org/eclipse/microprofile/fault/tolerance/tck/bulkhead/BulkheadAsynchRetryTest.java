@@ -20,13 +20,19 @@
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import javax.inject.Inject;
 
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BackendTestDelegate;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead55ClassAsynchronousRetryBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead55MethodAsynchronousRetryBean;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadRapidRetry55ClassAsynchBean;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadRapidRetry55MethodAsynchBean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead55RapidRetry10ClassAsynchBean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead55RapidRetry10MethodAsynchBean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Checker;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.ParrallelBulkheadTest;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.TestData;
 import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -54,6 +60,7 @@ import org.testng.annotations.Test;
  */
 public class BulkheadAsynchRetryTest extends Arquillian {
 
+
     /*
      * As the FaultTolerance annotation only works on business methods of
      * injected objects we need to inject a variety of these for use by the
@@ -63,6 +70,8 @@ public class BulkheadAsynchRetryTest extends Arquillian {
      */
 
     private static final int DONT_CHECK = 0;
+    private static final int THREADPOOL_SIZE = 30;
+    private ExecutorService xService = Executors.newFixedThreadPool(THREADPOOL_SIZE);
 
     @Inject
     private Bulkhead55MethodAsynchronousRetryBean methodBean;
@@ -70,9 +79,9 @@ public class BulkheadAsynchRetryTest extends Arquillian {
     private Bulkhead55ClassAsynchronousRetryBean classBean;
 
     @Inject
-    private BulkheadRapidRetry55ClassAsynchBean rrClassBean;
+    private Bulkhead55RapidRetry10ClassAsynchBean rrClassBean;
     @Inject
-    private BulkheadRapidRetry55MethodAsynchBean rrMethodBean;
+    private Bulkhead55RapidRetry10MethodAsynchBean rrMethodBean;
 
     /**
      * This is the Arquillian deploy method that controls the contents of the
@@ -230,5 +239,40 @@ public class BulkheadAsynchRetryTest extends Arquillian {
         Utils.loop(iterations, classBean, maxSimultaneousWorkers, expectedTasksScheduled, td);
         td.check();
     }
+    
+    /**
+     * Check we do not loose anything from the queue due to exceptions covered
+     * by Retry at the class level. The Checker backends will throw an exception
+     * the first time their 'perform' method is called but will run OK when
+     * retried.
+     */
+    @Test()
+    public void testBulkheadQueReplacesDueToClassRetryFailures() {
+        int threads = 10;
+        int maxSimultaneousWorkers = 5;
+        Future[] results = new Future[threads];
+
+        TestData td = new TestData(new CountDownLatch(threads));
+        td.setExpectedInstances(threads);
+        // As we are causing workers to get 'blown up' we cannot know that we
+        // get
+        // a full set at once, so we switch off the test that checks that the
+        // bulkhead 'filled up'. We will still check we don't get more than the
+        // bulkhead
+        // at one time.
+        td.setExpectedMaxSimultaneousWorkers(maxSimultaneousWorkers);
+        td.setMaxFill(false);
+        td.setExpectedTasksScheduled(DONT_CHECK);
+
+        for (int i = 0; i < threads; i++) {
+            Utils.log("Starting test " + i);
+            BackendTestDelegate failOnce = new Checker(100, td, 1);
+            results[i] = xService.submit(new ParrallelBulkheadTest(rrClassBean, failOnce));
+        }
+
+        td.check();
+        Utils.handleResults(threads, results);
+    }
+    
 
 }

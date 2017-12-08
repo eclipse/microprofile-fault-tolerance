@@ -28,19 +28,15 @@ import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
 
 /**
- * This tests the class level annotations in Retry that will enable us to submit
- * a set of tasks that will blow the bulkhead which will get
- * retried until they are done.
- * 
+ * A simple class level synchronous @Bulkhead bean that has a retry option.
+ *
  * @author Gordon Hutchison
  */
+@Bulkhead(waitingTaskQueue = 5, value = 5)
+@Retry(retryOn =
+{ BulkheadException.class }, delay = 1, delayUnit = ChronoUnit.MICROS, maxRetries = 10, maxDuration=999999)
+public class Bulkhead55RapidRetry10ClassSynchBean implements BulkheadTestBackend {
 
-public class Bulkhead55MethodSynchronousRetryBean implements BulkheadTestBackend {
-
-    @Override
-    @Bulkhead(value = 5)
-    @Retry(retryOn =
-    { BulkheadException.class }, delay = 1, delayUnit = ChronoUnit.SECONDS, maxRetries = 20, maxDuration=999999)
     public Future test(BackendTestDelegate action) throws InterruptedException {
         Utils.log("in business method of bean " + this.getClass().getName());
         return action.perform();

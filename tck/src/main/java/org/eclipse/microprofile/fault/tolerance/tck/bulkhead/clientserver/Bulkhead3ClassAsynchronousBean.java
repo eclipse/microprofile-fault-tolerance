@@ -24,19 +24,19 @@ import java.util.concurrent.Future;
 import javax.enterprise.context.ApplicationScoped;
 
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
+import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 
 /**
- * A simple method level Semaphore @Bulkhead(3)
- * 
+ * A simple class level Asychronous @Bulkhead(3)
+ *
  * @author Gordon Hutchison
  */
-@ApplicationScoped
-public class BulkheadMethodSemaphore3Bean implements BulkheadTestBackend {
+@Bulkhead(3) @Asynchronous @ApplicationScoped
+public class Bulkhead3ClassAsynchronousBean implements BulkheadTestBackend {
 
     @Override
-    @Bulkhead(3)
-    public Future test(BackendTestDelegate action) throws InterruptedException   {
+    public Future test(BackendTestDelegate action) throws InterruptedException {
         Utils.log("in business method of bean " + this.getClass().getName() );
         return action.perform();
     }

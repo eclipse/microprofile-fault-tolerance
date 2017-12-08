@@ -23,21 +23,19 @@ import java.util.concurrent.Future;
 
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
-import org.eclipse.microprofile.faulttolerance.Retry;
-import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
 
 /**
- * A Synchronous bean that will retry once.
+ * A simple method level Semaphore @Bulkhead(10)
  * 
  * @author Gordon Hutchison
  */
-@Bulkhead(waitingTaskQueue = 5, value = 5)
-@Retry(retryOn =
-{ BulkheadException.class, InterruptedException.class, RuntimeException.class }, maxRetries = 1, maxDuration=999999)
-public class Bulkhead55ClassSynchronousRetry1Bean implements BulkheadTestBackend {
 
+public class Bulkhead10MethodSemaphoreBean implements BulkheadTestBackend {
+
+    @Override
+    @Bulkhead(10)
     public Future test(BackendTestDelegate action) throws InterruptedException {
-        Utils.log("in business method of bean " + this.getClass().getName());
+        Utils.log("in business method of bean " + this.getClass().getName() );
         return action.perform();
     }
 

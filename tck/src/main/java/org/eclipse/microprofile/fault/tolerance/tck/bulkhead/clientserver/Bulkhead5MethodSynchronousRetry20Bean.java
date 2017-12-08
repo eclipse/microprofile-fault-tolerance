@@ -19,24 +19,30 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 
+import java.time.temporal.ChronoUnit;
 import java.util.concurrent.Future;
-
-import javax.enterprise.context.ApplicationScoped;
 
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
+import org.eclipse.microprofile.faulttolerance.Retry;
+import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
 
 /**
- * A simple class level Semaphore @Bulkhead
+ * This tests the class level annotations in Retry that will enable us to submit
+ * a set of tasks that will blow the bulkhead which will get
+ * retried until they are done.
  * 
  * @author Gordon Hutchison
  */
-@Bulkhead(3) @ApplicationScoped
-public class BulkheadClassSemaphore3Bean implements BulkheadTestBackend {
+
+public class Bulkhead5MethodSynchronousRetry20Bean implements BulkheadTestBackend {
 
     @Override
+    @Bulkhead(value = 5)
+    @Retry(retryOn =
+    { BulkheadException.class }, delay = 1, delayUnit = ChronoUnit.SECONDS, maxRetries = 20, maxDuration=999999)
     public Future test(BackendTestDelegate action) throws InterruptedException {
-        Utils.log("in business method of bean " + this.getClass().getName() );
+        Utils.log("in business method of bean " + this.getClass().getName());
         return action.perform();
     }
 
