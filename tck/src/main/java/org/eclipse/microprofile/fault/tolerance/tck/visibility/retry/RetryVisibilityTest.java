@@ -154,7 +154,7 @@ public class RetryVisibilityTest extends Arquillian {
     
     @Test
     public void serviceRetryRemovedAtMethodLevel() {
-        int nbExpectedRetries = 0;  // see RetryOnClassServiceNoAnnotationOnOveriddenMethod#service() method with no annotation
+        int nbExpectedRetries = 3;  // see RetryOnClassServiceNoAnnotationOnOveriddenMethod#service() method with no annotation
 
         checkServiceCall(nbExpectedRetries, serviceSuppressMethodLevel, "serviceRetryRemovedAtMethodLevel");
     }
@@ -182,7 +182,7 @@ public class RetryVisibilityTest extends Arquillian {
 
     @Test
     public void serviceBaseROMOverridedClassLevelMethodOverride() {
-        int nbExpectedRetries = 4;
+        int nbExpectedRetries = 3;
 
         checkServiceCall(nbExpectedRetries, serviceBaseROMOverridedClassLevelMethodOverride, "serviceBaseROMOverridedClassLevelMethodOverride");
     }
@@ -196,7 +196,7 @@ public class RetryVisibilityTest extends Arquillian {
 
     @Test
     public void serviceBaseROMNoRedefinition() {
-        int nbExpectedRetries = 0;
+        int nbExpectedRetries = 3;
 
         checkServiceCall(nbExpectedRetries, serviceBaseROMNoRedefinition, "serviceBaseROMNoRedefinition");
     }
@@ -210,14 +210,14 @@ public class RetryVisibilityTest extends Arquillian {
 
     @Test
     public void serviceBaseROCMNoRedefinition() {
-        int nbExpectedRetries = 3;
+        int nbExpectedRetries = 4;
 
         checkServiceCall(nbExpectedRetries, serviceBaseROCMNoRedefinition, "serviceBaseROCMNoRedefinition");
     }
 
     @Test
     public void serviceBaseROCMOverridedClassLevelNoMethodOverride() {
-        int nbExpectedRetries = 5;
+        int nbExpectedRetries = 4;
 
         checkServiceCall(nbExpectedRetries, serviceBaseROCMOverridedClassLevelNoMethodOverride, "serviceBaseROCMOverridedClassLevelNoMethodOverride");
     }
