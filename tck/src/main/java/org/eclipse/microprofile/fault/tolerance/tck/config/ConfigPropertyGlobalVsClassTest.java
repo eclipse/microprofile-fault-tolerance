@@ -64,7 +64,7 @@ public class ConfigPropertyGlobalVsClassTest extends Arquillian {
         catch (IllegalStateException e) {
             e.printStackTrace();
         }
-        Assert.assertEquals(bean.getRetry(), 6);
+        Assert.assertEquals(bean.getRetry(), 8);
     }
 
     @Inject

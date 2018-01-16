@@ -26,7 +26,7 @@ import java.util.concurrent.Future;
 
 import javax.inject.Inject;
 
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadClassSemaphore3Bean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead3ClassSemaphoreBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadClassSemaphoreDefaultBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadTestBackend;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.ParrallelBulkheadTest;
@@ -118,6 +118,6 @@ public class BulkheadSynchConfigTest extends Arquillian {
      * the {@code @Bulkhead} and whether we have queueing or not.
      */
     @Inject
-    private BulkheadClassSemaphore3Bean bhBeanClassSemaphore3;
+    private Bulkhead3ClassSemaphoreBean bhBeanClassSemaphore3;
 
 }
