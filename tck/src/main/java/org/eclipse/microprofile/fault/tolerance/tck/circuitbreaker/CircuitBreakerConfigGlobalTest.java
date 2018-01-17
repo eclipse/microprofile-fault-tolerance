@@ -61,7 +61,7 @@ public class CircuitBreakerConfigGlobalTest extends Arquillian {
     }
 
     /**
-     * this test is a copy of {@link CircuitBreakerTest#testCircuitDefaultSuccessThreshold()} except that
+     * this test is a copy of {@link org.eclipse.microprofile.fault.tolerance.tck.CircuitBreakerTest#testCircuitDefaultSuccessThreshold()} except that
      * the waiting time to let the Circuit Breaker is 500 ms. Without Property config the test can't pass
      */
     @Test
