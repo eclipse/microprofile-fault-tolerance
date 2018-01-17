@@ -43,6 +43,8 @@ public class AsyncClassLevelTimeoutClient {
     /**
      * serviceA is a slow running service that will take 5 seconds in normal operation. Here it is
      * configured to time out after 2 seconds.
+     * @return the result as a Future
+     * @throws InterruptedException the interrupted exception
      */
     public Future<Connection> serviceA() throws InterruptedException {
 
