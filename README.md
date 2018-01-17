@@ -73,7 +73,7 @@ Standardise the Fallback, Bulkhead and CircuitBreaker APIs and provide implement
 
 * CDI-first approach to apply RetryPolicy, Fallback, BulkHead, CircuitBreaker using annotations
 
-## Detailed design (One example of implemenations)
+## Detailed design (One example of implementations)
 
 
 ### CDI-based approach 
