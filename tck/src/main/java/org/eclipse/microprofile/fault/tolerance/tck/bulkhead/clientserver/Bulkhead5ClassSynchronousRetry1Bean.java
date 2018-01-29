@@ -21,6 +21,8 @@ package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 
 import java.util.concurrent.Future;
 
+import javax.enterprise.context.ApplicationScoped;
+
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 import org.eclipse.microprofile.faulttolerance.Retry;
@@ -31,6 +33,7 @@ import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
  * 
  * @author Gordon Hutchison
  */
+@ApplicationScoped
 @Bulkhead(value = 5)
 @Retry(retryOn =
 { BulkheadException.class, InterruptedException.class, RuntimeException.class }, maxRetries = 1, maxDuration=999999)
