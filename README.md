@@ -1,21 +1,21 @@
-/*
- * Copyright (c) 2016-2017 Contributors to the Eclipse Foundation
- *
- * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * You may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+//
+// Copyright (c) 2016-2017 Contributors to the Eclipse Foundation
+//
+// See the NOTICE file(s) distributed with this work for additional
+// information regarding copyright ownership.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// You may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
 [![Join the chat at https://gitter.im/eclipse/microprofile-fault-tolerance](https://badges.gitter.im/eclipse/microprofile-fault-tolerance.svg)](https://gitter.im/eclipse/microprofile-fault-tolerance)
 
 # Fault Tolerance
@@ -53,10 +53,6 @@ The requirements are as follows:
 * Require immutable failure handling policy configuration
 * Some Failure policy configurations, e.g. CircuitBreaker, RetryPolicy, can be used stand alone. For example, it has been very useful for circuit breakers to be standalone constructs which can be plugged into and intentionally shared across multiple executions. Likewise for retry policies. Additionally, an Execution construct can be offered that allows retry policies to be applied to some logic in a standalone, manually controlled way.
 
-Advanced requirements:
-
-* Event: Since this approach to fault tolerance involves handing execution over to some foreign code, it's very useful to be able to learn when executions are taking place and under what circumstances (onRetry, onFailedAttempt, onFailure, etc).
-
 Mailinglist thread: [Discussion thread topic for that proposal](https://groups.google.com/forum/#!topic/microprofile/ezFC1TLGozU)
 
 ## Motivation
@@ -67,214 +63,40 @@ Currently there are at least two libraries to provide fault tolerance. It is bes
 
 Separate the responsibility of executing logic (Runnables/Callables/etc) from guiding when execution should take place (through retry policies, bulkheads, circuit breakers). In this way, failure handling strategies become configuration that can influence executions, and the execution API itself is just responsible for receiving some configuration and performing executions.
 
-By default, a failure handling strategy could assume, for example, that any exception is a failure. But in some cases, a `null` or negative return value could also be considered a failure. Users should be able to define this, and a user's definition of a failure is what should influence execution. (This all is what the Failsafe RetryPolicy's `retryOn`, `retryWhen`, `abortIf`, etc methods are all about - defining a failure).
+By default, a failure handling strategy could assume, for example, that any exception is a failure. This all is what the RetryPolicy's `retryOn`, `abortOn` are all about - defining a failure.
 
 Standardise the Fallback, Bulkhead and CircuitBreaker APIs and provide implementations.
 
 * CDI-first approach to apply RetryPolicy, Fallback, BulkHead, CircuitBreaker using annotations
 
-## Detailed design (One example of implemenations)
-
+## Detailed design (One example of implementations)
+This specification utilises CDI to simplify the programming model.
 
 ### CDI-based approach 
-Use interceptor and annotation to specify the execution and policy configration.
+Use interceptor binding to specify the execution and policy configuration.
 An annotation of Asynchronous has to be specified for any asynchronous calls. Otherwise, synchronous execution is assumed. 
-The implementation should provide two interceptors, one for synchronous invocation and the other for asynchronous invocation. 
-```
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.METHOD, ElementType.TYPE })
-@Inherited
-public @interface Asynchronous {
 
-}
-```
 #### RetryPolicy: A policy to define the retry criteria
 
-An annotation to specify the max retries, delays, maxDuration, Duration unit, jitter, retryOn, bakeOff, fallback etc.
-```
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.METHOD, ElementType.TYPE })
-public @interface Retry {
-   
-   /**
-     *
-     * @return The max number of retries. -1 indicates retry forever.
-     * IllegalArgumentException if maxRetries <-1.
-     */
-    int maxRetries() default 3;
+An annotation to specify the max retries, delays, maxDuration, Duration unit, jitter, retryOn etc.
 
-    /**
-     * The delay between retries. Defaults to {@link Duration#NONE}.
-     * @return
-     */
-    int delay() default 0;
+#### CircuitBreaker: a rule to achieve fail fast, in order to prevent from repeating timeout
 
-    /**
-     *
-     * @return the delay unit
-     */
+An annotation to specify when to open a circuit, when to half open, close the circuit.
 
-    TimeUnit delayUnit() default TimeUnit.MILLISECONDS;
-
-    /**
-     * @return the maximum duration to perform retries for.
-     */
-    int maxDuration() default 20;
-
-    /**
-     *
-     * @return the duration unit
-     */
-    TimeUnit durationUnit() default TimeUnit.MILLISECONDS;
-
-    /**
-     *
-     * @return the jitter that randomly vary retry delays by. e.g. a jitter of 200 milliseconds
-     * will randomly add betweem -200 and 200 milliseconds to each retry delay.
-     */
-    int jitter() default 200;
-
-    /**
-     *
-     * @return the jitter delay unit.
-     */
-    TimeUnit jitterDelayUnit() default TimeUnit.MILLISECONDS;
-
-    /**
-     * For each retry delay, a randomly portion of the delay multiplied by the jitterFactor will be added or subtracted to the delay.
-     * e.g. a retry delay of 200 milliseconds and a jitter of 0.25 will result in a random retry delay between 150 and 250 milliseconds.
-     * @return the jitter factor.
-     */
-
-    double jitterFactor() default 0.25;
-
-    /**
-     *
-     * @return Specify the failure to retry on
-     */
-    Class<? extends Throwable>[] retryOn() default { Throwable.class };
-
-    /**
-     *
-     * @return Specify the failure to abort on
-     */
-    Class<? extends Throwable>[] aboartOn() default { Throwable.class };
-	/**
-     *
-     * @return The fallback method name
-     */
-    String fallBack();
-
-
-}
-
-
-```
-#### CircuitBreaker: a rule to define when to close the circuit
-
-```
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Target({ ElementType.TYPE, ElementType.METHOD })
-public @interface CircuitBreaker {
-
-        /**
-     * Define the failure criteria
-     * @return the failure exception
-     */
-    Class<? extends Throwable>[] failOn() default Throwable.class;
-
-    /**
-     *
-     * @return The delay time after the circuit is open
-     */
-    long delay() default 2;
-
-    /**
-     *
-     * @return The delay unit after the circuit is open
-     */
-
-    TimeUnit delayUnit() default TimeUnit.SECONDS;
-
-    /**
-     *
-     * @return The failure threshold to open the circuit
-     */
-    long failThreshold() default 2;
-
-    /**
-     *
-     * @return The success threshold to fully close the circuit
-     */
-    long successThreshold() default 2;
-
-}
-```
 #### Fallback
-```
-/**
- * Define the Fallback annotation to specify the fallback callable, BiConsumer or BiFuncation
- *@author Emily Jiang
- */
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Target({ ElementType.TYPE, ElementType.METHOD })
-public @interface Fallback {
+Define the fallback method or fallback handler for a failed execution.
 
-    /**
-     *
-     * @return the fallback class
-     */
-    Class<?> fallback();
+#### Timeout to be used specifying the maximum time for an execution
 
-}
-```
-#### Timeout to be used with either Retry or CircuitBreaker
-```
-/**
- * The Retry annotation to define the number of the retries and the fallback method on reaching the
- * retry counts.
- */
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.METHOD, ElementType.TYPE })
-public @interface TimeOut {
+Timeout to specify the maximum time for a particular execution.
 
-    /**
-     *
-     * @return the timeout
-     */
-    long time() default 2;
-
-    /**
-     *
-     * @return the time unit
-     */
-    TimeUnit timeUnit() default TimeUnit.MILLISECONDS;
-
-}
-```
 #### Bulkhead - threadpool or semaphore style
-```
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Target({ ElementType.METHOD, ElementType.TYPE })
-public @interface Bulkhead {
-    public enum Mode {
-        THREADPOOL, SEMAPHORE;
 
-        private Mode() {
-        }
-    }
-
-    Mode value() default Mode.THREADPOOL;
-}
-```
+Use this annotation without `Asynchronous` annotation for semaphore style. When used with `Asynchronous`, it means threadpool style of bulkhead.
 #### Usage
-An interceptor and fault tolerance policy can be applied to a bean or methods.
+The annotations can be applied to a bean or methods. They can be used together. For an instance, `@Retry` can be used with `@Fallback` in order to trigger the `fallback` when the `Retry` policy fails.
+
 ```
 @ApplicationScoped
 public class FaultToleranceBean {
@@ -288,49 +110,22 @@ public class FaultToleranceBean {
 }
 }
 ```
-### Non-CDI approach
-Some application don't use CDI but would like to utilise the fault tolerance feature. 
-
-#### Retry 
-```
-RetryPolicy rp = FaultToleranceFactory.getInstance(RetryPolicy.class).retryOn(TimeOutException.class)
-  .withDelay(2, TimeUnit.SECONDS)
-  .withMaxRetries(2);
-```
-
-When `TimeOutException` was received, delay 2 seconds and then retry 2 more times.
-
-#### Fallback 
-```
-Connection connection = FaultToleranceFactory.getInstance(Execution.class).with(rp).withFallBack(this::connectToBackup).get(this::connectToPrimary)
-```
-
-If `TimeOutException` is thrown, compute an alternative result such as from a backup resource.
-
-#### CircuitBreaker: a rule to define when to close the circuit
+#### Configuration
+The annotation parameters can be configured via MicroProfile Config. In order to configure the `maxRetries` to be `6` for the following `Retry` policy, define a property `org.microprofile.readme.FaultToleranceBean/doWork/Retry/maxRetries=6`. Alternatively, if the `maxRetries` of the `Retry` is to be configured to `6`, just specify the property of `Retry/maxRetries=6`.
 
 ```
-CircuitBreaker cb = FaultToleranceFactory.getInstance(CircuitBreaker.class)
-  .withFailureThreshold(3, 10)
-  .withSuccessThreshold(5)
-  .withDelay(1, TimeUnit.MINUTES);
-Connection connect = execution.with(cb).run(this::connect);  
-```
-
-When 3 of 10 execution failures occurs on a circuit breaker, the circuit is opened and further execution requests fail with `CircuitBreakerOpenException`. After a delay of 1 min, the circuit is half-opened and trail executions are attempted to determine whether the circuit should be closed or opened again. If the trial executions exceed a success threshold 5, the breaker is closed again and executions will proceed as normal.
-
-### Bulkhead
-
-```
-BulkHead bh = FaultToleranceFactory.getInstance(Bulkhead.class).withPool("myPool");
-Connection connect = FaultToleranceFactory.getInstance(Executor.class).with(bh).run(this::connect);
-```
-
-Bulkhead provides a thread pool with a fixed number of threads in order to achieve thread and failure isolation.
-### Timeout
-
-```
-Connection connect = FaultToleranceFactory.getInstance(Executor.class).withCircuitBreaker(circuitBreaker).withTimeOut(2, TimeUnit.SECONDS).run(this::connect);
+package org.microprofile.readme
+@ApplicationScoped
+public class FaultToleranceBean {
+   int i = 0;
+   @Retry(maxRetries = 2)
+   public Runnable doWork() {
+      Runnable mainService = () -> serviceA(); // This unreliable service sometimes succeeds but
+                                         // sometimes throws a RuntimeException
+	  return mainService;								 
+   }
+}
+}
 ```
 ## Impact on existing code
 
