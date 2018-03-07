@@ -43,5 +43,11 @@ public interface ExecutionContext {
      * 
      */
     public Object[] getParameters();
+    
+    /**
+     * Returns the failure of the method execution
+     * @return the failure of the method execution
+     */
+    public Throwable getFailure();
 
 }
