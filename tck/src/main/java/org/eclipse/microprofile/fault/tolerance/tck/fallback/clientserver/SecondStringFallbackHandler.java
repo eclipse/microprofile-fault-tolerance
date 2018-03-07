@@ -36,7 +36,7 @@ public class SecondStringFallbackHandler implements FallbackHandler<String> {
 
     @Override
     public String handle(ExecutionContext context) {
-        return "second fallback for " + context.getMethod().getName();
+        return "second fallback for " + context.getMethod().getName() + context.getFailure().getClass().getName();
     }
 
 }

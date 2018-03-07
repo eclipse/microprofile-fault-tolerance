@@ -152,6 +152,9 @@ public class FallbackTest extends Arquillian {
             String result = fallbackClassLevelClient.serviceB();
             Assert.assertTrue(result.contains("second fallback for serviceB"),
                             "The message should be \"second fallback for serviceB\"");
+            Assert.assertTrue(result.contains(RuntimeException.class.getName()),
+                    "The message should be " + RuntimeException.class.getName());
+
         }
         catch (RuntimeException ex) {
             Assert.fail("serviceB should not throw a RuntimeException in testFallbackSuccess");
