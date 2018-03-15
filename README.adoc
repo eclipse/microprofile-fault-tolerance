@@ -64,7 +64,7 @@ Currently there are at least two libraries to provide fault tolerance. It is bes
 
 Separate the responsibility of executing logic (Runnables/Callables/etc) from guiding when execution should take place (through retry policies, bulkheads, circuit breakers). In this way, failure handling strategies become configuration that can influence executions, and the execution API itself is just responsible for receiving some configuration and performing executions.
 
-By default, a failure handling strategy could assume, for example, that any exception is a failure. This what the RetryPolicy's retryOn, abortOn clauses are about - defining a failure.
+By default, a failure handling strategy could assume, for example, that any exception is a failure. This is what the RetryPolicy's retryOn, abortOn clauses are about - defining a failure.
 
 Standardise the Fallback, Bulkhead and CircuitBreaker APIs and provide implementations.
 
