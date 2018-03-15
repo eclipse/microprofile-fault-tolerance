@@ -16,8 +16,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-
-[![Join the chat at https://gitter.im/eclipse/microprofile-fault-tolerance](https://badges.gitter.im/eclipse/microprofile-fault-tolerance.svg)](https://gitter.im/eclipse/microprofile-fault-tolerance)
+image:https://badges.gitter.im/eclipse/microprofile-fault-tolerance.svg[link="https://gitter.im/eclipse/microprofile-fault-tolerance"]
 
 # Fault Tolerance
 
