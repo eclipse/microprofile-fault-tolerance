@@ -17,7 +17,7 @@
 		</module>
 		<module name="LocalVariableName" />
 		<module name="MethodName">
-			<property name="format" value="${checkstyle.methodNameFormat}" />
+			<property name="format" value="^_?[a-z][a-zA-Z0-9]*$" />
 		</module>
 		<module name="PackageName" />
 		<module name="LocalFinalVariableName" />
@@ -75,4 +75,3 @@
 		<module name="UpperEll" />
 	</module>
 </module>
-          
