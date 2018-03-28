@@ -152,3 +152,5 @@ For instance the following config will disable bulkhead policy globally:
 `Bulkhead/enabled=false`
 
 Policy will be disabled everywhere ignoring existing policy annotations on methods and classes.
+
+If the above configurations patterns are used with another value than `false` (i.e. `<classname>/<methodname>/<annotation>/enabled=whatever`) non-portable behaviour results.
