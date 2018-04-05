@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2016-2017 Eclipse Microprofile Contributors:
+// Copyright (c) 2016-2018 Eclipse Microprofile Contributors:
 // Emily Jiang
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,6 +30,8 @@ The `Retry` policy allows to configure :
 * `jitterDelayUnit`: the jitter unit
 * `retryOn`: specify the failures to retry on
 * `abortOn`: specify the failures to abort on
+* `backoffDelayFactor` : defines the factor to use to increase delay between retries
+* `backoffMaxDelay` : maximum delay when backoff retry is used
 
 === Retry usage
 
@@ -37,6 +39,7 @@ The `Retry` policy allows to configure :
 If applied to a class, it means the all methods in the class will have the `@Retry` policy applied.
 If applied to a method, it means  that method will have `@Retry` policy applied.
 If the `@Retry` policy applied on a class level and on a method level within that class, the method level `@Retry` will override the class-level `@Retry` policy for that particular method.
+Backoff retry can be used to exponentially increase delay between every retry.
 
 [source, java]
 ----
@@ -67,6 +70,15 @@ If the `@Retry` policy applied on a class level and on a method level within tha
     @Retry(retryOn = {IOException.class})
     public void serviceB() {
         writingService();
+    }
+
+    /**
+    * Delay before first retry will be 400ms, delay before second retry will be 800ms, 1600ms before third retry,
+    * 3200ms before fourth one and 4000ms before fifth and subsequent retries since backoff max delay is 4000ms
+    */
+    @Retry(delay = 400, backoffDelayFactor=2, backoffMaxDelay=4000 , maxRetries = 10)
+    public Connection serviceA() {
+        return connectionService();
     }
 ----
 

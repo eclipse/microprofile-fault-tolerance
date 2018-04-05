@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2017-2018 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -31,10 +31,11 @@ import javax.interceptor.InterceptorBinding;
 
 /**
  * The Retry annotation to define the number of the retries and the fallback method on reaching the
- * retry counts. Any invalid config value causes 
+ * retry counts. Any invalid config value causes
  * {@link org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException}.
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  * @author John Ament
+ * @author Antoine Sabot-Durand
  */
 @Inherited
 @Documented
@@ -79,7 +80,7 @@ public @interface Retry {
     ChronoUnit durationUnit() default ChronoUnit.MILLIS;
 
     /**
-     * Set the jitter to randomly vary retry delays for. The value must be greater than or equals to 0. 
+     * Set the jitter to randomly vary retry delays for. The value must be greater than or equals to 0.
      * 0 means not set.
      * @return the jitter that randomly vary retry delays by. e.g. a jitter of 200 milliseconds
      * will randomly add between -200 and 200 milliseconds to each retry delay.
@@ -108,5 +109,28 @@ public @interface Retry {
      */
     @Nonbinding
     Class<? extends Throwable>[] abortOn() default {};
+
+
+
+    /**
+     *
+     * When this value is greater than 1, backoff retry is activated.
+     * {@link #delay()} between retries will be increased exponentially with this value until
+     * the delay reaches {@link #backoffMaxDelay()}
+     * Value must be equals greater than 1
+     *
+     * @return the backoff factor
+     */
+    @Nonbinding
+    double backoffDelayFactor() default 1;
+
+
+    /**
+     *
+     * @return the maximum delay value. No limit if it's set to 0. Value is ignored if {@link #backoffDelayFactor()} is 1
+     */
+    @Nonbinding
+    long backoffMaxDelay() default 0;
+
 
 }
