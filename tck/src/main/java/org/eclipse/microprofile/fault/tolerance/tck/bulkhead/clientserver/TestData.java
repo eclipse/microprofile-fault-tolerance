@@ -128,7 +128,10 @@ public class TestData {
     }
 
     /**
-     * Check the test ran successfully
+     * Check the test ran successfully.
+     * Note: It is not safe to have checks of actual results here as they are RETURNED
+     * from the workers 'perform' methods and these decrement the latch used below
+     * just BEFORE returning.
      */
     public void check() {
         
