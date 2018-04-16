@@ -21,6 +21,7 @@ package org.eclipse.microprofile.fault.tolerance.tck.disableEnv;
 
 import javax.inject.Inject;
 
+import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.AsyncClient;
 import org.eclipse.microprofile.fault.tolerance.tck.fallback.clientserver.StringFallbackHandler;
 import org.eclipse.microprofile.faulttolerance.exceptions.TimeoutException;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -44,19 +45,22 @@ import org.testng.annotations.Test;
  */
 public class DisableAnnotationOnClassTest extends Arquillian {
 
-    private @Inject
-    DisableClient disableClient;
+    @Inject
+    private DisableClient disableClient;
+
+    @Inject
+    private AsyncClient asyncClient;
 
     @Deployment
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
             .create(JavaArchive.class, "ftDisableClass.jar")
             .addClasses(DisableClient.class, StringFallbackHandler.class)
-            .addAsManifestResource(new StringAsset("org.eclipse.microprofile.fault.tolerance.tck.disableEnv.DisableClient/Retry/enable=false\n" +
-                                                       "org.eclipse.microprofile.fault.tolerance.tck.disableEnv.DisableClient/Fallback/enable=false\n" +
-                                                       "org.eclipse.microprofile.fault.tolerance.tck.disableEnv.DisableClient/CircuitBreaker=false\n" +
-                                                       "org.eclipse.microprofile.fault.tolerance.tck.disableEnv.DisableClient/Timeout=false\n" +
-                                                       "org.eclipse.microprofile.fault.tolerance.tck.disableEnv.DisableClient/Asynchronous=false"),
+            .addAsManifestResource(new StringAsset("org.eclipse.microprofile.fault.tolerance.tck.disableEnv.DisableClient/Retry/enabled=false\n" +
+                                                       "org.eclipse.microprofile.fault.tolerance.tck.disableEnv.DisableClient/Fallback/enabled=false\n" +
+                                                       "org.eclipse.microprofile.fault.tolerance.tck.disableEnv.DisableClient/CircuitBreaker/enabled=false\n" +
+                                                       "org.eclipse.microprofile.fault.tolerance.tck.disableEnv.DisableClient/Timeout/enabled=false\n" +
+                                                       "org.eclipse.microprofile.fault.tolerance.tck.asynchronous.AsyncClient/Asynchronous/enabled=false"),
                                    "microprofile-config.properties")
             .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
             .as(JavaArchive.class);
@@ -137,5 +141,22 @@ public class DisableAnnotationOnClassTest extends Arquillian {
         } catch (RuntimeException ex) {
             // Expected
         }
+    }
+
+
+    /**
+     * A test to check taht asynchronous is disabled
+     *
+     * In normal operation, asyncClient.service() is launched asynchronously. As Asynchronous operation was disabled via config,
+     * test is expecting a synchronous operation.
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void testAsync() throws InterruptedException {
+        long start = System.currentTimeMillis();
+        asyncClient.service();
+        Assert.assertTrue(System.currentTimeMillis()-start >= 1000);
+
     }
 }
