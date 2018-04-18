@@ -40,7 +40,7 @@ import org.testng.annotations.Test;
  * The test assumes that the container supports both the MicroProfile Configuration API and the MicroProfile
  * Fault Tolerance API. Some Fault tolerance policies are disabled through configuration on DisabledClient methods.
  *
- * @auhtor Antoine Sabot-Durand
+ * @author <a href="mailto:antoine@sabot-durand.net">Antoine Sabot-Durand</a>
  * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  */
 public class DisableAnnotationOnMethodsTest extends Arquillian {
@@ -56,12 +56,13 @@ public class DisableAnnotationOnMethodsTest extends Arquillian {
         JavaArchive testJar = ShrinkWrap
             .create(JavaArchive.class, "ftDisableMethods.jar")
             .addClasses(DisableClient.class, StringFallbackHandler.class)
-            .addAsManifestResource(new StringAsset("org.eclipse.microprofile.fault.tolerance.tck.disableEnv.DisableClient/serviceA/Retry/enabled=false\n" +
-                                                       "org.eclipse.microprofile.fault.tolerance.tck.disableEnv.DisableClient/serviceB/Fallback/enabled=false\n" +
-                                                       "org.eclipse.microprofile.fault.tolerance.tck.disableEnv.DisableClient/serviceC/CircuitBreaker/enabled=false\n" +
-                                                       "org.eclipse.microprofile.fault.tolerance.tck.disableEnv.DisableClient/serviceD/Timeout/enabled=false\n" +
-                                                       "org.eclipse.microprofile.fault.tolerance.tck.asynchronous.AsyncClient/service/Asynchronous/enabled=false"),
-                                   "microprofile-config.properties")
+            .addAsManifestResource(new StringAsset(
+              "org.eclipse.microprofile.fault.tolerance.tck.disableEnv.DisableClient/serviceA/Retry/enabled=false\n" +
+              "org.eclipse.microprofile.fault.tolerance.tck.disableEnv.DisableClient/serviceB/Fallback/enabled=false\n" +
+              "org.eclipse.microprofile.fault.tolerance.tck.disableEnv.DisableClient/serviceC/CircuitBreaker/enabled=false\n" +
+              "org.eclipse.microprofile.fault.tolerance.tck.disableEnv.DisableClient/serviceD/Timeout/enabled=false\n" +
+              "org.eclipse.microprofile.fault.tolerance.tck.asynchronous.AsyncClient/service/Asynchronous/enabled=false"),
+              "microprofile-config.properties")
             .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
             .as(JavaArchive.class);
 
@@ -74,14 +75,16 @@ public class DisableAnnotationOnMethodsTest extends Arquillian {
     /**
      * Test maxRetries on @Retry.
      *
-     * ServiceA is annotated with maxRetries = 1 so serviceA is expected to execute 2 times but as Retry is disabled, then no retries should be attempted.
+     * ServiceA is annotated with maxRetries = 1 so serviceA is expected to execute 2 times but as Retry is disabled,
+     * then no retries should be attempted.
      */
     @Test
     public void testRetryDisabled() {
         try {
             disableClient.serviceA();
             Assert.fail("serviceA should throw a RuntimeException in testRetryDisabled");
-        } catch (RuntimeException ex) {
+        } 
+        catch (RuntimeException ex) {
             // Expected
         }
         Assert.assertEquals(disableClient.getRetryCountForConnectionService(), 1, "The max number of executions should be 1");
@@ -109,7 +112,8 @@ public class DisableAnnotationOnMethodsTest extends Arquillian {
 
             try {
                 disableClient.serviceC();
-            } catch (RuntimeException ex) {
+            }
+            catch (RuntimeException ex) {
                 // Expected
             } catch (Exception ex) {
                 // Not Expected
@@ -134,10 +138,12 @@ public class DisableAnnotationOnMethodsTest extends Arquillian {
         try {
             disableClient.serviceD(3000);
             Assert.fail("serviceD should throw a TimeoutException in testTimeout");
-        } catch (TimeoutException ex) {
+        }
+        catch (TimeoutException ex) {
             // Not Expected
             Assert.fail("serviceD should throw a RuntimeException in testTimeout not a TimeoutException");
-        } catch (RuntimeException ex) {
+        }
+        catch (RuntimeException ex) {
             // Expected
         }
     }
