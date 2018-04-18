@@ -39,7 +39,7 @@ import org.testng.annotations.Test;
 /**
  * Verify the asynchronous invocation
  *
- * @author
+ * @author Antoine Sabot-Durand
  */
 public class AsynchronousTest extends Arquillian {
 
