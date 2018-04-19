@@ -144,7 +144,8 @@ public class BulkheadAsynchRetryTest extends Arquillian {
     public void testBulkheadMethodAsynchronousRetry55Trip() throws InterruptedException {
         int iterations = 11;
         int maxSimultaneousWorkers = 5;
-        TestData td = new TestData(new CountDownLatch(10));
+        CountDownLatch latch = new CountDownLatch(10);
+        TestData td = new TestData(latch);
 
         boolean tripped;
         try {
@@ -155,7 +156,10 @@ public class BulkheadAsynchRetryTest extends Arquillian {
             tripped = true;
             Utils.log("Class Bulkhead queue not long enough as expected " + bhe.getMessage());
         }
-        Assert.assertTrue(tripped,
+        
+        // We should have either tripped or, under stress, one of the workers has finished,
+        // before 10 retries are done, letting the 11th task in.
+        Assert.assertTrue(tripped || latch.getCount()<10,
                 "Asynchronous class Bulkead Retry not throwing Bulkhead exception when retry limit just exceeded");
 
         td.setExpectedTasksScheduled(DONT_CHECK);
