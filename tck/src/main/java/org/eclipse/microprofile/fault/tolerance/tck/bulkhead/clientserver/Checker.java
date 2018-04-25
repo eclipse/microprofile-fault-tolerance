@@ -20,6 +20,7 @@
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 
 import javax.management.RuntimeErrorException;
@@ -86,9 +87,9 @@ public class Checker implements BackendTestDelegate {
                 fails--;
                 RuntimeErrorException e = new RuntimeErrorException(new Error("fake error for Retry Testing"));
                 Utils.log(e.toString());
-                if (td.getLatch() != null) {
-                    td.getLatch().countDown();
-                }
+
+                // We will countDown the latch in the finally block
+
                 throw e;
             }
 
@@ -99,16 +100,22 @@ public class Checker implements BackendTestDelegate {
 
             Utils.log("Task " + taskId + " woke.");
 
-            if (td.getLatch() != null) {
-                td.getLatch().countDown();
-            }
+            // We will countDown the latch in the finally block
 
         }
         catch (InterruptedException e) {
             Utils.log(e.toString());
         }
         finally {
+
+            // We want to decrement this before the latch
             td.getWorkers().decrementAndGet();
+
+            CountDownLatch latch = td.getLatch();
+            if (latch != null ) {
+                latch.countDown();
+            }
+
         }
         CompletableFuture<String> result = new CompletableFuture<>();
         result.complete("max workers was " + td.getMaxSimultaneousWorkers().get());
