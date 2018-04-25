@@ -21,6 +21,8 @@ package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 
 import java.util.concurrent.Future;
 
+import javax.enterprise.context.ApplicationScoped;
+
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
@@ -30,7 +32,7 @@ import org.eclipse.microprofile.faulttolerance.Bulkhead;
  *
  * @author Gordon Hutchison
  */
-@Bulkhead(10) @Asynchronous
+@Bulkhead(10) @Asynchronous @ApplicationScoped
 public class Bulkhead10ClassAsynchronousBean implements BulkheadTestBackend {
 
     @Override

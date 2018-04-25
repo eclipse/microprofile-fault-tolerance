@@ -17,30 +17,47 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
+package org.eclipse.microprofile.fault.tolerance.tck.asynchronous;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.RequestScoped;
 
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
+import org.eclipse.microprofile.fault.tolerance.tck.util.Connection;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
-import org.eclipse.microprofile.faulttolerance.Bulkhead;
 
 /**
- * A simple class level Asynchronous @Bulkhead
+ * A client to demonstrate Asynchronous behaviour
  *
- * @author Gordon Hutchison
+ * @author <a href="mailto:antoine@sabot-durand.net">Antoine Sabot-Durand</a>
+ *
  */
-@ApplicationScoped
-@Bulkhead
-@Asynchronous
-public class BulkheadClassAsynchronousDefaultBean implements BulkheadTestBackend {
+@RequestScoped
+public class AsyncClient {
 
-    @Override
-    public Future test(BackendTestDelegate action) throws InterruptedException {
-        Utils.log("in business method of bean " + this.getClass().getName());
-        return action.perform();
+
+    /**
+     * service 1 second in normal operation.
+     * @return the result as a Future
+     * @throws InterruptedException the interrupted exception
+     */
+    @Asynchronous
+    public Future<Connection> service() throws InterruptedException {
+
+        Connection conn = new Connection() {
+            {
+                Thread.sleep(1000);
+            }
+
+            @Override
+            public String getData() {
+                return "service DATA";
+            }
+        };
+
+        return CompletableFuture.completedFuture(conn);
     }
 
-};
+
+}
