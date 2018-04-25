@@ -23,14 +23,14 @@
           "http://checkstyle.sourceforge.net/dtds/configuration_1_3.dtd">
 
 <module name="Checker">
-	<module name="SuppressionCommentFilter" />
 	<module name="FileLength">
 		<property name="max" value="3500" />
 		<property name="fileExtensions" value="java" />
 	</module>
 	<module name="FileTabCharacter" />
 	<module name="TreeWalker">
-		<module name="FileContentsHolder" />
+        <module name="SuppressionCommentFilter" />
+        <module name="FileContentsHolder" />
 		<module name="ConstantName">
 			<property name="format" value="^(([A-Z][A-Z0-9]*(_[A-Z0-9]+)*))$" />
 		</module>
