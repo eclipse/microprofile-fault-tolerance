@@ -22,8 +22,6 @@ package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.Future;
 
-import javax.enterprise.context.ApplicationScoped;
-
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 import org.eclipse.microprofile.faulttolerance.Retry;
@@ -34,7 +32,6 @@ import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
  *
  * @author Gordon Hutchison
  */
-@ApplicationScoped
 @Bulkhead(waitingTaskQueue = 5, value = 5)
 @Retry(retryOn =
 { BulkheadException.class }, delay = 1, delayUnit = ChronoUnit.MICROS, maxRetries = 10, maxDuration=999999)

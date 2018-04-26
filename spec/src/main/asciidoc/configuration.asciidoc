@@ -31,7 +31,7 @@ The reason `fallback` is special as the `fallback` business logic can only be de
 Set the config property of `MP_Fault_Tolerance_NonFallback_Enabled` with the value of `false` means the Fault Tolerance is disabled, except `@Fallback`.
 If the property is absent or with the value of `true`, it means that MicroProfile Fault Tolerance is enabled if any annotations are specified.  For more information about how to set config properties, refer to MicroProfile Config specification.
 
-In order to prevent from any unexpected behaviours, the property `MP_Fault_Tolerance_NonFallback_Enabled` will only be read on application starting.
+In order to prevent from any unexpected behaviours, the property `MP_Fault_Tolerance_NonFallback_Enabled` will only be read on application starting. 
 Any dynamic changes afterwards will be ignored until  the application restarting.
 
 === Config Fault Tolerance parameters
@@ -44,7 +44,7 @@ The value of each parameter can be overridden individually or globally.
 * Override individual parameters
 The annotation parameters can be overwritten via config properties in the naming convention of `<classname>/<methodname>/<annotation>/<parameter>`.
 
-The `<classname>` and `<methodname>` must be the class name and method name where the annotation is declared upon.
+The `<classname>` and `<methodname>` must be the class name and method name where the annotation is declared upon. 
 
 In the following code snippet, in order to override the `maxRetries` for serviceB invocation to 100, set the config property `com.acme.test.MyClient/serviceB/Retry/maxRetries=100`
 Similarly to override the `maxDuration` for ServiceA, set the config property
@@ -107,50 +107,6 @@ public class MyClient{
 }
 ----
 
-If an annotation is not present, the configured properties are ignored.
-For instance, the property `com.acme.ClassA/methodB/Retry/maxRetries` will be ignored if `@Retry` annotation is not specified on the `methodB` of `com.acme.ClassA`.
+If an annotation is not present, the configured properties are ignored. 
+For instance, the property `com.acme.ClassA/methodB/Retry/maxRetries` will be ignored if `@Retry` annotation is not specified on the `methodB` of `com.acme.ClassA`. 
 Similarly, the property `com.acme.ClassA/Retry/maxRetries` will be ignored if `@Retry` annotation is not specified on the class `com.acme.ClassA` as a class-level annotation.
-
-=== Disabled Fault Tolerance policies with configuration
-
-Fault Tolerance policies can be disabled with configuration at method level, class level or globally for all deployment.
-
-Each policy can be disabled by using its annotation name.
-
-* Disabling a policy at Method level
-
-A policy can be disabled at method level with the following config property and value:
-
-`<classname>/<methodname>/<annotation>/enabled=false`
-
-For instance the following config will disable circuit breaker policy on `methodA` of `com.acme.test.MyClient` class:
-
-`com.acme.test.MyClient/methodA/CircuitBreaker/enabled=false`
-
-Policy will be disabled even if the policy is also defined at class level
-
-* Disabling a policy at class level
-
-A policy can be disabled at class level with the following config property and value:
-
-`<classname>/<annotation>/enabled=false`
-
-For instance the following config will disable fallback policy on `com.acme.test.MyClient` class:
-
-`com.acme.test.MyClient/Fallback/enabled=false`
-
-Policy will be disabled on all class methods even if a method has the policy.
-
-* Disabling a policy globally
-
-A policy can be disabled globally with the following config property and value:
-
-`<annotation>/enabled=false`
-
-For instance the following config will disable bulkhead policy globally:
-
-`Bulkhead/enabled=false`
-
-Policy will be disabled everywhere ignoring existing policy annotations on methods and classes.
-
-If the above configurations patterns are used with another value than `false` (i.e. `<classname>/<methodname>/<annotation>/enabled=whatever`) non-portable behaviour results.
