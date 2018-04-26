@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2016-2017 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -17,25 +17,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
+package org.eclipse.microprofile.fault.tolerance.tck;
 
-import java.util.concurrent.Future;
 
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
-import org.eclipse.microprofile.faulttolerance.Bulkhead;
+import org.jboss.arquillian.testng.Arquillian;
 
 /**
- * A simple class level Semaphore @Bulkhead
+ * Verify the asynchronous invocation 
  *
- * @author Gordon Hutchison
+ *  
  */
-@Bulkhead
-public class BulkheadClassSemaphoreDefaultBean implements BulkheadTestBackend {
-
-    @Override
-    public Future test(BackendTestDelegate action) throws InterruptedException {
-        Utils.log("in business method of bean " + this.getClass().getName() );
-        return action.perform();
-    }
-
-};
+public class AsynchronousInvocation extends Arquillian {
+ 
+    /**
+     * @Todo test the asynchronous behaviour
+     * 
+     */
+    
+}

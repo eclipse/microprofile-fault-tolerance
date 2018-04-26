@@ -86,7 +86,7 @@ public class BulkheadAsynchRetryTest extends Arquillian {
     /**
      * This is the Arquillian deploy method that controls the contents of the
      * war that contains all the tests.
-     *
+     * 
      * @return the test war "ftBulkheadAsynchTest.war"
      */
     @Deployment
@@ -137,15 +137,14 @@ public class BulkheadAsynchRetryTest extends Arquillian {
      * a method level test. The bean here does not delay its retries so there is
      * not enough time for the first generation of workers and queued workers to
      * progress.
-     *
+     * 
      * @throws InterruptedException when interrupted
      */
     @Test()
     public void testBulkheadMethodAsynchronousRetry55Trip() throws InterruptedException {
         int iterations = 11;
         int maxSimultaneousWorkers = 5;
-        CountDownLatch latch = new CountDownLatch(10);
-        TestData td = new TestData(latch);
+        TestData td = new TestData();
 
         boolean tripped;
         try {
@@ -156,10 +155,7 @@ public class BulkheadAsynchRetryTest extends Arquillian {
             tripped = true;
             Utils.log("Class Bulkhead queue not long enough as expected " + bhe.getMessage());
         }
-        
-        // We should have either tripped or, under stress, one of the workers has finished,
-        // before 10 retries are done, letting the 11th task in.
-        Assert.assertTrue(tripped || latch.getCount()<10,
+        Assert.assertTrue(tripped,
                 "Asynchronous class Bulkead Retry not throwing Bulkhead exception when retry limit just exceeded");
 
         td.setExpectedTasksScheduled(DONT_CHECK);
@@ -170,7 +166,7 @@ public class BulkheadAsynchRetryTest extends Arquillian {
     /**
      * Tests overloading the Retries by firing lots of work at a full Method
      * bulkhead
-     *
+     * 
      * @throws InterruptedException when interrupted
      */
     @Test()
@@ -192,7 +188,7 @@ public class BulkheadAsynchRetryTest extends Arquillian {
     }
 
     /**
-     *
+     * 
      * Tests overloading the Retries by firing lots of work at a full Class
      * bulkhead
      */
@@ -243,7 +239,7 @@ public class BulkheadAsynchRetryTest extends Arquillian {
         Utils.loop(iterations, classBean, maxSimultaneousWorkers, expectedTasksScheduled, td);
         td.check();
     }
-
+    
     /**
      * Check we do not loose anything from the queue due to exceptions covered
      * by Retry at the class level. The Checker backends will throw an exception
@@ -277,5 +273,6 @@ public class BulkheadAsynchRetryTest extends Arquillian {
         td.check();
         Utils.handleResults(threads, results);
     }
+    
 
 }

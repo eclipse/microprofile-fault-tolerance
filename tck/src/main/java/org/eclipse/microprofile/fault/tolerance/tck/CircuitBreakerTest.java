@@ -207,10 +207,6 @@ public class CircuitBreakerTest extends Arquillian {
      */
     @Test
     public void testCircuitDefaultSuccessThreshold() {
-
-        // Reset the counter in serviceA, to ensure that the test's environment is reinitialized.
-        clientForCBDefaultSuccess.setCounterForInvokingServiceA(0);
-
         for (int i = 1; i < 12; i++) {
             int[] successSet = new int[]{5};
             try {
@@ -280,10 +276,7 @@ public class CircuitBreakerTest extends Arquillian {
      */
     @Test
     public void testCircuitInitialSuccessDefaultSuccessThreshold() {
-
-        // Reset the counter in serviceA, to ensure that the test's environment is reinitialized.
-        clientForCBDefaultSuccess.setCounterForInvokingServiceA(0);
-
+        System.out.println("testCircuitInitialSuccessDefaultSuccessThreshold start");
         for (int i = 1; i < 12; i++) {
             int[] successSet = new int[]{1,5,6};
             try {
@@ -320,6 +313,7 @@ public class CircuitBreakerTest extends Arquillian {
             }
         }
         int serviceAExecutions = clientForCBDefaultSuccess.getCounterForInvokingServiceA();
+        System.out.println("testCircuitInitialSuccessDefaultSuccessThreshold complete");
         Assert.assertEquals(serviceAExecutions, 9, "The number of serviceA executions should be 9");
     }
 
@@ -352,10 +346,7 @@ public class CircuitBreakerTest extends Arquillian {
      */
     @Test
     public void testCircuitLateSuccessDefaultSuccessThreshold() {
-
-        // Reset the counter in serviceA, to ensure that the test's environment is reinitialized.
-        clientForCBDefaultSuccess.setCounterForInvokingServiceA(0);
-
+        System.out.println("testCircuitLateSuccessDefaultSuccessThreshold start");
         for (int i = 1; i < 12; i++) {
             int[] successSet = new int[]{4,5,9};
             try {
@@ -392,6 +383,7 @@ public class CircuitBreakerTest extends Arquillian {
             }
         }
         int serviceAExecutions = clientForCBDefaultSuccess.getCounterForInvokingServiceA();
+        System.out.println("testCircuitLateSuccessDefaultSuccessThreshold complete");
         Assert.assertEquals(serviceAExecutions, 9, "The number of serviceA executions should be 9");
     }
     
