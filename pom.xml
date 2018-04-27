@@ -69,24 +69,22 @@
 
     <scm>
         <connection>scm:git:https://github.com/eclipse/microprofile-fault-tolerance.git</connection>
-        <developerConnection>scm:git:https://github.com/eclipse/microprofile-fault-tolerance.git</developerConnection>
+        <developerConnection>scm:git:git@github.com:eclipse/microprofile-fault-tolerance.git</developerConnection>
         <url>https://github.com/eclipse/microprofile-fault-tolerance</url>
         <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
         <repository>
-            <id>repo.eclipse.org</id>
-            <name>Eclipse MicroProfile Repository - Releases</name>
-            <url>https://repo.eclipse.org/content/repositories/microprofile-releases/</url>
+           <id>ossrh</id>
+           <name>Sonatype OSSRH - Release Staging Area</name>
+           <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
         <snapshotRepository>
-            <id>repo.eclipse.org</id>
-            <name>Eclipse MicroProfile Repository - Snapshots</name>
-            <url>https://repo.eclipse.org/content/repositories/microprofile-snapshots/</url>
-
-            <uniqueVersion>true</uniqueVersion>  <!-- for keeping multipe snapshot versions - maybe for staging a final version besides nightly versions -->
-
+            <id>ossrh</id>
+            <name>Sonatype OSSRH Snapshots</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+            <uniqueVersion>true</uniqueVersion>
         </snapshotRepository>
     </distributionManagement>
 
@@ -107,13 +105,7 @@
         </dependencies>
     </dependencyManagement>
 
-    <pluginRepositories>
-        <pluginRepository>
-            <id>repo.eclipse.org</id>
-            <name>Project Repository - Releases</name>
-            <url>https://repo.eclipse.org/content/groups/cbi/</url>
-        </pluginRepository>
-    </pluginRepositories>
+   
     <build>
         <pluginManagement>
             <plugins>
@@ -123,8 +115,9 @@
                     <version>2.5.3</version>
                     <configuration>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
-                        <pushChanges>false</pushChanges>
                         <localCheckout>true</localCheckout>
+                        <useReleaseProfile>false</useReleaseProfile>
+                        <arguments>${arguments} -Prelease -Drevremark=${revremark}</arguments>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -286,7 +279,7 @@
             <id>release</id>
             <build>
                 <plugins>
-                    <plugin>
+                   <plugin>
                         <groupId>org.sonatype.plugins</groupId>
                         <artifactId>nexus-staging-maven-plugin</artifactId>
                         <version>1.6.3</version>
@@ -300,8 +293,31 @@
                     </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -315,5 +331,5 @@
                 </plugins>
             </build>
         </profile>
-    </profiles>
+</profiles>
 </project>

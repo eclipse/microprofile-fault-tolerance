@@ -29,6 +29,7 @@
     <name>microProfile-fault-tolerance-api</name>
 
 
+    <description>Fault Tolerance APIs for MicroProfile :: API</description>
     <dependencies>
         <dependency>
             <groupId>javax.enterprise</groupId>

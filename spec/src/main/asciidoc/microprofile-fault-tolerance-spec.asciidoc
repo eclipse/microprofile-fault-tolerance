@@ -21,9 +21,9 @@
 = Microprofile Fault Tolerance
 :author: Emily Jiang
 :email: emijiang@uk.ibm.com
-:revnumber: 1.0
-:revdate: 2017-09-13
-:revremark: Specification
+:version-label!:
+:sectanchors:
+:doctype: book
 :version-label!:
 :sectanchors:
 :doctype: book
