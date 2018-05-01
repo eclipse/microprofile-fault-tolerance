@@ -55,7 +55,7 @@ public class DisableAnnotationOnMethodsTest extends Arquillian {
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
             .create(JavaArchive.class, "ftDisableMethods.jar")
-            .addClasses(DisableClient.class, StringFallbackHandler.class)
+            .addClasses(DisableClient.class, StringFallbackHandler.class, AsyncClient.class)
             .addAsManifestResource(new StringAsset(
               "org.eclipse.microprofile.fault.tolerance.tck.disableEnv.DisableClient/serviceA/Retry/enabled=false\n" +
               "org.eclipse.microprofile.fault.tolerance.tck.disableEnv.DisableClient/serviceB/Fallback/enabled=false\n" +
