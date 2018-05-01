@@ -55,7 +55,7 @@ public class DisableAnnotationGloballyTest extends Arquillian {
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
             .create(JavaArchive.class, "ftDisableGlobally.jar")
-            .addClasses(DisableClient.class, StringFallbackHandler.class)
+            .addClasses(DisableClient.class, StringFallbackHandler.class, AsyncClient.class)
             .addAsManifestResource(new StringAsset("Retry/enabled=false\n" +
                                                        "Fallback/enabled=false\n" +
                                                        "CircuitBreaker/enabled=false\n" +
