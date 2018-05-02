@@ -24,21 +24,27 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.concurrent.CompletableFuture;
 
 import javax.interceptor.InterceptorBinding;
 
 /**
  * Wrap the execution and invoke it asynchronously.
- * Any methods marked with this annotation must return {@link java.util.concurrent.Future}. 
+ * Any methods marked with this annotation must return one of:
+ * <ul>
+ *   <li>{@link java.util.concurrent.Future}</li>
+ *   <li>{@link java.util.concurrent.CompletionStage}</li>
+ * </ul>
  * Otherwise, {@link org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException} occurs.
  * Example usage:
- * 
+ *
  * <pre>
  * <code>@Asynchronous</code>
  * public Future&lt;String&gt; getString() {
  *  return CompletableFuture.completedFuture("hello");
  * }
  * </pre>
+ *
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  */
 @Documented
@@ -47,4 +53,15 @@ import javax.interceptor.InterceptorBinding;
 @InterceptorBinding
 @Inherited
 public @interface Asynchronous {
+
+    public static final class CompletedFuture {
+        
+        private CompletedFuture() {} // this is a util class only for static methods
+
+        public static <U> CompletableFuture<U> exceptionally(Throwable ex) {
+            CompletableFuture<U> future = new CompletableFuture<>();
+            future.completeExceptionally(ex);
+            return future;
+        }
+    }
 }

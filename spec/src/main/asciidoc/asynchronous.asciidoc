@@ -17,6 +17,7 @@
 // limitations under the License.
 // Contributors:
 // Emily Jiang
+// Ondro Mihalyi
 
 [[asynchronous]]
 == Asynchronous
@@ -28,12 +29,12 @@ This thread should have the correct security context or naming context associate
 === Asynchronous Usage
 
 A method or a class can be annotated with `@Asynchronous`, which means the method or the methods under the class will be invoked by a separate thread.
-The method annotated with `@Asynchronous` must return a `Future`, otherwise, `FaultToleranceDefinitionException` occurs.
+The method annotated with `@Asynchronous` must return a `Future` or a `CompletionStage` from the `java.util.concurrent` package. Otherwise, `FaultToleranceDefinitionException` occurs.
 
 [source, java]
 ----
 @Asynchronous
-public Future<Connection> serviceA() {
+public CompletionStage<Connection> serviceA() {
    Connection conn = null;
    counterForInvokingServiceA++;
    conn = connectionService();

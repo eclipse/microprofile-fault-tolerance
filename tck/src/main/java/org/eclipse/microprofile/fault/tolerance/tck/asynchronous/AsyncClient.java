@@ -20,6 +20,7 @@
 package org.eclipse.microprofile.fault.tolerance.tck.asynchronous;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Future;
 
 import javax.enterprise.context.RequestScoped;
@@ -36,9 +37,9 @@ import org.eclipse.microprofile.faulttolerance.Asynchronous;
 @RequestScoped
 public class AsyncClient {
 
-
     /**
      * service 1 second in normal operation.
+     *
      * @return the result as a Future
      * @throws InterruptedException the interrupted exception
      */
@@ -59,5 +60,23 @@ public class AsyncClient {
         return CompletableFuture.completedFuture(conn);
     }
 
+    /**
+     * service 1 second in normal operation.
+     *
+     * @return the result as a CompletionStage. It may be completed with
+     * InterruptedException if the thread is interrupted
+     */
+    @Asynchronous
+    public CompletionStage<String> serviceCS() {
+
+        try {
+            Thread.sleep(1000);
+            return CompletableFuture.completedFuture("service DATA");
+            
+        } catch (InterruptedException e) {
+            return Asynchronous.CompletedFuture.exceptionally(e);
+        }
+
+    }
 
 }
