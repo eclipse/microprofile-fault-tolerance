@@ -20,7 +20,9 @@
 package org.eclipse.microprofile.fault.tolerance.tck.asynchronous;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import javax.enterprise.context.RequestScoped;
 
@@ -58,4 +60,30 @@ public class AsyncClassLevelClient {
 
         return CompletableFuture.completedFuture(conn);
     }
+    
+    /**
+     * Service an operation until waitCondition is completed or 1 second timeout.
+     *
+     * @param waitCondition Execution of this method will delay until the condition is finished
+     * @return the result as a CompletionStage. It may be completed with
+     * InterruptedException if the thread is interrupted
+     */
+    public CompletionStage<Connection> serviceCS(Future<?> waitCondition) {
+
+        try {
+            waitCondition.get(1000, TimeUnit.SECONDS);
+        }
+        catch (Exception e) {
+            return Asynchronous.CompletedFuture.exceptionally(e);
+        }
+
+        return CompletableFuture.completedFuture(new Connection() {
+            @Override
+            public String getData() {
+                return "service DATA";
+            }
+        });
+
+    }
+    
 }

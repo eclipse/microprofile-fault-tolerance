@@ -19,9 +19,11 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck;
 
-
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.Future;
 
 import javax.inject.Inject;
 
@@ -35,6 +37,7 @@ import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.Assert;
+import org.testng.annotations.AfterTest;
 import org.testng.annotations.Test;
 
 /**
@@ -50,87 +53,147 @@ public class AsynchronousCSTest extends Arquillian {
     private @Inject
     AsyncClassLevelClient clientClass;
 
+    private List<CompletableFuture<Void>> waitingFutures = new ArrayList<>();
+
     @Deployment
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
-            .create(JavaArchive.class, "ftAsynchronous.jar")
-            .addClasses(AsyncClient.class, AsyncClassLevelClient.class, Connection.class)
-            .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
-            .as(JavaArchive.class);
+                .create(JavaArchive.class, "ftAsynchronous.jar")
+                .addClasses(AsyncClient.class, AsyncClassLevelClient.class, Connection.class)
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
+                .as(JavaArchive.class);
 
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftAsynchronous.war").addAsLibrary(testJar);
         return war;
     }
 
-
     /**
-     * Test that the future returned by calling an asynchronous method is not done if called right after the operation
+     * Test that the future returned by calling an asynchronous method is not
+     * done if called right after the operation
      */
     @Test
     public void testAsyncIsNotFinished() {
-        CompletionStage<Connection> future = null;
+        CompletableFuture<Void> waitingFuture = newWaitingFuture();
+        
+        CompletionStage<Connection> resultFuture = null;
+        resultFuture = client.serviceCS(waitingFuture);
+
+        Assert.assertFalse(resultFuture.toCompletableFuture().isDone());
+
+        complete(waitingFuture);
+
         try {
-            future = client.serviceCS();
+            resultFuture.toCompletableFuture().join();
         }
-        catch (InterruptedException e) {
-            throw new AssertionError("testAsync: unexpected InterruptedException calling service");
+        catch (CompletionException e) {
+            handleCompletionException(e);
         }
-
-        Assert.assertFalse(future.isDone());
-
     }
 
     /**
-     * Test that the future returned by calling an asynchronous method is done if called after waiting enough time to end the operation
-     */
-    @Test
-    public void testClassLevelAsyncIsFinished() {
-        Future<Connection> future = null;
-        try {
-            future = client.service();
-            Thread.sleep(1500);
-        }
-        catch (InterruptedException e) {
-            throw new AssertionError("testAsync: unexpected InterruptedException calling service");
-        }
-
-        Assert.assertTrue(future.isDone());
-
-    }
-
-
-    /**
-     * Test that the future returned by calling a method in an asynchronous class is not done if called right after the operation
-     */
-    @Test
-    public void testClassLevelAsyncIsNotFinished() {
-        Future<Connection> future = null;
-        try {
-            future = clientClass.service();
-        }
-        catch (InterruptedException e) {
-            throw new AssertionError("testAsync: unexpected InterruptedException calling service");
-        }
-
-        Assert.assertFalse(future.isDone());
-
-    }
-
-    /**
-     * Test that the future returned by calling a method in an asynchronous class is done if called after waiting enough time to end the operation
+     * Test that the future returned by calling an asynchronous method is done
+     * if called after waiting enough time to end the operation
      */
     @Test
     public void testAsyncIsFinished() {
-        Future<Connection> future = null;
+        CompletableFuture<Void> waitingFuture = newWaitingFuture();
+        
+        CompletionStage<Connection> resultFuture = null;
+        resultFuture = client.serviceCS(waitingFuture);
+        complete(waitingFuture);
+
+        Assert.assertTrue(resultFuture.toCompletableFuture().isDone());
+
+
         try {
-            future = clientClass.service();
-            Thread.sleep(1500);
+            resultFuture.toCompletableFuture().join();
         }
-        catch (InterruptedException e) {
-            throw new AssertionError("testAsync: unexpected InterruptedException calling service");
+        catch (CompletionException e) {
+            handleCompletionException(e);
         }
-
-        Assert.assertTrue(future.isDone());
-
     }
+
+    /**
+     * Test that the future returned by calling a method in an asynchronous
+     * class is not done if called right after the operation
+     */
+    @Test
+    public void testClassLevelAsyncIsNotFinished() {
+        CompletableFuture<Void> waitingFuture = newWaitingFuture();
+        
+        CompletionStage<Connection> resultFuture = null;
+        resultFuture = clientClass.serviceCS(waitingFuture);
+
+        Assert.assertFalse(resultFuture.toCompletableFuture().isDone());
+
+        complete(waitingFuture);
+
+        try {
+            resultFuture.toCompletableFuture().join();
+        }
+        catch (CompletionException e) {
+            handleCompletionException(e);
+        }
+    }
+
+    /**
+     * Test that the future returned by calling a method in an asynchronous
+     * class is done if called after waiting enough time to end the operation
+     */
+    @Test
+    public void testClassLevelAsyncIsFinished() {
+        CompletableFuture<Void> waitingFuture = newWaitingFuture();
+        
+        CompletionStage<Connection> resultFuture = null;
+        resultFuture = clientClass.serviceCS(waitingFuture);
+        complete(waitingFuture);
+
+        Assert.assertTrue(resultFuture.toCompletableFuture().isDone());
+
+
+        try {
+            resultFuture.toCompletableFuture().join();
+        }
+        catch (CompletionException e) {
+            handleCompletionException(e);
+        }
+    }
+
+    /**
+     * Ensure that any waiting futures get completed at the end of each test
+     * <p>
+     * Important in case tests end early due to an exception or failure.
+     */
+    @AfterTest
+    public void completeWaitingFutures() {
+        for (CompletableFuture<Void> future : waitingFutures) {
+            future.complete(null);
+        }
+        waitingFutures.clear();
+    }
+
+    /**
+     * Use this method to obtain futures for passing to methods on
+     * {@link AsyncClient}
+     * <p>
+     * Using this factory method ensures they will be completed at the end of
+     * the test if your test fails.
+     */
+    private CompletableFuture<Void> newWaitingFuture() {
+        CompletableFuture<Void> result = new CompletableFuture<>();
+        waitingFutures.add(result);
+        return result;
+    }
+
+    /**
+     * A helper method to complete a waiting future with a more readable syntax
+     */
+    private void complete(CompletableFuture<?> future) {
+        future.complete(null);
+    }
+
+    private void handleCompletionException(CompletionException e) throws AssertionError {
+        throw new AssertionError("testAsync: unexpected Exception calling service: " + e.getCause().getMessage());
+    }
+
 }
