@@ -23,6 +23,7 @@ import javax.inject.Inject;
 
 import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.AsyncClient;
 import org.eclipse.microprofile.fault.tolerance.tck.fallback.clientserver.StringFallbackHandler;
+import org.eclipse.microprofile.fault.tolerance.tck.util.Connection;
 import org.eclipse.microprofile.faulttolerance.exceptions.TimeoutException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
@@ -55,7 +56,7 @@ public class DisableAnnotationOnMethodsTest extends Arquillian {
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
             .create(JavaArchive.class, "ftDisableMethods.jar")
-            .addClasses(DisableClient.class, StringFallbackHandler.class, AsyncClient.class)
+            .addClasses(DisableClient.class, StringFallbackHandler.class, AsyncClient.class, Connection.class)
             .addAsManifestResource(new StringAsset(
               "org.eclipse.microprofile.fault.tolerance.tck.disableEnv.DisableClient/serviceA/Retry/enabled=false\n" +
               "org.eclipse.microprofile.fault.tolerance.tck.disableEnv.DisableClient/serviceB/Fallback/enabled=false\n" +
