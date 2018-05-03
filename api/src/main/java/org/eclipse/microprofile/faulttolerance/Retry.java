@@ -97,14 +97,16 @@ public @interface Retry {
 
     /**
      *
-     * @return Specify the failure to retry on
+     * @return Specify the failure to retry on. Only a type of {@link java.long.Error} or {@link java.lang.Exception} can be specified.
+     * Specifying a custom java.lang.Throwable will be ignored.
      */
     @Nonbinding
     Class<? extends Throwable>[] retryOn() default { Exception.class };
 
     /**
-     *
-     * @return Specify the failure to abort on
+     * 
+     * @return Specify the failure to abort on. Only a type of {@link java.long.Error} or {@link java.lang.Exception} can be specified.
+     * Specifying a custom java.lang.Throwable will be ignored.
      */
     @Nonbinding
     Class<? extends Throwable>[] abortOn() default {};
