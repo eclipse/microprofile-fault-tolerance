@@ -22,6 +22,7 @@ package org.eclipse.microprofile.fault.tolerance.tck.disableEnv;
 import javax.inject.Inject;
 
 import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.AsyncClient;
+import org.eclipse.microprofile.fault.tolerance.tck.util.Connection;
 import org.eclipse.microprofile.fault.tolerance.tck.fallback.clientserver.StringFallbackHandler;
 import org.eclipse.microprofile.faulttolerance.exceptions.TimeoutException;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -55,7 +56,7 @@ public class DisableAnnotationOnClassTest extends Arquillian {
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
             .create(JavaArchive.class, "ftDisableClass.jar")
-            .addClasses(DisableClient.class, StringFallbackHandler.class, AsyncClient.class)
+            .addClasses(DisableClient.class, StringFallbackHandler.class, AsyncClient.class, Connection.class)
             .addAsManifestResource(new StringAsset(
               "org.eclipse.microprofile.fault.tolerance.tck.disableEnv.DisableClient/Retry/enabled=false\n" +
               "org.eclipse.microprofile.fault.tolerance.tck.disableEnv.DisableClient/Fallback/enabled=false\n" +
