@@ -38,8 +38,6 @@ import org.testng.annotations.Test;
 
 /**
  * Verify the asynchronous invocation
- *
- * @author
  */
 public class AsynchronousTest extends Arquillian {
 

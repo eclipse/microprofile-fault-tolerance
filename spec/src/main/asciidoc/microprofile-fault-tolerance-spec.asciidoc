@@ -58,7 +58,7 @@ include::circuitbreaker.asciidoc[]
 
 include::bulkhead.asciidoc[]
 
+include::metrics.asciidoc[]
+
 include::configuration.asciidoc[]
-
-
 

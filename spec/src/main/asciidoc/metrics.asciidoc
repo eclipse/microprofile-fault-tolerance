@@ -1,0 +1,237 @@
+//
+// Copyright (c) 2018 Contributors to the Eclipse Foundation
+//
+// See the NOTICE file(s) distributed with this work for additional
+// information regarding copyright ownership.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// You may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// Contributors:
+// Andrew Rouse
+
+== Integration with Microprofile Metrics
+
+When Microprofile Fault Tolerance and Microprofile Metrics are used together, metrics are automatically added for each of
+the methods annotated with a `@Retry`, `@Timeout`, `@CircuitBreaker` or `@Bulkhead` annotation.
+
+=== Names
+
+The automatically added metrics follow a consistent pattern which includes the fully qualified name of the annotated method.
+In the tables below, the placeholder `<name>` should be replaced by the fully qualified method name.
+
+=== Metrics added for `@Retry`, `@Timeout`, `@CircuitBreaker` and `@Bulkhead`
+
+Implementations must ensure that if any of these annotations are present on a method, then the following metrics are added only once for that method.
+
+[cols="8,3,4,9"]
+|===
+| Name | Type | Unit | Description
+
+|`ft.<name>.invocations.total`
+| Counter | None
+| The number of times the method was called
+
+|`ft.<name>.invocations.failed.total`
+| Counter | None
+| The number of times the method was called and, after all Fault Tolerance actions had been processed, threw a `Throwable`
+|===
+
+=== Metrics added for `@Retry`
+
+[cols="8,3,4,9"]
+|===
+| Name | Type | Unit | Description
+
+|`ft.<name>.retry.callsSucceededNotRetried.total`
+| Counter | None
+| The number of times the method was called and succeeded without retrying
+
+|`ft.<name>.retry.callsSucceededRetried.total`
+| Counter | None
+| The number of times the method was called and succeeded after retrying at least once
+
+|`ft.<name>.retry.callsFailed.total`
+| Counter | None
+| The number of times the method was called and ultimately failed after retrying
+
+|`ft.<name>.retry.retries.total`
+| Counter | None
+| The total number of times the method was retried
+|===
+
+Note that the sum of `ft.<name>.retry.callsSucceededNotRetried.total`, `ft.<name>.retry.callsSucceededRetried.total` and `ft.<name>.retry.callsFailed.total` will give the total number of calls for which the Retry logic was run.
+
+=== Metrics added for `@Timeout`
+
+[cols="8,3,4,9"]
+|===
+| Name | Type | Unit | Description
+
+|`ft.<name>.timeout.executionDuration`
+| Histogram | Nanoseconds
+| Histogram of execution times for the method
+
+|`ft.<name>.timeout.callsTimedOut.total`
+| Counter | None
+| The number of times the method timed out
+
+|`ft.<name>.timeout.callsNotTimedOut.total`
+| Counter | None
+| The number of times the method completed without timing out
+|===
+
+Note that the sum of `ft.<name>.timeout.callsTimedOut.total` and `ft.<name>.timeout.callsNotTimedOut.total` will give the total number of calls for which the Timeout logic was run. This may be larger than the total number of invocations of the method it's also annotated with `@Retry` because the Timeout logic is applied to each Retry attempt, not to the whole method invocation time.
+
+=== Metrics added for `@CircuitBreaker`
+
+[cols="8,3,4,9"]
+|===
+| Name | Type | Unit | Description
+
+|`ft.<name>.circuitbreaker.callsSucceeded.total`
+| Counter | None
+| Number of calls allowed to run by the circuit breaker that returned successfully
+
+|`ft.<name>.circuitbreaker.callsFailed.total`
+| Counter | None
+| Number of calls allowed to run by the circuit breaker that then failed
+
+|`ft.<name>.circuitbreaker.callsPrevented.total`
+| Counter | None
+| Number of calls prevented from running by an open circuit breaker
+
+|`ft.<name>.circuitbreaker.open.total`
+| Gauge<Long> | Nanoseconds
+| Amount of time the circuit breaker has spent in open state
+
+|`ft.<name>.circuitbreaker.halfOpen.total`
+| Gauge<Long> | Nanoseconds
+| Amount of time the circuit breaker has spent in half-open state
+
+|`ft.<name>.circuitbreaker.closed.total`
+| Gauge<Long> | Nanoseconds
+| Amount of time the circuit breaker has spent in closed state
+
+|`ft.<name>.circuitbreaker.opened.total`
+| Counter | None
+| Number of times the circuit breaker has moved from closed state to open state
+|===
+
+Note that the sum of `ft.<name>.circuitbreaker.callsSucceeded.total`, `ft.<name>.circuitbreaker.callsFailed.total` and `ft.<name>.circuitbreaker.callsPrevented.total` will give the total number of calls for which the Bulkhead logic was run.
+
+Similarly, the sum of `ft.<name>.circuitbreaker.open.total`, `ft.<name>.circuitbreaker.halfOpen.total` and `ft.<name>.circuitbreaker.closed.total` will give the total time that the circuit breaker has been active for.
+
+
+=== Metrics added for `@Bulkhead`
+
+[cols="8,3,4,9"]
+|===
+| Name | Type | Unit | Description
+
+|`ft.<name>.bulkhead.concurrentExecutions`
+| Gauge<Long> | None
+| Number of currently running executions
+
+|`ft.<name>.bulkhead.callsAccepted.total`
+| Counter | None
+| Number of calls accepted by the bulkhead
+
+|`ft.<name>.bulkhead.callsRejected.total`
+| Counter | None
+| Number of calls rejected by the bulkhead
+
+|`ft.<name>.bulkhead.executionDuration`
+| Histogram | Nanoseconds
+| Histogram of method execution times. This does not include any time spent waiting in the bulkhead queue.
+
+|`ft.<name>.bulkhead.waitingQueue.population`*
+| Gauge<Long> | None
+| Number of executions currently waiting in the queue
+
+|`ft.<name>.bulkhead.waiting.duration`*
+| Histogram | Nanoseconds
+| Histogram of the time executions spend waiting in the queue
+|===
+
+*Only added if the method is also annotated with `@Asynchronous`
+
+== Notes
+
+Metrics added by this specification will appear as application metrics for the application which uses the Fault Tolerance annotations.
+
+Future versions of this specification may change the definitions of the metrics which are added to take advantage of
+enhancements in the MicroProfile Metrics specification.
+
+If more than one annotation is applied to a method, the metrics associated with each annotation will be added for that method.
+
+All of the counters are monotonic and count the number of events which occurred since the application started.
+It is expected that these counters will be sampled regularly by monitoring software which is then able to compute deltas
+or moving averages from the gathered samples.
+
+=== Annotation Example
+
+[source, java]
+----
+package com.exmaple;
+
+@Timeout(1000)
+public class MyClass {
+
+    @Retry
+    public void doWork() {
+        // work
+    }
+
+}
+----
+
+This class would result in the following metrics being added.
+
+* `ft.com.example.MyClass.doWork.invocations.total`
+* `ft.com.example.MyClass.doWork.invocations.failed`
+* `ft.com.example.MyClass.doWork.retry.callsSucceededNotRetried.total`
+* `ft.com.example.MyClass.doWork.retry.callsSucceededRetried.total`
+* `ft.com.example.MyClass.doWork.retry.callsFailed.total`
+* `ft.com.example.MyClass.doWork.retry.retries.total`
+* `ft.com.example.MyClass.doWork.timeout.executionDuration`
+* `ft.com.example.MyClass.doWork.timeout.callsTimedOut.total`
+* `ft.com.example.MyClass.doWork.timeout.callsNotTimedOut.total`
+
+Now imagine the `doWork()` method is called and the invocation goes like this:
+* On the first attempt, the invocation takes more than 1000ms and times out
+* On the second attempt, something goes wrong and the method throws an `IOException`
+* On the third attempt, the method returns successfully and the result of this attempt is returned to the user
+
+After this sequence, the value of these metrics would be as follows:
+
+`ft.com.example.MyClass.doWork.invocations.total = 1` +
+The method has been called once.
+
+`ft.com.example.MyClass.doWork.invocations.failed = 0` +
+No exceptions were propagated back to the caller.
+
+`ft.com.example.MyClass.doWork.retry.callsSucceededNotRetried.total = 0` +
+`ft.com.example.MyClass.doWork.retry.callsSucceededRetried.total = 1` +
+`ft.com.example.MyClass.doWork.retry.callsFailed.total = 0` +
+Only one call was made, and it succeeded after some retries.
+
+`ft.com.example.MyClass.doWork.retry.retries.total = 2` +
+Two retries were made during the invocation.
+
+`ft.com.example.MyClass.doWork.timeout.executionDuration` +
+The `Histogram` will have been updated with the length of time taken for each attempt. It will show a count of `3` and will have calculated averages and percentiles from the execution times.
+
+`ft.com.example.MyClass.doWork.timeout.callsTimedOut.total = 1` +
+One of the attempts timed out.
+
+`ft.com.example.MyClass.doWork.timeout.callsNotTimedOut.total = 2` +
+Two of the attempts did not time out.
