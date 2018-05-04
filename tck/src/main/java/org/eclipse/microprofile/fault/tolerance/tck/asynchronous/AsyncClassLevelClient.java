@@ -89,7 +89,7 @@ public class AsyncClassLevelClient {
                 throwAsRuntimeException(exception);
             }
             else {
-                return Asynchronous.CompletedFuture.exceptionally(exception);
+                return CompletableFutureHelper.failedFuture(exception);
             }
         }
 

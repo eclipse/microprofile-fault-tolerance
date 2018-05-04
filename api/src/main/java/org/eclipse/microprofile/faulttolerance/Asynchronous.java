@@ -39,8 +39,9 @@ import javax.interceptor.InterceptorBinding;
  * 
  * <p>
  * When a method marked with this annotation is executed, the call returns immediately while the method
- * is executed in another thread. Returned Future or CompletionStage is not completed until the method 
- * running asynchronously returns or throws an exception.
+ * is executed in another thread. The returned Future or CompletionStage is not completed until the result 
+ * of the method running asynchronously is completed (either normally or exceptionally) or the method 
+ * throws an exception.
  * </p>
  * 
  * <p>After a method marked with this annotation returns normally, the Future or CompletionStage returned
@@ -98,14 +99,4 @@ import javax.interceptor.InterceptorBinding;
 @Inherited
 public @interface Asynchronous {
 
-    public static final class CompletedFuture {
-        
-        private CompletedFuture() {} // this is a util class only for static methods
-
-        public static <U> CompletableFuture<U> exceptionally(Throwable ex) {
-            CompletableFuture<U> future = new CompletableFuture<>();
-            future.completeExceptionally(ex);
-            return future;
-        }
-    }
 }
