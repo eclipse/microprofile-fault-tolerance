@@ -41,9 +41,9 @@ import org.testng.annotations.AfterTest;
 import org.testng.annotations.Test;
 
 /**
- * Verify the asynchronous invocation
+ * Verify the asynchronous invocation with COmpletionStage
  *
- * @author
+ * @author Ondro Mihalyi
  */
 public class AsynchronousCSTest extends Arquillian {
 
@@ -68,7 +68,7 @@ public class AsynchronousCSTest extends Arquillian {
     }
 
     /**
-     * Test that the future returned by calling an asynchronous method is not
+     * Test that the stage returned by calling an asynchronous method is not
      * done if called right after the operation
      */
     @Test
@@ -91,7 +91,7 @@ public class AsynchronousCSTest extends Arquillian {
     }
 
     /**
-     * Test that the future returned by calling an asynchronous method is done
+     * Test that the stage returned by calling an asynchronous method is done
      * if called after waiting enough time to end the operation
      */
     @Test
@@ -114,7 +114,7 @@ public class AsynchronousCSTest extends Arquillian {
     }
 
     /**
-     * Test that the future returned by calling a method in an asynchronous
+     * Test that the stage returned by calling a method in an asynchronous
      * class is not done if called right after the operation
      */
     @Test
@@ -137,7 +137,7 @@ public class AsynchronousCSTest extends Arquillian {
     }
 
     /**
-     * Test that the future returned by calling a method in an asynchronous
+     * Test that the stage returned by calling a method in an asynchronous
      * class is done if called after waiting enough time to end the operation
      */
     @Test
@@ -150,6 +150,101 @@ public class AsynchronousCSTest extends Arquillian {
 
         Assert.assertTrue(resultFuture.toCompletableFuture().isDone());
 
+
+        try {
+            resultFuture.toCompletableFuture().join();
+        }
+        catch (CompletionException e) {
+            handleCompletionException(e);
+        }
+    }
+
+    /**
+     * Test that the callbacks added to the initial stage are executed
+     * after the stage returned by the asynchronous method call is completed.
+     * 
+     * The callbacks added inside method invokation must be called first and 
+     * then callbacks added to the result of the call (on the calling thread)
+     * must be executed in the order they were added.
+     */
+    @Test
+    public void testAsyncCallbacksChained() {
+        CompletableFuture<Void> waitingFuture = newWaitingFuture();
+        StringBuilder executionRecord = new StringBuilder();
+        
+        CompletableFuture<Connection> innerFuture = new CompletableFuture<Connection>()
+                .thenApply(v -> {
+                    executionRecord.append("1");
+                    return v;
+                });
+        CompletionStage<Connection> resultFuture = client
+                .serviceCS(waitingFuture, innerFuture)
+                .thenApply(v -> {
+                    executionRecord.append("2");
+                    return v;
+                });
+        complete(waitingFuture);
+        resultFuture = resultFuture.thenApply(v -> {
+                    executionRecord.append("3");
+                    return v;
+                });
+
+        Assert.assertFalse(resultFuture.toCompletableFuture().isDone(), 
+                "Stage returned by the method isn't completed yet so also the outer stage mustn't be completed");
+        innerFuture.complete(new EmptyConnection());
+        Assert.assertTrue(resultFuture.toCompletableFuture().isDone(), 
+                "Stage returned by the method is completed so also the outer stage must be completed");
+        Assert.assertEquals(executionRecord.toString(), "123", "The execution didn't happen in the expected order");
+
+        try {
+            resultFuture.toCompletableFuture().join();
+        }
+        catch (CompletionException e) {
+            handleCompletionException(e);
+        }
+    }
+    
+    /**
+     * Test that the stage returned by calling an asynchronous method is 
+     * completed exceptionally if the method throws an exception
+     */
+    @Test
+    public void testAsyncCompletesExceptionallyWhenExceptionThrown() {
+        CompletableFuture<Void> waitingFuture = newWaitingFuture();
+        
+        CompletionStage<Connection> resultFuture = null;
+        resultFuture = client.serviceCS(waitingFuture, true);
+        waitingFuture.completeExceptionally(new SimulatedException("completedExceptionally"));
+
+        Assert.assertTrue(resultFuture.toCompletableFuture().isDone());
+        Assert.assertTrue(resultFuture.toCompletableFuture().isCompletedExceptionally());
+        Assert.assertFalse(resultFuture.toCompletableFuture().isCancelled());
+        Assert.assertThrows(SimulatedException.class, resultFuture.toCompletableFuture()::get);
+
+        try {
+            resultFuture.toCompletableFuture().join();
+        }
+        catch (CompletionException e) {
+            handleCompletionException(e);
+        }
+    }
+
+    /**
+     * Test that the stage returned by calling an asynchronous method is 
+     * completed exceptionally if the method returns a stage completed exceptionally
+     */
+    @Test
+    public void testAsyncCompletesExceptionallyWhenCompletedExceptionally() {
+        CompletableFuture<Void> waitingFuture = newWaitingFuture();
+        
+        CompletionStage<Connection> resultFuture = null;
+        resultFuture = client.serviceCS(waitingFuture, false);
+        waitingFuture.completeExceptionally(new SimulatedException("completedExceptionally"));
+
+        Assert.assertTrue(resultFuture.toCompletableFuture().isDone());
+        Assert.assertTrue(resultFuture.toCompletableFuture().isCompletedExceptionally());
+        Assert.assertFalse(resultFuture.toCompletableFuture().isCancelled());
+        Assert.assertThrows(SimulatedException.class, resultFuture.toCompletableFuture()::get);
 
         try {
             resultFuture.toCompletableFuture().join();
@@ -194,6 +289,26 @@ public class AsynchronousCSTest extends Arquillian {
 
     private void handleCompletionException(CompletionException e) throws AssertionError {
         throw new AssertionError("testAsync: unexpected Exception calling service: " + e.getCause().getMessage());
+    }
+    
+    private static class SimulatedException extends RuntimeException {
+
+        public SimulatedException() {
+        }
+
+        public SimulatedException(String message) {
+            super(message);
+        }
+        
+    }
+    
+    private static class EmptyConnection implements Connection {
+
+        @Override
+        public String getData() {
+            return null;
+        }
+        
     }
 
 }
