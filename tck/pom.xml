@@ -20,12 +20,12 @@
         <!-- This is just for now and will not work if the API has a separate release cycle than the rest. -->
         <groupId>org.eclipse.microprofile.fault-tolerance</groupId>
         <artifactId>microprofile-fault-tolerance-parent</artifactId>
-        <version>1.1-RC1</version>
+        <version>1.1-SNAPSHOT</version>
     </parent>
 
     <groupId>org.eclipse.microprofile.fault-tolerance</groupId>
     <artifactId>microprofile-fault-tolerance-tck</artifactId>
-    <version>1.1-RC1</version>
+    <version>1.1-SNAPSHOT</version>
 
     <description>Fault Tolerance for MicroProfile :: TCK</description>
     <properties>
@@ -50,7 +50,7 @@
         <dependency>
             <groupId>org.eclipse.microprofile.fault-tolerance</groupId>
             <artifactId>microprofile-fault-tolerance-api</artifactId>
-            <version>1.1-RC1</version>
+            <version>1.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 
