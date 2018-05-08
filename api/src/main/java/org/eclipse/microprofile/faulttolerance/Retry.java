@@ -97,7 +97,7 @@ public @interface Retry {
 
     /**
      *
-     * @return Specify the failure to retry on. Only a type of {@link java.long.Error} or {@link java.lang.Exception} can be specified.
+     * @return Specify the failure to retry on. Only a type assignable from {@link java.long.Error} or {@link java.lang.Exception} can be specified.
      * Specifying a custom java.lang.Throwable will be ignored.
      */
     @Nonbinding
