@@ -82,6 +82,9 @@ public class MetricGetter {
     private long bulkheadCallsAcceptedBaseline;
     private long bulkheadCallsRejectedBaseline;
     
+    // Fallback
+    private long fallbackCallsBaseline;
+    
     public MetricGetter(Class<?> clazz, String methodName) {
         validateClassAndMethodName(clazz, methodName);
         prefix = "ft." + clazz.getCanonicalName() + "." + methodName;
@@ -119,6 +122,9 @@ public class MetricGetter {
         // Bulkhead
         bulkheadCallsAcceptedBaseline = getBulkheadCallsAcceptedTotal();
         bulkheadCallsRejectedBaseline = getBulkheadCallsRejectedTotal();
+        
+        // Fallback
+        fallbackCallsBaseline = getFallbackCallsTotal();
     }
     
     // ----------------------
@@ -262,7 +268,7 @@ public class MetricGetter {
     }
     
     // -----------------------
-    // Circuit Breaker Metrics
+    // Bulkhead Metrics
     // -----------------------
     
     public Optional<Long> getBulkheadConcurrentExecutions() {
@@ -295,6 +301,18 @@ public class MetricGetter {
     
     public Optional<Histogram> getBulkheadWaitTime() {
         return getMetric(prefix + ".bulkhead.waiting.duration", Histogram.class);
+    }
+    
+    // -----------------------
+    // Fallback Metrics
+    // -----------------------
+    
+    public long getFallbackCallsTotal() {
+        return getCounterValue(prefix + ".fallback.calls.total");
+    }
+    
+    public long getFallbackCallsDelta() {
+        return getFallbackCallsTotal() - fallbackCallsBaseline;
     }
     
     // -----------------------

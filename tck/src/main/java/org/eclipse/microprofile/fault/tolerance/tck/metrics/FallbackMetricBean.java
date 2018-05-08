@@ -19,33 +19,44 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.metrics;
 
-import java.time.temporal.ChronoUnit;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
+import javax.enterprise.context.ApplicationScoped;
 
-import javax.enterprise.context.RequestScoped;
-
-import org.eclipse.microprofile.faulttolerance.Asynchronous;
-import org.eclipse.microprofile.faulttolerance.Bulkhead;
-import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
+import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.TestException;
 import org.eclipse.microprofile.faulttolerance.Fallback;
-import org.eclipse.microprofile.faulttolerance.Retry;
-import org.eclipse.microprofile.faulttolerance.Timeout;
 
-@RequestScoped
-public class AllMetricsBean {
-    
-    @Retry(maxRetries = 5)
-    @Bulkhead(3)
-    @Timeout(value = 1000, unit = ChronoUnit.MILLIS)
-    @CircuitBreaker(failureRatio = 1.0, requestVolumeThreshold = 20)
-    @Fallback(fallbackMethod = "doFallback")
-    @Asynchronous
-    public Future<Void> doWork() {
-        return CompletableFuture.completedFuture(null);
+@ApplicationScoped
+public class FallbackMetricBean {
+
+    public enum Action {
+        PASS,
+        FAIL
     }
     
-    public Future<Void> doFallback() {
-        return CompletableFuture.completedFuture(null);
+    private Action fallbackAction = Action.PASS;
+    
+    @Fallback(fallbackMethod = "doFallback")
+    public void doWork(Action action) {
+        if (action == Action.PASS) {
+            return;
+        }
+        else {
+            throw new TestException();
+        }
+    }
+    
+    public void doFallback(Action action) {
+        if (fallbackAction == Action.PASS) {
+            return;
+        }
+        else {
+            throw new TestException();
+        }
+    }
+    
+    /**
+     * Set whether the fallback method should pass or throw an exception 
+     */
+    public void setFallbackAction(Action action) {
+        this.fallbackAction = action;
     }
 }
