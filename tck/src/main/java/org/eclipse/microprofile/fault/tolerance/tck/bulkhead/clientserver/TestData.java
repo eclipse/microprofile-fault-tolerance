@@ -41,13 +41,45 @@ public class TestData {
     private int expectedMaxSimultaneousWorkers;
     private int expectedTasksScheduled;
     private boolean maxFill = true;
-    private CountDownLatch latch = null;
+    private CountDownLatch latchTotal = null;
+    private CountDownLatch latchParallel = null;
 
-    public TestData(CountDownLatch countDownLatch) {
-        latch = countDownLatch;
+    /**
+     * We expect the total number of workers and the workers
+     * will wait for each other until there occurs at least
+     * once a 'parallel' number of them in the 'perform' method.
+     * 
+     * @param total
+     * @param parallel
+     */
+    public TestData(int total, int parallel) {
+        this.latchTotal = new CountDownLatch(total);
+        this.latchParallel = new CountDownLatch(parallel);
     }
 
     public TestData() {
+    }
+
+    public CountDownLatch getLatchParallel() {
+        return latchParallel;
+    }
+
+    public void setLatchParallel(CountDownLatch latchParallel) {
+        this.latchParallel = latchParallel;
+    }
+
+    public boolean isParallelismTargetReached() {
+        return parallelismTargetReached;
+    }
+
+    public void setParallelismTargetReached(boolean parallelismTargetReached) {
+        this.parallelismTargetReached = parallelismTargetReached;
+    }
+
+    private boolean parallelismTargetReached = false;
+
+    public TestData(CountDownLatch latchTotal ) {
+        this.latchTotal = latchTotal;
     }
 
     public AtomicInteger getWorkers() {
@@ -110,12 +142,12 @@ public class TestData {
         this.maxFill = maxFill;
     }
 
-    public CountDownLatch getLatch() {
-        return latch;
+    public CountDownLatch getLatchTotal() {
+        return latchTotal;
     }
 
-    public void setLatch(CountDownLatch latch) {
-        this.latch = latch;
+    public void setLatchTotal(CountDownLatch latch) {
+        this.latchTotal = latch;
     }
 
     public void setExpectedTasksScheduled(int expected) {
@@ -135,9 +167,9 @@ public class TestData {
      */
     public void check() {
         
-        if( latch != null ) {
+        if( latchTotal != null ) {
             try {
-                latch.await(50000, TimeUnit.MILLISECONDS);
+                latchTotal.await(50000, TimeUnit.MILLISECONDS);
                 Assert.assertEquals(getWorkers().get(), 0, "Some workers still active. ");
             }
             catch (InterruptedException e) {

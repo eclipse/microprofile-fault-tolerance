@@ -111,7 +111,7 @@ public class BulkheadAsynchRetryTest extends Arquillian {
     public void testBulkheadClassAsynchronousPassiveRetry55() {
         int iterations = 10;
         int expectedTasksScheduled = iterations;
-        TestData td = new TestData(new CountDownLatch(expectedTasksScheduled));
+        TestData td = new TestData(expectedTasksScheduled, 5);
         Utils.loop(iterations, classBean, 5, expectedTasksScheduled, td);
         td.check();
     }
@@ -127,7 +127,7 @@ public class BulkheadAsynchRetryTest extends Arquillian {
         int iterations = 20;
         int expectedTasksScheduled = iterations;
         int maxSimultaneousWorkers = 5;
-        TestData td = new TestData(new CountDownLatch(expectedTasksScheduled));
+        TestData td = new TestData(expectedTasksScheduled, 5);
         Utils.loop(iterations, methodBean, maxSimultaneousWorkers, expectedTasksScheduled, td);
         td.check();
     }
@@ -144,8 +144,7 @@ public class BulkheadAsynchRetryTest extends Arquillian {
     public void testBulkheadMethodAsynchronousRetry55Trip() throws InterruptedException {
         int iterations = 11;
         int maxSimultaneousWorkers = 5;
-        CountDownLatch latch = new CountDownLatch(10);
-        TestData td = new TestData(latch);
+        TestData td = new TestData(10, maxSimultaneousWorkers);
 
         boolean tripped;
         try {
@@ -159,7 +158,7 @@ public class BulkheadAsynchRetryTest extends Arquillian {
         
         // We should have either tripped or, under stress, one of the workers has finished,
         // before 10 retries are done, letting the 11th task in.
-        Assert.assertTrue(tripped || latch.getCount()<10,
+        Assert.assertTrue(tripped || td.getLatchTotal().getCount()<10,
                 "Asynchronous class Bulkead Retry not throwing Bulkhead exception when retry limit just exceeded");
 
         td.setExpectedTasksScheduled(DONT_CHECK);
@@ -224,7 +223,7 @@ public class BulkheadAsynchRetryTest extends Arquillian {
     public void testBulkheadPassiveRetryMethodAsynchronous55() {
         int iterations = 10;
         int expectedTasksScheduled = iterations;
-        TestData td = new TestData(new CountDownLatch(expectedTasksScheduled));
+        TestData td = new TestData(expectedTasksScheduled, 5);
         Utils.loop(iterations, methodBean, 5, expectedTasksScheduled, td);
         td.check();
     }
@@ -239,7 +238,7 @@ public class BulkheadAsynchRetryTest extends Arquillian {
         int iterations = 20;
         int expectedTasksScheduled = iterations;
         int maxSimultaneousWorkers = 5;
-        TestData td = new TestData(new CountDownLatch(expectedTasksScheduled));
+        TestData td = new TestData(expectedTasksScheduled, maxSimultaneousWorkers);
         Utils.loop(iterations, classBean, maxSimultaneousWorkers, expectedTasksScheduled, td);
         td.check();
     }
