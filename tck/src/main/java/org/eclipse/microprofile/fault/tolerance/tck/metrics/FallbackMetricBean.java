@@ -53,10 +53,27 @@ public class FallbackMetricBean {
         }
     }
     
+    @Fallback(FallbackMetricHandler.class)
+    public Void doWorkWithHandler(Action action) {
+        if (action == Action.PASS) {
+            return null;
+        }
+        else {
+            throw new TestException();
+        }
+    }
+    
     /**
-     * Set whether the fallback method should pass or throw an exception 
+     * Set whether the fallback method and handler should pass or throw an exception 
      */
     public void setFallbackAction(Action action) {
         this.fallbackAction = action;
+    }
+    
+    /**
+     * Get whether the fallback method and handler should pass or throw an exception 
+     */
+    public Action getFallbackAction() {
+        return fallbackAction;
     }
 }

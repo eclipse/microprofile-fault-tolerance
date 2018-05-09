@@ -38,7 +38,7 @@ public class FallbackMetricTest extends Arquillian {
     @Deployment
     public static WebArchive deploy() {
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftMetricFallback.war")
-                .addClasses(FallbackMetricBean.class)
+                .addClasses(FallbackMetricBean.class, FallbackMetricHandler.class)
                 .addPackage(MetricGetter.class.getPackage());
         return war;
     }
@@ -46,7 +46,7 @@ public class FallbackMetricTest extends Arquillian {
     @Inject private FallbackMetricBean fallbackBean;
     
     @Test
-    public void fallbackMetricTest() {
+    public void fallbackMetricMethodTest() {
         MetricGetter m = new MetricGetter(FallbackMetricBean.class, "doWork");
         m.baselineCounters();
         
@@ -70,4 +70,31 @@ public class FallbackMetricTest extends Arquillian {
         assertThat("invocations", m.getInvocationsDelta(), is(3L));
         assertThat("failed invocations", m.getInvocationsFailedDelta(), is(1L));
     }
+    
+    @Test
+    public void fallbackMetricHandlerTest() {
+        MetricGetter m = new MetricGetter(FallbackMetricBean.class, "doWorkWithHandler");
+        m.baselineCounters();
+        
+        fallbackBean.setFallbackAction(Action.PASS);
+        fallbackBean.doWorkWithHandler(Action.PASS);
+        
+        assertThat("fallback calls", m.getFallbackCallsDelta(), is(0L));
+        assertThat("invocations", m.getInvocationsDelta(), is(1L));
+        assertThat("failed invocations", m.getInvocationsFailedDelta(), is(0L));
+        
+        fallbackBean.doWorkWithHandler(Action.FAIL);
+        
+        assertThat("fallback calls", m.getFallbackCallsDelta(), is(1L));
+        assertThat("invocations", m.getInvocationsDelta(), is(2L));
+        assertThat("failed invocations", m.getInvocationsFailedDelta(), is(0L));
+        
+        fallbackBean.setFallbackAction(Action.FAIL);
+        expectTestException(() -> fallbackBean.doWorkWithHandler(Action.FAIL));
+        
+        assertThat("fallback calls", m.getFallbackCallsDelta(), is(2L));
+        assertThat("invocations", m.getInvocationsDelta(), is(3L));
+        assertThat("failed invocations", m.getInvocationsFailedDelta(), is(1L));
+    }
+
 }
