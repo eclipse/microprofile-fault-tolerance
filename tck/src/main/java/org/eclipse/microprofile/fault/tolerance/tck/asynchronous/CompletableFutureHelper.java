@@ -1,3 +1,22 @@
+/*
+ *******************************************************************************
+ * Copyright (c) 2017 Contributors to the Eclipse Foundation
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * You may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.asynchronous;
 
 import java.util.concurrent.CompletableFuture;
@@ -27,17 +46,22 @@ public class CompletableFutureHelper {
     }
 
     /**
-     * Returns a future that is completed when the stage is completed and has the same value or exception as the completed stage. It's supposed to be equivalent to calling {@link CompletionStage#toCompletableFuture()} but works with any CompletionStage and doesn't throw {@link java.lang.UnsupportedOperationException}.
+     * Returns a future that is completed when the stage is completed and has the same value or exception
+     * as the completed stage. It's supposed to be equivalent to calling 
+     * {@link CompletionStage#toCompletableFuture()} but works with any CompletionStage
+     * and doesn't throw {@link java.lang.UnsupportedOperationException}.
+     * 
      * @param <U> The type of the future result
      * @param stage Stage to convert to a future
      * @return Future converted from stage
      */
     public static <U> CompletableFuture<U> toCompletableFuture(CompletionStage<U> stage) {
-        CompletableFuture future = new CompletableFuture();
+        CompletableFuture<U> future = new CompletableFuture<>();
         stage.whenComplete((v, e) -> {
             if (e != null) {
                 future.completeExceptionally(e);
-            } else {
+            }
+            else {
                 future.complete(v);
             }
         });
