@@ -21,14 +21,14 @@
 == Integration with Microprofile Metrics
 
 When Microprofile Fault Tolerance and Microprofile Metrics are used together, metrics are automatically added for each of
-the methods annotated with a `@Retry`, `@Timeout`, `@CircuitBreaker` or `@Bulkhead` annotation.
+the methods annotated with a `@Retry`, `@Timeout`, `@CircuitBreaker`, `@Bulkhead` or `@Fallback` annotation.
 
 === Names
 
 The automatically added metrics follow a consistent pattern which includes the fully qualified name of the annotated method.
 In the tables below, the placeholder `<name>` should be replaced by the fully qualified method name.
 
-=== Metrics added for `@Retry`, `@Timeout`, `@CircuitBreaker` and `@Bulkhead`
+=== Metrics added for `@Retry`, `@Timeout`, `@CircuitBreaker`, `@Bulkhead` and `@Fallback`
 
 Implementations must ensure that if any of these annotations are present on a method, then the following metrics are added only once for that method.
 
@@ -163,6 +163,19 @@ Similarly, the sum of `ft.<name>.circuitbreaker.open.total`, `ft.<name>.circuitb
 |===
 
 *Only added if the method is also annotated with `@Asynchronous`
+
+
+=== Metrics added for `@Fallback`
+
+[cols="8,3,4,9"]
+|===
+| Name | Type | Unit | Description
+
+|`ft.<name>.fallback.calls.total`
+| Gauge<Long> | None
+| Number of times the fallback handler or method was called
+|===
+
 
 == Notes
 

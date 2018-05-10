@@ -90,6 +90,9 @@ public class MetricsDisabledTest extends Arquillian {
         assertThat("bulkhead duration histogram present", m.getBulkheadExecutionDuration().isPresent(), is(false));
         assertThat("bulkhead queue population present", m.getBulkheadQueuePopulation().isPresent(), is(false));
         assertThat("bulkhead queue wait time histogram present", m.getBulkheadWaitTime().isPresent(), is(false));
+        
+        // Fallback metrics
+        assertThat("fallback calls", m.getFallbackCallsDelta(), is(0L));
     }
 
 }

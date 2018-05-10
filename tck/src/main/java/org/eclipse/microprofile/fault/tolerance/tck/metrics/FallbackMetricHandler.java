@@ -19,33 +19,27 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.metrics;
 
-import java.time.temporal.ChronoUnit;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 
-import javax.enterprise.context.RequestScoped;
+import org.eclipse.microprofile.fault.tolerance.tck.metrics.FallbackMetricBean.Action;
+import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.TestException;
+import org.eclipse.microprofile.faulttolerance.ExecutionContext;
+import org.eclipse.microprofile.faulttolerance.FallbackHandler;
 
-import org.eclipse.microprofile.faulttolerance.Asynchronous;
-import org.eclipse.microprofile.faulttolerance.Bulkhead;
-import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
-import org.eclipse.microprofile.faulttolerance.Fallback;
-import org.eclipse.microprofile.faulttolerance.Retry;
-import org.eclipse.microprofile.faulttolerance.Timeout;
-
-@RequestScoped
-public class AllMetricsBean {
+@Dependent
+public class FallbackMetricHandler implements FallbackHandler<Void> {
     
-    @Retry(maxRetries = 5)
-    @Bulkhead(3)
-    @Timeout(value = 1000, unit = ChronoUnit.MILLIS)
-    @CircuitBreaker(failureRatio = 1.0, requestVolumeThreshold = 20)
-    @Fallback(fallbackMethod = "doFallback")
-    @Asynchronous
-    public Future<Void> doWork() {
-        return CompletableFuture.completedFuture(null);
+    @Inject private FallbackMetricBean fallbackBean;
+    
+    @Override
+    public Void handle(ExecutionContext context) {
+        if (fallbackBean.getFallbackAction() == Action.PASS) {
+            return null;
+        }
+        else {
+            throw new TestException();
+        }
     }
     
-    public Future<Void> doFallback() {
-        return CompletableFuture.completedFuture(null);
-    }
 }

@@ -82,13 +82,16 @@ public class AllMetricsTest extends Arquillian {
         assertThat("circuitbreaker open time", m.getCircuitBreakerTimeOpenDelta(), is(0L));
         assertThat("circuitbreaker times opened", m.getCircuitBreakerOpenedDelta(), is(0L));
         
-        // Bulkhead
+        // Bulkhead metrics
         assertThat("bulkhead concurrent executions", m.getBulkheadConcurrentExecutions().get(), is(0L));
         assertThat("bulkhead accepted calls", m.getBulkheadCallsAcceptedDelta(), is(1L));
         assertThat("bulkhead rejected calls", m.getBulkheadCallsRejectedDelta(), is(0L));
         assertThat("bulkhead duration histogram present", m.getBulkheadExecutionDuration().isPresent(), is(true));
         assertThat("bulkhead queue population present", m.getBulkheadQueuePopulation().isPresent(), is(true));
         assertThat("bulkhead queue wait time histogram present", m.getBulkheadWaitTime().isPresent(), is(true));
+        
+        // Fallback metrics
+        assertThat("fallback calls", m.getFallbackCallsDelta(), is(0L));
     }
     
 }
