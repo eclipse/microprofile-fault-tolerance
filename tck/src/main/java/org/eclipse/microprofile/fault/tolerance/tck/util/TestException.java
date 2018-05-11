@@ -17,7 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.eclipse.microprofile.fault.tolerance.tck.metrics.util;
+package org.eclipse.microprofile.fault.tolerance.tck.util;
 
 /**
  * An identifiable exception thrown by tests which test handling of exceptions thrown by user code.

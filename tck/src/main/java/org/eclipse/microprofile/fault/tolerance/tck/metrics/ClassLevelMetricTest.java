@@ -26,6 +26,7 @@ import static org.hamcrest.Matchers.is;
 import javax.inject.Inject;
 
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricGetter;
+import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -42,7 +43,8 @@ public class ClassLevelMetricTest extends Arquillian {
     public static WebArchive deploy() {
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftMetricClassLevel.war")
                 .addClasses(ClassLevelMetricBean.class)
-                .addPackage(MetricGetter.class.getPackage());
+                .addPackage(Packages.UTILS)
+                .addPackage(Packages.METRIC_UTILS);
         
         return war;
     }

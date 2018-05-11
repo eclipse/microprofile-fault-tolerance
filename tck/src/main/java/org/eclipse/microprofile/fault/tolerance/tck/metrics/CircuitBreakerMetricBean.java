@@ -21,7 +21,7 @@ package org.eclipse.microprofile.fault.tolerance.tck.metrics;
 
 import javax.enterprise.context.RequestScoped;
 
-import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.TestException;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 
 @RequestScoped

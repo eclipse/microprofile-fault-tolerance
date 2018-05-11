@@ -17,24 +17,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.eclipse.microprofile.fault.tolerance.tck.metrics;
+package org.eclipse.microprofile.fault.tolerance.tck.util;
 
-import javax.enterprise.context.RequestScoped;
-
-import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
-import org.eclipse.microprofile.faulttolerance.Retry;
-
-@RequestScoped
-public class RetryMetricBean {
+/**
+ * Contains constants for utilities packages which need to be included by lots of tests.
+ */
+public class Packages {
     
-    private int calls = 0;
-
-    @Retry(maxRetries = 5)
-    public void failSeveralTimes(int timesToFail) {
-        calls++;
-        if (calls <= timesToFail) {
-            throw new TestException("call no. " + calls);
-        }
-    }
+    // Utility class only, no public constructors
+    private Packages() {}
     
+    /**
+     * The {@code org.eclipse.microprofile.fault.tolerance.tck.util} package
+     */
+    public static final Package UTILS = Package.getPackage("org.eclipse.microprofile.fault.tolerance.tck.util");
+    
+    /**
+     * The {@code org.eclipse.microprofile.fault.tolerance.tck.metrics.util} package
+     */
+    public static final Package METRIC_UTILS = Package.getPackage("org.eclipse.microprofile.fault.tolerance.tck.metrics.util");
 }
