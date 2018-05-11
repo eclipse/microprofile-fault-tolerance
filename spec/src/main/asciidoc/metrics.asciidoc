@@ -28,6 +28,9 @@ the methods annotated with a `@Retry`, `@Timeout`, `@CircuitBreaker`, `@Bulkhead
 The automatically added metrics follow a consistent pattern which includes the fully qualified name of the annotated method.
 In the tables below, the placeholder `<name>` should be replaced by the fully qualified method name.
 
+If two methods have the same fully qualified name then the metrics for those methods will be combined. The result of this combination
+is non-portable and may vary between implementations. For portable behavior, monitored methods in the same class should have unique names.
+
 === Metrics added for `@Retry`, `@Timeout`, `@CircuitBreaker`, `@Bulkhead` and `@Fallback`
 
 Implementations must ensure that if any of these annotations are present on a method, then the following metrics are added only once for that method.
