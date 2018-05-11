@@ -19,7 +19,6 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead;
 
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -72,12 +71,12 @@ public class BulkheadSynchConfigTest extends Arquillian {
     }
 
     /**
-     * Tests taking Bulkhead3 waiting for 3 and no more workers and change its configuration by propoerty
+     * Tests taking Bulkhead3 waiting for 3 and no more workers and change its configuration by property
      * to switch to 5 workers. Test wouldn't pass without property config working
      */
     @Test()
     public void testBulkheadClassSemaphore3() {
-        TestData td = new TestData(new CountDownLatch(3));
+        TestData td = new TestData(3, 5);
         threads(20, bhBeanClassSemaphore3, 5, td);
         td.check();
     }

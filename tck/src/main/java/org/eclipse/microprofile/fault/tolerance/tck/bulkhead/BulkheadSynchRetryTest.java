@@ -19,7 +19,6 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead;
 
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -117,7 +116,7 @@ public class BulkheadSynchRetryTest extends Arquillian {
     public void testBulkheadClassSynchronousPassiveRetry55() {
         int threads = 5;
         int maxSimultaneousWorkers = 5;
-        TestData td = new TestData(new CountDownLatch(threads));
+        TestData td = new TestData(5, 5);
         threads(threads, classBean, maxSimultaneousWorkers, threads, td);
         td.check();
     }
@@ -135,7 +134,7 @@ public class BulkheadSynchRetryTest extends Arquillian {
         TestData td = new TestData();
         td.setExpectedInstances(threads);
         td.setExpectedMaxSimultaneousWorkers(maxSimultaneousWorkers);
-        td.setLatch(null);
+        td.setLatchTotal(null);
         Future[] results = new Future[threads];
 
         // As we are causing workers to get 'blown up' we cannot know that we
@@ -167,7 +166,7 @@ public class BulkheadSynchRetryTest extends Arquillian {
         TestData td = new TestData();
         td.setExpectedInstances(threads);
         td.setExpectedMaxSimultaneousWorkers(maxSimultaneousWorkers);
-        td.setLatch(null);
+        td.setLatchTotal(null);
         Future[] results = new Future[threads];
 
         // As we are causing workers to get 'blown up' we cannot know that we
@@ -196,7 +195,7 @@ public class BulkheadSynchRetryTest extends Arquillian {
     public void testBulkheadMethodSynchronousRetry55() {
         int threads = 20;
         int maxSimultaneousWorkers = 5;
-        TestData td = new TestData(new CountDownLatch(20));
+        TestData td = new TestData(20, 5);
         threads(threads, methodBean, maxSimultaneousWorkers, threads, td);
         td.check();
     }
@@ -210,7 +209,7 @@ public class BulkheadSynchRetryTest extends Arquillian {
         int threads = 5;
         int maxSimultaneousWorkers = 5;
         int expectedTasks = threads;
-        TestData td = new TestData(new CountDownLatch(expectedTasks));
+        TestData td = new TestData(expectedTasks, maxSimultaneousWorkers);
         threads(threads, methodBean, maxSimultaneousWorkers, expectedTasks, td);
         td.check();
     }
@@ -227,7 +226,7 @@ public class BulkheadSynchRetryTest extends Arquillian {
         int expectedTasks = 15; // We Retry just long enough for the first
                                 // generation to finish.
         int maxSimultaneousWorkers = 5;
-        TestData td = new TestData(new CountDownLatch(expectedTasks));
+        TestData td = new TestData(expectedTasks, maxSimultaneousWorkers);
         threads(threads, classBean, maxSimultaneousWorkers, expectedTasks, td);
         td.check();
     }
@@ -241,7 +240,7 @@ public class BulkheadSynchRetryTest extends Arquillian {
         int threads = 30;
         int maxSimultaneousWorkers = 5;
         int expectedTasks = 5;
-        TestData td = new TestData(new CountDownLatch(expectedTasks));
+        TestData td = new TestData(expectedTasks, maxSimultaneousWorkers);
         threads(threads, zeroRetryBean, maxSimultaneousWorkers, expectedTasks, td);
         td.check();
     }
@@ -256,7 +255,7 @@ public class BulkheadSynchRetryTest extends Arquillian {
         int threads = 30;
         int maxSimultaneousWorkers = 5;
         int expectedTasks = 5;
-        TestData td = new TestData(new CountDownLatch(expectedTasks));
+        TestData td = new TestData(expectedTasks, maxSimultaneousWorkers);
         threads(threads, zeroRetryWaitingQueueBean, maxSimultaneousWorkers, expectedTasks, td);
         td.check();
     }

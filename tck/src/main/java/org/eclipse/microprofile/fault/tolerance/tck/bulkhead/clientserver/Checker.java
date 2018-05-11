@@ -22,6 +22,7 @@ package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import javax.management.RuntimeErrorException;
 
@@ -111,9 +112,18 @@ public class Checker implements BackendTestDelegate {
             // We want to decrement this before the latch
             td.getWorkers().decrementAndGet();
 
-            CountDownLatch latch = td.getLatch();
+            CountDownLatch latch = td.getLatchTotal();
             if (latch != null ) {
                 latch.countDown();
+                // We try to build up a crowd in the bulkhead if that is what is wanted
+                if( !td.isParallelismTargetReached()) {
+                    CountDownLatch p = td.getLatchParallel();
+                    if( p!=null ) {
+                        p.countDown(); 
+                    }
+                    p.await(50000, TimeUnit.MILLISECONDS);
+                    td.setParallelismTargetReached(true);
+                }
             }
 
         }

@@ -106,7 +106,7 @@ public class BulkheadSynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadClassSemaphore3() {
-        TestData td = new TestData(new CountDownLatch(3));
+        TestData td = new TestData(3, 3);
         threads(20, bhBeanClassSemaphore3, 3, td);
         td.check();
     }
@@ -118,8 +118,7 @@ public class BulkheadSynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadClassSemaphore10() {
-        TestData td = new TestData(new CountDownLatch(10));
-
+        TestData td = new TestData(10,10);
         threads(20, bhBeanClassSemaphore10, 10, td);
         td.check();
 
@@ -134,7 +133,7 @@ public class BulkheadSynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadMethodSemaphore10() {
-        TestData td = new TestData(new CountDownLatch(10));
+        TestData td = new TestData(10, 10);
 
         threads(20, bhBeanMethodSemaphore10, 10, td);
         td.check();
@@ -147,7 +146,7 @@ public class BulkheadSynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadMethodSemaphore3() {
-        TestData td = new TestData(new CountDownLatch(3));
+        TestData td = new TestData(3, 3);
 
         threads(20, bhBeanMethodSemaphore3, 3, td);
         td.check();
@@ -161,7 +160,7 @@ public class BulkheadSynchTest extends Arquillian {
     @Test()
     public void testBulkheadClassSemaphoreDefault() {
         TestData td = new TestData(new CountDownLatch(10));
-
+        td.setMaxFill(false);
         threads(20, bhBeanClassSemaphoreDefault, 10, td);
         td.check();
 
@@ -175,8 +174,8 @@ public class BulkheadSynchTest extends Arquillian {
     @Test()
     public void testBulkheadMethodSemaphoreDefault() {
         TestData td = new TestData(new CountDownLatch(10));
-
         threads(20, bhBeanMethodSemaphoreDefault, 10, td);
+        td.setMaxFill(false);
         td.check();
     }
 

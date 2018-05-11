@@ -104,7 +104,7 @@ public class BulkheadAsynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadClassAsynchronous10() {
-        TestData td = new TestData(new CountDownLatch(10));
+        TestData td = new TestData(10, 10);
         loop(10, bhBeanClassAsynchronous10, 10, td);
         td.check();
     }
@@ -116,7 +116,7 @@ public class BulkheadAsynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadMethodAsynchronous10() {
-        TestData td = new TestData(new CountDownLatch(10));
+        TestData td = new TestData(10,10);
         loop(10, bhBeanMethodAsynchronous10, 10, td);
         td.check();
     }
@@ -128,7 +128,7 @@ public class BulkheadAsynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadClassAsynchronous3() {
-        TestData td = new TestData(new CountDownLatch(10));
+        TestData td = new TestData(10, 3);
         loop(10, bhBeanClassAsynchronous3, 3, td);
         td.check();
     }
@@ -140,7 +140,7 @@ public class BulkheadAsynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadMethodAsynchronous3() {
-        TestData td = new TestData(new CountDownLatch(10));
+        TestData td = new TestData(10, 3);
         loop(10, bhBeanMethodAsynchronous3, 3, td);
         td.check();
     }
@@ -152,7 +152,7 @@ public class BulkheadAsynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadClassAsynchronousDefault() {
-        TestData td = new TestData(new CountDownLatch(10));
+        TestData td = new TestData(10, 10);
         loop(10, bhBeanClassAsynchronousDefault, 10, td);
         td.check();
     }
@@ -176,7 +176,7 @@ public class BulkheadAsynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadClassAsynchronousQueueing10() {
-        TestData td = new TestData(new CountDownLatch(20));
+        TestData td = new TestData(20, 10);
         loop(20, bhBeanClassAsynchronousQueueing, 10, 20, td);
         td.check();
     }
@@ -188,7 +188,7 @@ public class BulkheadAsynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadMethodAsynchronousQueueing10() {
-        TestData td = new TestData(new CountDownLatch(20));
+        TestData td = new TestData(20, 10);
         loop(20, bhBeanMethodAsynchronousQueueing, 10, 20, td);
         td.check();
     }
