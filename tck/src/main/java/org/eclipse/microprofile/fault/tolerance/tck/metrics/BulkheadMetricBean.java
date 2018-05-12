@@ -22,20 +22,18 @@ package org.eclipse.microprofile.fault.tolerance.tck.metrics;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
+import org.eclipse.microprofile.fault.tolerance.tck.util.ConcurrentExecutionTracker;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 
 @ApplicationScoped
 public class BulkheadMetricBean {
     
-    // The Atomicness is not important, this is just an integer holder
-    private AtomicInteger executionCount = new AtomicInteger(0);
-    
-    private static final long WAIT_TIMEOUT = 3L * 1000 * 1_000_000; 
+    @Inject private ConcurrentExecutionTracker tracker;
     
     /**
      * Wait for {@code future} to be completed
@@ -65,7 +63,7 @@ public class BulkheadMetricBean {
     
     private void doWaitFor(Future<?> future) {
         try {
-            executionStarted();
+            tracker.executionStarted();
             future.get();
         }
         catch (InterruptedException e) {
@@ -75,7 +73,7 @@ public class BulkheadMetricBean {
             throw new RuntimeException("Passed Future threw an exception", e);
         }
         finally {
-            executionEnded();
+            tracker.executionEnded();
         }
     }
     
@@ -85,35 +83,6 @@ public class BulkheadMetricBean {
      * This method will wait three seconds before returning an exception
      */
     public void waitForRunningExecutions(int executions) {
-        synchronized (executionCount) {
-            long startTime = System.nanoTime();
-            try {
-                while (executionCount.get() != executions && (System.nanoTime() - startTime) < WAIT_TIMEOUT) {
-                    executionCount.wait(500);
-                }
-            }
-            catch (InterruptedException e) {
-                // Stop waiting
-            }
-            
-            if (executionCount.get() != executions) {
-                // Timed out waiting
-                throw new RuntimeException("Timed out waiting for executions to start, expected " + executions + " but there were " + executionCount);
-            }
-        }
-    }
-    
-    private void executionStarted() {
-        synchronized (executionCount) {
-            executionCount.incrementAndGet();
-            executionCount.notifyAll();
-        }
-    }
-    
-    private void executionEnded() {
-        synchronized (executionCount) {
-            executionCount.decrementAndGet();
-            executionCount.notifyAll();
-        }
+        tracker.waitForRunningExecutions(executions);
     }
 }
