@@ -46,32 +46,45 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 /**
- * Test the impact of policies disabling through config.
+ * Test that annotations can be disabled globally, then enabled at the class level and then disabled at the method level.
  *
  * The test assumes that the container supports both the MicroProfile Configuration API and the MicroProfile
- * Fault Tolerance API. Some Fault tolerance policies are disabled through configuration on DisabledClient methods.
+ * Fault Tolerance API. All Fault tolerance policies are disabled through configuration in the deployment.
  *
  * @author <a href="mailto:antoine@sabot-durand.net">Antoine Sabot-Durand</a>
  * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  * @author <a href="mailto:anrouse@uk.ibm.com">Andrew Rouse</a>
  */
-public class DisableAnnotationOnMethodsTest extends Arquillian {
+public class DisableAnnotationGloballyEnableOnClassDisableOnMethod extends Arquillian {
 
     @Inject
     private DisableAnnotationClient disableClient;
 
     @Deployment
     public static WebArchive deploy() {
+        
         Asset config = new DisableConfigAsset()
+                .disable(Retry.class)
+                .disable(CircuitBreaker.class)
+                .disable(Timeout.class)
+                .disable(Asynchronous.class)
+                .disable(Fallback.class)
+                .disable(Bulkhead.class)
+                .enable(DisableAnnotationClient.class, Retry.class)
+                .enable(DisableAnnotationClient.class, CircuitBreaker.class)
+                .enable(DisableAnnotationClient.class, Timeout.class)
+                .enable(DisableAnnotationClient.class, Asynchronous.class)
+                .enable(DisableAnnotationClient.class, Fallback.class)
+                .enable(DisableAnnotationClient.class, Bulkhead.class)
                 .disable(DisableAnnotationClient.class, "failAndRetryOnce", Retry.class)
-                .disable(DisableAnnotationClient.class, "failRetryOnceThenFallback", Fallback.class)
                 .disable(DisableAnnotationClient.class, "failWithCircuitBreaker", CircuitBreaker.class)
                 .disable(DisableAnnotationClient.class, "failWithTimeout", Timeout.class)
                 .disable(DisableAnnotationClient.class, "asyncWaitThenReturn", Asynchronous.class)
+                .disable(DisableAnnotationClient.class, "failRetryOnceThenFallback", Fallback.class)
                 .disable(DisableAnnotationClient.class, "waitWithBulkhead", Bulkhead.class);
-        
+
         JavaArchive testJar = ShrinkWrap
-            .create(JavaArchive.class, "ftDisableMethods.jar")
+            .create(JavaArchive.class, "ftDisableGloballyEnableClassDisableMethod.jar")
             .addClasses(DisableAnnotationClient.class)
             .addPackage(Packages.UTILS)
             .addAsManifestResource(config, "microprofile-config.properties")
@@ -79,7 +92,7 @@ public class DisableAnnotationOnMethodsTest extends Arquillian {
             .as(JavaArchive.class);
 
         WebArchive war = ShrinkWrap
-            .create(WebArchive.class, "ftDisableMethods.war")
+            .create(WebArchive.class, "ftDisableGloballyEnableClassDisableMethod.war")
             .addAsLibrary(testJar);
         return war;
     }
@@ -96,14 +109,14 @@ public class DisableAnnotationOnMethodsTest extends Arquillian {
 
     /**
      * Test that a Fallback service is ignored when service fails.
-     *
-     * ServiceB is annotated with maxRetries = 1 so serviceB is expected to execute 2 times (Retry is not disabled on the method)
+     * 
+     * Retry is enabled at the class level and not disabled for this method so we expect to get two executions
      */
     @Test
     public void testFallbackDisabled() {
         // Throw TestException because Fallback is disabled
         Assert.assertThrows(TestException.class, () -> disableClient.failRetryOnceThenFallback());
-        // One execution because Retry is still enabled on this method
+        // One execution because Retry is enabled
         Assert.assertEquals(disableClient.getFailRetryOnceThenFallbackCounter(), 2, "Retry enabled - should be 2 executions");
     }
 
@@ -111,7 +124,7 @@ public class DisableAnnotationOnMethodsTest extends Arquillian {
      * CircuitBreaker policy being disabled the policy shouldn't be applied
      */
     @Test
-    public void testCircuitClosedThenOpen() {
+    public void testCircuitBreaker() {
         // Always get TestException on first execution
         Assert.assertThrows(TestException.class, () -> disableClient.failWithCircuitBreaker());
         // Should get TestException on second execution because CircuitBreaker is disabled
@@ -172,5 +185,4 @@ public class DisableAnnotationOnMethodsTest extends Arquillian {
             result2.get();
         }
     }
-
 }
