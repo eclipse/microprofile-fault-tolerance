@@ -33,7 +33,7 @@ import org.testng.annotations.Test;
 public class InvalidCircuitBreakerFailureRatioNegTest extends Arquillian {
 
     @Deployment
-    @ShouldThrowException(value = DefinitionException.class, testable = true)
+    @ShouldThrowException(value = DefinitionException.class)
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
             .create(JavaArchive.class, "ftInvalidCB3.jar")
