@@ -35,6 +35,9 @@ import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 import org.eclipse.microprofile.faulttolerance.Fallback;
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.faulttolerance.Timeout;
+import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
+import org.eclipse.microprofile.faulttolerance.exceptions.CircuitBreakerOpenException;
+import org.eclipse.microprofile.faulttolerance.exceptions.TimeoutException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -46,32 +49,35 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 /**
- * Test the impact of policies disabling through config.
- *
- * The test assumes that the container supports both the MicroProfile Configuration API and the MicroProfile
- * Fault Tolerance API. Some Fault tolerance policies are disabled through configuration on DisabledClient methods.
- *
+ * Test that annotations can be disabled at the class level and then re-enabled at the method level.
+ * 
  * @author <a href="mailto:antoine@sabot-durand.net">Antoine Sabot-Durand</a>
  * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  * @author <a href="mailto:anrouse@uk.ibm.com">Andrew Rouse</a>
  */
-public class DisableAnnotationOnMethodsTest extends Arquillian {
+public class DisableAnnotationGloballyEnableOnMethodTest extends Arquillian {
 
     @Inject
     private DisableAnnotationClient disableClient;
 
     @Deployment
     public static WebArchive deploy() {
-        Asset config = new DisableConfigAsset()
-                .disable(DisableAnnotationClient.class, "failAndRetryOnce", Retry.class)
-                .disable(DisableAnnotationClient.class, "failRetryOnceThenFallback", Fallback.class)
-                .disable(DisableAnnotationClient.class, "failWithCircuitBreaker", CircuitBreaker.class)
-                .disable(DisableAnnotationClient.class, "failWithTimeout", Timeout.class)
-                .disable(DisableAnnotationClient.class, "asyncWaitThenReturn", Asynchronous.class)
-                .disable(DisableAnnotationClient.class, "waitWithBulkhead", Bulkhead.class);
+       Asset config = new DisableConfigAsset()
+               .disable(Retry.class)
+               .disable(CircuitBreaker.class)
+               .disable(Timeout.class)
+               .disable(Asynchronous.class)
+               .disable(Fallback.class)
+               .disable(Bulkhead.class)
+               .enable(DisableAnnotationClient.class, "failAndRetryOnce", Retry.class)
+               .enable(DisableAnnotationClient.class, "failWithCircuitBreaker", CircuitBreaker.class)
+               .enable(DisableAnnotationClient.class, "failWithTimeout", Timeout.class)
+               .enable(DisableAnnotationClient.class, "asyncWaitThenReturn", Asynchronous.class)
+               .enable(DisableAnnotationClient.class, "failRetryOnceThenFallback", Fallback.class)
+               .enable(DisableAnnotationClient.class, "waitWithBulkhead", Bulkhead.class);
         
         JavaArchive testJar = ShrinkWrap
-            .create(JavaArchive.class, "ftDisableMethods.jar")
+            .create(JavaArchive.class, "ftDisableGloballyEnableMethod.jar")
             .addClasses(DisableAnnotationClient.class)
             .addPackage(Packages.UTILS)
             .addAsManifestResource(config, "microprofile-config.properties")
@@ -79,65 +85,64 @@ public class DisableAnnotationOnMethodsTest extends Arquillian {
             .as(JavaArchive.class);
 
         WebArchive war = ShrinkWrap
-            .create(WebArchive.class, "ftDisableMethods.war")
+            .create(WebArchive.class, "ftDisableGloballyEnableMethod.war")
             .addAsLibrary(testJar);
         return war;
     }
 
     /**
-     * failAndRetryOnce is annotated with maxRetries = 1 so it is expected to execute 2 times but as Retry is disabled,
-     * then no retries should be attempted.
+     * failAndRetryOnce is annotated with maxRetries = 1 so it is expected to execute 2 times.
      */
     @Test
-    public void testRetryDisabled() {
+    public void testRetryEnabled() {
+        // Always get a TestException
         Assert.assertThrows(TestException.class, () -> disableClient.failAndRetryOnce());
-        Assert.assertEquals(disableClient.getFailAndRetryOnceCounter(), 1, "Retry disabled - should be 1 exection");
+        // Should get two attempts if retry is enabled
+        Assert.assertEquals(disableClient.getFailAndRetryOnceCounter(), 2, "Retry enabled - should be 2 exections");
     }
 
     /**
-     * Test that a Fallback service is ignored when service fails.
+     * Test that a Fallback service is used when service fails.
      *
-     * ServiceB is annotated with maxRetries = 1 so serviceB is expected to execute 2 times (Retry is not disabled on the method)
+     * Retry has been disabled globally and has not been enabled for the method,
+     * therefore there should only be one execution
      */
     @Test
     public void testFallbackDisabled() {
-        // Throw TestException because Fallback is disabled
-        Assert.assertThrows(TestException.class, () -> disableClient.failRetryOnceThenFallback());
-        // One execution because Retry is still enabled on this method
-        Assert.assertEquals(disableClient.getFailRetryOnceThenFallbackCounter(), 2, "Retry enabled - should be 2 executions");
+        // Expect no exception because fallback is enabled
+        disableClient.failRetryOnceThenFallback();
+        // One execution because Retry is disabled
+        Assert.assertEquals(disableClient.getFailRetryOnceThenFallbackCounter(), 1, "Retry disabled - should be 1 execution");
     }
 
     /**
-     * CircuitBreaker policy being disabled the policy shouldn't be applied
+     * CircuitBreaker is enabled on the method so the policy should be applied
      */
     @Test
-    public void testCircuitClosedThenOpen() {
+    public void testCircuitBreaker() {
         // Always get TestException on first execution
         Assert.assertThrows(TestException.class, () -> disableClient.failWithCircuitBreaker());
-        // Should get TestException on second execution because CircuitBreaker is disabled
-        Assert.assertThrows(TestException.class, () -> disableClient.failWithCircuitBreaker());
+        // Should get CircuitBreakerOpenException on second execution because CircuitBreaker is enabled
+        Assert.assertThrows(CircuitBreakerOpenException.class, () -> disableClient.failWithCircuitBreaker());
     }
 
     /**
-     * Test Timeout is disabled, should wait two seconds and then get a TestException
+     * Test Timeout is enabled, should fail with a timeout exception
      */
     @Test
     public void testTimeout() {
-        // Expect TestException because Timeout is disabled and will not fire
-        Assert.assertThrows(TestException.class, () -> disableClient.failWithTimeout());
+        // Expect TimeoutException because Timeout is enabled and method will time out
+        Assert.assertThrows(TimeoutException.class, () -> disableClient.failWithTimeout());
     }
 
     /**
-     * A test to check that asynchronous is disabled
-     *
-     * In normal operation, asyncClient.asyncWaitThenReturn() is launched asynchronously. As Asynchronous operation was disabled via config,
-     * test is expecting a synchronous operation.
+     * A test to check that asynchronous is enabled
      */
     @Test
     public void testAsync() throws InterruptedException, ExecutionException {
         Future<?> result = disableClient.asyncWaitThenReturn();
         try {
-            Assert.assertTrue(result.isDone(), "Returned future.isDone() expected true because Async disabled");
+            Assert.assertFalse(result.isDone(), "Returned future.isDone() expected false because Async enabled");
         }
         finally {
             result.get(); // Success or failure, don't leave the future lying around
@@ -160,8 +165,8 @@ public class DisableAnnotationOnMethodsTest extends Arquillian {
             disableClient.waitForBulkheadExecutions(2);
             
             // Try to start a third execution. This would throw a BulkheadException if Bulkhead is enabled.
-            // Bulkhead is disabled on the method so no exception expected
-            disableClient.waitWithBulkhead(CompletableFuture.completedFuture(null));
+            // Bulkhead is enabled on the method, so expect exception
+            Assert.assertThrows(BulkheadException.class, () -> disableClient.waitWithBulkhead(CompletableFuture.completedFuture(null)));
         }
         finally {
             // Clean up executor and first two executions
@@ -172,5 +177,4 @@ public class DisableAnnotationOnMethodsTest extends Arquillian {
             result2.get();
         }
     }
-
 }

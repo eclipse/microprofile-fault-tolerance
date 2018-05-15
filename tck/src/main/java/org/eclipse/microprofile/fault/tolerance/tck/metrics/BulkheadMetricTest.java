@@ -34,6 +34,7 @@ import javax.inject.Inject;
 
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.AsyncCaller;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricGetter;
+import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.eclipse.microprofile.metrics.Histogram;
 import org.eclipse.microprofile.metrics.Snapshot;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -49,7 +50,8 @@ public class BulkheadMetricTest extends Arquillian {
     public static WebArchive deploy() {
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftMetricBulkhead.war")
                 .addClasses(BulkheadMetricBean.class)
-                .addPackage(MetricGetter.class.getPackage());
+                .addPackage(Packages.UTILS)
+                .addPackage(Packages.METRIC_UTILS);
         return war;
     }
     

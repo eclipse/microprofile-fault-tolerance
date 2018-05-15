@@ -23,7 +23,7 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.FallbackMetricBean.Action;
-import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.TestException;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.ExecutionContext;
 import org.eclipse.microprofile.faulttolerance.FallbackHandler;
 

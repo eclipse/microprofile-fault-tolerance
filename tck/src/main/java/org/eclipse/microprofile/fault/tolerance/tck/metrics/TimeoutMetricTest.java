@@ -27,6 +27,7 @@ import javax.inject.Inject;
 
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricComparator;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricGetter;
+import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.eclipse.microprofile.metrics.Histogram;
 import org.eclipse.microprofile.metrics.Snapshot;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -41,7 +42,8 @@ public class TimeoutMetricTest extends Arquillian {
     public static WebArchive deploy() {
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftMetricTimeout.war")
                 .addClasses(TimeoutMetricBean.class)
-                .addPackage(MetricGetter.class.getPackage());
+                .addPackage(Packages.UTILS)
+                .addPackage(Packages.METRIC_UTILS);
         return war;
     }
     

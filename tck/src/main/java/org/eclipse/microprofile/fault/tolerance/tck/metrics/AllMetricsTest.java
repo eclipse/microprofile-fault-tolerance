@@ -28,6 +28,7 @@ import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
 
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricGetter;
+import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -43,7 +44,8 @@ public class AllMetricsTest extends Arquillian {
     public static WebArchive deploy() {
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftMetricAll.war")
                 .addClasses(AllMetricsBean.class)
-                .addPackage(MetricGetter.class.getPackage());
+                .addPackage(Packages.UTILS)
+                .addPackage(Packages.METRIC_UTILS);
         
         return war;
     }

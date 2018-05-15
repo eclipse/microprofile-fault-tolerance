@@ -113,7 +113,12 @@ Similarly, the property `com.acme.ClassA/Retry/maxRetries` will be ignored if `@
 
 === Disabled Fault Tolerance policies with configuration
 
-Fault Tolerance policies can be disabled with configuration at method level, class level or globally for all deployment.
+Fault Tolerance policies can be disabled with configuration at method level, class level or globally for all deployment. If multiple configurations are specified, method-level configuration overrides class-level configuration, which then overrides global configuration. e.g.
+* `com.acme.test.MyClient/methodA/CircuitBreaker/enabled=false`
+* `com.acme.test.MyClient/CircuitBreaker/enabled=true`
+* `CircuitBreaker/enabled=false`
+For the above scenario, all occurrences of `CircuitBreaker` for the application are disabled except for those on the class `com.acme.test.MyClient`. All occurrences of `CircuitBreaker` on `com.acme.test.MyClient` are enabled, except for the one on `methodA` which is disabled.
+
 
 Each policy can be disabled by using its annotation name.
 
@@ -153,13 +158,4 @@ For instance the following config will disable bulkhead policy globally:
 
 Policy will be disabled everywhere ignoring existing policy annotations on methods and classes.
 
-If the above configurations patterns are used with another value than `false` (i.e. `<classname>/<methodname>/<annotation>/enabled=whatever`) non-portable behaviour results.
-
-=== Configuring Metrics Integration
-
-The integration with MicroProfile Metrics can be disabled by setting a config property named `MP_Fault_Tolerance_Metrics_Enabled` to the value `false`.
-If this property is absent or set to `true` then the integration with MicroProfile Metrics will be enabled and the metrics listed earlier in this specification
-will be added automatically for every method annotated with a `@Retry`, `@Timeout`, `@CircuitBreaker` or `@Bulkhead` annotation.
-
-In order to prevent from any unexpected behaviours, the property `MP_Fault_Tolerance_Metrics_Enabled` will only be read when the application starts.
-Any dynamic changes afterwards will be ignored until the application is restarted.
+If the above configurations patterns are used with a value other than `true` or `false` (i.e. `<classname>/<methodname>/<annotation>/enabled=whatever`) non-portable behaviour results.

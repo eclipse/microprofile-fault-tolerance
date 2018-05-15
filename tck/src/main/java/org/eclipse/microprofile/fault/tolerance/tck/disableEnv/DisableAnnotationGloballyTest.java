@@ -19,17 +19,27 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.disableEnv;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
 import javax.inject.Inject;
 
-import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.AsyncClient;
-import org.eclipse.microprofile.fault.tolerance.tck.fallback.clientserver.StringFallbackHandler;
-import org.eclipse.microprofile.fault.tolerance.tck.util.Connection;
-import org.eclipse.microprofile.faulttolerance.exceptions.TimeoutException;
+import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
+import org.eclipse.microprofile.faulttolerance.Asynchronous;
+import org.eclipse.microprofile.faulttolerance.Bulkhead;
+import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
+import org.eclipse.microprofile.faulttolerance.Fallback;
+import org.eclipse.microprofile.faulttolerance.Retry;
+import org.eclipse.microprofile.faulttolerance.Timeout;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
+import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
-import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.Assert;
@@ -43,26 +53,29 @@ import org.testng.annotations.Test;
  *
  * @author <a href="mailto:antoine@sabot-durand.net">Antoine Sabot-Durand</a>
  * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
+ * @author <a href="mailto:anrouse@uk.ibm.com">Andrew Rouse</a>
  */
 public class DisableAnnotationGloballyTest extends Arquillian {
 
     @Inject
-    private DisableClient disableClient;
-
-    @Inject
-    private AsyncClient asyncClient;
+    private DisableAnnotationClient disableClient;
 
     @Deployment
     public static WebArchive deploy() {
+        
+        Asset config = new DisableConfigAsset()
+                .disable(Retry.class)
+                .disable(CircuitBreaker.class)
+                .disable(Timeout.class)
+                .disable(Asynchronous.class)
+                .disable(Fallback.class)
+                .disable(Bulkhead.class);
+        
         JavaArchive testJar = ShrinkWrap
             .create(JavaArchive.class, "ftDisableGlobally.jar")
-            .addClasses(DisableClient.class, StringFallbackHandler.class, AsyncClient.class, Connection.class)
-            .addAsManifestResource(new StringAsset("Retry/enabled=false\n" +
-                                                       "Fallback/enabled=false\n" +
-                                                       "CircuitBreaker/enabled=false\n" +
-                                                       "Timeout/enabled=false\n" +
-                                                       "Asynchronous/enabled=false"),
-                                   "microprofile-config.properties")
+            .addClasses(DisableAnnotationClient.class)
+            .addPackage(Packages.UTILS)
+            .addAsManifestResource(config, "microprofile-config.properties")
             .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
             .as(JavaArchive.class);
 
@@ -73,96 +86,92 @@ public class DisableAnnotationGloballyTest extends Arquillian {
     }
 
     /**
-     * Test maxRetries on @Retry.
-     *
-     * ServiceA is annotated with maxRetries = 1 so serviceA is expected to execute 2 times but as Retry is disabled,
+     * failAndRetryOnce is annotated with maxRetries = 1 so it is expected to execute 2 times but as Retry is disabled,
      * then no retries should be attempted.
      */
     @Test
     public void testRetryDisabled() {
-        try {
-            disableClient.serviceA();
-            Assert.fail("serviceA should throw a RuntimeException in testRetryDisabled");
-        }
-        catch (RuntimeException ex) {
-            // Expected
-        }
-        Assert.assertEquals(disableClient.getRetryCountForConnectionService(), 1, "The max number of executions should be 1");
+        Assert.assertThrows(TestException.class, () -> disableClient.failAndRetryOnce());
+        Assert.assertEquals(disableClient.getFailAndRetryOnceCounter(), 1, "Retry disabled - should be 1 exection");
     }
 
     /**
      * Test that a Fallback service is ignored when service fails.
      *
-     * ServiceB is annotated with maxRetries = 1 so serviceB is expected to execute 2 times but as Retry is disabled
+     * failRetryOnceThenFallback is annotated with maxRetries = 1 so serviceB is expected to execute 2 times but as Retry is disabled
      * then no retries should be attempted .
      */
     @Test
     public void testFallbackDisabled() {
-        Assert.assertThrows(RuntimeException.class, () -> disableClient.serviceB());
-        Assert.assertEquals(disableClient.getCounterForInvokingServiceB(), 1, "The execution count should be 1 (0 retries + 1)");
+        // Throw TestException because Fallback is disabled
+        Assert.assertThrows(TestException.class, () -> disableClient.failRetryOnceThenFallback());
+        // One execution because Retry is disabled
+        Assert.assertEquals(disableClient.getFailRetryOnceThenFallbackCounter(), 1, "Retry disabled - should be 1 execution");
     }
 
     /**
-     * A test to exercise Circuit Breaker thresholds, with a default SuccessThreshold
-     *
      * CircuitBreaker policy being disabled the policy shouldn't be applied
      */
     @Test
     public void testCircuitClosedThenOpen() {
-        for (int i = 0; i < 7; i++) {
-
-            try {
-                disableClient.serviceC();
-            }
-            catch (RuntimeException ex) {
-                // Expected
-            }
-            catch (Exception ex) {
-                // Not Expected
-                Assert.fail("serviceC should throw a RuntimeException in testCircuitClosedThenOpen on iteration " + i +
-                                " but caught exception " + ex);
-            }
-        }
-        int serviceCExecutions = disableClient.getCounterForInvokingServiceC();
-
-        Assert.assertEquals(serviceCExecutions, 7, "The number of executions should be 7");
+        // Always get TestException on first execution
+        Assert.assertThrows(TestException.class, () -> disableClient.failWithCircuitBreaker());
+        // Should get TestException on second execution because CircuitBreaker is disabled
+        Assert.assertThrows(TestException.class, () -> disableClient.failWithCircuitBreaker());
     }
 
     /**
-     * A test to exercise the default timeout.
-     *
-     * In normal operation, the default Fault Tolerance timeout is 1 second but serviceD will attempt to sleep for 3 seconds, so
-     * would be expected to throw a TimeoutException. However, Timeout policy being disabled, no Timeout will occur and a
-     * RuntimeException will be thrown after 3 seconds.
+     * Test Timeout is disabled, should wait two seconds and then get a TestException
      */
     @Test
     public void testTimeout() {
-        try {
-            disableClient.serviceD(3000);
-            Assert.fail("serviceD should throw a TimeoutException in testTimeout");
-        }
-        catch (TimeoutException ex) {
-            // Not Expected
-            Assert.fail("serviceD should throw a RuntimeException in testTimeout not a TimeoutException");
-        }
-        catch (RuntimeException ex) {
-            // Expected
-        }
+        // Expect TestException because Timeout is disabled and will not fire
+        Assert.assertThrows(TestException.class, () -> disableClient.failWithTimeout());
     }
 
     /**
-     * A test to check taht asynchronous is disabled
+     * A test to check that asynchronous is disabled
      *
-     * In normal operation, asyncClient.service() is launched asynchronously. As Asynchronous operation was disabled via config,
+     * In normal operation, asyncClient.asyncWaitThenReturn() is launched asynchronously. As Asynchronous operation was disabled via config,
      * test is expecting a synchronous operation.
-     *
-     * @throws InterruptedException
      */
     @Test
-    public void testAsync() throws InterruptedException {
-        long start = System.currentTimeMillis();
-        asyncClient.service();
-        Assert.assertTrue(System.currentTimeMillis()-start >= 1000);
-
+    public void testAsync() throws InterruptedException, ExecutionException {
+        Future<?> result = disableClient.asyncWaitThenReturn();
+        try {
+            Assert.assertTrue(result.isDone(), "Returned future.isDone() expected true because Async disabled");
+        }
+        finally {
+            result.get(); // Success or failure, don't leave the future lying around
+        }
+    }
+    
+    /**
+     * Test whether Bulkhead is enabled on {@code waitWithBulkhead()}
+     */
+    @Test
+    public void testBulkhead() throws ExecutionException, InterruptedException {
+        ExecutorService executor = Executors.newFixedThreadPool(10);
+        
+        // Start two executions at once
+        CompletableFuture<Void> waitingFuture = new CompletableFuture<>();
+        Future<?> result1 = executor.submit(() -> disableClient.waitWithBulkhead(waitingFuture));
+        Future<?> result2 = executor.submit(() -> disableClient.waitWithBulkhead(waitingFuture));
+        
+        try {
+            disableClient.waitForBulkheadExecutions(2);
+            
+            // Try to start a third execution. This should throw a BulkheadException if Bulkhead is enabled.
+            // Bulkhead is globally disabled so expect no exception
+            disableClient.waitWithBulkhead(CompletableFuture.completedFuture(null));
+        }
+        finally {
+            // Clean up executor and first two executions
+            executor.shutdown();
+            
+            waitingFuture.complete(null);
+            result1.get();
+            result2.get();
+        }
     }
 }
