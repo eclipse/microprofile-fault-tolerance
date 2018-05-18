@@ -159,3 +159,10 @@ For instance the following config will disable bulkhead policy globally:
 Policy will be disabled everywhere ignoring existing policy annotations on methods and classes.
 
 If the above configurations patterns are used with a value other than `true` or `false` (i.e. `<classname>/<methodname>/<annotation>/enabled=whatever`) non-portable behaviour results.
+
+When the above property is used together with the property `MP_Fault_Tolerance_NonFallback_Enabled`, the propoerty `MP_Fault_Tolerance_NonFallback_Enabled` has the lowest priority. 
+`MP_Fault_Tolerance_NonFallback_Enabled=true`
+`Bulkhead/enabled=true`
+All other annotations except `Fallback` and `Bulkhead` will not be enabled.
+
+ 
