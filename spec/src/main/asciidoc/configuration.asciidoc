@@ -160,7 +160,7 @@ Policy will be disabled everywhere ignoring existing policy annotations on metho
 
 If the above configurations patterns are used with a value other than `true` or `false` (i.e. `<classname>/<methodname>/<annotation>/enabled=whatever`) non-portable behaviour results.
 
-When the above configuration is used together with `MP_Fault_Tolerance_NonFallback_Enabled`, `MP_Fault_Tolerance_NonFallback_Enabled`has the lowest priority. 
+When the above configuration is used together with `MP_Fault_Tolerance_NonFallback_Enabled`, `MP_Fault_Tolerance_NonFallback_Enabled` has the lowest priority. 
 `MP_Fault_Tolerance_NonFallback_Enabled=true`
 `Bulkhead/enabled=true`
 All other annotations except `Fallback` and `Bulkhead` will not be enabled.
