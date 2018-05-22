@@ -175,7 +175,7 @@ Similarly, the sum of `ft.<name>.circuitbreaker.open.total`, `ft.<name>.circuitb
 | Name | Type | Unit | Description
 
 |`ft.<name>.fallback.calls.total`
-| Gauge<Long> | None
+| Counter | None
 | Number of times the fallback handler or method was called
 |===
 
