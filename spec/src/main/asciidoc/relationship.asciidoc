@@ -61,6 +61,14 @@ annotations/interceptor bindings are config properties. They can be configured e
 via other predefined config sources (e.g. environment variables, system properties or other sources). For an instance,
 the `maxRetries` parameter on the `@Retry` annotation is a configuration property. It can be configured externally.
 
+=== Relationship to MicroProfile Metrics
+The MicroProfile Metrics specification provides a way to monitor microservice invocations. It is also important to find out how Fault Tolerance policies are operating, e.g. 
+
+* When `Retry` is used, it is useful to know how many times a method was called and succeeded after retrying at least once.
+* When `Timeout` is used, you would like to know how many times the method timed out.
+
+Because of this requirement, when Microprofile Fault Tolerance and Microprofile Metrics are used together, metrics are automatically added for each of the methods annotated with a `@Retry`, `@Timeout`, `@CircuitBreaker`, `@Bulkhead` or `@Fallback` annotation. 
+
 
 
 

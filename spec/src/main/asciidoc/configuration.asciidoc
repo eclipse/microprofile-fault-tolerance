@@ -23,16 +23,9 @@
 
 This specification defines the programming model to build a resilient microservice.
 Microservices developed using this feature are guaranteed to be resilient despite of running environments.
-In some service mash platform, e.g. Istio, has its own Fault Tolerance policy.
-The operation team might want to use the platform Fault Tolerance.
-In order to fulfil the requirement, MicroProfile Fault Tolerance provides a capability to have its resilient functionalities except `fallback` disabled.
-The reason `fallback` is special as the `fallback` business logic can only be defined by microservices not by any other platforms.
 
-Set the config property of `MP_Fault_Tolerance_NonFallback_Enabled` with the value of `false` means the Fault Tolerance is disabled, except `@Fallback`.
-If the property is absent or with the value of `true`, it means that MicroProfile Fault Tolerance is enabled if any annotations are specified.  For more information about how to set config properties, refer to MicroProfile Config specification.
+This programming model is very flexible. All the annotation parameters are configurable and the annotations can be disabled as well.
 
-In order to prevent from any unexpected behaviours, the property `MP_Fault_Tolerance_NonFallback_Enabled` will only be read on application starting.
-Any dynamic changes afterwards will be ignored until  the application restarting.
 
 === Config Fault Tolerance parameters
 
@@ -111,12 +104,26 @@ If an annotation is not present, the configured properties are ignored.
 For instance, the property `com.acme.ClassA/methodB/Retry/maxRetries` will be ignored if `@Retry` annotation is not specified on the `methodB` of `com.acme.ClassA`.
 Similarly, the property `com.acme.ClassA/Retry/maxRetries` will be ignored if `@Retry` annotation is not specified on the class `com.acme.ClassA` as a class-level annotation.
 
-=== Disabled Fault Tolerance policies with configuration
+=== Disable a group of Fault Tolerance annotations on the global level
+In some service mash platform, e.g. Istio, has its own Fault Tolerance policy.
+The operation team might want to use the platform Fault Tolerance.
+In order to fulfil the requirement, MicroProfile Fault Tolerance provides a capability to have its resilient functionalities except `fallback` disabled.
+The reason `fallback` is special as the `fallback` business logic can only be defined by microservices not by any other platforms.
+
+Set the config property of `MP_Fault_Tolerance_NonFallback_Enabled` with the value of `false` means the Fault Tolerance is disabled, except `@Fallback`.
+If the property is absent or with the value of `true`, it means that MicroProfile Fault Tolerance is enabled if any annotations are specified.  For more information about how to set config properties, refer to MicroProfile Config specification.
+
+In order to prevent from any unexpected behaviours, the property `MP_Fault_Tolerance_NonFallback_Enabled` will only be read on application starting.
+Any dynamic changes afterwards will be ignored until  the application restarting.
+
+=== Disabled individual Fault Tolerance policy
 
 Fault Tolerance policies can be disabled with configuration at method level, class level or globally for all deployment. If multiple configurations are specified, method-level configuration overrides class-level configuration, which then overrides global configuration. e.g.
+
 * `com.acme.test.MyClient/methodA/CircuitBreaker/enabled=false`
 * `com.acme.test.MyClient/CircuitBreaker/enabled=true`
 * `CircuitBreaker/enabled=false`
+
 For the above scenario, all occurrences of `CircuitBreaker` for the application are disabled except for those on the class `com.acme.test.MyClient`. All occurrences of `CircuitBreaker` on `com.acme.test.MyClient` are enabled, except for the one on `methodA` which is disabled.
 
 
@@ -160,9 +167,11 @@ Policy will be disabled everywhere ignoring existing policy annotations on metho
 
 If the above configurations patterns are used with a value other than `true` or `false` (i.e. `<classname>/<methodname>/<annotation>/enabled=whatever`) non-portable behaviour results.
 
-When the above property is used together with the property `MP_Fault_Tolerance_NonFallback_Enabled`, the propoerty `MP_Fault_Tolerance_NonFallback_Enabled` has the lowest priority. 
-`MP_Fault_Tolerance_NonFallback_Enabled=true`
-`Bulkhead/enabled=true`
-All other annotations except `Fallback` and `Bulkhead` will not be enabled.
+When the above property is used together with the property `MP_Fault_Tolerance_NonFallback_Enabled`, the propoerty `MP_Fault_Tolerance_NonFallback_Enabled` has the lowest priority. e.g. 
+
+* `MP_Fault_Tolerance_NonFallback_Enabled=true`
+* `Bulkhead/enabled=true`
+
+In the above example, only `Fallback` and `Bulkhead` are enabled while the others are disabled.
 
  

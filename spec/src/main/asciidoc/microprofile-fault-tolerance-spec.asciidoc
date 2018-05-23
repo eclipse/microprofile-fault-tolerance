@@ -19,7 +19,7 @@
 // Emily Jiang
 
 = Microprofile Fault Tolerance
-:author: Emily Jiang
+:author: Emily Jiang, Antoine Sabot-Durant, Andrew Rouse
 :email: emijiang@uk.ibm.com
 :version-label!:
 :sectanchors:
@@ -61,4 +61,6 @@ include::bulkhead.asciidoc[]
 include::metrics.asciidoc[]
 
 include::configuration.asciidoc[]
+
+include::release_notes.asciidoc[] 
 

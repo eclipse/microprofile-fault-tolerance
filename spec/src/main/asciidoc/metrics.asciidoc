@@ -129,7 +129,7 @@ Note that the sum of `ft.<name>.timeout.callsTimedOut.total` and `ft.<name>.time
 | Number of times the circuit breaker has moved from closed state to open state
 |===
 
-Note that the sum of `ft.<name>.circuitbreaker.callsSucceeded.total`, `ft.<name>.circuitbreaker.callsFailed.total` and `ft.<name>.circuitbreaker.callsPrevented.total` will give the total number of calls for which the Bulkhead logic was run.
+Note that the sum of `ft.<name>.circuitbreaker.callsSucceeded.total`, `ft.<name>.circuitbreaker.callsFailed.total` and `ft.<name>.circuitbreaker.callsPrevented.total` will give the total number of calls for which the circuit breaker logic was run.
 
 Similarly, the sum of `ft.<name>.circuitbreaker.open.total`, `ft.<name>.circuitbreaker.halfOpen.total` and `ft.<name>.circuitbreaker.closed.total` will give the total time that the circuit breaker has been active for.
 
@@ -180,7 +180,7 @@ Similarly, the sum of `ft.<name>.circuitbreaker.open.total`, `ft.<name>.circuitb
 |===
 
 
-== Notes
+=== Notes
 
 Metrics added by this specification will appear as application metrics for the application which uses the Fault Tolerance annotations.
 
@@ -189,7 +189,7 @@ enhancements in the MicroProfile Metrics specification.
 
 If more than one annotation is applied to a method, the metrics associated with each annotation will be added for that method.
 
-All of the counters are monotonic and count the number of events which occurred since the application started.
+All of the counters count the number of events which occurred since the application started, and therefore never decrease.
 It is expected that these counters will be sampled regularly by monitoring software which is then able to compute deltas
 or moving averages from the gathered samples.
 
@@ -223,6 +223,7 @@ This class would result in the following metrics being added.
 * `ft.com.example.MyClass.doWork.timeout.callsNotTimedOut.total`
 
 Now imagine the `doWork()` method is called and the invocation goes like this:
+
 * On the first attempt, the invocation takes more than 1000ms and times out
 * On the second attempt, something goes wrong and the method throws an `IOException`
 * On the third attempt, the method returns successfully and the result of this attempt is returned to the user
