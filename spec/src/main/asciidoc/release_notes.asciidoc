@@ -27,7 +27,7 @@ A full list of changes may be found on the link:https://github.com/eclipse/micro
 
 === API/SPI Changes
 
-- The `ExecutionContext` SPI has been extended with a `getFailure` method that returns the execution failure(link:https://github.com/eclipse/microprofile-fault-tolerance/issues/224[#224]).
+- The `ExecutionContext` interface has been extended with a `getFailure` method that returns the execution failure(link:https://github.com/eclipse/microprofile-fault-tolerance/issues/224[#224]).
 
 === Functional Changes
 
