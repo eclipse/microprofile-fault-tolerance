@@ -105,12 +105,12 @@ For instance, the property `com.acme.ClassA/methodB/Retry/maxRetries` will be ig
 Similarly, the property `com.acme.ClassA/Retry/maxRetries` will be ignored if `@Retry` annotation is not specified on the class `com.acme.ClassA` as a class-level annotation.
 
 === Disable a group of Fault Tolerance annotations on the global level
-In some service mash platform, e.g. Istio, has its own Fault Tolerance policy.
+Some service mesh platforms, e.g. Istio, have their own Fault Tolerance policy.
 The operation team might want to use the platform Fault Tolerance.
-In order to fulfil the requirement, MicroProfile Fault Tolerance provides a capability to have its resilient functionalities except `fallback` disabled.
-The reason `fallback` is special as the `fallback` business logic can only be defined by microservices not by any other platforms.
+In order to fulfil the requirement, MicroProfile Fault Tolerance provides a capability to have its resilient functionalities disabled except `fallback`.
+The reason `fallback` is special is that the `fallback` business logic can only be defined by microservices and not by any other platforms.
 
-Set the config property of `MP_Fault_Tolerance_NonFallback_Enabled` with the value of `false` means the Fault Tolerance is disabled, except `@Fallback`.
+Setting the config property of `MP_Fault_Tolerance_NonFallback_Enabled` with the value of `false` means the Fault Tolerance is disabled, except `@Fallback`.
 If the property is absent or with the value of `true`, it means that MicroProfile Fault Tolerance is enabled if any annotations are specified.  For more information about how to set config properties, refer to MicroProfile Config specification.
 
 In order to prevent from any unexpected behaviours, the property `MP_Fault_Tolerance_NonFallback_Enabled` will only be read on application starting.
@@ -167,7 +167,7 @@ Policy will be disabled everywhere ignoring existing policy annotations on metho
 
 If the above configurations patterns are used with a value other than `true` or `false` (i.e. `<classname>/<methodname>/<annotation>/enabled=whatever`) non-portable behaviour results.
 
-When the above property is used together with the property `MP_Fault_Tolerance_NonFallback_Enabled`, the propoerty `MP_Fault_Tolerance_NonFallback_Enabled` has the lowest priority. e.g. 
+When the above property is used together with the property `MP_Fault_Tolerance_NonFallback_Enabled`, the property `MP_Fault_Tolerance_NonFallback_Enabled` has the lowest priority. e.g. 
 
 * `MP_Fault_Tolerance_NonFallback_Enabled=true`
 * `Bulkhead/enabled=true`
