@@ -25,7 +25,7 @@ import java.lang.reflect.Method;
  * 
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  */
-
+@org.osgi.annotation.versioning.ProviderType
 public interface ExecutionContext {
 
      /**
