@@ -23,6 +23,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 
+import java.util.concurrent.ExecutionException;
+
 import javax.inject.Inject;
 
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricGetter;
@@ -47,12 +49,12 @@ public class ClashingNameTest extends Arquillian {
     private ClashingNameBean clashingNameBean;
     
     @Test
-    public void testClashingName() {
+    public void testClashingName() throws InterruptedException, ExecutionException {
         MetricGetter m = new MetricGetter(ClashingNameBean.class, "doWork");
         m.baselineCounters();
         
-        clashingNameBean.doWork();
-        clashingNameBean.doWork("dummy");
+        clashingNameBean.doWork().get();
+        clashingNameBean.doWork("dummy").get();
         
         assertThat("invocations", m.getInvocationsDelta(), is(greaterThan(0L)));
     }
