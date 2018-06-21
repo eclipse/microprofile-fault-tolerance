@@ -20,13 +20,13 @@ image:https://badges.gitter.im/eclipse/microprofile-fault-tolerance.svg[link="ht
 
 # Fault Tolerance
 
-* Proposal: [MP-0004](0004-FaultTolerance.md)
-* Authors: [Emily Jiang](https://github.com/Emily-Jiang), [Jonathan Halterman](https://github.com/jhalterman/), [Antoine Sabot-Durand](https://github.com/antoinesd), [John Ament](https://github.com/johnament)
+* Proposal: link:0004-FaultTolerance.md[MP-0004]
+* Authors: link:https://github.com/Emily-Jiang[Emily Jiang], link:https://github.com/jhalterman/[Jonathan Halterman], link:https://github.com/antoinesd[Antoine Sabot-Durand], link:https://github.com/johnament[John Ament]
 * Status: **v1.0 released**
 
 *During the review process, add the following fields as needed:*
 
-* Decision Notes: [Discussion thread topic covering the  Rationale](https://groups.google.com/forum/#!topic/microprofile/ezFC1TLGozU), [Discussion thread topic with additional Commentary](https://groups.google.com/forum/#!forum/microprofile)
+* Decision Notes: link:https://groups.google.com/forum/#!topic/microprofile/ezFC1TLGozU[Discussion thread topic covering the  Rationale], link:https://groups.google.com/forum/#!forum/microprofile[Discussion thread topic with additional Commentary]
 
 ## Introduction
 
@@ -42,7 +42,7 @@ As mentioned above, the Fault Tolerance proposal is to focus the aspects: TimeOu
 
 The main design is to separate execution logic from execution. The execution can be configured with fault tolerance policies, such as RetryPolicy, fallback, Bulkhead and CircuitBreaker. 
 
-[Hystrix](https://github.com/Netflix/Hystrix) and [Failsafe](https://github.com/jhalterman/failsafe) are two popular libraries for handling failures. This proposal is to define a standard API and approach for applications to follow in order to achieve the fault tolerance.
+link:https://github.com/Netflix/Hystrix[Hystrix] and link:https://github.com/jhalterman/failsafe[Failsafe] are two popular libraries for handling failures. This proposal is to define a standard API and approach for applications to follow in order to achieve the fault tolerance.
 
 The requirements are as follows:
 
@@ -53,7 +53,7 @@ The requirements are as follows:
 * Require immutable failure handling policy configuration
 * Some Failure policy configurations, e.g. CircuitBreaker, RetryPolicy, can be used stand alone. For example, it has been very useful for circuit breakers to be standalone constructs which can be plugged into and intentionally shared across multiple executions. Likewise for retry policies. Additionally, an Execution construct can be offered that allows retry policies to be applied to some logic in a standalone, manually controlled way.
 
-Mailinglist thread: [Discussion thread topic for that proposal](https://groups.google.com/forum/#!topic/microprofile/ezFC1TLGozU)
+Mailinglist thread: link:https://groups.google.com/forum/#!topic/microprofile/ezFC1TLGozU[Discussion thread topic for that proposal]
 
 ## Motivation
 
