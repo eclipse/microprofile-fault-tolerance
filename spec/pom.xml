@@ -20,12 +20,12 @@
         <!-- This is just for now and will not work if the API has a separate release cycle than the rest. -->
         <groupId>org.eclipse.microprofile.fault-tolerance</groupId>
         <artifactId>microprofile-fault-tolerance-parent</artifactId>
-        <version>1.1.1-CR1</version>
+        <version>1.1.1-SNAPSHOT</version>
     </parent>
 
     <groupId>org.eclipse.microprofile.fault-tolerance</groupId>
     <artifactId>microprofile-fault-tolerance-spec</artifactId>
-    <version>1.1.1-CR1</version>
+    <version>1.1.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <description>Fault Tolerance for MicroProfile :: Specification</description>
