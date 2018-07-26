@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2016-2017 Contributors to the Eclipse Foundation
+// Copyright (c) 2016-2018 Contributors to the Eclipse Foundation
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information regarding copyright ownership.
@@ -17,6 +17,7 @@
 // limitations under the License.
 // Contributors:
 // Emily Jiang
+// Andrew Rouse
 
 [[circuitbreaker]]
 == Circuit Breaker
@@ -61,5 +62,9 @@ After 10 consecutive successful invocations, the circuit will be back to close a
 
 When a circuit is open, A `CircuitBreakerOpenException` must be thrown.
 The `@CircuitBreaker` annotation can be used together with `@Timeout`, `@Fallback`, `@Asynchronous`, `@Bulkhead` and `@Retry`.
-A `@Fallback` can be specified and it will be invoked if the `CircuitBreakerOpenException` is thrown.
-`@Timeout` can be configured to fail an operation if it takes longer than the `Timeout` value to complete.
+
+If `@Fallback` is used with `@CircuitBreaker`, the fallback method or handler will be invoked if a `CircuitBreakerOpenException` is thrown.
+
+If `@Retry` is used with `@CircuitBreaker`, each retry attempt is processed by the circuit breaker and recorded as either a success or a failure. If a `CircuitBreakerOpenException` is thrown, the execution may be retried, depending on how the `@Retry` is configured.
+
+If `@Bulkhead` is used with `@Circuitbreaker`, the circuit breaker is checked before attempting to enter the bulkhead. If attempting to enter the bulkhead results in a `BulkheadException`, this may be counted as a failure, depending on the value of the circuit breaker `failOn` attribute.
