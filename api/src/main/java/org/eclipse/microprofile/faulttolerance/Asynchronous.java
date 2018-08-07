@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2017-2018 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -34,7 +34,8 @@ import javax.interceptor.InterceptorBinding;
  *   <li>{@link java.util.concurrent.Future}</li>
  *   <li>{@link java.util.concurrent.CompletionStage}</li>
  * </ul>
- * Otherwise, {@link org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException} occurs.
+ * Otherwise, {@link org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException} occurs
+ * (at deploy time if the bean is discovered during deployment).
  * 
  * <p>
  * When a method marked with this annotation is executed, the call returns immediately while the method
@@ -61,8 +62,10 @@ import javax.interceptor.InterceptorBinding;
  * </ul>
  * It's recommended that methods throw only runtime exceptions to avoid unnecessary {@code try..catch} blocks.
  * 
- * <p>If a class is annotated with this annotation, all class methods that could be marked with this 
- * annotation are treated as if they were marked with this annotation.
+ * <p>If a class is annotated with this annotation, all class methods are treated as if they were marked
+ * with this annotation. If one of the methods doesn't return either Future or CompletionStage,
+ * {@link org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException}
+ * occurs (at deploy time if the bean is discovered during deployment).
  * </p>
  * 
  * <p>
