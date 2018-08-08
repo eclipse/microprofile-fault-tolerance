@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -40,6 +41,7 @@ import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.Assert;
+import org.testng.Assert.ThrowingRunnable;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.Test;
 
@@ -62,7 +64,7 @@ public class AsynchronousCSTest extends Arquillian {
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
                 .create(JavaArchive.class, "ftAsynchronous.jar")
-                .addClasses(AsyncClient.class, AsyncClassLevelClient.class, Connection.class)
+                .addClasses(AsyncClient.class, AsyncClassLevelClient.class, Connection.class, CompletableFutureHelper.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                 .as(JavaArchive.class);
 
@@ -171,13 +173,14 @@ public class AsynchronousCSTest extends Arquillian {
         CompletableFuture<Void> waitingFuture = newWaitingFuture();
         StringBuilder executionRecord = new StringBuilder();
         
-        CompletableFuture<Connection> innerFuture = new CompletableFuture<Connection>()
+        CompletableFuture<Connection> innerFuture = new CompletableFuture<Connection>();
+        CompletableFuture<Connection> returnedFuture = innerFuture
                 .thenApply(v -> {
                     executionRecord.append("1");
                     return v;
                 });
         CompletionStage<Connection> resultFuture = client
-                .serviceCS(waitingFuture, innerFuture)
+                .serviceCS(waitingFuture, returnedFuture)
                 .thenApply(v -> {
                     executionRecord.append("2");
                     return v;
@@ -218,14 +221,7 @@ public class AsynchronousCSTest extends Arquillian {
         Assert.assertTrue(completesQuickly(resultFuture));
         Assert.assertTrue(isCompletedExceptionally(resultFuture));
         Assert.assertFalse(isCancelled(resultFuture));
-        Assert.assertThrows(SimulatedException.class, CompletableFutureHelper.toCompletableFuture(resultFuture)::get);
-
-        try {
-            waitUntilCompleted(resultFuture);
-        }
-        catch (CompletionException e) {
-            handleCompletionException(e);
-        }
+        assertThrowsExecutionExceptionWithCause(SimulatedException.class, CompletableFutureHelper.toCompletableFuture(resultFuture)::get);
     }
 
     /**
@@ -242,14 +238,7 @@ public class AsynchronousCSTest extends Arquillian {
         Assert.assertTrue(completesQuickly(resultFuture));
         Assert.assertTrue(isCompletedExceptionally(resultFuture));
         Assert.assertFalse(isCancelled(resultFuture));
-        Assert.assertThrows(SimulatedException.class, CompletableFutureHelper.toCompletableFuture(resultFuture)::get);
-
-        try {
-            waitUntilCompleted(resultFuture);
-        }
-        catch (CompletionException e) {
-            handleCompletionException(e);
-        }
+        assertThrowsExecutionExceptionWithCause(SimulatedException.class, CompletableFutureHelper.toCompletableFuture(resultFuture)::get);
     }
 
     /**
@@ -321,6 +310,19 @@ public class AsynchronousCSTest extends Arquillian {
 
     private static boolean isCompletedExceptionally(CompletionStage<Connection> resultFuture) {
         return CompletableFutureHelper.toCompletableFuture(resultFuture).isCompletedExceptionally();
+    }
+    
+    private static void assertThrowsExecutionExceptionWithCause(Class<? extends Throwable> causeClazz, ThrowingRunnable runnable) {
+        try {
+            runnable.run();
+            Assert.fail("ExecutionException not thrown");
+        }
+        catch (ExecutionException ex) {
+            Assert.assertTrue(causeClazz.isInstance(ex.getCause()), "Cause of ExecutionException was " + ex.getCause());
+        }
+        catch (Throwable ex) {
+            Assert.fail("Unexpected exception thrown", ex);
+        }
     }
 
     private static class SimulatedException extends RuntimeException {
