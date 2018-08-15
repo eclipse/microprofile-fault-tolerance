@@ -31,38 +31,58 @@ import javax.interceptor.InterceptorBinding;
  * Wrap the execution and invoke it asynchronously.
  * Any methods marked with this annotation must return one of:
  * <ul>
- *   <li>{@link java.util.concurrent.Future}</li>
- *   <li>{@link java.util.concurrent.CompletionStage}</li>
+ * <li>{@link java.util.concurrent.Future}</li>
+ * <li>{@link java.util.concurrent.CompletionStage}</li>
  * </ul>
  * Otherwise, {@link org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException} occurs
  * (at deploy time if the bean is discovered during deployment).
  * 
  * <p>
- * When a method marked with this annotation is executed, the call returns immediately while the method
- * is executed in another thread. The returned Future or CompletionStage is not completed until the result 
- * of the method running asynchronously is completed (either normally or exceptionally) or the method 
- * throws an exception.
- * </p>
- * 
- * <p>After a method marked with this annotation returns normally, the Future or CompletionStage returned
- * in the calling thread delegate all method calls to the object returned by the method. 
- * CompletionStage returned in the calling thread is completed when the stage returned by the method is completed
- * and with the same completion value or exception.</p>
- * 
- * <p>If a method marked with this annotation throws an exception when invoked, the exception isn't thrown 
- * in the callers thread therefore it's not possible to catch it with a {@code try..catch} block. 
- * The exception is propagated asynchronously:
- * </p>
+ * When a method marked with this annotation is called from one thread (which we will call Thread A), the method call is
+ * intercepted, and execution of the method is submitted to run asynchronously on another thread (which we will call
+ * Thread B).
+ * <p>
+ * On Thread A, a Future or CompletionStage is returned immediately and can be used to get the result of the execution
+ * taking place on Thread B, once it is complete.
+ * <p>
+ * Before the execution on Thread B completes, the Future or CompletionStage returned in Thread A will report itself as
+ * incomplete. At this point, {@link java.util.concurrent.Future#cancel(boolean)} can be used to abort the execution.
+ * <p>
+ * Once the execution on Thread B is complete, the Future or CompletionStage returned in Thread A behaves differently
+ * depending on whether the execution in Thread B threw an exception:
  * <ul>
- *   <li>If the method declares {@link java.util.concurrent.Future} as the return type, 
- * calling {@link java.util.concurrent.Future#get()} will throw an 
- * {@link java.util.concurrent.ExecutionException} wrapping the original exception</li>
- *   <li>If the method declares {@link java.util.concurrent.CompletionStage} as the return type, 
- * it is completed exceptionally with the exception.</li>
+ * <li>If the execution threw an exception, the Future or CompletionStage will be completed with that exception</li>
+ * <li>If the execution returned normally, the Future or CompletionStage returned in Thread A will behave in the same
+ * way as the Future or CompletionStage returned from the execution in Thread B, i.e. it can be
+ * <ul>
+ * <li>not complete yet</li>
+ * <li>completed successfully with a return value</li>
+ * <li>completed exceptionally</li>
  * </ul>
- * It's recommended that methods throw only runtime exceptions to avoid unnecessary {@code try..catch} blocks.
+ * <p>
+ * At this point, any calls to the Future or CompletionStage returned in Thread A will be delegated to the Future or
+ * CompletionStage returned from the execution in Thread B.
+ * </li>
+ * </ul>
  * 
- * <p>If a class is annotated with this annotation, all class methods are treated as if they were marked
+ * <p>
+ * The call made on Thread A will never throw an exception, even if the method declares that it throws checked
+ * exceptions, because the execution is going to occur on Thread B and hasn't happened yet.
+ * To avoid unnecessary {@code try..catch} blocks around these method calls, it's recommended that methods annotated
+ * with {@code @Asynchronous} do not declare that they throw checked exceptions.
+ * <p>
+ * Any exception thrown from the execution on Thread B, or raised by another Fault Tolerance component such as
+ * {@link Bulkhead} or {@link CircuitBreaker}, can be retrieved in the following ways:
+ * <ul>
+ * <li>If the method declares {@link java.util.concurrent.Future} as the return type,
+ * calling {@link java.util.concurrent.Future#get()} on the Future returned in Thread A will throw an
+ * {@link java.util.concurrent.ExecutionException} wrapping the original exception</li>
+ * <li>If the method declares {@link java.util.concurrent.CompletionStage} as the return type,
+ * the CompletionStage returned in Thread A is completed exceptionally with the exception.</li>
+ * </ul>
+ * 
+ * <p>
+ * If a class is annotated with this annotation, all class methods are treated as if they were marked
  * with this annotation. If one of the methods doesn't return either Future or CompletionStage,
  * {@link org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException}
  * occurs (at deploy time if the bean is discovered during deployment).
@@ -76,21 +96,17 @@ import javax.interceptor.InterceptorBinding;
  * <code>@Asynchronous
  * public CompletionStage&lt;String&gt; getString() {
  *  return CompletableFuture.completedFuture("hello");
- * }
- * </code>
- * </pre>
+ * }</code></pre>
  *
  * <p>
  * Example call with exception handling:
  * </p>
  *
- * <pre><code>
- * CompletionStage stage = getString().exceptionally(e -&gt; {
+ * <pre>
+ * <code>CompletionStage stage = getString().exceptionally(e -&gt; {
  *     handleException(e); 
  *     return null;
- * });
- * </code>
- * </pre>
+ * });</code></pre>
  * 
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  */
