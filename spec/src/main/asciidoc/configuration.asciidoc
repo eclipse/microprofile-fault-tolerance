@@ -174,4 +174,11 @@ When the above property is used together with the property `MP_Fault_Tolerance_N
 
 In the above example, only `Fallback` and `Bulkhead` are enabled while the others are disabled.
 
- 
+=== Configuring Metrics Integration
+
+The integration with MicroProfile Metrics can be disabled by setting a config property named `MP_Fault_Tolerance_Metrics_Enabled` to the value `false`.
+If this property is absent or set to `true` then the integration with MicroProfile Metrics will be enabled and the metrics listed earlier in this specification
+will be added automatically for every method annotated with a `@Retry`, `@Timeout`, `@CircuitBreaker`, `@Bulkhead` or `@Fallback` annotation.
+
+In order to prevent any unexpected behaviour, the property `MP_Fault_Tolerance_Metrics_Enabled` will only be read when the application starts.
+Any dynamic changes afterwards will be ignored until the application is restarted.
