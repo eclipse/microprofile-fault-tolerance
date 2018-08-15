@@ -88,7 +88,8 @@ public class AsyncClassLevelClient {
             if (throwException) {
                 if (exception instanceof RuntimeException) {
                     throw (RuntimeException) exception;
-                } else {
+                }
+                else {
                     throw new RuntimeException(exception);
                 }
             }
