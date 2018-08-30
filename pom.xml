@@ -37,6 +37,8 @@
         <autorelease>false</autorelease>
         <!-- keeping closed repos with failure - default is false because the errors are visible in the maven output, but true will leave the repo open for investigation in Sonatype Nexus -->
         <keepStagingReposOnFailure>false</keepStagingReposOnFailure>
+        <cdi.api.version>1.2</cdi.api.version>
+        <interceptor.api.version>1.1</interceptor.api.version>
     </properties>
 
     <licenses>
@@ -100,7 +102,7 @@
             <dependency>
                 <groupId>javax.enterprise</groupId>
                 <artifactId>cdi-api</artifactId>
-                <version>1.2</version>
+                <version>${cdi.api.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
