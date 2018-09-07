@@ -20,7 +20,11 @@
 package org.eclipse.microprofile.fault.tolerance.tck.asynchronous;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.enterprise.context.RequestScoped;
 
@@ -58,4 +62,57 @@ public class AsyncClassLevelClient {
 
         return CompletableFuture.completedFuture(conn);
     }
+    
+    /**
+     * Service an operation until waitCondition is completed or 1 second timeout.
+     *
+     * @param waitCondition Execution of this method will delay until the condition is finished
+     * @param throwException Whether the method should throw an exception (true) or return a stage completed with exception (false)
+     * @return the result as a CompletionStage. It may be completed with
+     * InterruptedException if the thread is interrupted
+     */
+    public CompletionStage<Connection> serviceCS(Future<?> waitCondition, boolean throwException) {
+
+        Throwable exception = null;
+        try {
+            waitCondition.get(1000, TimeUnit.SECONDS);
+        }
+        catch (ExecutionException e) {
+            exception = e.getCause();
+        }
+        catch (InterruptedException | TimeoutException e) {
+            exception = e;
+        }
+        
+        if (exception != null) {
+            if (throwException) {
+                throwAsRuntimeException(exception);
+            }
+            else {
+                return CompletableFutureHelper.failedFuture(exception);
+            }
+        }
+
+        return CompletableFuture.completedFuture(new Connection() {
+            @Override
+            public String getData() {
+                return "service DATA";
+            }
+        });
+
+    }
+
+    public CompletionStage<Connection> serviceCS(Future<?> waitCondition) {
+        return serviceCS(waitCondition, false);
+    }
+
+    private void throwAsRuntimeException(Throwable exception) throws RuntimeException {
+        if (exception instanceof RuntimeException) {
+            throw (RuntimeException)exception;
+        }
+        else {
+            throw new RuntimeException(exception);
+        }
+    }
+    
 }

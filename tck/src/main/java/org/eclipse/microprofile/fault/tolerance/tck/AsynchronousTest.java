@@ -81,7 +81,7 @@ public class AsynchronousTest extends Arquillian {
      * Test that the future returned by calling an asynchronous method is done if called after waiting enough time to end the operation
      */
     @Test
-    public void testClassLevelAsyncIsFinished() {
+    public void testAsyncIsFinished() {
         Future<Connection> future = null;
         try {
             future = client.service();
@@ -117,7 +117,7 @@ public class AsynchronousTest extends Arquillian {
      * Test that the future returned by calling a method in an asynchronous class is done if called after waiting enough time to end the operation
      */
     @Test
-    public void testAsyncIsFinished() {
+    public void testClassLevelAsyncIsFinished() {
         Future<Connection> future = null;
         try {
             future = clientClass.service();

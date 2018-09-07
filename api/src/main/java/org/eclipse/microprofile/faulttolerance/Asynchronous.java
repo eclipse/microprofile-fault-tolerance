@@ -29,16 +29,66 @@ import javax.interceptor.InterceptorBinding;
 
 /**
  * Wrap the execution and invoke it asynchronously.
- * Any methods marked with this annotation must return {@link java.util.concurrent.Future}. 
+ * Any methods marked with this annotation must return one of:
+ * <ul>
+ *   <li>{@link java.util.concurrent.Future}</li>
+ *   <li>{@link java.util.concurrent.CompletionStage}</li>
+ * </ul>
  * Otherwise, {@link org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException} occurs.
- * Example usage:
  * 
+ * <p>
+ * When a method marked with this annotation is executed, the call returns immediately while the method
+ * is executed in another thread. The returned Future or CompletionStage is not completed until the result 
+ * of the method running asynchronously is completed (either normally or exceptionally) or the method 
+ * throws an exception.
+ * </p>
+ * 
+ * <p>After a method marked with this annotation returns normally, the Future or CompletionStage returned
+ * in the calling thread delegate all method calls to the object returned by the method. 
+ * CompletionStage returned in the calling thread is completed when the stage returned by the method is completed
+ * and with the same completion value or exception.</p>
+ * 
+ * <p>If a method marked with this annotation throws an exception when invoked, the exception isn't thrown 
+ * in the callers thread therefore it's not possible to catch it with a {@code try..catch} block. 
+ * The exception is propagated asynchronously:
+ * </p>
+ * <ul>
+ *   <li>If the method declares {@link java.util.concurrent.Future} as the return type, 
+ * calling {@link java.util.concurrent.Future#get()} will throw an 
+ * {@link java.util.concurrent.ExecutionException} wrapping the original exception</li>
+ *   <li>If the method declares {@link java.util.concurrent.CompletionStage} as the return type, 
+ * it is completed exceptionally with the exception.</li>
+ * </ul>
+ * It's recommended that methods throw only runtime exceptions to avoid unnecessary {@code try..catch} blocks.
+ * 
+ * <p>If a class is annotated with this annotation, all class methods that could be marked with this 
+ * annotation are treated as if they were marked with this annotation.
+ * </p>
+ * 
+ * <p>
+ * Example usage:
+ * </p>
+ *
  * <pre>
- * <code>@Asynchronous</code>
- * public Future&lt;String&gt; getString() {
+ * <code>@Asynchronous
+ * public CompletionStage&lt;String&gt; getString() {
  *  return CompletableFuture.completedFuture("hello");
  * }
+ * </code>
  * </pre>
+ *
+ * <p>
+ * Example call with exception handling:
+ * </p>
+ *
+ * <pre><code>
+ * CompletionStage stage = getString().exceptionally(e -&gt; {
+ *     handleException(e); 
+ *     return null;
+ * });
+ * </code>
+ * </pre>
+ * 
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  */
 @Documented
@@ -47,4 +97,5 @@ import javax.interceptor.InterceptorBinding;
 @InterceptorBinding
 @Inherited
 public @interface Asynchronous {
+
 }
