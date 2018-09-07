@@ -86,7 +86,12 @@ public class AsyncClassLevelClient {
         
         if (exception != null) {
             if (throwException) {
-                throwAsRuntimeException(exception);
+                if (exception instanceof RuntimeException) {
+                    throw (RuntimeException) exception;
+                }
+                else {
+                    throw new RuntimeException(exception);
+                }
             }
             else {
                 return CompletableFutureHelper.failedFuture(exception);
@@ -106,13 +111,4 @@ public class AsyncClassLevelClient {
         return serviceCS(waitCondition, false);
     }
 
-    private void throwAsRuntimeException(Throwable exception) throws RuntimeException {
-        if (exception instanceof RuntimeException) {
-            throw (RuntimeException)exception;
-        }
-        else {
-            throw new RuntimeException(exception);
-        }
-    }
-    
 }
