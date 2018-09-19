@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2016-2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2016-2018 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -88,7 +88,8 @@ public class RetryTest extends Arquillian {
 
         //The writing service invocation takes 100ms plus a jitter of 0-200ms with the max duration of 1000ms, 
         //the max invocation should be less than 10
-        Assert.assertTrue(clientForMaxRetry.getRetryCountForWritingService()< 11, "The max retry counter should be less than 11");
+        int retries = clientForMaxRetry.getRetryCountForWritingService();
+        Assert.assertTrue(retries< 11, "The max retry counter should be less than 11 but it was " + retries);
     }
 
     @Test
@@ -103,7 +104,9 @@ public class RetryTest extends Arquillian {
 
         //The writing service invocation takes 100ms plus a jitter of 0-200ms with the max duration of 1000ms, 
         //the max invocation should be less than 10
-        Assert.assertTrue(clientForMaxRetry.getRetryCountForWritingService()< 11, "The max retry counter should be less than 11");
+        int retries = clientForMaxRetry.getRetryCountForWritingService();
+
+        Assert.assertTrue(retries< 11, "The max retry counter should be less than 11 but it was " + retries);
     }
     
     @Test
@@ -116,7 +119,9 @@ public class RetryTest extends Arquillian {
             // Expected
         }
 
-        Assert.assertTrue(clientForDelay.getRetryCountForConnectionService() > 4, "The max number of execution should be greater than 4");
+        int retryCountForConnectionService = clientForDelay.getRetryCountForConnectionService();
+
+        Assert.assertTrue(retryCountForConnectionService > 4, "The max number of execution should be greater than 4 but it was " + retryCountForConnectionService);
         Assert.assertTrue(clientForDelay.isDelayInRange(), "The delay between each retry should be 0-800ms");
     }
 
@@ -135,7 +140,10 @@ public class RetryTest extends Arquillian {
         catch(RuntimeException ex) {
             // Expected
         }
-        Assert.assertEquals(clientForClassLevelMaxRetry.getRetryCountForConnectionService(), 3, "The max number of execution should be 3");
+
+        int retries = clientForClassLevelMaxRetry.getRetryCountForConnectionService();
+
+        Assert.assertEquals(retries, 3, "The max number of execution should be 3 but it was " + retries);
     }
 
     /**
@@ -157,10 +165,10 @@ public class RetryTest extends Arquillian {
         //The writing service invocation takes 100ms plus a jitter of 0-200ms with the max duration of 1000ms, 
         //the max invocation should be less than 10
         int retryCountforWritingService = clientForClassLevelMaxRetry.getRetryCountForWritingService();        
-        Assert.assertTrue(retryCountforWritingService< 11, "The max retry counter should be less than 11");
+        Assert.assertTrue(retryCountforWritingService< 11, "The max retry counter should be less than 11 but it was " + retryCountforWritingService);
         
         // Further test that we have retried more than the maximum number of retries specified in the Class level {@code @Retry} annotation
-        Assert.assertTrue(retryCountforWritingService> 3, "The max retry counter should be greater than 3");      
+        Assert.assertTrue(retryCountforWritingService> 3, "The max retry counter should be greater than 3 but it was " + retryCountforWritingService);      
     }
 
     /**
@@ -181,6 +189,7 @@ public class RetryTest extends Arquillian {
 
         //The writing service invocation takes 100ms plus a jitter of 0-200ms with the max duration of 1000ms, 
         //the max invocation should be less than 10
-        Assert.assertTrue(clientForClassLevelMaxRetry.getRetryCountForWritingService()< 11, "The max retry counter should be less than 11");
+        int retries = clientForClassLevelMaxRetry.getRetryCountForWritingService();
+        Assert.assertTrue(retries < 11, "The max retry counter should be less than 11 but it was" + retries);
     }
 }
