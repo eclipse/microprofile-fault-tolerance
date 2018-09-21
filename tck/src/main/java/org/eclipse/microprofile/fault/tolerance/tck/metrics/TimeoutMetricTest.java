@@ -44,7 +44,7 @@ public class TimeoutMetricTest extends Arquillian {
                 .addClasses(TimeoutMetricBean.class)
                 .addPackage(Packages.UTILS)
                 .addPackage(Packages.METRIC_UTILS)
-                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
+                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
         return war;
     }
     

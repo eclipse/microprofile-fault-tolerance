@@ -41,7 +41,7 @@ public class ClashingNameTest extends Arquillian {
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftMetricClash.war")
                 .addClasses(ClashingNameBean.class)
                 .addPackage(MetricGetter.class.getPackage())
-                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
+                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
         
         return war;
     }

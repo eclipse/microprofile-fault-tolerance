@@ -47,7 +47,7 @@ public class CircuitBreakerMetricTest extends Arquillian {
                 .addClasses(CircuitBreakerMetricBean.class)
                 .addPackage(Packages.UTILS)
                 .addPackage(Packages.METRIC_UTILS)
-                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
+                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
         return war;
     }
     

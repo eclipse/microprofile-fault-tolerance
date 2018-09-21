@@ -46,7 +46,7 @@ public class AllMetricsTest extends Arquillian {
                 .addClasses(AllMetricsBean.class)
                 .addPackage(Packages.UTILS)
                 .addPackage(Packages.METRIC_UTILS)
-                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
+                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
         
         return war;
     }

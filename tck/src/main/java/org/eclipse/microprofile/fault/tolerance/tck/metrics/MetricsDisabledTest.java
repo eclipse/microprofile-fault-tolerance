@@ -47,7 +47,7 @@ public class MetricsDisabledTest extends Arquillian {
                 .addPackage(Packages.UTILS)
                 .addPackage(Packages.METRIC_UTILS)
                 .addAsResource(new StringAsset("MP_Fault_Tolerance_Metrics_Enabled=false"), "META-INF/microprofile-config.properties")
-                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
+                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
         
         return war;
     }

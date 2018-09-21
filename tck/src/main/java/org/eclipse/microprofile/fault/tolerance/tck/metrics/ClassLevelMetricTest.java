@@ -45,7 +45,7 @@ public class ClassLevelMetricTest extends Arquillian {
                 .addClasses(ClassLevelMetricBean.class)
                 .addPackage(Packages.UTILS)
                 .addPackage(Packages.METRIC_UTILS)
-                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
+                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
         
         return war;
     }

@@ -42,7 +42,7 @@ public class FallbackMetricTest extends Arquillian {
                 .addClasses(FallbackMetricBean.class, FallbackMetricHandler.class)
                 .addPackage(Packages.UTILS)
                 .addPackage(Packages.METRIC_UTILS)
-                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
+                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
         return war;
     }
     
