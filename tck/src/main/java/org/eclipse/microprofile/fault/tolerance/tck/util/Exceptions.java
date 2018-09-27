@@ -23,6 +23,7 @@ import static org.testng.Assert.fail;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
 import org.eclipse.microprofile.faulttolerance.exceptions.CircuitBreakerOpenException;
@@ -81,9 +82,15 @@ public class Exceptions {
         expect(BulkheadException.class, future);
     }
     
+    /**
+     * Call {@code future.get()} and check that it throws an ExecutionException wrapping the {@code expectedException}
+     * 
+     * @param expectedException the expected exception type
+     * @param future the future to check
+     */
     public static void expect(Class<? extends Exception> expectedException, Future<?> future) {
         try {
-            future.get();
+            future.get(1, TimeUnit.MINUTES); // Long timeout here to avoid possibility of tests hanging
             fail("Execution exception not thrown from Future");
         }
         catch (ExecutionException e) {
@@ -93,6 +100,9 @@ public class Exceptions {
         }
         catch (InterruptedException e) {
             fail("Getting future result was interrupted", e);
+        }
+        catch (java.util.concurrent.TimeoutException e) {
+            fail("Timed out waiting for future to throw " + expectedException.getSimpleName());
         }
     }
 
