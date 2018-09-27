@@ -29,13 +29,17 @@ import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
 import org.eclipse.microprofile.faulttolerance.exceptions.CircuitBreakerOpenException;
 import org.eclipse.microprofile.faulttolerance.exceptions.TimeoutException;
 
+/**
+ * Utility class, no public constructor
+ */
 public class Exceptions {
-    
-    // Utility class, no public constructor
+
     private Exceptions() {}
     
     /**
      * Run an action an check that a timeout exception is thrown
+     *
+     * @param action The action to run
      */
     public static void expectTimeout(ExceptionThrowingAction action) {
         expect(TimeoutException.class, action);
@@ -43,6 +47,8 @@ public class Exceptions {
 
     /**
      * Run an action and check that a {@link TestException} is thrown
+     *
+     * @param action The action to run
      */
     public static void expectTestException(ExceptionThrowingAction action) {
         expect(TestException.class, action);
@@ -50,6 +56,8 @@ public class Exceptions {
 
     /**
      * Run an action and check that a {@link CircuitBreakerOpenException} is thrown
+     *
+     * @param action The action to run
      */
     public static void expectCbOpen(ExceptionThrowingAction action) {
         expect(CircuitBreakerOpenException.class, action);
@@ -57,6 +65,8 @@ public class Exceptions {
     
     /**
      * Run an action and check that a {@link BulkheadException} is thrown
+     *
+     * @param action The action to run
      */
     public static void expectBulkheadException(ExceptionThrowingAction action) {
         expect(BulkheadException.class, action);
@@ -65,6 +75,8 @@ public class Exceptions {
     /**
      * Run {@code future.get()} and check that a {@link BulkheadException} is thrown
      * wrapped in an {@link ExecutionException}.
+     *
+     * @param future the action to run
      */
     public static void expectBulkheadException(Future<?> future) {
         expect(BulkheadException.class, future);
@@ -84,9 +96,12 @@ public class Exceptions {
             fail("Getting future result was interrupted", e);
         }
     }
-    
+
     /**
      * Run an action an ensure that the expected exception is thrown
+     *
+     * @param expectedException the exception class to expect
+     * @param action the action to run
      */
     public static void expect(Class<? extends Exception> expectedException, ExceptionThrowingAction action) {
         try {

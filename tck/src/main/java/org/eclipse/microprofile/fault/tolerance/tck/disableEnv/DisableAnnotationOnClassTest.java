@@ -133,6 +133,9 @@ public class DisableAnnotationOnClassTest extends Arquillian {
      *
      * In normal operation, asyncClient.asyncWaitThenReturn() is launched asynchronously. As Asynchronous operation was disabled via config,
      * test is expecting a synchronous operation.
+     *
+     * @throws InterruptedException interrupted
+     * @throws ExecutionException task was aborted
      */
     @Test
     public void testAsync() throws InterruptedException, ExecutionException {
@@ -147,6 +150,9 @@ public class DisableAnnotationOnClassTest extends Arquillian {
     
     /**
      * Test whether Bulkhead is enabled on {@code waitWithBulkhead()}
+     *
+     * @throws InterruptedException interrupted
+     * @throws ExecutionException task was aborted
      */
     @Test
     public void testBulkhead() throws ExecutionException, InterruptedException {

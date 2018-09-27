@@ -62,6 +62,8 @@ public class DisableAnnotationClient {
     
     /**
      * Returns the number of times that {@link #failAndRetryOnce()} has been executed
+     *
+     * @return failAndRetryOnceCounter
      */
     public int getFailAndRetryOnceCounter() {
         return failAndRetryOnceCounter;
@@ -74,13 +76,15 @@ public class DisableAnnotationClient {
      */
     @Retry(maxRetries = 1)
     @Fallback(fallbackMethod = "fallback")
-    public String failRetryOnceThenFallback() {
+    public void failRetryOnceThenFallback() {
         failRetryOnceThenFallbackCounter++;
         throw new TestException();
     }
     
     /**
      * Returns the number of times that {@link #failRetryOnceThenFallback()} has been executed
+     *
+     * @return failRetryOnceThenFallbackCounter
      */
     public int getFailRetryOnceThenFallbackCounter() {
         return failRetryOnceThenFallbackCounter;
@@ -140,13 +144,18 @@ public class DisableAnnotationClient {
     
     /**
      * Wait for {@code count} executions of {@link #waitWithBulkhead(Future)} to be in progress.
+     *
+     * @param count execution count
      */
     public void waitForBulkheadExecutions(int count) {
         tracker.waitForRunningExecutions(count);
     }
     
     /**
-     * Returns a future which will be complete on method return if Asynchronous is disabled, or incomplete if Asynchronous is enabled. 
+     * Returns a future which will be complete on method return if Asynchronous is disabled,
+     * or incomplete if Asynchronous is enabled.
+     *
+     * @return Completed future
      */
     @Asynchronous
     public Future<String> asyncWaitThenReturn() {
