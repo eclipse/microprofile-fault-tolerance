@@ -18,8 +18,8 @@
  */
 package org.eclipse.microprofile.fault.tolerance.tck.metrics;
 
-import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.Exceptions.expectBulkheadException;
 import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricComparator.approxMillis;
+import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expectBulkheadException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
