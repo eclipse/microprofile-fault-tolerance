@@ -121,7 +121,8 @@ public class RetryTest extends Arquillian {
 
         int retryCountForConnectionService = clientForDelay.getRetryCountForConnectionService();
 
-        Assert.assertTrue(retryCountForConnectionService > 4, "The max number of execution should be greater than 4 but it was " + retryCountForConnectionService);
+        Assert.assertTrue(retryCountForConnectionService > 4,
+            "The max number of execution should be greater than 4 but it was " + retryCountForConnectionService);
         Assert.assertTrue(clientForDelay.isDelayInRange(), "The delay between each retry should be 0-800ms");
     }
 
@@ -165,10 +166,12 @@ public class RetryTest extends Arquillian {
         //The writing service invocation takes 100ms plus a jitter of 0-200ms with the max duration of 1000ms, 
         //the max invocation should be less than 10
         int retryCountforWritingService = clientForClassLevelMaxRetry.getRetryCountForWritingService();        
-        Assert.assertTrue(retryCountforWritingService< 11, "The max retry counter should be less than 11 but it was " + retryCountforWritingService);
+        Assert.assertTrue(retryCountforWritingService< 11,
+            "The max retry counter should be less than 11 but it was " + retryCountforWritingService);
         
         // Further test that we have retried more than the maximum number of retries specified in the Class level {@code @Retry} annotation
-        Assert.assertTrue(retryCountforWritingService> 3, "The max retry counter should be greater than 3 but it was " + retryCountforWritingService);      
+        Assert.assertTrue(retryCountforWritingService> 3,
+            "The max retry counter should be greater than 3 but it was " + retryCountforWritingService);
     }
 
     /**

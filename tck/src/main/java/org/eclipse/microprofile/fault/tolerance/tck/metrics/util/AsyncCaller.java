@@ -28,9 +28,12 @@ import org.eclipse.microprofile.faulttolerance.Asynchronous;
 
 @ApplicationScoped
 public class AsyncCaller {
-    
+
     /**
      * Run a runnable asynchronously
+     *
+     * @param runnable task to execute
+     * @return a completed future set to null
      */
     @Asynchronous
     public Future<Void> run(Runnable runnable) {

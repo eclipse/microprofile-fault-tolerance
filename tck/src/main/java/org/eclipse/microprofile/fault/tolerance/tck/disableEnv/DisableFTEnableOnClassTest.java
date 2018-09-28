@@ -133,6 +133,9 @@ public class DisableFTEnableOnClassTest extends Arquillian {
 
     /**
      * A test to check that asynchronous is enabled
+     *
+     * @throws InterruptedException interrupted
+     * @throws ExecutionException task was aborted
      */
     @Test
     public void testAsync() throws InterruptedException, ExecutionException {
@@ -147,6 +150,9 @@ public class DisableFTEnableOnClassTest extends Arquillian {
     
     /**
      * Test whether Bulkhead is enabled on {@code waitWithBulkhead()}
+     *
+     * @throws InterruptedException interrupted
+     * @throws ExecutionException task was aborted
      */
     @Test
     public void testBulkhead() throws ExecutionException, InterruptedException {

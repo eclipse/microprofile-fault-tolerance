@@ -34,9 +34,11 @@ import org.eclipse.microprofile.faulttolerance.Bulkhead;
 public class BulkheadMetricBean {
     
     @Inject private ConcurrentExecutionTracker tracker;
-    
+
     /**
      * Wait for {@code future} to be completed
+     *
+     * @param future to complete
      */
     @Bulkhead(2)
     public void waitFor(Future<?> future) {
@@ -45,6 +47,8 @@ public class BulkheadMetricBean {
 
     /**
      * Separate waitFor method for testing execution time histogram
+     *
+     * @param future to complete
      */
     @Bulkhead(2)
     public void waitForHistogram(Future<?> future) {
@@ -53,6 +57,9 @@ public class BulkheadMetricBean {
 
     /**
      * WaitFor method for testing async calls
+     *
+     * @param future to complete
+     * @return a completed future set to null
      */
     @Asynchronous
     @Bulkhead(value = 2, waitingTaskQueue = 2)
@@ -81,6 +88,8 @@ public class BulkheadMetricBean {
      * Wait for the given number of method executions to be running in this bean
      * <p>
      * This method will wait three seconds before returning an exception
+     *
+     * @param executions number of executions
      */
     public void waitForRunningExecutions(int executions) {
         tracker.waitForRunningExecutions(executions);

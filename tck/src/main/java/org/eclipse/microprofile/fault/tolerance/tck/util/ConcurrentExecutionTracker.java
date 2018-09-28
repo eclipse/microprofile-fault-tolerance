@@ -46,14 +46,16 @@ import javax.enterprise.context.Dependent;
 public class ConcurrentExecutionTracker {
     
     // The Atomicness is not important, this is just an integer holder
-    private AtomicInteger executionCount = new AtomicInteger(0);
+    private final AtomicInteger executionCount = new AtomicInteger(0);
     
-    private static final long WAIT_TIMEOUT = 3L * 1000 * 1_000_000; 
+    private static final long WAIT_TIMEOUT = 3L * 1000 * 1_000_000;
 
     /**
      * Wait for the given number of method executions to be running
      * <p>
      * This method will wait three seconds before returning an exception
+     *
+     * @param executions number of executions
      */
     public void waitForRunningExecutions(int executions) {
         synchronized (executionCount) {

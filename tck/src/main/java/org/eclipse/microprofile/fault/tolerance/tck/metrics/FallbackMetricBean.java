@@ -64,14 +64,18 @@ public class FallbackMetricBean {
     }
     
     /**
-     * Set whether the fallback method and handler should pass or throw an exception 
+     * Set whether the fallback method and handler should pass or throw an exception
+     *
+     * @param action set to {@link Action} PASS or FAIL
      */
     public void setFallbackAction(Action action) {
         this.fallbackAction = action;
     }
     
     /**
-     * Get whether the fallback method and handler should pass or throw an exception 
+     * Get whether the fallback method and handler should pass or throw an exception
+     *
+     * @return {@link Action} PASS or FAIL
      */
     public Action getFallbackAction() {
         return fallbackAction;
