@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2017-2018 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,24 +19,30 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead;
 
+import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expectBulkheadException;
+
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import javax.inject.Inject;
 
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BackendTestDelegate;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead55RapidRetry10ClassSynchBean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead55RapidRetry10MethodSynchBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead5ClassSynchronousRetry12Bean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead5MethodSynchronousRetry20Bean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead5RapidRetry0MethodSynchBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead5RapidRetry12MethodSynchBean;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead55RapidRetry10ClassSynchBean;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead55RapidRetry10MethodSynchBean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadRetryDelaySyncBean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadTask;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadTaskManager;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadTestBackend;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Checker;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.ParrallelBulkheadTest;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.TestData;
+import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncCaller;
+import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -44,6 +50,8 @@ import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.ITestContext;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -57,13 +65,14 @@ import org.testng.annotations.Test;
  */
 public class BulkheadSynchRetryTest extends Arquillian {
 
-    private static final int DONT_CHECK = 0;
     /*
      * We use an executer service to simulate the parallelism of multiple*
      * simultaneous requests
      */
-    private static final int THREADPOOL_SIZE = 30;
-    private ExecutorService xService = Executors.newFixedThreadPool(THREADPOOL_SIZE);
+    private BulkheadTaskManager manager = new BulkheadTaskManager();
+    
+    @Inject
+    private AsyncCaller asyncCaller;
 
     /*
      * As the FaultTolerance annotation only works on business methods of
@@ -88,7 +97,10 @@ public class BulkheadSynchRetryTest extends Arquillian {
     
     @Inject
     private Bulkhead5RapidRetry12MethodSynchBean zeroRetryWaitingQueueBean;
-
+    
+    @Inject
+    private BulkheadRetryDelaySyncBean retryDelaySyncBean;
+    
     /**
      * This is the Arquillian deploy method that controls the contents of the
      * war that contains all the tests.
@@ -99,6 +111,7 @@ public class BulkheadSynchRetryTest extends Arquillian {
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftBulkheadSynchRetryTest.jar")
                 .addPackage(Bulkhead5ClassSynchronousRetry12Bean.class.getPackage()).addClass(Utils.class)
+                .addPackage(Packages.UTILS)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml").as(JavaArchive.class);
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftBulkheadSynchRetryTest.war").addAsLibrary(testJar);
         return war;
@@ -107,6 +120,16 @@ public class BulkheadSynchRetryTest extends Arquillian {
     @BeforeTest
     public void beforeTest(final ITestContext testContext) {
         Utils.log("Testmethod: " + testContext.getName());
+    }
+    
+    @AfterMethod
+    public void afterMethod() throws InterruptedException {
+        manager.cleanup();
+    }
+    
+    @AfterClass
+    public void afterClass() throws InterruptedException {
+        manager.cleanup();
     }
 
     /**
@@ -147,7 +170,7 @@ public class BulkheadSynchRetryTest extends Arquillian {
         for (int i = 0; i < threads; i++) {
             Utils.log("Starting test " + i);
             BackendTestDelegate failOnce = new Checker(100, td, 1);
-            results[i] = xService.submit(new ParrallelBulkheadTest(rrMethodBean, failOnce));
+            results[i] = asyncCaller.submit(new ParrallelBulkheadTest(rrMethodBean, failOnce));
         }
 
         Utils.handleResults(threads, results);
@@ -179,7 +202,7 @@ public class BulkheadSynchRetryTest extends Arquillian {
         for (int i = 0; i < threads; i++) {
             Utils.log("Starting test " + i);
             BackendTestDelegate failOnce = new Checker(100, td, 1);
-            results[i] = xService.submit(new ParrallelBulkheadTest(rrClassBean, failOnce));
+            results[i] = asyncCaller.submit(new ParrallelBulkheadTest(rrClassBean, failOnce));
         }
 
         Utils.handleResults(threads, results);
@@ -260,6 +283,37 @@ public class BulkheadSynchRetryTest extends Arquillian {
         threads(threads, zeroRetryWaitingQueueBean, maxSimultaneousWorkers, expectedTasks, td);
         td.check();
     }
+    
+    /**
+     * Test that when an execution is retried, it doesn't hold onto its bulkhead slot.
+     * <p>
+     * This is particularly important if Retry is used with a long delay.
+     * @throws InterruptedException if the test is interrupted
+     */
+    @Test
+    public void testRetriesReenterBulkhead() throws InterruptedException {
+        // Start taskA
+        BulkheadTask taskA = manager.startTask(retryDelaySyncBean);
+        taskA.assertStarting();
+        
+        // Cause it to fail, prompting a retry after 1 second
+        taskA.completeExceptionally(new TestException());
+        
+        // Wait a short while for taskA to clear the bulkhead
+        Thread.sleep(100);
+        
+        // Now, start taskB
+        BulkheadTask taskB = manager.startTask(retryDelaySyncBean);
+        // Task B should start because the bulkhead is empty while taskA waits to retry
+        taskB.assertStarting();
+        
+        // Now, when taskA retries, it should complete with a BulkheadException because the bulkhead is full because taskB is running
+        expectBulkheadException(taskA.getResultFuture());
+        
+        // Now let taskB complete
+        taskB.complete();
+        taskB.assertFinishing();
+    }
 
     /**
      * Run a number of Callable's in parallel
@@ -278,7 +332,7 @@ public class BulkheadSynchRetryTest extends Arquillian {
         Future[] results = new Future[number];
         for (int i = 0; i < number; i++) {
             Utils.log("Starting test " + i);
-            results[i] = xService.submit(new ParrallelBulkheadTest(test, td));
+            results[i] = asyncCaller.submit(new ParrallelBulkheadTest(test, td));
         }
 
         Utils.handleResults(number, results);

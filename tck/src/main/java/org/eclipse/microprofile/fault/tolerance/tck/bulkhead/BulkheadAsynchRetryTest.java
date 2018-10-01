@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2017-2018 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,21 +19,34 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expect;
+import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expectBulkheadException;
+
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
 
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.AsyncBulkheadTask;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BackendTestDelegate;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead55ClassAsynchronousRetryBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead55MethodAsynchronousRetryBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead55RapidRetry10ClassAsynchBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead55RapidRetry10MethodAsynchBean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadRetryDelayAsyncBean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadRetryQueueAsyncBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Checker;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.ParrallelBulkheadTest;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.TestData;
+import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
@@ -82,6 +95,12 @@ public class BulkheadAsynchRetryTest extends Arquillian {
     private Bulkhead55RapidRetry10ClassAsynchBean rrClassBean;
     @Inject
     private Bulkhead55RapidRetry10MethodAsynchBean rrMethodBean;
+    
+    @Inject
+    private BulkheadRetryDelayAsyncBean retryDelayAsyncBean;
+    
+    @Inject
+    private BulkheadRetryQueueAsyncBean retryQueueAsyncBean;
 
     /**
      * This is the Arquillian deploy method that controls the contents of the
@@ -93,6 +112,7 @@ public class BulkheadAsynchRetryTest extends Arquillian {
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftBulkheadAsynchRetryTest.jar")
                 .addPackage(Bulkhead55ClassAsynchronousRetryBean.class.getPackage()).addClass(Utils.class)
+                .addPackage(Packages.UTILS)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml").as(JavaArchive.class);
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftBulkheadAsynchRetryTest.war").addAsLibrary(testJar);
         return war;
@@ -277,5 +297,94 @@ public class BulkheadAsynchRetryTest extends Arquillian {
         td.check();
         Utils.handleResults(threads, results);
     }
+    
+    /**
+     * Test that when an execution is retried, it doesn't hold onto its bulkhead slot.
+     * <p>
+     * This is particularly important if Retry is used with a long delay.
+     * 
+     * @throws InterruptedException if the test is interrupted
+     * @throws TimeoutException if we time out waiting for a result
+     * @throws ExecutionException if an asynchronous call threw an exception
+     */
+    @Test
+    public void testRetriesReenterBulkhead() throws InterruptedException, ExecutionException, TimeoutException {
+        // Start taskA
+        AsyncBulkheadTask taskA = new AsyncBulkheadTask();
+        Future resultA = retryDelayAsyncBean.test(taskA);
+        
+        taskA.assertStarting();
+        
+        // Now, start taskB
+        AsyncBulkheadTask taskB = new AsyncBulkheadTask();
+        Future resultB = retryDelayAsyncBean.test(taskB);
+        
+        // Cause taskA to fail, prompting a retry after 1 second
+        taskA.completeExceptionally(new TestException());
+        
+        // Task B should now start because the bulkhead is empty while taskA waits to retry
+        taskB.assertStarting();
+        
+        // Start taskC
+        AsyncBulkheadTask taskC = new AsyncBulkheadTask();
+        Future resultC = retryDelayAsyncBean.test(taskC);
+        
+        // Task C should wait in the queue behind task B
+        taskC.assertNotStarting();
+        
+        // Now, when taskA retries, it should complete with a BulkheadException because the bulkhead is full because
+        // taskB is running and taskC is queued
+        expectBulkheadException(resultA);
+        
+        // Now let taskB complete
+        taskB.complete(CompletableFuture.completedFuture("OK"));
+        Assert.assertEquals(resultB.get(1, TimeUnit.MINUTES), "OK", "taskB should be complete");
+        
+        // Now let taskC complete
+        taskC.complete(CompletableFuture.completedFuture("OK"));
+        Assert.assertEquals(resultC.get(1, TimeUnit.MINUTES), "OK", "taskC should be complete");
+    }
+    
+    /**
+     * Test that when an execution is retried, it goes to the back of the bulkhead queue.
+     * 
+     * @throws InterruptedException if the test is interrupted
+     * @throws TimeoutException if we time out waiting for a result
+     * @throws ExecutionException if an asynchronous call threw an exception
+     */
+    @Test
+    public void testRetriesJoinBackOfQueue() throws InterruptedException, ExecutionException, TimeoutException {
+        AsyncBulkheadTask taskA = new AsyncBulkheadTask();
+        Future resultA = retryQueueAsyncBean.test(taskA);
+        
+        AsyncBulkheadTask taskB = new AsyncBulkheadTask();
+        Future resultB = retryQueueAsyncBean.test(taskB);
+        
+        AsyncBulkheadTask taskC = new AsyncBulkheadTask();
+        Future resultC = retryQueueAsyncBean.test(taskC);
+        
+        taskA.assertStarting();
+        taskB.assertNotStarting();
+        taskC.assertNotStarting();
+        
+        taskA.completeExceptionally(new TestException()); // fail A, causes instant retry which puts taskA on the back of the queue
+        
+        taskB.assertStarting();
+        taskC.assertNotStarting();
+        Assert.assertFalse(resultA.isDone(), "Result A should not be complete yet"); // Check A is not finished, it should be back on the queue
+        
+        taskB.complete(CompletableFuture.completedFuture("OK")); // Let B complete
+        
+        Assert.assertEquals(resultB.get(2, SECONDS), "OK", "ResultB should be complete");
+        taskC.assertStarting();
+        Assert.assertFalse(resultA.isDone(), "Result A should still not be complete");
+        
+        taskC.complete(CompletableFuture.completedFuture("OK")); // Let C complete
+        Assert.assertEquals(resultC.get(2, SECONDS), "OK", "ResultC should be complete");
+        
+        // Now that there are no more tasks, A should quickly finish its retry and throw an exception
+        expect(TestException.class, resultA);
+    }
+
 
 }

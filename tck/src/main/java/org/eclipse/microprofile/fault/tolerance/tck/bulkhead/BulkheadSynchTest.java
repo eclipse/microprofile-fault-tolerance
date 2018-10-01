@@ -36,6 +36,7 @@ import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhe
 
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.ParrallelBulkheadTest;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.TestData;
+import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.jboss.arquillian.container.test.api.Deployment;
 //import org.jboss.arquillian.core.api.Asynchronousing.ExecutorService;
 import org.jboss.arquillian.testng.Arquillian;
@@ -88,8 +89,11 @@ public class BulkheadSynchTest extends Arquillian {
     @Deployment
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftBulkheadSynchTest.jar")
-                .addPackage(BulkheadClassSemaphoreDefaultBean.class.getPackage()).addClass(Utils.class)
-                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml").as(JavaArchive.class);
+                .addPackage(BulkheadClassSemaphoreDefaultBean.class.getPackage())
+                .addClass(Utils.class)
+                .addPackage(Packages.UTILS)
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
+                .as(JavaArchive.class);
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftBulkheadSynchTest.war").addAsLibrary(testJar);
         return war;
     }
