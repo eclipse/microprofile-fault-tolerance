@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2016-2017 Contributors to the Eclipse Foundation
+// Copyright (c) 2016-2018 Contributors to the Eclipse Foundation
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information regarding copyright ownership.
@@ -18,18 +18,25 @@
 // Contributors:
 // Emily Jiang
 // Ondro Mihalyi
+// Andrew Rouse
 
 [[asynchronous]]
 == Asynchronous
 
 `Asynchronous` means the execution of the client request will be on a separate thread.
-This thread should have the correct security context or naming context associated with.
+This thread should have the correct security context or naming context associated with it.
 
 
 === Asynchronous Usage
 
 A method or a class can be annotated with `@Asynchronous`, which means the method or the methods under the class will be invoked by a separate thread.
-The method annotated with `@Asynchronous` must return a `Future` or a `CompletionStage` from the `java.util.concurrent` package. Otherwise, `FaultToleranceDefinitionException` occurs.
+The method annotated with `@Asynchronous` must return a `Future` or a `CompletionStage` from the `java.util.concurrent` package. Otherwise, a `FaultToleranceDefinitionException` occurs.
+
+When a method annotated with `@Asynchronous` is invoked, it immediately returns a `Future` or `CompletionStage`. The execution of the any remaining interceptors and the method body will then take place on a separate thread.
+
+* Until the execution has finished, the `Future` or `CompletionStage` which was returned will be incomplete.
+* If the execution throws an exception, the `Future` or `CompletionStage` will be completed with that exception. (I.e. `Future.get()` will throw an `ExecutionException` which wraps the thrown exception and any functions passed to `CompletionStage.exceptionally()` will run.)
+* If the execution completes normally and returns a value, the `Future` or `CompletionStage` will then delegate to the returned value.
 
 [source, java]
 ----
@@ -42,7 +49,13 @@ public CompletionStage<Connection> serviceA() {
 }
 ----
 
-The above code-snippet means the method serviceA applies the `Asynchronous` policy, which means the invocation will be done by a different thread.
+The above code-snippet means that the `Asynchronous` policy is applied to the `serviceA` method, which means that a call to `serviceA` will return a `CompletionStage` immediately and that execution of the method body will be done on a different thread.
 
-The `@Asynchronous` annotation can be used together with `@Timeout`, `@Fallback`, `@Bulkhead` and `@Retry`.
-Method invocation will occur in a different thread.
+The `@Asynchronous` annotation can be used together with `@Timeout`, `@Fallback`, `@Bulkhead`, `@CircuitBreaker` and `@Retry`.
+In this case, the method invocation and any fault tolerance processing will occur in a different thread. The returned `Future` or `CompletionStage` will be completed with the final result once all other Fault Tolerance processing has been completed.
+
+=== Exception Handling
+
+A call to a method annotated with `@Asynchronous` will never throw an exception directly. Instead, the returned `Future` or `CompletionStage` will report that its task failed with the exception which would have been thrown.
+
+For example, if `@Asynchronous` is used with `@Bulkhead` on a method which returns a `Future` and the bulkhead queue is full when the method is called, the method will return a `Future` where calling `isDone()` returns `true` and calling `get()` will throw an `ExecutionException` which wraps a `BulkheadException`.

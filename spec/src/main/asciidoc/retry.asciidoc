@@ -1,6 +1,7 @@
 //
-// Copyright (c) 2016-2017 Eclipse Microprofile Contributors:
+// Copyright (c) 2016-2018 Eclipse Microprofile Contributors:
 // Emily Jiang
+// Andrew Rouse
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -71,6 +72,7 @@ If the `@Retry` policy applied on a class level and on a method level within tha
 ----
 
 The `@Retry` annotation can be used together with `@Fallback`, `@CircuitBreaker`, `@Asynchronous`, `@Bulkhead` and `@Timeout`.
-A `@Fallback` can be specified and it will be invoked if the `@Retry` still fails.
 
-If `@Retry` is used with `@Timeout`, a retry will only be triggered if `TimeoutException` or one of its super classes are defined in the `retryOn` attribute of the `@Retry`.
+A `@Fallback` can be specified and it will be invoked if the method still fails after any retires have been run.
+
+If `@Retry` is used with `@Asynchronous` and a retry is required, the new retry attempt may be run on the same thread as the previous attempt, or on a different thread.

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2017 Contributors to the Eclipse Foundation
+// Copyright (c) 2017-2018 Contributors to the Eclipse Foundation
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information regarding copyright ownership.
@@ -17,6 +17,7 @@
 // limitations under the License.
 // Contributors:
 // Emily Jiang
+// Andrew Rouse
 
 [[bulkhead]]
 == Bulkhead
@@ -34,7 +35,7 @@ The semaphore approach only allows the concurrent number of requests configurati
 
 ==== Semaphore style Bulkhead
 
-The below code-snippet means the method serviceA applies the `Bulkhead` policy, which is semaphore approach, limiting the maximum concurrent requests to 5.
+The below code-snippet means the method serviceA applies the `Bulkhead` policy with the semaphore approach, limiting the maximum concurrent requests to 5.
 
 [source, java]
 ----
@@ -52,7 +53,7 @@ When using the semaphore approach, on reaching maximum request counter, the extr
 
 ==== Thread pool style Bulkhead
 
-The below code-snippet means the method serviceA applies the `Bulkhead` policy, which is thread pool approach, limiting the maximum concurrent requests to 5 and the waiting queue size to 8.
+The below code-snippet means the method serviceA applies the `Bulkhead` policy with the thread pool approach, limiting the maximum concurrent requests to 5 and the waiting queue size to 8.
 
 [source, java]
 ----
@@ -71,4 +72,7 @@ public Future<Connection> serviceA() {
 When using the thread pool approach, when a request cannot be added to the waiting queue, `BulkheadException` will be thrown.
 
 The `@Bulkhead` annotation can be used together with `@Fallback`, `@CircuitBreaker`, `@Asynchronous`, `@Timeout` and `@Retry`.
+
 If a `@Fallback` is specified, it will be invoked if the `BulkheadException` is thrown.
+
+If `@Retry` is used with `@Bulkhead`, when an invocation fails due to a `BulkheadException` it is retried after waiting for the delay configured on `@Retry`. If an invocation is permitted to run by the bulkhead but then throws another exception which is handled by `@Retry`, it first leaves the bulkhead, reducing the count of running concurrent requests by 1, waits for the delay configured on `@Retry`, and then attempts to enter the bulkhead again. At this point, it may be accepted, queued (if the method is also annotated with `@Asynchronous`) or fail with a `BulkheadException` (which may result in further retries).
