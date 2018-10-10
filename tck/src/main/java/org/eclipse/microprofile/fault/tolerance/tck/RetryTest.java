@@ -21,9 +21,11 @@ package org.eclipse.microprofile.fault.tolerance.tck;
 
 import javax.inject.Inject;
 
+import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClassLevelClientForMaxRetries;
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClientForMaxRetries;
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClientWithDelay;
+import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClientWithNoDelayAndJiter;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -44,6 +46,7 @@ public class RetryTest extends Arquillian {
     private @Inject RetryClientForMaxRetries clientForMaxRetry;
     private @Inject RetryClientWithDelay clientForDelay;
     private @Inject RetryClassLevelClientForMaxRetries clientForClassLevelMaxRetry;
+    private @Inject RetryClientWithNoDelayAndJiter retryClientWithNoDelayAndJiter;
     
     @Deployment
     public static WebArchive deploy() {
@@ -124,6 +127,29 @@ public class RetryTest extends Arquillian {
         Assert.assertTrue(retryCountForConnectionService > 4,
             "The max number of execution should be greater than 4 but it was " + retryCountForConnectionService);
         Assert.assertTrue(clientForDelay.isDelayInRange(), "The delay between each retry should be 0-800ms");
+    }
+
+    /**
+     * Testing whether the {@code @Retry} annotation on method serviceB overrides the Class level
+     * {@code @Retry} annotation.
+     *
+     * Delay is 0 and jitter 400ms. Invocation takes 3200ms and efective
+     */
+    @Test
+    public void testRetryWithNoDelayAndJitter() {
+        try {
+            retryClientWithNoDelayAndJiter.serviceA();
+            Assert.fail("serviceA should throw a RuntimeException in testRetryWithDelay");
+        }
+        catch(RuntimeException ex) {
+            // Expected
+        }
+
+        int retryCountForConnectionService = retryClientWithNoDelayAndJiter.getRetryCountForConnectionService();
+
+        Assert.assertTrue(retryCountForConnectionService > 8,
+            "The max number of execution should be greater than 4 but it was " + retryCountForConnectionService);
+        Assert.assertTrue(retryClientWithNoDelayAndJiter.isDelayInRange(), "The delay between each retry should be 0-400ms");
     }
 
     /**
