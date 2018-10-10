@@ -132,7 +132,7 @@ public class RetryTest extends Arquillian {
      * Testing whether the {@code @Retry} annotation on method serviceB overrides the Class level
      * {@code @Retry} annotation.
      *
-     * Delay is 0 and jitter 400ms. Invocation takes 3200ms and efective
+     * Delay is 0 and jitter 400ms. Invocation takes a maximum of 3200ms and should perform at least 8 tries.
      */
     @Test
     public void testRetryWithNoDelayAndJitter() {
