@@ -23,8 +23,8 @@ import org.eclipse.microprofile.faulttolerance.Retry;
 
 import javax.enterprise.context.RequestScoped;
 import java.sql.Connection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A client to demonstrate the delay configurations
@@ -33,33 +33,31 @@ import java.util.Set;
  */
 @RequestScoped
 public class RetryClientWithNoDelayAndJiter {
-    private int counterForInvokingConnenectionService;
-    private long timestampForConnectionService = 0;
-    private Set<Long> delayTimes = new HashSet<Long>();
+    private int counterForInvokingConnenectionService = 0;
+    private long timestampForConnectionService = System.currentTimeMillis();
+    private final List<Long> delayTimes = new ArrayList<>();
 
 
     //There should be 0-400ms (jitter is -400ms - 400ms but min value must be 0) delays between each invocation
     //there should be at least 8 retries
-    @Retry(delay = 0, maxDuration= 3200, jitter= 400, maxRetries = 20)
+    @Retry(delay = 0, maxDuration= 3200, jitter= 400, maxRetries = 50)
     public Connection serviceA() {
         return connectionService();
     }
 
     //simulate a backend service
     private Connection connectionService() {
-       // the time delay between each invocation should be 0-400ms
-       if (timestampForConnectionService != 0) {
-           long currentTime = System.currentTimeMillis() ;
-           delayTimes.add(currentTime -timestampForConnectionService );
-           timestampForConnectionService = currentTime;
-        
-       }
+        // the time delay between each invocation should be 0-400ms
+        long currentTime = System.currentTimeMillis();
+        delayTimes.add(currentTime - timestampForConnectionService);
+        timestampForConnectionService = currentTime;
+
         counterForInvokingConnenectionService++;
         throw new RuntimeException("Connection failed");
     }
-    
+
     public boolean isDelayInRange() {
-        boolean isDelayInRange = true;        
+        boolean isDelayInRange = true;
         for (long delayTime : delayTimes) {
             if (delayTime > 400) {
                 return false;
@@ -67,9 +65,19 @@ public class RetryClientWithNoDelayAndJiter {
         }
         return isDelayInRange;
     }
-   
+
     public int getRetryCountForConnectionService() {
         return counterForInvokingConnenectionService;
     }
-   
+
+    public int fastDelays() {
+        System.out.println("delays are: " + delayTimes);
+        int count = 0;
+        for (long delayTime : delayTimes) {
+            if (delayTime < 5) {
+                count++;
+            }
+        }
+        return count;
+    }
 }

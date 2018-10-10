@@ -128,11 +128,12 @@ public class RetryTest extends Arquillian {
         Assert.assertTrue(clientForDelay.isDelayInRange(), "The delay between each retry should be 0-800ms");
     }
 
+
     /**
      * Testing whether the {@code @Retry} annotation on method serviceB overrides the Class level
      * {@code @Retry} annotation.
      *
-     * Delay is 0 and jitter 400ms. Invocation takes a maximum of 3200ms and should perform at least 8 tries.
+     * Delay is 0 and jitter 400ms. Invocation takes 3200ms and efective
      */
     @Test
     public void testRetryWithNoDelayAndJitter() {
@@ -140,16 +141,23 @@ public class RetryTest extends Arquillian {
             retryClientWithNoDelayAndJiter.serviceA();
             Assert.fail("serviceA should throw a RuntimeException in testRetryWithDelay");
         }
-        catch(RuntimeException ex) {
+        catch (RuntimeException ex) {
             // Expected
         }
 
-        int retryCountForConnectionService = retryClientWithNoDelayAndJiter.getRetryCountForConnectionService();
+        final int retryCountForConnectionService = retryClientWithNoDelayAndJiter.getRetryCountForConnectionService();
+        final int fastDelays = retryClientWithNoDelayAndJiter.fastDelays();
 
-        Assert.assertTrue(retryCountForConnectionService > 8,
-            "The max number of execution should be greater than 4 but it was " + retryCountForConnectionService);
+        // 60% to discard false positives
+        Assert.assertTrue(fastDelays < (retryCountForConnectionService * 0.6),
+            "Jitter not uniformly distributed. More than 60% retries got delay smaller than 5ms. Got " + fastDelays + " in " +
+                retryCountForConnectionService + " tries");
+        Assert.assertTrue(retryCountForConnectionService > 8 && retryCountForConnectionService < 50,
+            "The max number of execution should be between 8 and 50 but it was " + retryCountForConnectionService +
+                ". Too many retries mean jitter is not being applied.");
         Assert.assertTrue(retryClientWithNoDelayAndJiter.isDelayInRange(), "The delay between each retry should be 0-400ms");
     }
+
 
     /**
      * Analogous to testRetryMaxRetries but using a Class level rather
