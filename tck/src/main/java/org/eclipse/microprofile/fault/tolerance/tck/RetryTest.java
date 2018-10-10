@@ -21,7 +21,6 @@ package org.eclipse.microprofile.fault.tolerance.tck;
 
 import javax.inject.Inject;
 
-import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClassLevelClientForMaxRetries;
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClientForMaxRetries;
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClientWithDelay;
