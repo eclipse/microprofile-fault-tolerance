@@ -41,7 +41,7 @@ import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.testng.annotations.AfterTest;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 public class BulkheadMetricTest extends Arquillian {
@@ -66,7 +66,7 @@ public class BulkheadMetricTest extends Arquillian {
      * <p>
      * Important in case tests end early due to an exception or failure.
      */
-    @AfterTest
+    @AfterMethod
     public void completeWaitingFutures() {
         for (CompletableFuture<Void> future : waitingFutures) {
             future.complete(null);
