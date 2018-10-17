@@ -81,6 +81,8 @@ public @interface Retry {
     /**
      * Set the jitter to randomly vary retry delays for. The value must be greater than or equals to 0. 
      * 0 means not set.
+     * The effective delay will be [delay - jitter, delay + jitter] and allways greater than or equal to 0.
+     * Negative effective delays will be 0.
      * @return the jitter that randomly vary retry delays by. e.g. a jitter of 200 milliseconds
      * will randomly add between -200 and 200 milliseconds to each retry delay.
      */

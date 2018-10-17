@@ -62,6 +62,17 @@ If the `@Retry` policy applied on a class level and on a method level within tha
     }
 
     /**
+    * There should be 0-400ms delays between each invocation.
+    * The effective delay will be between:
+    * [delay - jitter, delay + jitter] and allways >= 0. Negative effective delays will be 0.
+    * There should be at least 8 retries but no more than 10 retries.
+    */
+    @Retry(delay = 0, maxDuration= 3200, jitter= 400, maxRetries = 10)
+    public Connection serviceA() {
+        return connectionService();
+    }
+
+    /**
     * Sets retry condition, which means Retry will be performed on
     * IOException.
     */
