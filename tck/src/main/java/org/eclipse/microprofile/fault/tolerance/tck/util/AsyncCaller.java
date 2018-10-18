@@ -17,8 +17,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.eclipse.microprofile.fault.tolerance.tck.metrics.util;
+package org.eclipse.microprofile.fault.tolerance.tck.util;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
@@ -27,6 +28,7 @@ import javax.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 
 @ApplicationScoped
+@Asynchronous
 public class AsyncCaller {
 
     /**
@@ -35,10 +37,27 @@ public class AsyncCaller {
      * @param runnable task to execute
      * @return a completed future set to null
      */
-    @Asynchronous
     public Future<Void> run(Runnable runnable) {
         runnable.run();
         return CompletableFuture.completedFuture(null);
+    }
+    
+    /**
+     * Run a callable asynchronously
+     * 
+     * @param callable the callable to run
+     * @param <T> the type returned by {@code callable}
+     * @return a future which can be used to get the result of running {@code callable}
+     */
+    public <T> Future<T> submit(Callable<T> callable) {
+        try {
+            return CompletableFuture.completedFuture(callable.call());
+        }
+        catch (Exception e) {
+            CompletableFuture<T> result = new CompletableFuture<T>();
+            result.completeExceptionally(e);
+            return result;
+        }
     }
 
 }

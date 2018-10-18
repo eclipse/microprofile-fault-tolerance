@@ -31,8 +31,8 @@ import java.util.concurrent.Future;
 
 import javax.inject.Inject;
 
-import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.AsyncCaller;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricGetter;
+import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncCaller;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.eclipse.microprofile.metrics.Histogram;
 import org.eclipse.microprofile.metrics.Snapshot;
