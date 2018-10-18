@@ -19,8 +19,10 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.fail;
 
+import java.util.Collection;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -110,6 +112,25 @@ public class AbstractBulkheadTask {
         }
         catch (TimeoutException e) {
             // Expected
+        }
+    }
+    
+    /**
+     * Asserts that all of the given tasks do not start within 2 seconds
+     * <p>
+     * If you have lots of tasks to check, this method will wait 2 seconds and check
+     * all of them. This is much quicker than waiting 2 seconds for each task using
+     * {@link #assertNotStarting()}.
+     * 
+     * @param tasks the tasks to check
+     * @throws InterruptedException if the thread is interrupted while waiting
+     */
+    public static void assertAllNotStarting(Collection<? extends AbstractBulkheadTask> tasks) throws InterruptedException {
+        Thread.sleep(2000);
+        int i = 0;
+        for (AbstractBulkheadTask task : tasks) {
+            assertFalse(task.runningLatch.isDone(), "Task " + i + " is running.");
+            i++;
         }
     }
     

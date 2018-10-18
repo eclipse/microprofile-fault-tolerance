@@ -153,7 +153,7 @@ public class BulkheadSynchRetryTest extends Arquillian {
      */
     @Test()
     public void testBulkheadRetriedMethodDueToFailures() {
-        int threads = 10;
+        int threads = 5;
         int maxSimultaneousWorkers = 5;
         TestData td = new TestData();
         td.setExpectedInstances(threads);
@@ -185,7 +185,7 @@ public class BulkheadSynchRetryTest extends Arquillian {
      */
     @Test()
     public void testBulkheadRetriedClassDueToFailures() {
-        int threads = 10;
+        int threads = 5;
         int maxSimultaneousWorkers = 5;
         TestData td = new TestData();
         td.setExpectedInstances(threads);
