@@ -23,10 +23,10 @@ import org.eclipse.microprofile.fault.tolerance.tck.ejb.CounterFactory.CounterId
 import org.eclipse.microprofile.fault.tolerance.tck.ejb.EarlyFtInterceptor.InterceptEarly;
 import org.eclipse.microprofile.fault.tolerance.tck.ejb.LateFtInterceptor.InterceptLate;
 import org.eclipse.microprofile.faulttolerance.Retry;
+import org.testng.TestException;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import java.sql.Connection;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -40,21 +40,12 @@ public class EjbComponent {
     @CounterId("serviceA")
     private AtomicInteger serviceACounter;
 
-    @Inject
-    @CounterId("connectionService")
-    private AtomicInteger connectionServiceCounter;
 
     @InterceptEarly
     @InterceptLate
     @Retry(maxRetries = 5)
-    public Connection serviceA() {
+    public String serviceA() {
         serviceACounter.incrementAndGet();
-        return connectionService();
+        throw new TestException("retryGetString failed");
     }
-
-    public Connection connectionService() {
-        connectionServiceCounter.incrementAndGet();
-        throw new RuntimeException("Connection failed");
-    }
-
 }

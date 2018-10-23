@@ -19,56 +19,70 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.ejb;
 
+
+import org.eclipse.microprofile.fault.tolerance.tck.ejb.CounterFactory.CounterId;
 import org.jboss.arquillian.container.test.api.Deployment;
-import org.jboss.arquillian.container.test.api.RunAsClient;
-import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
+//import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Response;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
+import javax.ejb.EJB;
+import javax.ejb.EJBException;
+import javax.inject.Inject;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.testng.Assert.fail;
+import static org.testng.Assert.assertEquals;
 
 /**
- * Test for mixed interceptors CDI, EJB and, FT
+ * A Client to demonstrate the ordering behavior of FT annotation, CDI, and EJB interceptors
+ *
  */
 public class EjbFaultToleranceTest extends Arquillian {
 
-    @Deployment(testable = false)
+    @Inject
+    @CounterId("EarlyFtInterceptor")
+    private AtomicInteger earlyInterceptorCounter;
+
+    @Inject
+    @CounterId("LateFtInterceptor")
+    private AtomicInteger lateInterceptorCounter;
+
+    @Inject
+    @CounterId("serviceA")
+    private AtomicInteger methodCounter;
+
+    @EJB
+    private EjbComponent testEjb;
+
+    @Deployment
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
             .create(JavaArchive.class, "EjbFtCdi.jar")
             .addClasses(EjbComponent.class, EarlyFtInterceptor.class, LateFtInterceptor.class, CounterFactory.class)
-            .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
+             .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
             .as(JavaArchive.class);
 
-        WebArchive war = ShrinkWrap.create(WebArchive.class, "EjbFtCdi.war")
-            .addClass(EjbFaultToleranceServlet.class)
+        return ShrinkWrap.create(WebArchive.class, "EjbFtCdi.war")
             .addAsLibrary(testJar);
-        return war;
     }
-
-    @ArquillianResource
-    private URL base;
 
     @Test
-    @RunAsClient
-    public void servletTest() throws MalformedURLException {
-        Client client = ClientBuilder.newClient();
-        WebTarget target = client.target(URI.create(new URL(base, "/EjbFaultToleranceServletTest?name=hello").toExternalForm()));
+    public void testEjbRetryInterceptors() {
+        try {
+            testEjb.serviceA();
+            fail("Exception not thrown");
+        }
+        catch (EJBException e) {
 
-        Response response = target.request().get();
-        Assert.assertEquals(response.readEntity(String.class), "hello");
+        } // Expected
+
+        assertEquals(methodCounter.get(), 6, "methodCounter"); // Method called six times (1 + 5 retries)
+        assertEquals(earlyInterceptorCounter.get(), 1, "earlyInterceptorCounter");
+        assertEquals(lateInterceptorCounter.get(), 6, "lateInterceptorCounter");
     }
-
-
 }
