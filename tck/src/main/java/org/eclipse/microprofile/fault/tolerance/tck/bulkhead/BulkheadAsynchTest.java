@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2017-2018 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,23 +19,31 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead;
 
+import static org.testng.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 
 import javax.inject.Inject;
 
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.AbstractBulkheadTask;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.AsyncBulkheadTask;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead10ClassAsynchronousBean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead10MethodAsynchronousBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead3ClassAsynchronousBean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead3MethodAsynchronousBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadClassAsynchronousDefaultBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadClassAsynchronousQueueingBean;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead10MethodAsynchronousBean;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead3MethodAsynchronousBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadMethodAsynchronousDefaultBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadMethodAsynchronousQueueingBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadTestBackend;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Checker;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.TestData;
+import org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
+import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -49,6 +57,7 @@ import org.testng.annotations.Test;
 
 /**
  * @author Gordon Hutchison
+ * @author Andrew Rouse
  */
 
 public class BulkheadAsynchTest extends Arquillian {
@@ -196,7 +205,52 @@ public class BulkheadAsynchTest extends Arquillian {
         loop(20, bhBeanMethodAsynchronousQueueing, 10, 20, td);
         td.check();
     }
-
+    
+    /**
+     * Test that when the bulkhead is full, a BulkheadException is thrown
+     * 
+     * @throws InterruptedException if the test is interrupted
+     */
+    @Test
+    public void testBulkheadExceptionThrownWhenQueueFullAsync() throws InterruptedException {
+        List<AsyncBulkheadTask> tasks = new ArrayList<>();
+        
+        try {
+            // Fill the bulkhead
+            for (int i = 0; i < 10; i++) {
+                AsyncBulkheadTask task = new AsyncBulkheadTask();
+                tasks.add(task);
+                Future<?> result = bhBeanClassAsynchronousDefault.test(task);
+                task.assertStarting(result);
+            }
+            
+            // Fill the queue
+            List<AsyncBulkheadTask> queuingTasks = new ArrayList<>();
+            for (int i = 0; i < 10; i++) {
+                AsyncBulkheadTask task = new AsyncBulkheadTask();
+                tasks.add(task);
+                queuingTasks.add(task);
+                bhBeanClassAsynchronousDefault.test(task);
+            }
+            // Queued tasks should not start
+            AbstractBulkheadTask.assertAllNotStarting(queuingTasks);
+            
+            // Try to run one more (should get a bulkhead exception)
+            AsyncBulkheadTask task = new AsyncBulkheadTask();
+            tasks.add(task);
+            Future<?> result = bhBeanClassAsynchronousDefault.test(task);
+            task.assertNotStarting();
+            
+            assertTrue(result.isDone(), "When a task is rejected from the bulkhead, the returned future should report as done");
+            Exceptions.expect(BulkheadException.class, result);
+        }
+        finally {
+            for (AsyncBulkheadTask task : tasks) {
+                task.complete();
+            }
+        }
+    }
+    
     /**
      * Run a number of Callable's (usually Asynch's) in a loop on one thread.
      * Here we do not check that amount that were successfully through the
