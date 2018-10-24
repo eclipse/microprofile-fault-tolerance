@@ -18,6 +18,8 @@
  */
 package org.eclipse.microprofile.faulttolerance;
 
+import javax.enterprise.util.Nonbinding;
+import javax.interceptor.InterceptorBinding;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -25,9 +27,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.time.temporal.ChronoUnit;
-
-import javax.enterprise.util.Nonbinding;
-import javax.interceptor.InterceptorBinding;
 
 /**
  * The Retry annotation to define the number of the retries and the fallback method on reaching the
@@ -79,10 +78,13 @@ public @interface Retry {
     ChronoUnit durationUnit() default ChronoUnit.MILLIS;
 
     /**
-     * Set the jitter to randomly vary retry delays for. The value must be greater than or equals to 0. 
+     * <p>
+     * Set the jitter to randomly vary retry delays for. The value must be greater than or equals to 0.
      * 0 means not set.
+     * </p>
      * The effective delay will be [delay - jitter, delay + jitter] and allways greater than or equal to 0.
      * Negative effective delays will be 0.
+     *
      * @return the jitter that randomly vary retry delays by. e.g. a jitter of 200 milliseconds
      * will randomly add between -200 and 200 milliseconds to each retry delay.
      */
