@@ -22,8 +22,11 @@ package org.eclipse.microprofile.fault.tolerance.tck.bulkhead;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expect;
 import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expectBulkheadException;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.lessThan;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -42,6 +45,7 @@ import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhe
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead55MethodAsynchronousRetryBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead55RapidRetry10ClassAsynchBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead55RapidRetry10MethodAsynchBean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadRetryAbortOnAsyncBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadRetryDelayAsyncBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadRetryQueueAsyncBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Checker;
@@ -98,6 +102,9 @@ public class BulkheadAsynchRetryTest extends Arquillian {
     
     @Inject
     private BulkheadRetryQueueAsyncBean retryQueueAsyncBean;
+    
+    @Inject
+    private BulkheadRetryAbortOnAsyncBean retryAbortOnAsyncBean;
     
     private List<AsyncBulkheadTask> tasks = new ArrayList<>();
     
@@ -427,6 +434,62 @@ public class BulkheadAsynchRetryTest extends Arquillian {
         // Now that there are no more tasks, A should quickly finish its retry and throw an exception
         expect(TestException.class, resultA);
     }
+    
+    /**
+     * Test that retries do not occur when BulkheadException is not included in the retryOn attribute
+     * 
+     * @throws InterruptedException if the test is interrupted
+     */
+    @Test
+    public void testNoRetriesWithoutRetryOn() throws InterruptedException {
+        // Start taskA, which should run
+        AsyncBulkheadTask taskA = newTask();
+        retryDelayAsyncBean.test(taskA);
+        taskA.assertStarting();
+        
+        // Start taskB, which should queue
+        AsyncBulkheadTask taskB = newTask();
+        retryDelayAsyncBean.test(taskB);
+        taskB.assertNotStarting();
+        
+        // Now, start taskC, which should quickly fail because there are no retries
+        long startTime = System.nanoTime();
+        AsyncBulkheadTask taskC = newTask();
+        Future<?> resultC = retryDelayAsyncBean.test(taskC);
+        expectBulkheadException(resultC);
+        long endTime = System.nanoTime();
+        
+        assertThat("Task took to long to return, may have done retries", Duration.ofNanos(endTime - startTime), lessThan(Duration.ofMillis(250)));
+    }
+    
+    /**
+     * Test that retries do not occur when BulkheadException is included in the abortOn attribute
+     * 
+     * @throws InterruptedException if the test is interrupted
+     */
+    @Test
+    public void testNoRetriesWithAbortOn() throws InterruptedException {
+        // Start taskA, which should run
+        AsyncBulkheadTask taskA = newTask();
+        retryAbortOnAsyncBean.test(taskA);
+        taskA.assertStarting();
+        
+        // Start taskB, which should queue
+        AsyncBulkheadTask taskB = newTask();
+        retryAbortOnAsyncBean.test(taskB);
+        taskB.assertNotStarting();
+        
+        // Now, start taskC, which should quickly fail because there are no retries
+        long startTime = System.nanoTime();
+        AsyncBulkheadTask taskC = newTask();
+        Future<?> resultC = retryAbortOnAsyncBean.test(taskC);
+        expectBulkheadException(resultC);
+        long endTime = System.nanoTime();
+        
+        assertThat("Task took to long to return, may have done retries", Duration.ofNanos(endTime - startTime), lessThan(Duration.ofMillis(250)));
+    }
+
+
 
 
 }

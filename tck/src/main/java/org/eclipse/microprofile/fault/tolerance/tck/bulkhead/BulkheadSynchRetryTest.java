@@ -20,7 +20,10 @@
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead;
 
 import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expectBulkheadException;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.lessThan;
 
+import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 
@@ -33,6 +36,7 @@ import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhe
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead5MethodSynchronousRetry20Bean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead5RapidRetry0MethodSynchBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead5RapidRetry12MethodSynchBean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadRetryAbortOnSyncBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadRetryDelaySyncBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadTask;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadTaskManager;
@@ -100,6 +104,9 @@ public class BulkheadSynchRetryTest extends Arquillian {
     
     @Inject
     private BulkheadRetryDelaySyncBean retryDelaySyncBean;
+    
+    @Inject
+    private BulkheadRetryAbortOnSyncBean retryAbortOnSyncBean;
     
     /**
      * This is the Arquillian deploy method that controls the contents of the
@@ -314,6 +321,47 @@ public class BulkheadSynchRetryTest extends Arquillian {
         taskB.complete();
         taskB.assertFinishing();
     }
+    
+    /**
+     * Test that retries do not occur when BulkheadException is not included in the retryOn attribute
+     * 
+     * @throws InterruptedException if the test is interrupted
+     */
+    @Test
+    public void testNoRetriesWithoutRetryOn() throws InterruptedException {
+        // Start taskA
+        BulkheadTask taskA = manager.startTask(retryDelaySyncBean);
+        taskA.assertStarting();
+        
+        // Now, start taskB, which should quickly fail because there are no retries
+        long startTime = System.nanoTime();
+        BulkheadTask taskB = manager.startTask(retryDelaySyncBean);
+        expectBulkheadException(taskB.getResultFuture());
+        long endTime = System.nanoTime();
+        
+        assertThat("Task took to long to return, may have done retries", Duration.ofNanos(endTime - startTime), lessThan(Duration.ofMillis(250)));
+    }
+    
+    /**
+     * Test that retries do not occur when BulkheadException is included in the abortOn attribute
+     * 
+     * @throws InterruptedException if the test is interrupted
+     */
+    @Test
+    public void testNoRetriesWithAbortOn() throws InterruptedException {
+        // Start taskA
+        BulkheadTask taskA = manager.startTask(retryAbortOnSyncBean);
+        taskA.assertStarting();
+        
+        // Now, start taskB, which should quickly fail because there are no retries
+        long startTime = System.nanoTime();
+        BulkheadTask taskB = manager.startTask(retryAbortOnSyncBean);
+        expectBulkheadException(taskB.getResultFuture());
+        long endTime = System.nanoTime();
+        
+        assertThat("Task took to long to return, may have done retries", Duration.ofNanos(endTime - startTime), lessThan(Duration.ofMillis(250)));
+    }
+
 
     /**
      * Run a number of Callable's in parallel
