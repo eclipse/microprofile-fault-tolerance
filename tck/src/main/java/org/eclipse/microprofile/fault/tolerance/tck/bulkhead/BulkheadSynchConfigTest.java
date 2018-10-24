@@ -20,8 +20,6 @@
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead;
 
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import javax.inject.Inject;
@@ -31,6 +29,7 @@ import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhe
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadTestBackend;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.ParrallelBulkheadTest;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.TestData;
+import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncCaller;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
@@ -42,8 +41,6 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.ITestContext;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-
-//import org.jboss.arquillian.core.api.Asynchronousing.ExecutorService;
 
 /**
  * @author Gordon Hutchison
@@ -106,12 +103,11 @@ public class BulkheadSynchConfigTest extends Arquillian {
     }
 
     /*
-     * We use an executer service to simulate the parallelism of multiple
+     * We use an AsyncCaller bean to simulate the parallelism of multiple
      * simultaneous requests
      */
-    private static final int THREADPOOL_SIZE = 30;
-
-    private ExecutorService xService = Executors.newFixedThreadPool(THREADPOOL_SIZE);
+    @Inject
+    private AsyncCaller xService;
 
     /*
      * As the FaultTolerance annotation only work on business methods of
