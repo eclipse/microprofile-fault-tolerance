@@ -70,11 +70,12 @@ public class RetryClientWithNoDelayAndJiter {
         return counterForInvokingConnenectionService;
     }
 
-    public int fastDelays() {
+    public int positiveDelays() {
         System.out.println("delays are: " + delayTimes);
         int count = 0;
+        // ignore fast delays
         for (long delayTime : delayTimes) {
-            if (delayTime < 5) {
+            if (delayTime > 5) {
                 count++;
             }
         }

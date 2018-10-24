@@ -128,7 +128,6 @@ public class RetryTest extends Arquillian {
         Assert.assertTrue(clientForDelay.isDelayInRange(), "The delay between each retry should be 0-800ms");
     }
 
-
     /**
      * Testing whether the {@code @Retry} annotation on method serviceB overrides the Class level
      * {@code @Retry} annotation.
@@ -146,18 +145,18 @@ public class RetryTest extends Arquillian {
         }
 
         final int retryCountForConnectionService = retryClientWithNoDelayAndJiter.getRetryCountForConnectionService();
-        final int fastDelays = retryClientWithNoDelayAndJiter.fastDelays();
 
-        // 60% to discard false positives
-        Assert.assertTrue(fastDelays < (retryCountForConnectionService * 0.6),
-            "Jitter not uniformly distributed. More than 60% retries got delay smaller than 5ms. Got " + fastDelays + " in " +
-                retryCountForConnectionService + " tries");
+        // we have positive delays
+        Assert.assertTrue(retryClientWithNoDelayAndJiter.positiveDelays() > 0,
+            "Using jitter must cause some effective delay even when delay is set to 0");
+
         Assert.assertTrue(retryCountForConnectionService > 8 && retryCountForConnectionService < 50,
             "The max number of execution should be between 8 and 50 but it was " + retryCountForConnectionService +
                 ". Too many retries mean jitter is not being applied.");
-        Assert.assertTrue(retryClientWithNoDelayAndJiter.isDelayInRange(), "The delay between each retry should be 0-400ms");
-    }
 
+        Assert.assertTrue(retryClientWithNoDelayAndJiter.isDelayInRange(),
+            "The delay between each retry should be 0-400ms");
+    }
 
     /**
      * Analogous to testRetryMaxRetries but using a Class level rather
