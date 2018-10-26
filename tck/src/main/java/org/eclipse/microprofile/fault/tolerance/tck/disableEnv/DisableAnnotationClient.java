@@ -73,10 +73,12 @@ public class DisableAnnotationClient {
      * Should return normally if Fallback is enabled or throw TestException if not
      * <p>
      * Should increment counter by two if Retry is enabled or one if it is not
+     * 
+     * @return nothing, always throws TestException
      */
     @Retry(maxRetries = 1)
     @Fallback(fallbackMethod = "fallback")
-    public void failRetryOnceThenFallback() {
+    public String failRetryOnceThenFallback() {
         failRetryOnceThenFallbackCounter++;
         throw new TestException();
     }
