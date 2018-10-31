@@ -53,6 +53,8 @@ Since this specification depends on CDI and interceptors specifications, fault t
 
 * if a method and its containing class don't have any fault tolerance interceptor binding, it won't be considered as a fault tolerance operation.
 
+Remark: According to the EE7/8 spec table 5.24, JAX-RS resources are not CDI beans. In order to make the micro-service portable, a bean defining annotation must be specified.
+
 === Relationship to MicroProfile Config
 
 The MicroProfile config specification defines a flexible config model to enable microservice
@@ -62,13 +64,9 @@ via other predefined config sources (e.g. environment variables, system properti
 the `maxRetries` parameter on the `@Retry` annotation is a configuration property. It can be configured externally.
 
 === Relationship to MicroProfile Metrics
-The MicroProfile Metrics specification provides a way to monitor microservice invocations. It is also important to find out how Fault Tolerance policies are operating, e.g. 
+The MicroProfile Metrics specification provides a way to monitor microservice invocations. It is also important to find out how Fault Tolerance policies are operating, e.g.
 
 * When `Retry` is used, it is useful to know how many times a method was called and succeeded after retrying at least once.
 * When `Timeout` is used, you would like to know how many times the method timed out.
 
-Because of this requirement, when Microprofile Fault Tolerance and Microprofile Metrics are used together, metrics are automatically added for each of the methods annotated with a `@Retry`, `@Timeout`, `@CircuitBreaker`, `@Bulkhead` or `@Fallback` annotation. 
-
-
-
-
+Because of this requirement, when Microprofile Fault Tolerance and Microprofile Metrics are used together, metrics are automatically added for each of the methods annotated with a `@Retry`, `@Timeout`, `@CircuitBreaker`, `@Bulkhead` or `@Fallback` annotation.

@@ -65,3 +65,4 @@ This specification introduces the following interceptor bindings:
 
 Refer to Interceptor Specification for more information on interceptor bindings.
 
+Remark: According to the EE7/8 spec table 5.24, JAX-RS resources are not CDI beans. In order to make the micro-service portable, a bean defining annotation must be specified.
