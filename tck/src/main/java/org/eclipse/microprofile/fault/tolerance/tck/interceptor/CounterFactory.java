@@ -44,6 +44,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * {@code @Inject @CounterId("foo") AtomicInteger fooCounter;}
  * <p>
  * Injection points which specify the same {@code @CounterId} will receive the same counter instance.
+ * @author carlosdlr
  */
 @ApplicationScoped
 public class CounterFactory {

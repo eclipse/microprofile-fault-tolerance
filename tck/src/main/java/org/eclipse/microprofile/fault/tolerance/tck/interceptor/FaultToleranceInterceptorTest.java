@@ -39,7 +39,7 @@ import static org.testng.Assert.assertEquals;
 
 /**
  * A Client to demonstrate the interceptors ordering behavior of FT and CDI annotations
- *
+ * @author carlosdlr
  */
 public class FaultToleranceInterceptorTest extends Arquillian {
 

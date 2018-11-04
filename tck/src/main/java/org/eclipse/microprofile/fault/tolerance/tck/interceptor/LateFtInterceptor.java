@@ -40,6 +40,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * An interceptor that is called after the FT interceptor
  * in the chain and count the invocation.
+ * @author carlosdlr
  */
 @Interceptor
 @InterceptLate

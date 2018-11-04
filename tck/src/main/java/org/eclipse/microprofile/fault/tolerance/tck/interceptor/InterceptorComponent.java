@@ -34,6 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Component to show the CDI interceptor ordering with FT annotations
+ * @author carlosdlr
  */
 @ApplicationScoped
 public class InterceptorComponent {

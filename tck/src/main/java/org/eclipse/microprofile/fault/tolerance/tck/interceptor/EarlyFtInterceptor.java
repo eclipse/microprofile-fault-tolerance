@@ -40,6 +40,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 /**
  * An interceptor that is called before the FT interceptor
  * in the chain and count the invocation.
+ * @author carlosdlr
  */
 @Interceptor
 @InterceptEarly
