@@ -55,7 +55,7 @@ public class PureJ2SERetryVisibilityTest {
     }
 
     @Test
-    public void check_BASE_ROM_RETRY_MISSING_ON_METHOD() throws Exception {
+    public void checkBaseRomRetryMissingOnMethod() throws Exception {
         Retry foundAnnotation;
         Method m = RetryOnMethodServiceNoAnnotationOnOverridedMethod.class.getDeclaredMethod("service");
         
