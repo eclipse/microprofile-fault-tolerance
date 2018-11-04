@@ -17,10 +17,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.eclipse.microprofile.fault.tolerance.tck.ejb;
+package org.eclipse.microprofile.fault.tolerance.tck.interceptor;
 
 
-import org.eclipse.microprofile.fault.tolerance.tck.ejb.CounterFactory.CounterId;
+import org.eclipse.microprofile.fault.tolerance.tck.interceptor.CounterFactory.CounterId;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -29,19 +29,19 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
-import javax.ejb.EJB;
-import javax.ejb.EJBException;
 import javax.inject.Inject;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.testng.Assert.fail;
 import static org.testng.Assert.assertEquals;
 
 /**
- * A Client to demonstrate the ordering behavior of FT annotation, CDI, and EJB interceptors
+ * A Client to demonstrate the interceptors ordering behavior of FT and CDI annotations
  *
  */
-public class EjbFaultToleranceTest extends Arquillian {
+public class FaultToleranceInterceptorTest extends Arquillian {
 
     @Inject
     @CounterId("EarlyFtInterceptor")
@@ -55,28 +55,34 @@ public class EjbFaultToleranceTest extends Arquillian {
     @CounterId("serviceA")
     private AtomicInteger methodCounter;
 
-    @EJB
-    private EjbComponent testEjb;
+    @Inject
+    private InterceptorComponent testInterceptor;
 
     @Deployment
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
-            .create(JavaArchive.class, "EjbFtCdi.jar")
-            .addClasses(EjbComponent.class, EarlyFtInterceptor.class, LateFtInterceptor.class, CounterFactory.class)
+            .create(JavaArchive.class, "interceptorFtCdi.jar")
+            .addClasses(InterceptorComponent.class, EarlyFtInterceptor.class, LateFtInterceptor.class, CounterFactory.class)
              .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
             .as(JavaArchive.class);
 
-        return ShrinkWrap.create(WebArchive.class, "EjbFtCdi.war")
+        return ShrinkWrap.create(WebArchive.class, "interceptorFtCdi.war")
             .addAsLibrary(testJar);
+    }
+
+    @Test
+    public void testEjbAsync() throws InterruptedException, ExecutionException {
+        Future<String> result = testInterceptor.asyncGetString();
+        assertEquals(result.get(), "OK");
     }
 
     @Test
     public void testEjbRetryInterceptors() {
         try {
-            testEjb.serviceA();
+            testInterceptor.serviceA();
             fail("Exception not thrown");
         }
-        catch (EJBException e) {
+        catch (Exception e) {
 
         } // Expected
 

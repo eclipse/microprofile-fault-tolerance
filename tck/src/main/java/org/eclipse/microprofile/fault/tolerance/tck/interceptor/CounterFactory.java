@@ -17,14 +17,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.eclipse.microprofile.fault.tolerance.tck.ejb;
+package org.eclipse.microprofile.fault.tolerance.tck.interceptor;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.util.Nonbinding;
 import javax.inject.Qualifier;
-import javax.ws.rs.Produces;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;

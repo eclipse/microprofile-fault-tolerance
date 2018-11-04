@@ -17,24 +17,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.eclipse.microprofile.fault.tolerance.tck.ejb;
+package org.eclipse.microprofile.fault.tolerance.tck.interceptor;
 
-import org.eclipse.microprofile.fault.tolerance.tck.ejb.CounterFactory.CounterId;
-import org.eclipse.microprofile.fault.tolerance.tck.ejb.EarlyFtInterceptor.InterceptEarly;
-import org.eclipse.microprofile.fault.tolerance.tck.ejb.LateFtInterceptor.InterceptLate;
+import org.eclipse.microprofile.fault.tolerance.tck.interceptor.CounterFactory.CounterId;
+import org.eclipse.microprofile.fault.tolerance.tck.interceptor.EarlyFtInterceptor.InterceptEarly;
+import org.eclipse.microprofile.fault.tolerance.tck.interceptor.LateFtInterceptor.InterceptLate;
+import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.testng.TestException;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * An EJB component to show the ordering between EJB, CDI
- * with FT annotations
+ * Component to show the CDI interceptor ordering with FT annotations
  */
-@Stateless
-public class EjbComponent {
+@ApplicationScoped
+public class InterceptorComponent {
 
     @Inject
     @CounterId("serviceA")
@@ -47,5 +49,10 @@ public class EjbComponent {
     public String serviceA() {
         serviceACounter.incrementAndGet();
         throw new TestException("retryGetString failed");
+    }
+
+    @Asynchronous
+    public Future<String> asyncGetString() {
+        return CompletableFuture.completedFuture("OK");
     }
 }

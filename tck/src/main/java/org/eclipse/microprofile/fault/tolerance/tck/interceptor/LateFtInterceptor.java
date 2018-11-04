@@ -17,11 +17,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.eclipse.microprofile.fault.tolerance.tck.ejb;
+package org.eclipse.microprofile.fault.tolerance.tck.interceptor;
 
 
-import org.eclipse.microprofile.fault.tolerance.tck.ejb.CounterFactory.CounterId;
-import org.eclipse.microprofile.fault.tolerance.tck.ejb.LateFtInterceptor.InterceptLate;
+import org.eclipse.microprofile.fault.tolerance.tck.interceptor.CounterFactory.CounterId;
+import org.eclipse.microprofile.fault.tolerance.tck.interceptor.LateFtInterceptor.InterceptLate;
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
@@ -37,6 +37,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * An interceptor that is called after the FT interceptor
+ * in the chain and count the invocation.
+ */
 @Interceptor
 @InterceptLate
 @Priority(Interceptor.Priority.LIBRARY_AFTER)

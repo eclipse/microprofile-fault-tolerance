@@ -17,10 +17,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.eclipse.microprofile.fault.tolerance.tck.ejb;
+package org.eclipse.microprofile.fault.tolerance.tck.interceptor;
 
-import org.eclipse.microprofile.fault.tolerance.tck.ejb.CounterFactory.CounterId;
-import org.eclipse.microprofile.fault.tolerance.tck.ejb.EarlyFtInterceptor.InterceptEarly;
+import org.eclipse.microprofile.fault.tolerance.tck.interceptor.CounterFactory.CounterId;
+import org.eclipse.microprofile.fault.tolerance.tck.interceptor.EarlyFtInterceptor.InterceptEarly;
 
 
 import javax.annotation.Priority;
