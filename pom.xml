@@ -32,6 +32,7 @@
         <maven.compiler.target>1.8</maven.compiler.target>
 
         <checkstyle.version>2.17</checkstyle.version>
+        <checkstyle.methodNameFormat>^_?[a-z][a-zA-Z0-9]*$</checkstyle.methodNameFormat>
         <!-- whether autorelease maven central staging repositories - default true to allow review and manually release repositories -->
         <autorelease>false</autorelease>
         <!-- keeping closed repos with failure - default is false because the errors are visible in the maven output, but true will leave the repo open for investigation in Sonatype Nexus -->
@@ -172,7 +173,77 @@
                     <failsOnError>true</failsOnError>
                     <linkXRef>true</linkXRef>
                     <logViolationsToConsole>true</logViolationsToConsole>
-                    <configLocation>mp_checkstyle_rules.xml</configLocation>
+                    <checkstyleRules>
+                        <module name="Checker">
+                            <module name="SuppressionCommentFilter" />
+                            <module name="FileLength">
+                                <property name="max" value="3500" />
+                                <property name="fileExtensions" value="java" />
+                            </module>
+                            <module name="FileTabCharacter" />
+                            <module name="TreeWalker">
+                                <module name="FileContentsHolder" />
+                                <module name="ConstantName">
+                                    <property name="format" value="^(([A-Z][A-Z0-9]*(_[A-Z0-9]+)*))$" />
+                                </module>
+                                <module name="LocalVariableName" />
+                                <module name="MethodName">
+                                    <property name="format" value="${checkstyle.methodNameFormat}" />
+                                </module>
+                                <module name="PackageName" />
+                                <module name="LocalFinalVariableName" />
+                                <module name="ParameterName" />
+                                <module name="StaticVariableName" />
+
+                                <module name="TypeName">
+                                    <property name="format" value="^_?[A-Z][a-zA-Z0-9]*$|packageinfo" />
+                                </module>
+                                <module name="AvoidStarImport">
+                                    <property name="excludes" value="java.io,java.net,java.util,javax.enterprise.inject.spi,javax.enterprise.context" />
+                                </module>
+                                <module name="IllegalImport" />
+                                <module name="RedundantImport" />
+                                <module name="UnusedImports" />
+                                <module name="LineLength">
+                                    <property name="max" value="150" />
+                                    <property name="ignorePattern" value="@version|@see" />
+                                </module>
+                                <module name="MethodLength">
+                                    <property name="max" value="250" />
+                                </module>
+                                <module name="ParameterNumber">
+                                    <property name="max" value="11" />
+                                </module>
+                                <module name="EmptyBlock">
+                                    <property name="option" value="text" />
+                                </module>
+                                <module name="NeedBraces" />
+                                <module name="LeftCurly">
+                                    <property name="option" value="EOL" />
+                                </module>
+                                <module name="RightCurly">
+                                    <property name="option" value="ALONE" />
+                                </module>
+                                <module name="EmptyStatement" />
+                                <module name="EqualsHashCode" />
+                                <module name="DefaultComesLast" />
+                                <module name="MissingSwitchDefault" />
+                                <module name="FallThrough" />
+                                <module name="MultipleVariableDeclarations" />
+                                <module name="com.puppycrawl.tools.checkstyle.checks.design.DesignForExtensionCheck">
+                                    <property name="severity" value="ignore" />
+                                </module>
+                                <module name="HideUtilityClassConstructor" />
+                                <module name="com.puppycrawl.tools.checkstyle.checks.design.VisibilityModifierCheck">
+                                    <property name="packageAllowed" value="false" />
+                                    <property name="protectedAllowed" value="true" />
+                                    <property name="publicMemberPattern" value="^serialVersionUID" />
+                                    <property name="severity" value="warning" />
+                                </module>
+                                <module name="UpperEll" />
+                            </module>
+                        </module>
+                    </checkstyleRules>
                 </configuration>
             </plugin>
 

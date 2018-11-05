@@ -28,6 +28,7 @@
     </module>
     <module name="FileTabCharacter" />
     <module name="TreeWalker">
+        <module name="SuppressionCommentFilter" />
         <module name="ConstantName">
             <property name="format" value="^(([A-Z][A-Z0-9]*(_[A-Z0-9]+)*))$" />
         </module>
