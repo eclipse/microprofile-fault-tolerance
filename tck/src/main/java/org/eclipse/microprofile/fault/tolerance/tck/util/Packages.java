@@ -1,5 +1,4 @@
 /*
- *******************************************************************************
  * Copyright (c) 2018 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -16,7 +15,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *******************************************************************************/
+ */
 package org.eclipse.microprofile.fault.tolerance.tck.util;
 
 /**
@@ -35,5 +34,5 @@ public class Packages {
     /**
      * The {@code org.eclipse.microprofile.fault.tolerance.tck.metrics.util} package
      */
-    public static final Package METRIC_UTILS = Package.getPackage("org.eclipse.microprofile.fault.tolerance.tck.metrics.util");
+    public static final Package METRIC_UTILS = org.eclipse.microprofile.fault.tolerance.tck.metrics.util.AsyncCaller.class.getPackage();
 }

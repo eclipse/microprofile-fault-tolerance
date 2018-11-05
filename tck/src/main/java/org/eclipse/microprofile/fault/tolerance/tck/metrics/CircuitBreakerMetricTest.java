@@ -1,5 +1,4 @@
 /*
- *******************************************************************************
  * Copyright (c) 2018 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -16,7 +15,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *******************************************************************************/
+ */
 package org.eclipse.microprofile.fault.tolerance.tck.metrics;
 
 import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.Exceptions.expectCbOpen;
@@ -33,6 +32,7 @@ import org.eclipse.microprofile.faulttolerance.exceptions.CircuitBreakerOpenExce
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
+import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -46,7 +46,8 @@ public class CircuitBreakerMetricTest extends Arquillian {
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftMetricCircuitBreaker.war")
                 .addClasses(CircuitBreakerMetricBean.class)
                 .addPackage(Packages.UTILS)
-                .addPackage(Packages.METRIC_UTILS);
+                .addPackage(Packages.METRIC_UTILS)
+            .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
         return war;
     }
     

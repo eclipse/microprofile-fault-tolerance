@@ -1,5 +1,4 @@
 /*
- *******************************************************************************
  * Copyright (c) 2018 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -16,7 +15,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *******************************************************************************/
+ */
 package org.eclipse.microprofile.fault.tolerance.tck.metrics;
 
 import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.Exceptions.expectBulkheadException;
@@ -40,8 +39,9 @@ import org.eclipse.microprofile.metrics.Snapshot;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
+import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.testng.annotations.AfterTest;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 public class BulkheadMetricTest extends Arquillian {
@@ -51,7 +51,8 @@ public class BulkheadMetricTest extends Arquillian {
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftMetricBulkhead.war")
                 .addClasses(BulkheadMetricBean.class)
                 .addPackage(Packages.UTILS)
-                .addPackage(Packages.METRIC_UTILS);
+                .addPackage(Packages.METRIC_UTILS)
+            .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
         return war;
     }
     
@@ -65,7 +66,7 @@ public class BulkheadMetricTest extends Arquillian {
      * <p>
      * Important in case tests end early due to an exception or failure.
      */
-    @AfterTest
+    @AfterMethod
     public void completeWaitingFutures() {
         for (CompletableFuture<Void> future : waitingFutures) {
             future.complete(null);
