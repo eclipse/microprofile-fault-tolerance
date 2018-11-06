@@ -21,6 +21,7 @@ package org.eclipse.microprofile.fault.tolerance.tck.interceptor;
 
 
 import org.eclipse.microprofile.fault.tolerance.tck.interceptor.CounterFactory.CounterId;
+import org.eclipse.microprofile.fault.tolerance.tck.interceptor.CounterFactory.OrderId;
 import org.eclipse.microprofile.fault.tolerance.tck.interceptor.LateFtInterceptor.InterceptLate;
 
 import static java.lang.annotation.ElementType.METHOD;
@@ -35,6 +36,7 @@ import javax.interceptor.InterceptorBinding;
 import javax.interceptor.InvocationContext;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -44,12 +46,16 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Interceptor
 @InterceptLate
-@Priority(Interceptor.Priority.LIBRARY_AFTER)
+@Priority(Interceptor.Priority.PLATFORM_AFTER+100)
 public class LateFtInterceptor {
 
     @Inject
     @CounterId("LateFtInterceptor")
     private AtomicInteger counter;
+
+    @Inject
+    @OrderId("LateOrderFtInterceptor")
+    private Queue<String> order;
 
 
     /**

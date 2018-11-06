@@ -21,6 +21,7 @@ package org.eclipse.microprofile.fault.tolerance.tck.interceptor;
 
 
 import org.eclipse.microprofile.fault.tolerance.tck.interceptor.CounterFactory.CounterId;
+import org.eclipse.microprofile.fault.tolerance.tck.interceptor.CounterFactory.OrderId;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -30,6 +31,7 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
 import javax.inject.Inject;
+import java.util.Queue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -56,6 +58,10 @@ public class FaultToleranceInterceptorTest extends Arquillian {
     private AtomicInteger methodCounter;
 
     @Inject
+    @OrderId("EarlyOrderFtInterceptor")
+    private Queue<String> orderKeeper;
+
+    @Inject
     private InterceptorComponent testInterceptor;
 
     @Deployment
@@ -70,14 +76,23 @@ public class FaultToleranceInterceptorTest extends Arquillian {
             .addAsLibrary(testJar);
     }
 
+    /**
+     * This test validates the interceptors execution order after call a method
+     * annotated with Asynchronous FT annotation, using a queue type FIFO (first-in-first-out).
+     * The head of the queue is that element that has been on the queue the longest time.
+     * In this case is validating that the early interceptor is executed at first.
+     * @throws InterruptedException
+     * @throws ExecutionException
+     */
     @Test
-    public void testEjbAsync() throws InterruptedException, ExecutionException {
+    public void testAsync() throws InterruptedException, ExecutionException {
         Future<String> result = testInterceptor.asyncGetString();
         assertEquals(result.get(), "OK");
+        assertEquals(orderKeeper.peek(), "EarlyOrderFtInterceptor");
     }
 
     @Test
-    public void testEjbRetryInterceptors() {
+    public void testRetryInterceptors() {
         try {
             testInterceptor.serviceA();
             fail("Exception not thrown");
@@ -87,7 +102,7 @@ public class FaultToleranceInterceptorTest extends Arquillian {
         } // Expected
 
         assertEquals(methodCounter.get(), 6, "methodCounter"); // Method called six times (1 + 5 retries)
-        assertEquals(earlyInterceptorCounter.get(), 1, "earlyInterceptorCounter");
-        assertEquals(lateInterceptorCounter.get(), 6, "lateInterceptorCounter");
+        assertEquals(earlyInterceptorCounter.get(), 2, "earlyInterceptorCounter");
+        assertEquals(lateInterceptorCounter.get(), 7, "lateInterceptorCounter");
     }
 }

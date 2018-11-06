@@ -30,6 +30,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.lang.annotation.ElementType.FIELD;
@@ -51,6 +53,7 @@ public class CounterFactory {
 
 
     private final Map<String, AtomicInteger> counters = new HashMap<>();
+    private Queue<String> orderQueue = new ConcurrentLinkedQueue<>();
 
 
     @Qualifier
@@ -61,20 +64,19 @@ public class CounterFactory {
         String value();
     }
 
+    @Qualifier
+    @Retention(RUNTIME)
+    @Target({ METHOD, FIELD, PARAMETER })
+    public @interface OrderId {
+        @Nonbinding
+        String value();
+    }
+
     @Produces
     @Dependent
     @CounterId(value = "")
     private synchronized AtomicInteger produce(InjectionPoint injectionPoint) {
-        String id = null;
-        for (Annotation qualifier : injectionPoint.getQualifiers()) {
-            if (qualifier.annotationType() == CounterId.class) {
-                id = ((CounterId) qualifier).value();
-            }
-        }
-
-        if (id == null) {
-            throw new IllegalStateException("No counter id for injection point: " + injectionPoint.getMember());
-        }
+        String id = getAnnotationObject(CounterId.class, injectionPoint).value();
 
         AtomicInteger counter = counters.get(id);
         if (counter == null) {
@@ -85,4 +87,28 @@ public class CounterFactory {
         return counter;
     }
 
+    @Produces
+    @Dependent
+    @OrderId(value = "")
+    private synchronized Queue<String> ordering(InjectionPoint injectionPoint) {
+        String id = getAnnotationObject(OrderId.class, injectionPoint).value();
+        orderQueue.add(id);
+        return orderQueue;
+    }
+
+    private <T> T getAnnotationObject(Class<T> annotationClass, InjectionPoint injectionPoint) {
+         T annotationObject = null;
+        for (Annotation qualifier : injectionPoint.getQualifiers()) {
+            if (qualifier.annotationType() == annotationClass) {
+                annotationObject = annotationClass.cast(qualifier);
+            }
+        }
+
+        if (annotationObject == null) {
+            throw new IllegalStateException("No counter id for injection point: " + injectionPoint.getMember());
+        }
+
+        return annotationObject;
+
+    }
 }
