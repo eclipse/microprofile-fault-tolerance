@@ -1,0 +1,57 @@
+//
+// Copyright (c) 2018 Contributors to the Eclipse Foundation
+//
+// See the NOTICE file(s) distributed with this work for additional
+// information regarding copyright ownership.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// You may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// Contributors:
+// Emily Jiang
+
+[[fault-tolerance-interceptor]]
+
+== Fault Tolerance Interceptor
+
+The implementor of MicroProfile Fault Tolerance specification must provide a Fault Tolerance interceptor. The interceptor will be called if any one or many of the above interceptor bindings are specified. The default priority of the interceptor is `Priority.PLATFORM_AFTER+10`, which is `4010`. 
+
+The Fault Tolerance interceptor priority can be configured via MicroProfile Config with the property name of `mp.fault.tolerance.interceptor.priority`. The property value will only be read at application startup. Any subsequent value changes will not take effect until the application restarts.
+
+If a method is annotated with any of the Fault Tolerance interceptor bindings, it may specify other interceptor bindings. The bounded interceptors will be invoked in the ascending order of the interceptor priority, as specified by https://download.oracle.com/otn-pub/jcp/interceptors-1_2A-mrel3-eval-spec/Intercept.pdf?AuthParam=1541543428_889968d50f535735cbabe343350e09a4[Interceptor Specification^]. 
+
+For an instance, in the following example, MyLogInterceptor will be invoked first, followed by Fault Tolerance interceptor and then MyPrintInterceptor.
+
+[source, java]
+----
+@Retry
+@MyLog 
+@MyPrint
+public void myInvok() {
+
+ //do something
+}
+@Priority(3000)
+@MyLog
+public class MyLogInterceptor{
+ //do logging
+}
+
+@Priority(5000)
+@MyPrint
+public class MyPrintInterceptor{
+ //do printing
+}
+----
+
+
+
+
