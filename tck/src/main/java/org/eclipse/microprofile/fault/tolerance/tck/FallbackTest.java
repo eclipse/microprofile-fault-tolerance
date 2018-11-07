@@ -263,7 +263,7 @@ public class FallbackTest extends Arquillian {
      * ServiceA fallback is driven by a class implementing FallbackHandler. ServiceA is only called once.
      */
     @Test
-    public void testStandaloneClassLevelFallback() {
+    public void testStandaloneClassHandlerFallback() {
         try {
             String result = fallbackOnlyClient.serviceA();
             Assert.assertTrue(result.contains("serviceA"),
