@@ -22,13 +22,13 @@
 
 == Fault Tolerance Interceptor
 
-The implementor of MicroProfile Fault Tolerance specification must provide a Fault Tolerance interceptor. The interceptor will be called if any one or many of the above interceptor bindings are specified. The default priority of the interceptor is `Priority.PLATFORM_AFTER+10`, which is `4010`. 
+The implementor of the MicroProfile Fault Tolerance specification must provide a Fault Tolerance interceptor. This interceptor provides the functionality for each Fault Tolerance annotation. The interceptor will be called if any one or many of the above interceptor bindings are specified. For instance, this interceptor will retry the specified operation if `Retry` annotation was specified on that operation. The default priority of the interceptor is `Priority.PLATFORM_AFTER+10`, which is `4010`. 
 
 The Fault Tolerance interceptor priority can be configured via MicroProfile Config with the property name of `mp.fault.tolerance.interceptor.priority`. The property value will only be read at application startup. Any subsequent value changes will not take effect until the application restarts.
 
-If a method is annotated with any of the Fault Tolerance interceptor bindings, it may specify other interceptor bindings. The bounded interceptors will be invoked in the ascending order of the interceptor priority, as specified by https://download.oracle.com/otn-pub/jcp/interceptors-1_2A-mrel3-eval-spec/Intercept.pdf?AuthParam=1541543428_889968d50f535735cbabe343350e09a4[Interceptor Specification^]. 
+A method that is annotated with any of the Fault Tolerance interceptor bindings, it may specify other interceptor bindings. The bounded interceptors will be invoked in the ascending order of the interceptor priority, as specified by https://download.oracle.com/otn-pub/jcp/interceptors-1_2A-mrel3-eval-spec/Intercept.pdf?AuthParam=1541543428_889968d50f535735cbabe343350e09a4[Interceptor Specification^]. 
 
-For an instance, in the following example, MyLogInterceptor will be invoked first, followed by Fault Tolerance interceptor and then MyPrintInterceptor.
+For instance, in the following example, `MyLogInterceptor` will be invoked first, followed by Fault Tolerance interceptor and then `MyPrintInterceptor`.
 
 [source, java]
 ----
