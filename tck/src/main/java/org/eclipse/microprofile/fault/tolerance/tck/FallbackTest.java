@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -263,7 +263,7 @@ public class FallbackTest extends Arquillian {
      * ServiceA fallback is driven by a class implementing FallbackHandler. ServiceA is only called once.
      */
     @Test
-    public void testStandaloneClassHandlerFallback() {
+    public void testStandaloneHandlerFallback() {
         try {
             String result = fallbackOnlyClient.serviceA();
             Assert.assertTrue(result.contains("serviceA"),
