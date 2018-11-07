@@ -21,7 +21,9 @@
 
 [[fallback]]
 == Fallback
-Fallbacks are invoked once a Retry or CircuitBreaker has failed enough times.
+Fallback provides an graceful alternative execution in case of failure.
+
+Fallbacks are invoked when used alone, once a Retry or CircuitBreaker has failed enough times.
 
 For a Retry, Fallback is handled any time the Retry would exceed its maximum number of attempts.
 
