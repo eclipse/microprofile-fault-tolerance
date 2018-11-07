@@ -201,7 +201,7 @@ public class BulkheadMetricTest extends Arquillian {
         
         Future<?> f3 = bulkheadBean.waitForAsync(waitingFuture);
         Future<?> f4 = bulkheadBean.waitForAsync(waitingFuture);
-        expectBulkheadException(() -> bulkheadBean.waitForAsync(waitingFuture));
+        expectBulkheadException(bulkheadBean.waitForAsync(waitingFuture));
         
         assertThat("concurrent executions", m.getBulkheadConcurrentExecutions().get(), is(2L));
         assertThat("queue population", m.getBulkheadQueuePopulation().get(), is(2L));
