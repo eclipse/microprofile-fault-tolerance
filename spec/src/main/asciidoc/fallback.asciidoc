@@ -21,7 +21,9 @@
 
 [[fallback]]
 == Fallback
-Fallbacks are invoked once a Retry or CircuitBreaker has failed enough times.
+Fallback method is invoked when the method with @Fallback annotation completed exceptionally.
+
+Fallback annotation can be used on its own or together with other Fault Tolerance annotations.
 
 For a Retry, Fallback is handled any time the Retry would exceed its maximum number of attempts.
 

@@ -23,6 +23,7 @@ import javax.inject.Inject;
 
 import org.eclipse.microprofile.fault.tolerance.tck.fallback.clientserver.FallbackClassLevelClient;
 import org.eclipse.microprofile.fault.tolerance.tck.fallback.clientserver.FallbackClient;
+import org.eclipse.microprofile.fault.tolerance.tck.fallback.clientserver.FallbackOnlyClient;
 import org.eclipse.microprofile.fault.tolerance.tck.fallback.clientserver.FallbackWithBeanClient;
 import org.eclipse.microprofile.fault.tolerance.tck.fallback.clientserver.MyBean;
 import org.eclipse.microprofile.fault.tolerance.tck.fallback.clientserver.SecondStringFallbackHandler;
@@ -49,6 +50,7 @@ public class FallbackTest extends Arquillian {
     private @Inject FallbackClient fallbackClient;
     private @Inject FallbackWithBeanClient fallbackWithBeanClient;
     private @Inject FallbackClassLevelClient fallbackClassLevelClient;
+    private @Inject FallbackOnlyClient fallbackOnlyClient;
 
     @Deployment
     public static WebArchive deploy() {
@@ -56,7 +58,8 @@ public class FallbackTest extends Arquillian {
                         .addClasses(FallbackClient.class, FallbackWithBeanClient.class,
                                         FallbackClassLevelClient.class, StringFallbackHandler.class,
                                         SecondStringFallbackHandler.class,
-                                        StringFallbackHandlerWithBean.class, MyBean.class)
+                                        StringFallbackHandlerWithBean.class, MyBean.class,
+                                        FallbackOnlyClient.class)
                         .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                         .as(JavaArchive.class);
 
@@ -252,5 +255,39 @@ public class FallbackTest extends Arquillian {
         }
         Assert.assertEquals(fallbackClient.getCounterForInvokingServiceE(), 2, "The execution count should be 2 (1 retry + 1)");
         
+    }
+
+    /**
+     * Test that a Fallback service can work alone, without other annotations.<br>
+     * <p>
+     * ServiceA fallback is driven by a class implementing FallbackHandler. ServiceA is only called once.
+     */
+    @Test
+    public void testStandaloneHandlerFallback() {
+        try {
+            String result = fallbackOnlyClient.serviceA();
+            Assert.assertTrue(result.contains("serviceA"),
+                "The message should be \"fallback for serviceA\"");
+        } catch (RuntimeException ex) {
+            Assert.fail("serviceA should not throw a RuntimeException in testStandaloneClassLevelFallback");
+        }
+        Assert.assertEquals(fallbackOnlyClient.getCounterForInvokingServiceA(), 1, "The getCounterForInvokingServiceA should be 1");
+    }
+
+    /**
+     * Test that a Fallback service can work alone, without other annotations.<br>
+     * <p>
+     * ServiceB fallback is driven by a FallbackHandler method in the same class. ServiceB is only called once.
+     */
+    @Test
+    public void testStandaloneMethodFallback() {
+        try {
+            String result = fallbackOnlyClient.serviceB();
+            Assert.assertTrue(result.contains("serviceB"),
+                "The message should be \"fallback method for serviceB\"");
+        } catch (RuntimeException ex) {
+            Assert.fail("serviceB should not throw a RuntimeException in testStandaloneMethodFallback");
+        }
+        Assert.assertEquals(fallbackOnlyClient.getCounterForInvokingServiceB(), 1, "The getCounterForInvokingServiceB should be 1");
     }
 }
