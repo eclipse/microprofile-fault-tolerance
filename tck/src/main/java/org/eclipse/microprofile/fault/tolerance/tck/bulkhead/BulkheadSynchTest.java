@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2017-2018 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -20,24 +20,26 @@
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead;
 
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import javax.inject.Inject;
 
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead10ClassSemaphoreBean;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead3ClassSemaphoreBean;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadClassSemaphoreDefaultBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead10MethodSemaphoreBean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead3ClassSemaphoreBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead3MethodSemaphoreBean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadClassSemaphoreDefaultBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadMethodSemaphoreDefaultBean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadTask;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadTaskManager;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadTestBackend;
-
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.ParrallelBulkheadTest;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.TestData;
+import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncCaller;
+import org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions;
+import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
+import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
 import org.jboss.arquillian.container.test.api.Deployment;
-//import org.jboss.arquillian.core.api.Asynchronousing.ExecutorService;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
@@ -49,15 +51,12 @@ import org.testng.annotations.Test;
 
 /**
  * @author Gordon Hutchison
+ * @author Andrew Rouse
  */
 public class BulkheadSynchTest extends Arquillian {
 
-    /*
-     * We use an executer service to simulate the parallelism of multiple
-     * simultaneous requests
-     */
-    private static final int THREADPOOL_SIZE = 30;
-    private ExecutorService xService = Executors.newFixedThreadPool(THREADPOOL_SIZE);
+    @Inject
+    private AsyncCaller xService;
 
     /*
      * As the FaultTolerance annotation only work on business methods of
@@ -88,8 +87,11 @@ public class BulkheadSynchTest extends Arquillian {
     @Deployment
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftBulkheadSynchTest.jar")
-                .addPackage(BulkheadClassSemaphoreDefaultBean.class.getPackage()).addClass(Utils.class)
-                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml").as(JavaArchive.class);
+                .addPackage(BulkheadClassSemaphoreDefaultBean.class.getPackage())
+                .addClass(Utils.class)
+                .addPackage(Packages.UTILS)
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
+                .as(JavaArchive.class);
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftBulkheadSynchTest.war").addAsLibrary(testJar);
         return war;
     }
@@ -179,6 +181,33 @@ public class BulkheadSynchTest extends Arquillian {
         threads(20, bhBeanMethodSemaphoreDefault, 10, td);
         td.check();
     }
+    
+    /**
+     * Test that when the bulkhead is full, a BulkheadException is thrown
+     * 
+     * @throws InterruptedException if the test is interrupted
+     */
+    @Test
+    public void testBulkheadExceptionThrownWhenQueueFullSemaphore() throws InterruptedException {
+        BulkheadTaskManager manager = new BulkheadTaskManager();
+        try {
+            // Fill the bulkhead
+            for (int i = 0; i < 10; i++) {
+                BulkheadTask task = manager.startTask(bhBeanMethodSemaphoreDefault);
+                task.assertStarting();
+            }
+            
+            // Try to run one more (should get a bulkhead exception)
+            BulkheadTask task = manager.startTask(bhBeanMethodSemaphoreDefault);
+            task.assertNotStarting();
+            
+            Exceptions.expect(BulkheadException.class, task.getResultFuture());
+        }
+        finally {
+            manager.cleanup();
+        }
+    }
+
 
     /**
      * Run a number of Callable's in parallel

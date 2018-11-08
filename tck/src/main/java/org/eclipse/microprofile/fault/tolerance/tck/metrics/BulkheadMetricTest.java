@@ -18,8 +18,8 @@
  */
 package org.eclipse.microprofile.fault.tolerance.tck.metrics;
 
-import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.Exceptions.expectBulkheadException;
 import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricComparator.approxMillis;
+import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expectBulkheadException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
@@ -31,8 +31,8 @@ import java.util.concurrent.Future;
 
 import javax.inject.Inject;
 
-import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.AsyncCaller;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricGetter;
+import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncCaller;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.eclipse.microprofile.metrics.Histogram;
 import org.eclipse.microprofile.metrics.Snapshot;
@@ -201,7 +201,7 @@ public class BulkheadMetricTest extends Arquillian {
         
         Future<?> f3 = bulkheadBean.waitForAsync(waitingFuture);
         Future<?> f4 = bulkheadBean.waitForAsync(waitingFuture);
-        expectBulkheadException(() -> bulkheadBean.waitForAsync(waitingFuture));
+        expectBulkheadException(bulkheadBean.waitForAsync(waitingFuture));
         
         assertThat("concurrent executions", m.getBulkheadConcurrentExecutions().get(), is(2L));
         assertThat("queue population", m.getBulkheadQueuePopulation().get(), is(2L));

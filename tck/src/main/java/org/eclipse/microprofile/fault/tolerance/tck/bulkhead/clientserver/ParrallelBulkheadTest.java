@@ -75,7 +75,7 @@ public class ParrallelBulkheadTest implements Callable<Future> {
             Utils.log("Might expect a Bulkhead exception from some tests : " + b.toString() + b.getMessage());
         }
         catch( Throwable t ){
-            Assert.fail("Unexpected exception" +  t.getMessage() );
+            Assert.fail("Unexpected exception: " + t.toString(), t);
         }
         return result;
     }
