@@ -268,7 +268,8 @@ public class FallbackTest extends Arquillian {
             String result = fallbackOnlyClient.serviceA();
             Assert.assertTrue(result.contains("serviceA"),
                 "The message should be \"fallback for serviceA\"");
-        } catch (RuntimeException ex) {
+        } 
+        catch (RuntimeException ex) {
             Assert.fail("serviceA should not throw a RuntimeException in testStandaloneClassLevelFallback");
         }
         Assert.assertEquals(fallbackOnlyClient.getCounterForInvokingServiceA(), 1, "The getCounterForInvokingServiceA should be 1");
@@ -285,7 +286,8 @@ public class FallbackTest extends Arquillian {
             String result = fallbackOnlyClient.serviceB();
             Assert.assertTrue(result.contains("serviceB"),
                 "The message should be \"fallback method for serviceB\"");
-        } catch (RuntimeException ex) {
+        } 
+        catch (RuntimeException ex) {
             Assert.fail("serviceB should not throw a RuntimeException in testStandaloneMethodFallback");
         }
         Assert.assertEquals(fallbackOnlyClient.getCounterForInvokingServiceB(), 1, "The getCounterForInvokingServiceB should be 1");
