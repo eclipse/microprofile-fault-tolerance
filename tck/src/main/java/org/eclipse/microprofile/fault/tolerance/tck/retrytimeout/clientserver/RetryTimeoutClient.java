@@ -19,9 +19,14 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.retrytimeout.clientserver;
 
+import static org.testng.Assert.fail;
+
 import javax.enterprise.context.RequestScoped;
+
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.faulttolerance.Timeout;
+import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
+import org.eclipse.microprofile.faulttolerance.exceptions.TimeoutException;
 
 /**
  * A client to demonstrate the combination of the @Retry and @Timeout annotations.
@@ -33,11 +38,27 @@ import org.eclipse.microprofile.faulttolerance.Timeout;
 public class RetryTimeoutClient {
 
     private int counterForInvokingServiceA = 0;
+    private int counterForInvokingServiceWithoutRetryOn = 0;
+    private int counterForInvokingServiceWithAbortOn = 0;
 
     public int getCounterForInvokingServiceA() {
         return counterForInvokingServiceA;
     }
 
+    public int getCounterForInvokingServiceWithoutRetryOn() {
+        return counterForInvokingServiceWithoutRetryOn;
+    }
+
+    public int getCounterForInvokingServiceWithAbortOn() {
+        return counterForInvokingServiceWithAbortOn;
+    }
+
+    /**
+     * Times out after 500ms, retries once
+     * 
+     * @param timeToSleep time this method should sleep for in ms 
+     * @return {@code null}
+     */
     @Timeout(500)
     @Retry(maxRetries = 1)
     public String serviceA(long timeToSleep) {
@@ -48,6 +69,46 @@ public class RetryTimeoutClient {
         } 
         catch (InterruptedException e) {
             //expected
+        }
+        return null;
+    }
+    
+    /**
+     * Sleeps for 1000ms, times out after 500ms, retries once on BulkheadException
+     * <p>
+     * Method will never throw a BulkheadException so the Retry annotation should have no effect
+     * 
+     * @return {@code null}
+     */
+    @Timeout(500)
+    @Retry(maxRetries = 1, retryOn = BulkheadException.class)
+    public String serviceWithoutRetryOn() {
+        try {
+            counterForInvokingServiceWithoutRetryOn++;
+            Thread.sleep(1000);
+            fail("Timeout did not interrupt");
+        }
+        catch (InterruptedException e) {
+            // expected
+        }
+        return null;
+    }
+    
+    /**
+     * Sleeps for 1000ms, times out after 500ms, retries once on anything but TimeoutException
+     * 
+     * @return {@code null}
+     */
+    @Timeout(500)
+    @Retry(maxRetries = 1, abortOn = TimeoutException.class)
+    public String serviceWithAbortOn() {
+        try {
+            counterForInvokingServiceWithAbortOn++;
+            Thread.sleep(1000);
+            fail("Timeout did not interrupt");
+        }
+        catch (InterruptedException e) {
+            // expected
         }
         return null;
     }

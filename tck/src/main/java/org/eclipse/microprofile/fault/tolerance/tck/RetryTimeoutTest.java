@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2016-2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2016-2018 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,6 +19,9 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
+
 import javax.inject.Inject;
 
 import org.eclipse.microprofile.fault.tolerance.tck.retrytimeout.clientserver.RetryTimeoutClient;
@@ -35,6 +38,7 @@ import org.testng.annotations.Test;
  * Test the combination of the @Retry and @Timeout annotations.
  * 
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
+ * @author <a href="mailto:anrouse@uk.ibm.com">Andrew Rouse</a>
  *
  */
 public class RetryTimeoutTest extends Arquillian {
@@ -101,4 +105,37 @@ public class RetryTimeoutTest extends Arquillian {
 
         Assert.assertEquals(clientForRetryTimeout.getCounterForInvokingServiceA(), 2, "The execution count should be 2 (1 retry + 1)");
     }
+    
+    /**
+     * Test that a service is not retried if TimeoutException is not included in the retryOn attribute
+     */
+    @Test
+    public void testRetryWithoutRetryOn() {
+        try {
+            clientForRetryTimeout.serviceWithoutRetryOn();
+            fail("Timeout exception not thrown");
+        }
+        catch (TimeoutException e) {
+            // expected
+        }
+        
+        assertEquals(clientForRetryTimeout.getCounterForInvokingServiceWithoutRetryOn(), 1, "The execution count should be 1 (no retries)");
+    }
+    
+    /**
+     * Test that a service is not retried if TimeoutException is included in the abortOn attribute
+     */
+    @Test
+    public void testRetryWithAbortOn() {
+        try {
+            clientForRetryTimeout.serviceWithAbortOn();
+            fail("Timeout exception not thrown");
+        }
+        catch (TimeoutException e) {
+            // expected
+        }
+        
+        assertEquals(clientForRetryTimeout.getCounterForInvokingServiceWithAbortOn(), 1, "The execution count should be 1 (no retries)");
+    }
+
 }

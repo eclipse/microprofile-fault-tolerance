@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,29 +19,31 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 
-import java.time.temporal.ChronoUnit;
 import java.util.concurrent.Future;
 
 import javax.enterprise.context.ApplicationScoped;
 
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
+import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 import org.eclipse.microprofile.faulttolerance.Retry;
 
 /**
- * A simple method level synchronous @Bulkhead bean that has a retry option.
- *
- * @author Gordon Hutchison
+ * Test to ensure that the executions which are retried join the back of the queue
+ * <p>
+ * Has a bulkhead of size 1 and a queue size of 5
+ * <p>
+ * Retries 1 time on thrown TestException with no delay
  */
+@Retry(maxRetries = 1, delay = 0, jitter = 0, retryOn = TestException.class)
+@Bulkhead(value = 1, waitingTaskQueue = 5)
+@Asynchronous
 @ApplicationScoped
-public class Bulkhead55RapidRetry10MethodSynchBean implements BulkheadTestBackend {
-
+public class BulkheadRetryQueueAsyncBean implements BulkheadTestBackend {
+    
     @Override
-    @Bulkhead(waitingTaskQueue = 5, value = 5)
-    @Retry(delay = 1, delayUnit = ChronoUnit.MILLIS, maxRetries = 10, maxDuration=999999)
     public Future test(BackendTestDelegate action) throws InterruptedException {
-        Utils.log("in business method of bean " + this.getClass().getName());
         return action.perform();
     }
 
-};
+}

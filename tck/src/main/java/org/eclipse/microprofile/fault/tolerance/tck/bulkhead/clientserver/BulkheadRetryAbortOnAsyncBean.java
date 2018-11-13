@@ -17,28 +17,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.eclipse.microprofile.fault.tolerance.tck.metrics.util;
+package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
 import javax.enterprise.context.ApplicationScoped;
 
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
+import org.eclipse.microprofile.faulttolerance.Bulkhead;
+import org.eclipse.microprofile.faulttolerance.Retry;
+import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
 
+/**
+ * Test to ensure that retries do not occur if BulkheadException is included in abortOn attribute.
+ * <p>
+ * Has a bulkhead of size 1 and a queue size of 1
+ * <p>
+ * Retries 1 time on any exception except BulkheadException with 1 second delay
+ */
+@Retry(maxRetries = 1, delay = 1000, jitter = 0, abortOn = BulkheadException.class)
+@Bulkhead(value = 1, waitingTaskQueue = 1)
+@Asynchronous
 @ApplicationScoped
-public class AsyncCaller {
-
-    /**
-     * Run a runnable asynchronously
-     *
-     * @param runnable task to execute
-     * @return a completed future set to null
-     */
-    @Asynchronous
-    public Future<Void> run(Runnable runnable) {
-        runnable.run();
-        return CompletableFuture.completedFuture(null);
+public class BulkheadRetryAbortOnAsyncBean implements BulkheadTestBackend {
+    
+    @Override
+    public Future test(BackendTestDelegate action) throws InterruptedException {
+        return action.perform();
     }
 
 }

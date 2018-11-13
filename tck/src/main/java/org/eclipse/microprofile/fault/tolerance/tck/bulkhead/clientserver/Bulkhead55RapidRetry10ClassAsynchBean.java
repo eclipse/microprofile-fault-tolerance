@@ -28,7 +28,6 @@ import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 import org.eclipse.microprofile.faulttolerance.Retry;
-import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
 
 /**
  * A simple method level Asynchronous @Bulkhead bean that has a retry option.
@@ -38,8 +37,7 @@ import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
 @ApplicationScoped
 @Bulkhead(waitingTaskQueue = 5, value = 5)
 @Asynchronous
-@Retry(retryOn =
-{ BulkheadException.class }, delay = 1, delayUnit = ChronoUnit.MICROS, maxRetries = 10, maxDuration=999999)
+@Retry(delay = 1, delayUnit = ChronoUnit.MICROS, maxRetries = 10, maxDuration=999999)
 public class Bulkhead55RapidRetry10ClassAsynchBean implements BulkheadTestBackend {
 
     public Future test(BackendTestDelegate action) throws InterruptedException {

@@ -19,6 +19,8 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead;
 
+import static org.testng.Assert.fail;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.Future;
@@ -41,31 +43,28 @@ public class Utils {
 
     /**
      * Common function to check the returned results of the tests
+     * <p>
+     * This method waits for all backends to complete successfully.
+     * <p>
+     * If one or more of the results throws an ExecutionException, the first
+     * exception thrown will be propagated, after waiting for all results to
+     * complete.
      * 
      * @param number number of futures in results
      * @param results futures of background processes
      */
     static void handleResults(int number, Future[] results) {
-        try {
-            boolean done = false;
-            // Wait for all the backends to finish
-            while (!done) {
-                done = true;
-                for (int i = 0; i < number; i++) {
-                    boolean thisDone = (results[i] == null || results[i].get() == null || ((Future) results[i]).isDone()
-                            || results[i].get() instanceof Future && ((Future) results[i].get()).isDone());
-                    done = done && thisDone;
-                    
-                    log("Result for " + i + (thisDone ? " (Done)" : " (NotDone)") + " is "
-                            + ((results[i] == null || results[i].get() == null)?"null":""+(((Future) results[i]).get() instanceof Future
-                                    ? ((Future) ((Future) results[i]).get()).get() : ((Future) results[i]).get())));
-
+        // Wait for all the backends to finish
+        for (int i = 0; i < number; i++) {
+            try {
+                Object result = results[i].get(); // Waits for completion
+                if (result instanceof Future) {
+                    result = ((Future) result).get();
                 }
-                Thread.sleep(1000);
             }
-        }
-        catch (Throwable e) {
-            log(e.toString());
+            catch (Exception e) {
+                fail("Error reported from result " + i, e);
+            }
         }
     }
 
@@ -79,27 +78,25 @@ public class Utils {
      * @param maxSimultaneousWorkers simultaneous workers
      * @param expectedTasksScheduled expected tasks scheduled
      * @param td - used to hold expected results
+     * @return the array of Futures representing the results of each call to {@code test}
      */
-    public static void loop(int iterations, BulkheadTestBackend test, int maxSimultaneousWorkers, int expectedTasksScheduled, TestData td ) {
+    public static Future[] loop(int iterations, BulkheadTestBackend test, int maxSimultaneousWorkers, int expectedTasksScheduled, TestData td ) {
         Future[] results = new Future[iterations];
-        try {
-            td.setExpectedMaxSimultaneousWorkers(maxSimultaneousWorkers);
-            td.setExpectedInstances(iterations);
-            td.setExpectedTasksScheduled(expectedTasksScheduled);
+        td.setExpectedMaxSimultaneousWorkers(maxSimultaneousWorkers);
+        td.setExpectedInstances(iterations);
+        td.setExpectedTasksScheduled(expectedTasksScheduled);
 
-            try {
-                for (int i = 0; i < iterations; i++) {
-                    Utils.log("Starting test " + i);
-                    results[i] = test.test(new Checker(1 * 1000, td));
-                }
-            }
-            catch (InterruptedException e1) {
-                Assert.fail("Unexpected interruption", e1);
+        try {
+            for (int i = 0; i < iterations; i++) {
+                Utils.log("Starting test " + i);
+                results[i] = test.test(new Checker(1 * 1000, td));
             }
         }
-        finally {
-            Utils.handleResults(iterations, results);
+        catch (InterruptedException e1) {
+            Assert.fail("Unexpected interruption", e1);
         }
+        
+        return results;
     }
 
     /**

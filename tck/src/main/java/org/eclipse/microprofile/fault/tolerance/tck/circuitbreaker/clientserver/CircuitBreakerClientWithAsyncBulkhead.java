@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -17,31 +17,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
+package org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver;
 
-import java.time.temporal.ChronoUnit;
 import java.util.concurrent.Future;
 
-import javax.enterprise.context.ApplicationScoped;
-
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BackendTestDelegate;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadTestBackend;
+import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
-import org.eclipse.microprofile.faulttolerance.Retry;
+import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 
 /**
- * A simple method level synchronous @Bulkhead bean that has a retry option.
- *
- * @author Gordon Hutchison
+ * Client bean with CircuitBreaker, Bulkhead and Asynchronous
  */
-@ApplicationScoped
-public class Bulkhead55RapidRetry10MethodSynchBean implements BulkheadTestBackend {
-
-    @Override
-    @Bulkhead(waitingTaskQueue = 5, value = 5)
-    @Retry(delay = 1, delayUnit = ChronoUnit.MILLIS, maxRetries = 10, maxDuration=999999)
+@CircuitBreaker(requestVolumeThreshold = 3, failureRatio = 1.0, delay = 50000)
+@Bulkhead(value = 1, waitingTaskQueue = 1)
+@Asynchronous
+public class CircuitBreakerClientWithAsyncBulkhead implements BulkheadTestBackend {
+    
     public Future test(BackendTestDelegate action) throws InterruptedException {
-        Utils.log("in business method of bean " + this.getClass().getName());
         return action.perform();
     }
-
-};
+}
