@@ -58,7 +58,7 @@ public class FaultToleranceInterceptorTest extends Arquillian {
     private AtomicInteger methodCounter;
 
     @Inject
-    @OrderId("EarlyOrderFtInterceptor")
+    @OrderId("Ordering")
     private Queue<String> orderKeeper;
 
     @Inject
@@ -88,7 +88,9 @@ public class FaultToleranceInterceptorTest extends Arquillian {
     public void testAsync() throws InterruptedException, ExecutionException {
         Future<String> result = testInterceptor.asyncGetString();
         assertEquals(result.get(), "OK");
-        assertEquals(orderKeeper.peek(), "EarlyOrderFtInterceptor");
+        orderKeeper.poll();
+        String [] expectedOrder = {"EarlyOrderFtInterceptor","LateOrderFtInterceptor","asyncGetString"};
+        assertEquals(orderKeeper.toArray(), expectedOrder);
     }
 
     @Test

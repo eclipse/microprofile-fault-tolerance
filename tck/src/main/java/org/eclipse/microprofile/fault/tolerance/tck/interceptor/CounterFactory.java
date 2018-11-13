@@ -53,7 +53,7 @@ public class CounterFactory {
 
 
     private final Map<String, AtomicInteger> counters = new HashMap<>();
-    private Queue<String> orderQueue = new ConcurrentLinkedQueue<>();
+    private final Queue<String> orderQueue = new ConcurrentLinkedQueue<>();
 
 
     @Qualifier
