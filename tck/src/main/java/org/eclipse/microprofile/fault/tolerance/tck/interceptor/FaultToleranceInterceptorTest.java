@@ -19,25 +19,21 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.interceptor;
 
-
-import org.eclipse.microprofile.fault.tolerance.tck.interceptor.CounterFactory.CounterId;
-import org.eclipse.microprofile.fault.tolerance.tck.interceptor.CounterFactory.OrderId;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.testng.annotations.AfterTest;
 import org.testng.annotations.Test;
 
 import javax.inject.Inject;
-import java.util.Queue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.testng.Assert.fail;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
 
 /**
  * A Client to demonstrate the interceptors ordering behavior of FT and CDI annotations
@@ -46,29 +42,16 @@ import static org.testng.Assert.assertEquals;
 public class FaultToleranceInterceptorTest extends Arquillian {
 
     @Inject
-    @CounterId("EarlyFtInterceptor")
-    private AtomicInteger earlyInterceptorCounter;
-
-    @Inject
-    @CounterId("LateFtInterceptor")
-    private AtomicInteger lateInterceptorCounter;
-
-    @Inject
-    @CounterId("serviceA")
-    private AtomicInteger methodCounter;
-
-    @Inject
-    @OrderId("Ordering")
-    private Queue<String> orderKeeper;
-
-    @Inject
     private InterceptorComponent testInterceptor;
+
+    @Inject
+    private OrderQueueProducer orderFactory;
 
     @Deployment
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
             .create(JavaArchive.class, "interceptorFtCdi.jar")
-            .addClasses(InterceptorComponent.class, EarlyFtInterceptor.class, LateFtInterceptor.class, CounterFactory.class)
+            .addClasses(InterceptorComponent.class, EarlyFtInterceptor.class, LateFtInterceptor.class, OrderQueueProducer.class)
              .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
             .as(JavaArchive.class);
 
@@ -84,27 +67,34 @@ public class FaultToleranceInterceptorTest extends Arquillian {
      * @throws InterruptedException
      * @throws ExecutionException
      */
-    @Test
+    @Test(priority = 1)
     public void testAsync() throws InterruptedException, ExecutionException {
         Future<String> result = testInterceptor.asyncGetString();
         assertEquals(result.get(), "OK");
-        orderKeeper.poll();
         String [] expectedOrder = {"EarlyOrderFtInterceptor","LateOrderFtInterceptor","asyncGetString"};
-        assertEquals(orderKeeper.toArray(), expectedOrder);
+        assertEquals(orderFactory.getOrderQueue().toArray(), expectedOrder);
     }
 
-    @Test
+    @Test(priority = 2)
     public void testRetryInterceptors() {
         try {
-            testInterceptor.serviceA();
+            testInterceptor.serviceRetryA();
             fail("Exception not thrown");
         }
         catch (Exception e) {
 
         } // Expected
 
-        assertEquals(methodCounter.get(), 6, "methodCounter"); // Method called six times (1 + 5 retries)
-        assertEquals(earlyInterceptorCounter.get(), 2, "earlyInterceptorCounter");
-        assertEquals(lateInterceptorCounter.get(), 7, "lateInterceptorCounter");
+        String [] expectedOrder = {"EarlyOrderFtInterceptor","LateOrderFtInterceptor","serviceRetryA",
+            "LateOrderFtInterceptor","serviceRetryA"}; //executes 1 more time the later interceptor and the bean method
+        // annotated with maxRetries = 1
+        assertEquals(orderFactory.getOrderQueue().toArray(), expectedOrder);
+    }
+
+    @AfterTest
+    public void clearResources() {
+        if (orderFactory != null) { //validate if not null because after the last test is called the context is cleared
+            orderFactory.getOrderQueue().clear();
+        }
     }
 }

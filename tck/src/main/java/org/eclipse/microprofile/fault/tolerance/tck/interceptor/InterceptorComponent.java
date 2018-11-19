@@ -19,8 +19,6 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.interceptor;
 
-import org.eclipse.microprofile.fault.tolerance.tck.interceptor.CounterFactory.CounterId;
-import org.eclipse.microprofile.fault.tolerance.tck.interceptor.CounterFactory.OrderId;
 import org.eclipse.microprofile.fault.tolerance.tck.interceptor.EarlyFtInterceptor.InterceptEarly;
 import org.eclipse.microprofile.fault.tolerance.tck.interceptor.LateFtInterceptor.InterceptLate;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
@@ -29,10 +27,8 @@ import org.testng.TestException;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Component to show the CDI interceptor ordering with FT annotations
@@ -42,19 +38,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class InterceptorComponent {
 
     @Inject
-    @CounterId("serviceA")
-    private AtomicInteger serviceACounter;
-
-    @Inject
-    @OrderId("asyncGetString")
-    private Queue<String> asyncStringOrder;
-
+    private OrderQueueProducer orderFactory;
 
     @InterceptEarly
     @InterceptLate
-    @Retry(maxRetries = 5)
-    public String serviceA() {
-        serviceACounter.incrementAndGet();
+    @Retry(maxRetries = 1)
+    public String serviceRetryA() {
+        orderFactory.getOrderQueue().add("serviceRetryA");
         throw new TestException("retryGetString failed");
     }
 
@@ -62,6 +52,7 @@ public class InterceptorComponent {
     @InterceptLate
     @Asynchronous
     public Future<String> asyncGetString() {
+        orderFactory.getOrderQueue().add("asyncGetString");
         return CompletableFuture.completedFuture("OK");
     }
 }
