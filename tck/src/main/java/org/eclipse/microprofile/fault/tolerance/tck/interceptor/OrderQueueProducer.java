@@ -20,13 +20,13 @@
 package org.eclipse.microprofile.fault.tolerance.tck.interceptor;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Produces;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * Creates the producer method that allows access to the order queue.
+ * Creates the order queue that will be used by the interceptors
+ * and the test bean to store the order in which this components are called.
  * @author carlosdlr
  */
 
@@ -36,11 +36,10 @@ public class OrderQueueProducer {
     private final Queue<String> orderQueue = new ConcurrentLinkedQueue<>();
 
     /**
-     * producer method that will be called by other beans when is needed
+     * get the order queue that stores the interceptors call order.
      * @return order queue
      */
-    @Produces
-    public synchronized Queue<String> getOrderQueue() {
+    public  Queue<String> getOrderQueue() {
         return orderQueue;
     }
 }

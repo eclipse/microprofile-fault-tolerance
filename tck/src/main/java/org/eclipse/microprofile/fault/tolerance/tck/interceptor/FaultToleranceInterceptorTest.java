@@ -25,7 +25,7 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.testng.annotations.AfterTest;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 import javax.inject.Inject;
@@ -67,7 +67,7 @@ public class FaultToleranceInterceptorTest extends Arquillian {
      * @throws InterruptedException
      * @throws ExecutionException
      */
-    @Test(priority = 1)
+    @Test
     public void testAsync() throws InterruptedException, ExecutionException {
         Future<String> result = testInterceptor.asyncGetString();
         assertEquals(result.get(), "OK");
@@ -75,7 +75,7 @@ public class FaultToleranceInterceptorTest extends Arquillian {
         assertEquals(orderFactory.getOrderQueue().toArray(), expectedOrder);
     }
 
-    @Test(priority = 2)
+    @Test
     public void testRetryInterceptors() {
         try {
             testInterceptor.serviceRetryA();
@@ -91,7 +91,7 @@ public class FaultToleranceInterceptorTest extends Arquillian {
         assertEquals(orderFactory.getOrderQueue().toArray(), expectedOrder);
     }
 
-    @AfterTest
+    @AfterMethod
     public void clearResources() {
         if (orderFactory != null) { //validate if not null because after the last test is called the context is cleared
             orderFactory.getOrderQueue().clear();
