@@ -64,8 +64,8 @@ public class FaultToleranceInterceptorTest extends Arquillian {
      * annotated with Asynchronous FT annotation, using a queue type FIFO (first-in-first-out).
      * The head of the queue is that element that has been on the queue the longest time.
      * In this case is validating that the early interceptor is executed at first.
-     * @throws InterruptedException
-     * @throws ExecutionException
+     * @throws InterruptedException if the current thread was interrupted while waiting
+     * @throws ExecutionException if the computation threw an exception
      */
     @Test
     public void testAsync() throws InterruptedException, ExecutionException {
@@ -82,8 +82,8 @@ public class FaultToleranceInterceptorTest extends Arquillian {
             fail("Exception not thrown");
         }
         catch (Exception e) {
-
-        } // Expected
+            assertEquals(e.getMessage().trim(), "retryGetString failed");
+        }
 
         String [] expectedOrder = {"EarlyOrderFtInterceptor","LateOrderFtInterceptor","serviceRetryA",
             "LateOrderFtInterceptor","serviceRetryA"}; //executes 1 more time the later interceptor and the bean method
