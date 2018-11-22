@@ -44,6 +44,8 @@ include::architecture.asciidoc[]
 
 include::relationship.asciidoc[]
 
+include::fault-tolerance-interceptor.asciidoc[]
+
 include::execution.asciidoc[]
 
 include::asynchronous.asciidoc[]
