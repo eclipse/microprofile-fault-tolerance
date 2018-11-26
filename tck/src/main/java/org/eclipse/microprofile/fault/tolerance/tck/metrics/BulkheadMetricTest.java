@@ -160,7 +160,7 @@ public class BulkheadMetricTest extends Arquillian {
 
         expectBulkheadException(f3);
         
-        Thread.sleep(3000);
+        Thread.sleep(1000);
         
         waitingFuture.complete(null);
         f1.get();
@@ -170,21 +170,21 @@ public class BulkheadMetricTest extends Arquillian {
         Snapshot snap = executionTimes.getSnapshot();
         
         assertThat("histogram count", executionTimes.getCount(), is(2L)); // Rejected executions not recorded in histogram
-        assertThat("median", snap.getMedian(), approxMillis(3000));
-        assertThat("mean", snap.getMean(), approxMillis(3000));
+        assertThat("median", snap.getMedian(), approxMillis(1000));
+        assertThat("mean", snap.getMean(), approxMillis(1000));
         
         // Now let's put some quick results through the bulkhead so we can check the quantiles
         for (int i = 0; i < 10; i++) {
             bulkheadBean.waitForHistogram(CompletableFuture.completedFuture(null));
         }
         
-        // Should have ~0ms * 10 and ~3000ms * 2
+        // Should have ~0ms * 10 and ~1000ms * 2
         // Note approxMillis(0) allows up to 100ms
         snap = executionTimes.getSnapshot();
         assertThat("histogram count", executionTimes.getCount(), is(12L));
         assertThat("median", snap.getMedian(), approxMillis(0));
         assertThat("75th percentile", snap.get75thPercentile(), approxMillis(0));
-        assertThat("99th percentile", snap.get99thPercentile(), approxMillis(3000));
+        assertThat("99th percentile", snap.get99thPercentile(), approxMillis(1000));
     }
     
     @Test
