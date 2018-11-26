@@ -51,7 +51,10 @@ public class RetryTest extends Arquillian {
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
                 .create(JavaArchive.class, "ftRetry.jar")
-                .addClasses(RetryClientForMaxRetries.class, RetryClientWithDelay.class, RetryClassLevelClientForMaxRetries.class)
+                .addClasses(RetryClientForMaxRetries.class,
+                            RetryClientWithDelay.class,
+                            RetryClassLevelClientForMaxRetries.class,
+                            RetryClientWithNoDelayAndJiter.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                 .as(JavaArchive.class);
 
