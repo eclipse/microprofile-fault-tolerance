@@ -154,7 +154,7 @@ Similarly, the sum of `ft.<name>.circuitbreaker.open.total`, `ft.<name>.circuitb
 
 |`ft.<name>.bulkhead.executionDuration`
 | Histogram | Nanoseconds
-| Histogram of method execution times. This does not include any time spent waiting in the bulkhead queue.
+| Histogram of the time that executions spend holding a semaphore permit or using one of the threads from the thread pool
 
 |`ft.<name>.bulkhead.waitingQueue.population`*
 | Gauge<Long> | None
