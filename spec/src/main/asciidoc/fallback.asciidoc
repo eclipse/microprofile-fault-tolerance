@@ -89,6 +89,8 @@ When `fallbackMethod` is used a `FaultToleranceDefinitionException` will be thro
 * The named fallback method must be on the same class, a superclass or an implemented interface of the class which declares the annotated method
 * The named fallback method must have the same parameter types as the annotated method (after resolving any type variables)
 * The named fallback method must have the same return type as the annotated method (after resolving any type variables)
+* If the named fallback method is not declared by the same class as the annotated method, it must not be `private`
+* If the named fallback method is not in the same package as the annotated method, it must be either `protected` or `public`
 
 The parameter `value` and `fallbackMethod` on `@Fallback` cannot be specified at the same time.
 Otherwise, the `FaultToleranceDefinitionException` exception will be thrown.
