@@ -36,7 +36,7 @@ import org.testng.annotations.Test;
 /**
  * Test for private fallback method in the same class
  */
-public class FallbackMethodPrivate extends Arquillian {
+public class FallbackMethodPrivateTest extends Arquillian {
     
     @Deployment
     public static WebArchive deploy() {

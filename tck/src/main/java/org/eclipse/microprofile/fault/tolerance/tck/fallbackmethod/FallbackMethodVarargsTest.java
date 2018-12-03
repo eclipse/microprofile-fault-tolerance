@@ -24,8 +24,7 @@ import static org.testng.Assert.assertEquals;
 
 import javax.inject.Inject;
 
-import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodAbstractBeanA;
-import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodAbstractBeanB;
+import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodVarargsBean;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -35,27 +34,27 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
 /**
- * Test for an abstract fallback method which is implemented by a subclass
+ * Test for a fallback methods with a varargs parameter
  */
-public class FallbackMethodAbstract extends Arquillian {
-    
+public class FallbackMethodVarargsTest extends Arquillian {
+
     @Deployment
     public static WebArchive deploy() {
-        JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodAbstract.jar")
-                .addClasses(FallbackMethodAbstractBeanA.class, FallbackMethodAbstractBeanB.class)
+        JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodVarargs.jar")
+                .addClasses(FallbackMethodVarargsBean.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
         
         WebArchive war = ShrinkWrap
-                .create(WebArchive.class, "ftFallbackMethodAbstract.war")
+                .create(WebArchive.class, "ftFallbackMethodVarargs.war")
                 .addAsLibrary(testJar);
         return war;
     }
     
-    @Inject private FallbackMethodAbstractBeanB bean;
+    @Inject private FallbackMethodVarargsBean bean;
     
     @Test
-    public void fallbackMethodAbstract() {
+    public void fallbackMethodVarargs() {
         assertEquals(bean.method(1, 2L), "fallback");
     }
-
+    
 }

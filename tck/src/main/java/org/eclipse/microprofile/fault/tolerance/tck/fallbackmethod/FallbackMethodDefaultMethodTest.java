@@ -24,8 +24,8 @@ import static org.testng.Assert.assertEquals;
 
 import javax.inject.Inject;
 
-import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodGenericArrayBeanA;
-import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodGenericArrayBeanB;
+import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodDefaultMethodA;
+import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodDefaultMethodB;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -35,27 +35,28 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
 /**
- * Test for a fallback method with a generic array parameter
+ * Test for a fallback method defined as a default method on an interface
  */
-public class FallbackMethodGenericArray extends Arquillian {
-
+public class FallbackMethodDefaultMethodTest extends Arquillian {
+    
     @Deployment
     public static WebArchive deploy() {
-        JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodGenericArray.jar")
-                .addClasses(FallbackMethodGenericArrayBeanA.class, FallbackMethodGenericArrayBeanB.class)
+        JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodDefaultMethod.jar")
+                .addClasses(FallbackMethodDefaultMethodA.class,
+                            FallbackMethodDefaultMethodB.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
         
         WebArchive war = ShrinkWrap
-                .create(WebArchive.class, "ftFallbackMethodGenericArray.war")
+                .create(WebArchive.class, "ftFallbackMethodDefaultMethod.war")
                 .addAsLibrary(testJar);
         return war;
     }
     
-    @Inject private FallbackMethodGenericArrayBeanA bean;
+    @Inject private FallbackMethodDefaultMethodA bean;
     
     @Test
-    public void fallbackMethodGenericArray() {
-        assertEquals(bean.method(new String[3][4]), "fallback");
+    public void fallbackMethodDefaultMethod() {
+        assertEquals(bean.method(1, 2L), "fallback");
     }
-    
+
 }

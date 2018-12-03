@@ -20,14 +20,10 @@
 
 package org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod;
 
-import static org.testng.Assert.assertEquals;
-
-import javax.inject.Inject;
-
-import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodGenericDeepBeanA;
-import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodGenericDeepBeanB;
-import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodGenericDeepBeanC;
+import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodWildcardNegativeBean;
+import org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException;
 import org.jboss.arquillian.container.test.api.Deployment;
+import org.jboss.arquillian.container.test.api.ShouldThrowException;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
@@ -36,29 +32,26 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
 /**
- * Test for a fallback method with a type variable parameter in a deeper class hierarchy
+ * Test that a fallback method with a bounded wildcard parameter cannot be called if the bounds do not match
  */
-public class FallbackMethodGenericDeep extends Arquillian {
-
+public class FallbackMethodWildcardNegativeTest extends Arquillian {
+    
     @Deployment
+    @ShouldThrowException(FaultToleranceDefinitionException.class)
     public static WebArchive deploy() {
-        JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodGenericDeep.jar")
-                .addClasses(FallbackMethodGenericDeepBeanA.class,
-                            FallbackMethodGenericDeepBeanB.class,
-                            FallbackMethodGenericDeepBeanC.class)
+        JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodSuperclassPrivate.jar")
+                .addClass(FallbackMethodWildcardNegativeBean.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
         
         WebArchive war = ShrinkWrap
-                .create(WebArchive.class, "ftFallbackMethodGenericDeep.war")
+                .create(WebArchive.class, "ftFallbackMethodSuperclassPrivate.war")
                 .addAsLibrary(testJar);
         return war;
     }
     
-    @Inject private FallbackMethodGenericDeepBeanA bean;
-    
     @Test
-    public void fallbackMethodGenericDeep() {
-        assertEquals(bean.method(1, 2L), "fallback");
+    public void fallbackMethodWildcardNegative() {
+        // Nothing to test, deployment should throw exception
     }
-    
+
 }

@@ -24,9 +24,9 @@ import static org.testng.Assert.assertEquals;
 
 import javax.inject.Inject;
 
-import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodInterfaceBeanA;
-import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodInterfaceBeanB;
-import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodInterfaceBeanC;
+import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodGenericDeepBeanA;
+import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodGenericDeepBeanB;
+import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodGenericDeepBeanC;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -36,29 +36,29 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
 /**
- * Test for a fallback method defined on an interface and implemented in a subclass
+ * Test for a fallback method with a type variable parameter in a deeper class hierarchy
  */
-public class FallbackMethodInterface extends Arquillian {
-    
+public class FallbackMethodGenericDeepTest extends Arquillian {
+
     @Deployment
     public static WebArchive deploy() {
-        JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodInterface.jar")
-                .addClasses(FallbackMethodInterfaceBeanA.class,
-                            FallbackMethodInterfaceBeanB.class,
-                            FallbackMethodInterfaceBeanC.class)
+        JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodGenericDeep.jar")
+                .addClasses(FallbackMethodGenericDeepBeanA.class,
+                            FallbackMethodGenericDeepBeanB.class,
+                            FallbackMethodGenericDeepBeanC.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
         
         WebArchive war = ShrinkWrap
-                .create(WebArchive.class, "ftFallbackMethodInterface.war")
+                .create(WebArchive.class, "ftFallbackMethodGenericDeep.war")
                 .addAsLibrary(testJar);
         return war;
     }
     
-    @Inject private FallbackMethodInterfaceBeanB bean;
+    @Inject private FallbackMethodGenericDeepBeanA bean;
     
     @Test
-    public void fallbackMethodInterface() {
+    public void fallbackMethodGenericDeep() {
         assertEquals(bean.method(1, 2L), "fallback");
     }
-
+    
 }

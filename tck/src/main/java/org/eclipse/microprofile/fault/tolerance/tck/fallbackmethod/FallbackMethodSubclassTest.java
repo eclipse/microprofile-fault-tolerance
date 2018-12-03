@@ -20,13 +20,11 @@
 
 package org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod;
 
-import static org.testng.Assert.assertEquals;
-
-import javax.inject.Inject;
-
-import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodGenericAbstractBeanA;
-import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodGenericAbstractBeanB;
+import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodSubclassBeanA;
+import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodSubclassBeanB;
+import org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException;
 import org.jboss.arquillian.container.test.api.Deployment;
+import org.jboss.arquillian.container.test.api.ShouldThrowException;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
@@ -35,27 +33,26 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
 /**
- * Test for an abstract fallback method on a generic class
+ * Test that a fallback method defined in a subclass cannot be called
  */
-public class FallbackMethodGenericAbstract extends Arquillian {
-
+public class FallbackMethodSubclassTest extends Arquillian {
+    
     @Deployment
+    @ShouldThrowException(FaultToleranceDefinitionException.class)
     public static WebArchive deploy() {
-        JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodGenericAbstract.jar")
-                .addClasses(FallbackMethodGenericAbstractBeanA.class, FallbackMethodGenericAbstractBeanB.class)
+        JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodSubclass.jar")
+                .addClasses(FallbackMethodSubclassBeanA.class, FallbackMethodSubclassBeanB.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
         
         WebArchive war = ShrinkWrap
-                .create(WebArchive.class, "ftFallbackMethodGenericAbstract.war")
+                .create(WebArchive.class, "ftFallbackMethodSubclass.war")
                 .addAsLibrary(testJar);
         return war;
     }
     
-    @Inject private FallbackMethodGenericAbstractBeanA bean;
-    
     @Test
-    public void fallbackMethodGenericAbstract() {
-        assertEquals(bean.method(1, 2L), "fallback");
+    public void fallbackMethodSubclass() {
+        // Nothing to test, deployment should throw exception
     }
-    
+
 }

@@ -24,8 +24,8 @@ import static org.testng.Assert.assertEquals;
 
 import javax.inject.Inject;
 
-import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodSuperclassBeanA;
-import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodSuperclassBeanB;
+import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodAbstractBeanA;
+import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodAbstractBeanB;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -35,26 +35,26 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
 /**
- * Test for protected fallback method on a superclass
+ * Test for an abstract fallback method which is implemented by a subclass
  */
-public class FallbackMethodSuperclass extends Arquillian {
+public class FallbackMethodAbstractTest extends Arquillian {
     
     @Deployment
     public static WebArchive deploy() {
-        JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodSuperclass.jar")
-                .addClasses(FallbackMethodSuperclassBeanA.class, FallbackMethodSuperclassBeanB.class)
+        JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodAbstract.jar")
+                .addClasses(FallbackMethodAbstractBeanA.class, FallbackMethodAbstractBeanB.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
         
         WebArchive war = ShrinkWrap
-                .create(WebArchive.class, "ftFallbackMethodSuperclass.war")
+                .create(WebArchive.class, "ftFallbackMethodAbstract.war")
                 .addAsLibrary(testJar);
         return war;
     }
     
-    @Inject private FallbackMethodSuperclassBeanA bean;
+    @Inject private FallbackMethodAbstractBeanB bean;
     
     @Test
-    public void fallbackMethodSuperclass() {
+    public void fallbackMethodAbstract() {
         assertEquals(bean.method(1, 2L), "fallback");
     }
 

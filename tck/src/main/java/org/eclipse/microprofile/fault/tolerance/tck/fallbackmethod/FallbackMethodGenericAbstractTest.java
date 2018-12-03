@@ -20,11 +20,13 @@
 
 package org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod;
 
-import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodOutOfPackageBeanA;
-import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.subpackage.FallbackMethodOutOfPackageBeanB;
-import org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException;
+import static org.testng.Assert.assertEquals;
+
+import javax.inject.Inject;
+
+import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodGenericAbstractBeanA;
+import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodGenericAbstractBeanB;
 import org.jboss.arquillian.container.test.api.Deployment;
-import org.jboss.arquillian.container.test.api.ShouldThrowException;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
@@ -33,26 +35,27 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
 /**
- * Test that a package scoped fallback method in a superclass from a different package cannot be called
+ * Test for an abstract fallback method on a generic class
  */
-public class FallbackMethodOutOfPackage extends Arquillian {
-    
+public class FallbackMethodGenericAbstractTest extends Arquillian {
+
     @Deployment
-    @ShouldThrowException(FaultToleranceDefinitionException.class)
     public static WebArchive deploy() {
-        JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodOutOfPackage.jar")
-                .addClasses(FallbackMethodOutOfPackageBeanA.class, FallbackMethodOutOfPackageBeanB.class)
+        JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodGenericAbstract.jar")
+                .addClasses(FallbackMethodGenericAbstractBeanA.class, FallbackMethodGenericAbstractBeanB.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
         
         WebArchive war = ShrinkWrap
-                .create(WebArchive.class, "ftFallbackMethodOutOfPackage.war")
+                .create(WebArchive.class, "ftFallbackMethodGenericAbstract.war")
                 .addAsLibrary(testJar);
         return war;
     }
     
+    @Inject private FallbackMethodGenericAbstractBeanA bean;
+    
     @Test
-    public void fallbackMethodOutOfPackage() {
-        // Nothing to test, deployment should throw exception
+    public void fallbackMethodGenericAbstract() {
+        assertEquals(bean.method(1, 2L), "fallback");
     }
-
+    
 }

@@ -20,12 +20,11 @@
 
 package org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod;
 
-import static org.testng.Assert.assertEquals;
-
-import javax.inject.Inject;
-
-import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodVarargsBean;
+import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodSuperclassPrivateBeanA;
+import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodSuperclassPrivateBeanB;
+import org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException;
 import org.jboss.arquillian.container.test.api.Deployment;
+import org.jboss.arquillian.container.test.api.ShouldThrowException;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
@@ -34,27 +33,26 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
 /**
- * Test for a fallback methods with a varargs parameter
+ * Test that a private fallback method defined in a superclass cannot be called
  */
-public class FallbackMethodVarargs extends Arquillian {
-
+public class FallbackMethodSuperclassPrivateTest extends Arquillian {
+    
     @Deployment
+    @ShouldThrowException(FaultToleranceDefinitionException.class)
     public static WebArchive deploy() {
-        JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodVarargs.jar")
-                .addClasses(FallbackMethodVarargsBean.class)
+        JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodSuperclassPrivate.jar")
+                .addClasses(FallbackMethodSuperclassPrivateBeanA.class, FallbackMethodSuperclassPrivateBeanB.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
         
         WebArchive war = ShrinkWrap
-                .create(WebArchive.class, "ftFallbackMethodVarargs.war")
+                .create(WebArchive.class, "ftFallbackMethodSuperclassPrivate.war")
                 .addAsLibrary(testJar);
         return war;
     }
     
-    @Inject private FallbackMethodVarargsBean bean;
-    
     @Test
-    public void fallbackMethodVarargs() {
-        assertEquals(bean.method(1, 2L), "fallback");
+    public void fallbackMethodSuperclassPrivate() {
+        // Nothing to test, deployment should throw exception
     }
-    
+
 }

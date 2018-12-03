@@ -22,12 +22,10 @@ package org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod;
 
 import static org.testng.Assert.assertEquals;
 
-import java.util.Collections;
-
 import javax.inject.Inject;
 
-import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodGenericComplexBeanA;
-import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodGenericComplexBeanB;
+import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodWithinInterfaceA;
+import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodWithinInterfaceB;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -37,27 +35,28 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
 /**
- * Test for a fallback method with a more complex type variable parameter
+ * Test for a fallback method defined on an interface and implemented in a subclass
  */
-public class FallbackMethodGenericComplex extends Arquillian {
-
+public class FallbackMethodWithinInterfaceTest extends Arquillian {
+    
     @Deployment
     public static WebArchive deploy() {
-        JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodGenericComplex.jar")
-                .addClasses(FallbackMethodGenericComplexBeanA.class, FallbackMethodGenericComplexBeanB.class)
+        JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodWithinInterface.jar")
+                .addClasses(FallbackMethodWithinInterfaceA.class,
+                            FallbackMethodWithinInterfaceB.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
         
         WebArchive war = ShrinkWrap
-                .create(WebArchive.class, "ftFallbackMethodGenericComplex.war")
+                .create(WebArchive.class, "ftFallbackMethodWithinInterface.war")
                 .addAsLibrary(testJar);
         return war;
     }
     
-    @Inject private FallbackMethodGenericComplexBeanA bean;
+    @Inject private FallbackMethodWithinInterfaceA bean;
     
     @Test
-    public void fallbackMethodGenericComplex() {
-        assertEquals(bean.method(Collections.singletonList(Collections.singleton("test"))), "fallback");
+    public void fallbackMethodWithinInterface() {
+        assertEquals(bean.method(1, 2L), "fallback");
     }
-    
+
 }

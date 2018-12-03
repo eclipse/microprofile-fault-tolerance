@@ -24,7 +24,9 @@ import static org.testng.Assert.assertEquals;
 
 import javax.inject.Inject;
 
-import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodWildcardBean;
+import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodInterfaceBeanA;
+import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodInterfaceBeanB;
+import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodInterfaceBeanC;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -34,27 +36,29 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
 /**
- * Test for a fallback methods with a varargs parameter
+ * Test for a fallback method defined on an interface and implemented in a subclass
  */
-public class FallbackMethodWildcard extends Arquillian {
-
+public class FallbackMethodInterfaceTest extends Arquillian {
+    
     @Deployment
     public static WebArchive deploy() {
-        JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodWildcard.jar")
-                .addClasses(FallbackMethodWildcardBean.class)
+        JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodInterface.jar")
+                .addClasses(FallbackMethodInterfaceBeanA.class,
+                            FallbackMethodInterfaceBeanB.class,
+                            FallbackMethodInterfaceBeanC.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
         
         WebArchive war = ShrinkWrap
-                .create(WebArchive.class, "ftFallbackMethodWildcard.war")
+                .create(WebArchive.class, "ftFallbackMethodInterface.war")
                 .addAsLibrary(testJar);
         return war;
     }
     
-    @Inject private FallbackMethodWildcardBean bean;
+    @Inject private FallbackMethodInterfaceBeanB bean;
     
     @Test
-    public void fallbackMethodWildcard() {
-        assertEquals(bean.method(null), "fallback");
+    public void fallbackMethodInterface() {
+        assertEquals(bean.method(1, 2L), "fallback");
     }
-    
+
 }

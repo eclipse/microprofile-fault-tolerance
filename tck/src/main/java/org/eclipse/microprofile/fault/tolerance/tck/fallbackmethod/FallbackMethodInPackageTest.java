@@ -37,7 +37,7 @@ import org.testng.annotations.Test;
 /**
  * Test for a package-scoped fallback method in superclass within the same package
  */
-public class FallbackMethodInPackage extends Arquillian {
+public class FallbackMethodInPackageTest extends Arquillian {
     
     @Deployment
     public static WebArchive deploy() {

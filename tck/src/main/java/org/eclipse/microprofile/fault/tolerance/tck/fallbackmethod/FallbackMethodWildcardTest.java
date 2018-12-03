@@ -20,10 +20,12 @@
 
 package org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod;
 
-import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodWildcardNegativeBean;
-import org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException;
+import static org.testng.Assert.assertEquals;
+
+import javax.inject.Inject;
+
+import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodWildcardBean;
 import org.jboss.arquillian.container.test.api.Deployment;
-import org.jboss.arquillian.container.test.api.ShouldThrowException;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
@@ -32,26 +34,27 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
 /**
- * Test that a fallback method with a bounded wildcard parameter cannot be called if the bounds do not match
+ * Test for a fallback methods with a varargs parameter
  */
-public class FallbackMethodWildcardNegative extends Arquillian {
-    
+public class FallbackMethodWildcardTest extends Arquillian {
+
     @Deployment
-    @ShouldThrowException(FaultToleranceDefinitionException.class)
     public static WebArchive deploy() {
-        JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodSuperclassPrivate.jar")
-                .addClass(FallbackMethodWildcardNegativeBean.class)
+        JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodWildcard.jar")
+                .addClasses(FallbackMethodWildcardBean.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
         
         WebArchive war = ShrinkWrap
-                .create(WebArchive.class, "ftFallbackMethodSuperclassPrivate.war")
+                .create(WebArchive.class, "ftFallbackMethodWildcard.war")
                 .addAsLibrary(testJar);
         return war;
     }
     
+    @Inject private FallbackMethodWildcardBean bean;
+    
     @Test
-    public void fallbackMethodWildcardNegative() {
-        // Nothing to test, deployment should throw exception
+    public void fallbackMethodWildcard() {
+        assertEquals(bean.method(null), "fallback");
     }
-
+    
 }
