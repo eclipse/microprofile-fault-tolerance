@@ -22,11 +22,16 @@ package org.eclipse.microprofile.fault.tolerance.tck.asyncretry.clientserver;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Retry;
 
+import javax.annotation.Resource;
+import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.enterprise.context.RequestScoped;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
+
+import static java.util.Objects.nonNull;
 
 /**
  * A client to demonstrate the combination of the @Retry and @Asynchronous annotations.
@@ -36,7 +41,13 @@ import java.util.concurrent.Future;
 @RequestScoped
 public class AsyncRetryClient {
 
-    private int countServiceAInvocations = 0;
+    private int countInvocationsServA = 0;
+    private int countInvocationsServB = 0;
+    private int countInvocationsServC = 0;
+    private int countInvocationsServD = 0;
+
+    @Resource
+    private ManagedExecutorService executorService;// TODO should we use this?
 
     /**
      * Service A will retry a method returning a CompletionStage and configured to always completeExceptionally.
@@ -46,15 +57,105 @@ public class AsyncRetryClient {
      */
     @Asynchronous
     @Retry(maxRetries = 2)
-    public Future<String> serviceA() {
-        countServiceAInvocations++;
-
+    public CompletionStage<String> serviceA() {
+        countInvocationsServA++;
+        // always fail
         CompletableFuture<String> future = new CompletableFuture<>();
         future.completeExceptionally(new IOException("Simulated error"));
         return future;
     }
 
-    public int getCountServiceAInvocations() {
-        return countServiceAInvocations;
+    /**
+     * Service A will retry a method returning a CompletionStage and configured to always completeExceptionally.
+     *
+     * @return a {@link CompletionStage}
+     * @throws IOException
+     */
+    @Retry(maxRetries = 2)// TODO discuss implications with @Async and without @Async
+    public CompletionStage<String> serviceB(final CompletionStage future) {
+        countInvocationsServB++;
+        // always fail
+        future.toCompletableFuture().completeExceptionally(new IOException("Simulated error"));
+        return future;
+    }
+
+    /**
+     * Service A will retry a method returning a CompletionStage and configured to completeExceptionally twice.
+     *
+     * @return a {@link CompletionStage}
+     * @throws IOException
+     */
+    @Asynchronous
+    @Retry(maxRetries = 3)
+    public CompletionStage<String> serviceC() {
+        countInvocationsServC++;
+
+        CompletableFuture<String> future = new CompletableFuture<>();
+
+        if (countInvocationsServC < 3) {
+            // fail 2 first invocations
+            future.completeExceptionally(new IOException("Simulated error"));
+        } else {
+            future.complete("Success");
+        }
+        return future;
+    }
+
+    /**
+     * Service A will retry a method returning a chained CompletionStage configured to completeExceptionally twice.
+     *
+     * @return a {@link CompletionStage}
+     * @throws IOException
+     */
+    @Asynchronous
+    @Retry(maxRetries = 3)
+    public CompletionStage<String> serviceD() {
+        countInvocationsServD++;
+
+        CompletableFuture<String> future = new CompletableFuture<>();
+
+        if (countInvocationsServD < 3) {
+            // fail 2 first invocations
+            future.supplyAsync(doTask(null))
+                .thenCompose(s -> CompletableFuture.supplyAsync(doTask("Simulated error")));
+        } else {
+            future.supplyAsync(doTask(null))
+                .thenCompose(s -> CompletableFuture.supplyAsync(doTask(null)));
+        }
+
+
+        return future;
+    }
+
+    private Supplier<String> doTask(final String errorMessage) {
+        return () -> {
+            try {
+                // simulate some processing.
+                TimeUnit.MILLISECONDS.sleep(50);
+            } catch (InterruptedException e) {
+                throw new RuntimeException("Unplanned error: " + e);
+            }
+            if (nonNull(errorMessage)) {
+                throw new RuntimeException(errorMessage);
+            } else {
+                return "Success";
+            }
+        };
+    }
+
+    public int getCountInvocationsServA() {
+        return countInvocationsServA;
+    }
+
+    public int getCountInvocationsServB() {
+        return countInvocationsServB;
+    }
+
+    public int getCountInvocationsServC() {
+        return countInvocationsServC;
+    }
+
+    public int getCountInvocationsServD() {
+        return countInvocationsServD;
     }
 }

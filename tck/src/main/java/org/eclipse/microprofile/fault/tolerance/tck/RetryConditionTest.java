@@ -34,10 +34,8 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import javax.inject.Inject;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.io.IOException;
+import java.util.concurrent.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -227,16 +225,75 @@ public class RetryConditionTest extends Arquillian {
     }
 
 
+    /**
+     * Persistent Error condition. Will retry 2 times and still throw exception.
+     * ServiceA uses {@link org.eclipse.microprofile.faulttolerance.Asynchronous} and will always return IOException.
+     */
     @Test
-    public void testAsyncRetryExeptionally() {
-        final Future<String> future = asyncRetryClient.serviceA();
+    public void testAsyncRetryExceptionally() {
+        final CompletionStage<String> future = asyncRetryClient.serviceA();
+
+        assertCompleteExceptionally(future, IOException.class, "Simulated error");
+        assertEquals(2, asyncRetryClient.getCountInvocationsServA());
+    }
+
+    /**
+     * Persistent Error condition. Will retry 2 times and still throw exception.
+     * ServiceB will always return IOException.
+     */
+    @Test
+    public void testRetryExceptionally() {
+        CompletableFuture<String> future = new CompletableFuture<>();
+
+        asyncRetryClient.serviceB(future);
+
+        assertCompleteExceptionally(future, IOException.class, "Simulated error");
+        assertEquals(2, asyncRetryClient.getCountInvocationsServB());
+    }
+
+    /**
+     * Temporary error. Will retry 3 times, the first 2 will fail.
+     * ServiceC uses {@link org.eclipse.microprofile.faulttolerance.Asynchronous}.
+     */
+    @Test
+    public void testRetrySuccess() {
+        final CompletionStage<String> future = asyncRetryClient.serviceC();
+
+        assertCompleteOk(future, "Success");
+        assertEquals(2, asyncRetryClient.getCountInvocationsServC());
+    }
+
+    /**
+     * Temporary error. Will retry 3 times, the first 2 will fail deep in a CompletableFuture chained execution.
+     * ServiceD uses {@link org.eclipse.microprofile.faulttolerance.Asynchronous} and chains 2 CompletableFutures.
+     */
+    @Test
+    public void testRetryChainSuccess() {
+        final CompletionStage<String> future = asyncRetryClient.serviceD();
+
+        assertCompleteOk(future, "Success");
+        assertEquals(2, asyncRetryClient.getCountInvocationsServD());
+    }
+
+    private void assertCompleteExceptionally(final CompletionStage<String> future,
+                                             final Class<? extends Throwable> exceptionClass,
+                                             final String exceptionMessage) {
         try {
-            future.get(200, TimeUnit.MILLISECONDS);
+            future.toCompletableFuture().get(200, TimeUnit.MILLISECONDS);
+            fail("We were expecting an exception: " + exceptionClass.getName() + " with message: " + exceptionMessage);
         } catch (InterruptedException | TimeoutException e) {
             fail("Unexpected exception" + e);
-        } catch (ExecutionException ioe) {
-            assertEquals("Simulated error", ioe.getCause().getMessage());
+        } catch (ExecutionException ee) {
+            Assert.assertTrue(exceptionClass.isInstance(ee.getCause()), "Cause of ExecutionException was " + ee.getCause());
+            assertEquals(exceptionMessage, ee.getCause().getMessage());
         }
-        assertEquals(2, asyncRetryClient.getCountServiceAInvocations());
+    }
+
+    private void assertCompleteOk(final CompletionStage<String> future, final String expectedMessage) {
+        try {
+            assertEquals(expectedMessage, future.toCompletableFuture().get(200, TimeUnit.MILLISECONDS));
+        } catch (Exception e) {
+            fail("Unexpected exception" + e);
+        }
     }
 }
