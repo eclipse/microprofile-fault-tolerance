@@ -122,6 +122,12 @@ public class BulkheadFutureTest extends Arquillian {
         Assert.assertFalse(result.isDone(), "Future reporting Done when not");
         try {
             Thread.sleep(SHORT_TIME + SHORT_TIME);
+            // Usually, we will not enter the loop, 
+            // but we are prepared to wait up to 100 SHORT_TIMES (10sec)
+            int loops = 0;
+            while(!result.isDone() && loops++ < 100) {
+                Thread.sleep(SHORT_TIME);
+            }
         }
         catch (Throwable t) {
             Assert.assertNull(t);
