@@ -196,6 +196,7 @@
                         <exclude>.checkstyle</exclude>
                         <exclude>.factorypath</exclude>
                         <exclude>.editorconfig</exclude>
+                        <exclude>**/META-INF/services/*</exclude>
                     </excludes>
                 </configuration>
             </plugin>
