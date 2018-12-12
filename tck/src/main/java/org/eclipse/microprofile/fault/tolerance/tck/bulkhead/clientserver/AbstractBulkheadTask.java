@@ -44,6 +44,11 @@ public class AbstractBulkheadTask {
      * Execution of the task waits on this object
      */
     protected CompletableFuture<Future> releaseLatch = new CompletableFuture<>();
+    
+    /**
+     * Future that is completed when the method returns with the value being {@code true} if the method was interrupted.
+     */
+    protected CompletableFuture<Boolean> interruptedLatch = new CompletableFuture<>();
 
     public AbstractBulkheadTask() {
         super();
@@ -194,8 +199,41 @@ public class AbstractBulkheadTask {
             }
         }
     }
-
-
+    
+    public void assertInterrupting() throws InterruptedException {
+        try {
+            boolean interrupted = awaitInterruptedResult(2, TimeUnit.SECONDS);
+            if (!interrupted) {
+                fail("Task completed without being interrupted");
+            }
+        }
+        catch (TimeoutException e) {
+            fail("Task had not been interrupted after two seconds", e);
+        }
+    }
+    
+    public void assertNotInterrupting() throws InterruptedException {
+        try {
+            boolean interrupted = awaitInterruptedResult(2, TimeUnit.SECONDS);
+            if (interrupted) {
+                fail("Task was interrupted within two seconds");
+            }
+        }
+        catch (TimeoutException e) {
+            // Expected
+        }
+    }
+    
+    public boolean awaitInterruptedResult(long time, TimeUnit unit) throws InterruptedException, TimeoutException {
+        try {
+            return interruptedLatch.get(time, unit);
+        }
+        catch (ExecutionException e) {
+            // Don't expect an execution exception from a latch
+            throw new AssertionError("Unexpected execution exception during awaitInterruptedResult", e);
+        }
+    }
+    
     protected class TestDelegate implements BackendTestDelegate {
     
         @Override
@@ -211,6 +249,13 @@ public class AbstractBulkheadTask {
             catch (TimeoutException e) {
                 Assert.fail("Timeout waiting for release() to be called", e);
                 return null; // Compiler requires a return even though fail() will throw an exception
+            }
+            catch (InterruptedException e) {
+                interruptedLatch.complete(true);
+                throw e;
+            }
+            finally {
+                interruptedLatch.complete(false); // Ignored if the latch has already been completed
             }
         }
     }

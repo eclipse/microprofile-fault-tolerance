@@ -45,13 +45,15 @@ which is to fail the execution if the execution takes more than 400ms to complet
 When a timeout occurs, A `TimeoutException` must be thrown.
 The `@Timeout` annotation can be used together with `@Fallback`, `@CircuitBreaker`, `@Asynchronous`, `@Bulkhead` and `@Retry`.
 
-When `@Timeout` is used without `@Asynchronous`, the current thread will be interrupted with a call to Thread.interrupt() on reaching the specified timeout duration. The interruption will only work in certain scenarios. The interruption will not work for the following situations:
+When `@Timeout` is used without `@Asynchronous`, the current thread will be interrupted with a call to `Thread.interrupt()` on reaching the specified timeout duration. The interruption will only work in certain scenarios. The interruption will not work for the following situations:
 
 * The thread is blocked on blocking I/O (database, file read/write), an exception is thrown only in case of waiting for a NIO channel
 * The thread isn't waiting (CPU intensive task) and isn't checking for being interrupted
 * The thread will catch the interrupted exception (with a general catch block) and will just continue processing, ignoring the interrupt
 
 In the above situations, it is impossible to suspend the execution. The execution thread will finish its process. If the execution takes longer than the specified timeout, the `TimeoutException` will be thrown and the execution result will be discarded.
+
+If a timeout occurs, the thread interrupted status must be cleared when the method returns.
 
 If `@Timeout` is used with `@Asynchronous`, then a separate thread will be spawned to perform the work in the annotated method or methods, while a `Future` or `CompletionStage` is returned on the main thread. If the work on the spawned thread does time out, then a get() call to the `Future` on the main thread will throw an `ExecutionException` that wraps a fault tolerance `TimeoutException`.
 
