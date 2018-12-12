@@ -275,6 +275,48 @@ public class RetryConditionTest extends Arquillian {
         assertEquals(2, asyncRetryClient.getCountInvocationsServD());
     }
 
+    /**
+     * Persistent Error condition. Will retry 3 times and still throw exception.
+     * ServiceE will always return IOException.
+     */
+    @Test
+    public void testRetryChainExceptionally() {
+        CompletableFuture<String> future = new CompletableFuture<>();
+
+        asyncRetryClient.serviceE();
+
+        assertCompleteExceptionally(future, IOException.class, "Simulated error");
+        assertEquals(3, asyncRetryClient.getCountInvocationsServE());
+    }
+
+    /**
+     * Persistent Error condition. Will retry 3 times and still throw exception.
+     * ServiceF will always return IOException.
+     */
+    @Test
+    public void testRetryParallelExceptionally() {
+        CompletableFuture<String> future = new CompletableFuture<>();
+
+        asyncRetryClient.serviceG();
+
+        assertCompleteExceptionally(future, IOException.class, "Simulated error");
+        assertEquals(3, asyncRetryClient.getCountInvocationsServG());
+    }
+
+    /**
+     * Temporary error. Will retry 3 times, the first 2 will fail in a CompletableFuture parallel execution.
+     * ServiceG uses {@link org.eclipse.microprofile.faulttolerance.Asynchronous} and 2 CompletableFutures.
+     */
+    @Test
+    public void testRetryParallelSuccess() {
+        CompletableFuture<String> future = new CompletableFuture<>();
+
+        asyncRetryClient.serviceG();
+
+        assertCompleteOk(future, "Success then Success");
+        assertEquals(2, asyncRetryClient.getCountInvocationsServG());
+    }
+
     private void assertCompleteExceptionally(final CompletionStage<String> future,
                                              final Class<? extends Throwable> exceptionClass,
                                              final String exceptionMessage) {

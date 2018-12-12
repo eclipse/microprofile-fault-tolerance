@@ -22,8 +22,6 @@ package org.eclipse.microprofile.fault.tolerance.tck.asyncretry.clientserver;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Retry;
 
-import javax.annotation.Resource;
-import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.enterprise.context.RequestScoped;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -45,9 +43,9 @@ public class AsyncRetryClient {
     private int countInvocationsServB = 0;
     private int countInvocationsServC = 0;
     private int countInvocationsServD = 0;
-
-    @Resource
-    private ManagedExecutorService executorService;// TODO should we use this?
+    private int countInvocationsServE = 0;
+    private int countInvocationsServF = 0;
+    private int countInvocationsServG = 0;
 
     /**
      * Service A will retry a method returning a CompletionStage and configured to always completeExceptionally.
@@ -102,7 +100,7 @@ public class AsyncRetryClient {
     }
 
     /**
-     * Service A will retry a method returning a chained CompletionStage configured to completeExceptionally twice.
+     * Service A will retry a method returning a chained, running sequentially, CompletionStage configured to completeExceptionally twice.
      *
      * @return a {@link CompletionStage}
      * @throws IOException
@@ -112,35 +110,75 @@ public class AsyncRetryClient {
     public CompletionStage<String> serviceD() {
         countInvocationsServD++;
 
-        CompletableFuture<String> future = new CompletableFuture<>();
-
         if (countInvocationsServD < 3) {
             // fail 2 first invocations
-            future.supplyAsync(doTask(null))
+            return CompletableFuture.supplyAsync(doTask(null))
                 .thenCompose(s -> CompletableFuture.supplyAsync(doTask("Simulated error")));
         } else {
-            future.supplyAsync(doTask(null))
+            return CompletableFuture.supplyAsync(doTask(null))
                 .thenCompose(s -> CompletableFuture.supplyAsync(doTask(null)));
+        }
+    }
+
+    /**
+     * Service A will retry a method returning a chained, running sequentially,
+     * CompletionStage configured to completeExceptionally on all calls.
+     *
+     * @return a {@link CompletionStage}
+     * @throws IOException
+     */
+    @Asynchronous
+    @Retry(maxRetries = 2)
+    public CompletionStage<String> serviceE() {
+        countInvocationsServE++;
+
+        // always fail
+        return CompletableFuture.supplyAsync(doTask(null))
+            .thenCompose(s -> CompletableFuture.supplyAsync(doTask("Simulated error")));
+    }
+
+    /**
+     * Service A will retry a method returning a parallel execution of 2 CompletionStages. One of them configured to
+     * always fail.
+     *
+     * @return a {@link CompletionStage}
+     * @throws IOException
+     */
+    @Asynchronous
+    @Retry(maxRetries = 3)
+    public CompletionStage<String> serviceF() {
+        countInvocationsServF++;
+
+        if (countInvocationsServF < 3) {
+            // fail 2 first invocations
+            return CompletableFuture.supplyAsync(doTask(null))
+                .thenCombine(CompletableFuture.supplyAsync(doTask("Simulated error")),
+                    (s, s2) -> s + " then " + s2);
+        } else {
+            return CompletableFuture.supplyAsync(doTask(null))
+                .thenCombine(CompletableFuture.supplyAsync(doTask(null)),
+                    (s, s2) -> s + " then " + s2);
         }
 
 
-        return future;
     }
 
-    private Supplier<String> doTask(final String errorMessage) {
-        return () -> {
-            try {
-                // simulate some processing.
-                TimeUnit.MILLISECONDS.sleep(50);
-            } catch (InterruptedException e) {
-                throw new RuntimeException("Unplanned error: " + e);
-            }
-            if (nonNull(errorMessage)) {
-                throw new RuntimeException(errorMessage);
-            } else {
-                return "Success";
-            }
-        };
+    /**
+     * Service A will retry a method returning a parallel execution of 2 CompletionStages. One of them configured to
+     * fail twice.
+     *
+     * @return a {@link CompletionStage}
+     * @throws IOException
+     */
+    @Asynchronous
+    @Retry(maxRetries = 2)
+    public CompletionStage<String> serviceG() {
+        countInvocationsServG++;
+        // always fail
+        return CompletableFuture.supplyAsync(doTask(null))
+            .thenCombine(CompletableFuture.supplyAsync(doTask("Simulated error")),
+                (s, s2) -> s + " then " + s2);
+
     }
 
     public int getCountInvocationsServA() {
@@ -157,5 +195,33 @@ public class AsyncRetryClient {
 
     public int getCountInvocationsServD() {
         return countInvocationsServD;
+    }
+
+    public int getCountInvocationsServE() {
+        return countInvocationsServE;
+    }
+
+    public int getCountInvocationsServF() {
+        return countInvocationsServF;
+    }
+
+    public int getCountInvocationsServG() {
+        return countInvocationsServG;
+    }
+
+    private Supplier<String> doTask(final String errorMessage) {
+        return () -> {
+            try {
+                // simulate some processing.
+                TimeUnit.MILLISECONDS.sleep(50);
+            } catch (InterruptedException e) {
+                throw new RuntimeException("Unplanned error: " + e);
+            }
+            if (nonNull(errorMessage)) {
+                throw new RuntimeException(errorMessage);
+            } else {
+                return "Success";
+            }
+        };
     }
 }
