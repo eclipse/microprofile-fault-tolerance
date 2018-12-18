@@ -46,7 +46,7 @@ public class RetryClientWithDelay {
     private Connection connectionService() {
        // the time delay between each invocation should be 0-800ms
        if (timestampForConnectionService != 0) {
-           long currentTime = System.currentTimeMillis() ;
+           long currentTime = System.nanoTime();
            delayTimes.add(currentTime -timestampForConnectionService );
            timestampForConnectionService = currentTime;
         
