@@ -63,7 +63,7 @@ Otherwise, the `FaultToleranceDefinitionException` exception will be thrown.
 
 ==== Specify the fallbackMethod
 
-This is used if the `fallbackMethod` is on the same class as the method to call fall back.
+This is used to specify that a named method should be called if a fallback is required.
 
 [source, java]
 ----
@@ -83,8 +83,13 @@ This is used if the `fallbackMethod` is on the same class as the method to call 
 
 The above code snippet means when the method failed and retry reaches its maximum retry, the fallback operation will be performed.
 The method `fallbackForServiceB` will be invoked.
-The return type of `fallbackForServiceB` must be `String` and the argument list for `fallbackForServiceB` must be the same as `ServiceB`.
-Otherwise, the `FaultToleranceDefinitionException` exception will be thrown.
+
+When `fallbackMethod` is used a `FaultToleranceDefinitionException` will be thrown if any of the following constraints are not met:
+
+* The named fallback method must be on the same class, a superclass or an implemented interface of the class which declares the annotated method
+* The named fallback method must have the same parameter types as the annotated method (after resolving any type variables)
+* The named fallback method must have the same return type as the annotated method (after resolving any type variables)
+* The named fallback method must be accessible from the class which declares the annotated method
 
 The parameter `value` and `fallbackMethod` on `@Fallback` cannot be specified at the same time.
 Otherwise, the `FaultToleranceDefinitionException` exception will be thrown.
