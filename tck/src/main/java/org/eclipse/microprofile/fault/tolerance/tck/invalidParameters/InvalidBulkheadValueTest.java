@@ -19,7 +19,7 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.invalidParameters;
 
-import javax.enterprise.inject.spi.DefinitionException;
+import org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.ShouldThrowException;
 import org.jboss.arquillian.testng.Arquillian;
@@ -33,7 +33,7 @@ import org.testng.annotations.Test;
 public class InvalidBulkheadValueTest extends Arquillian {
 
     @Deployment
-    @ShouldThrowException(value = DefinitionException.class)
+    @ShouldThrowException(value = FaultToleranceDefinitionException.class)
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
             .create(JavaArchive.class, "ftInvalidBulkhead1.jar")
