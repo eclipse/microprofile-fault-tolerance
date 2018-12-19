@@ -19,16 +19,8 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.asynctimeout.clientserver.AsyncClassLevelTimeoutClient;
 import org.eclipse.microprofile.fault.tolerance.tck.asynctimeout.clientserver.AsyncTimeoutClient;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.Connection;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
@@ -38,6 +30,13 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import javax.inject.Inject;
+import java.time.Duration;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 /**
  * Test the combination of the @Asynchronous and @Timeout annotations.
  * 
@@ -125,7 +124,8 @@ public class AsyncTimeoutTest extends Arquillian {
         end = System.nanoTime();
 
         duration = end - start;
-        if (Duration.ofNanos(duration) < Duration.ofMillis(TEST_TIMEOUT_SERVICEA)) { // duration should be greater than the timeout configured on the service 
+        // duration should be greater than the timeout configured on the service
+        if (Duration.ofNanos(duration).compareTo(Duration.ofMillis(TEST_TIMEOUT_SERVICEA)) < 0) {
             throw new AssertionError("testAsyncTimeout: the service duration was less than the configured timeout - " + duration);
         }
     }
@@ -229,7 +229,8 @@ public class AsyncTimeoutTest extends Arquillian {
         end = System.nanoTime();
 
         duration = end - start;
-        if (Duration.ofNanos(duration) < Duration.ofMillis(TEST_TIMEOUT_SERVICEA)) { // duration should be greater than the timeout configured on the service 
+        // duration should be greater than the timeout configured on the service
+        if (Duration.ofNanos(duration).compareTo(Duration.ofMillis(TEST_TIMEOUT_SERVICEA)) < 0) {
             throw new AssertionError("testAsyncClassLevelTimeout: the service duration was less than the configured timeout - " + duration);
         }
     }
