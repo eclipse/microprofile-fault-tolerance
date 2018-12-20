@@ -40,7 +40,8 @@ import static java.util.Objects.nonNull;
 public class AsyncRetryClient {
 
     private int countInvocationsServA = 0;
-    private int countInvocationsServB = 0;
+    private int countInvocationsServBFailException = 0;
+    private int countInvocationsServBFailExceptionally = 0;
     private int countInvocationsServC = 0;
     private int countInvocationsServD = 0;
     private int countInvocationsServE = 0;
@@ -69,12 +70,25 @@ public class AsyncRetryClient {
      * @return a {@link CompletionStage}
      * @throws IOException
      */
-    @Retry(maxRetries = 2)// TODO discuss implications with @Async and without @Async
-    public CompletionStage<String> serviceB(final CompletionStage future) {
-        countInvocationsServB++;
+    @Retry(maxRetries = 2)
+    public CompletionStage<String> serviceBFailExceptionally(final CompletionStage future) {
+        countInvocationsServBFailExceptionally++;
         // always fail
         future.toCompletableFuture().completeExceptionally(new IOException("Simulated error"));
         return future;
+    }
+
+    /**
+     * Service A will retry a method returning a CompletionStage and configured to always completeExceptionally.
+     *
+     * @return a {@link CompletionStage}
+     * @throws IOException
+     */
+    @Retry(maxRetries = 2)
+    public CompletionStage<String> serviceBFailException(final CompletionStage future) {
+        countInvocationsServBFailException++;
+        // always fail
+        throw new RuntimeException("Simulated error");
     }
 
     /**
@@ -185,8 +199,12 @@ public class AsyncRetryClient {
         return countInvocationsServA;
     }
 
-    public int getCountInvocationsServB() {
-        return countInvocationsServB;
+    public int getCountInvocationsServBFailException() {
+        return countInvocationsServBFailException;
+    }
+
+    public int getCountInvocationsServBFailExceptionally() {
+        return countInvocationsServBFailExceptionally;
     }
 
     public int getCountInvocationsServC() {

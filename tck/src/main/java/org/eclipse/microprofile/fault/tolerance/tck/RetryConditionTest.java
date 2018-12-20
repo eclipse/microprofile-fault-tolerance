@@ -238,17 +238,38 @@ public class RetryConditionTest extends Arquillian {
     }
 
     /**
-     * Persistent Error condition. Will retry 2 times and still throw exception.
-     * ServiceB will always return IOException.
+     * Persistent Error condition inside a CompletableFuture.
+     * Will not retry because method is not marked with @Asynchronous
+     * ServiceB will always complete exceptionally with IOException.
      */
     @Test
-    public void testRetryExceptionally() {
+    public void testNoAsynWilNotRetryExceptionally() {
         CompletableFuture<String> future = new CompletableFuture<>();
 
-        asyncRetryClient.serviceB(future);
+        asyncRetryClient.serviceBFailExceptionally(future);
 
         assertCompleteExceptionally(future, IOException.class, "Simulated error");
-        assertEquals(2, asyncRetryClient.getCountInvocationsServB());
+        // no retries
+        assertEquals("No retries are expected",0, asyncRetryClient.getCountInvocationsServBFailExceptionally());
+    }
+
+    /**
+     * Persistent Error condition outside the CompletableFuture.
+     * Will retry because
+     * ServiceB will always throw IOException.
+     */
+    @Test
+    public void testNoAsynRetryOnMethodException() {
+        CompletableFuture<String> future = new CompletableFuture<>();
+
+        try {
+            asyncRetryClient.serviceBFailException(future);
+            fail("Was expecting an exception");
+        } catch (RuntimeException e) {
+            assertEquals("Simulated error", e.getMessage());
+        }
+        // 2 retries
+        assertEquals(2, asyncRetryClient.getCountInvocationsServBFailException());
     }
 
     /**
