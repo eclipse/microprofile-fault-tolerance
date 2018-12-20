@@ -19,16 +19,8 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.asynctimeout.clientserver.AsyncClassLevelTimeoutClient;
 import org.eclipse.microprofile.fault.tolerance.tck.asynctimeout.clientserver.AsyncTimeoutClient;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.Connection;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
@@ -38,6 +30,13 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import javax.inject.Inject;
+import java.time.Duration;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 /**
  * Test the combination of the @Asynchronous and @Timeout annotations.
  * 
@@ -79,7 +78,7 @@ public class AsyncTimeoutTest extends Arquillian {
 
         // Call serviceA. As it is annotated @Asynchronous, serviceA should return a future straight away even though 
         // the method has a 5s sleep in it
-        long start = System.currentTimeMillis();
+        long start = System.nanoTime();
 
         Future<Connection> future = null;
         try {
@@ -89,7 +88,7 @@ public class AsyncTimeoutTest extends Arquillian {
             throw new AssertionError("testAsyncTimeout: unexpected InterruptedException calling serviceA");
         }
         
-        long end = System.currentTimeMillis();
+        long end = System.nanoTime();
 
         long duration = end - start;
         if (duration > TEST_FUTURE_THRESHOLD) { //should have returned almost instantly, if it takes TEST_FUTURE_THRESHOLD 
@@ -122,10 +121,11 @@ public class AsyncTimeoutTest extends Arquillian {
         catch (TimeoutException e) {
             throw new AssertionError("testAsyncTimeout: unexpected TimeoutException on future.get()");
         }
-        end = System.currentTimeMillis();
+        end = System.nanoTime();
 
         duration = end - start;
-        if (duration < TEST_TIMEOUT_SERVICEA) { // duration should be greater than the timeout configured on the service 
+        // duration should be greater than the timeout configured on the service
+        if (Duration.ofNanos(duration).compareTo(Duration.ofMillis(TEST_TIMEOUT_SERVICEA)) < 0) {
             throw new AssertionError("testAsyncTimeout: the service duration was less than the configured timeout - " + duration);
         }
     }
@@ -141,7 +141,7 @@ public class AsyncTimeoutTest extends Arquillian {
     public void testAsyncNoTimeout() {
         // Call serviceB. As it is annotated @Asynchronous, serviceB should return a future straight away even though 
         // the method has a 0.5s sleep in it
-        long start = System.currentTimeMillis();
+        long start = System.nanoTime();
 
         Future<Connection> future = null;
         try {
@@ -150,7 +150,7 @@ public class AsyncTimeoutTest extends Arquillian {
         catch (InterruptedException e) {
             throw new AssertionError("testAsyncNoTimeout: unexpected InterruptedException calling serviceB");
         }
-        long end = System.currentTimeMillis();
+        long end = System.nanoTime();
 
         long duration = end - start;
         if (duration > TEST_FUTURE_THRESHOLD) { //should have returned almost instantly, if it takes TEST_FUTURE_THRESHOLD 
@@ -183,7 +183,7 @@ public class AsyncTimeoutTest extends Arquillian {
     public void testAsyncClassLevelTimeout() {
         // Call serviceA. As it is annotated @Asynchronous, serviceA should return a future straight away even though 
         // the method has a 5s sleep in it
-        long start = System.currentTimeMillis();
+        long start = System.nanoTime();
 
         Future<Connection> future = null;
         try {
@@ -192,7 +192,7 @@ public class AsyncTimeoutTest extends Arquillian {
         catch (InterruptedException e1) {
             throw new AssertionError("testAsyncClassLevelTimeout: unexpected InterruptedException calling serviceA");
         }
-        long end = System.currentTimeMillis();
+        long end = System.nanoTime();
 
         long duration = end - start;
         if (duration > TEST_FUTURE_THRESHOLD) { //should have returned almost instantly, if it takes TEST_FUTURE_THRESHOLD 
@@ -210,7 +210,7 @@ public class AsyncTimeoutTest extends Arquillian {
 
         // Call future.get() with a timeout (3 seconds) that is longer than the annotated timeout (2 seconds) specified on
         // the service but shorter than the overall service duration (5 seconds sleep)
-        start = System.currentTimeMillis();
+        start = System.nanoTime();
         try {
             future.get(TEST_TIMEOUT_SERVICEA + TEST_TIME_UNIT, TimeUnit.MILLISECONDS);
             throw new AssertionError("testAsyncClassLevelTimeout: Future not interrupted");
@@ -226,10 +226,11 @@ public class AsyncTimeoutTest extends Arquillian {
         catch (TimeoutException e) {
             throw new AssertionError("testAsyncClassLevelTimeout: unexpected TimeoutException on future.get()");
         }
-        end = System.currentTimeMillis();
+        end = System.nanoTime();
 
         duration = end - start;
-        if (duration < TEST_TIMEOUT_SERVICEA) { // duration should be greater than the timeout configured on the service 
+        // duration should be greater than the timeout configured on the service
+        if (Duration.ofNanos(duration).compareTo(Duration.ofMillis(TEST_TIMEOUT_SERVICEA)) < 0) {
             throw new AssertionError("testAsyncClassLevelTimeout: the service duration was less than the configured timeout - " + duration);
         }
     }

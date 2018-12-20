@@ -19,9 +19,9 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.illegalConfig;
 
-import javax.enterprise.inject.spi.DefinitionException;
 import javax.inject.Inject;
 
+import org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.ShouldThrowException;
 import org.jboss.arquillian.testng.Arquillian;
@@ -37,7 +37,7 @@ public class IncompatibleFallbackPolicies extends Arquillian {
     FallbackClient fallbackClient;
 
     @Deployment
-    @ShouldThrowException(value = DefinitionException.class)
+    @ShouldThrowException(value = FaultToleranceDefinitionException.class)
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
             .create(JavaArchive.class, "ftInvalid.jar")
@@ -52,9 +52,9 @@ public class IncompatibleFallbackPolicies extends Arquillian {
 
     /**
      * Test that the deployment of specifying both handler and fallback method causing deployment failure.
-     * 
-     * A service in FallbackClientWithBothFallbacks has specified both fallback handler and fallback method. 
-     * 
+     *
+     * A service in FallbackClientWithBothFallbacks has specified both fallback handler and fallback method.
+     *
      */
     @Test
     public void test() {
