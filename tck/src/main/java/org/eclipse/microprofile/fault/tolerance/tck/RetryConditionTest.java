@@ -269,7 +269,8 @@ public class RetryConditionTest extends Arquillian {
         try {
             asyncRetryClient.serviceBFailException(future);
             fail("Was expecting an exception");
-        } catch (RuntimeException e) {
+        }
+        catch (RuntimeException e) {
             assertEquals("Simulated error", e.getMessage());
         }
         // 2 retries
@@ -348,9 +349,11 @@ public class RetryConditionTest extends Arquillian {
         try {
             future.toCompletableFuture().get(200, TimeUnit.MILLISECONDS);
             fail("We were expecting an exception: " + exceptionClass.getName() + " with message: " + exceptionMessage);
-        } catch (InterruptedException | TimeoutException e) {
+        }
+        catch (InterruptedException | TimeoutException e) {
             fail("Unexpected exception" + e);
-        } catch (ExecutionException ee) {
+        }
+        catch (ExecutionException ee) {
             Assert.assertTrue(exceptionClass.isInstance(ee.getCause()), "Cause of ExecutionException was " + ee.getCause());
             assertEquals(exceptionMessage, ee.getCause().getMessage());
         }
@@ -359,7 +362,8 @@ public class RetryConditionTest extends Arquillian {
     private void assertCompleteOk(final CompletionStage<String> future, final String expectedMessage) {
         try {
             assertEquals(expectedMessage, future.toCompletableFuture().get(200, TimeUnit.MILLISECONDS));
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             fail("Unexpected exception" + e);
         }
     }

@@ -52,7 +52,6 @@ public class AsyncRetryClient {
      * Service A will retry a method returning a CompletionStage and configured to always completeExceptionally.
      *
      * @return a {@link CompletionStage}
-     * @throws IOException
      */
     @Asynchronous
     @Retry(maxRetries = 2)
@@ -68,7 +67,6 @@ public class AsyncRetryClient {
      * Service A will retry a method returning a CompletionStage and configured to always completeExceptionally.
      *
      * @return a {@link CompletionStage}
-     * @throws IOException
      */
     @Retry(maxRetries = 2)
     public CompletionStage<String> serviceBFailExceptionally(final CompletionStage future) {
@@ -82,7 +80,6 @@ public class AsyncRetryClient {
      * Service A will retry a method returning a CompletionStage and configured to always completeExceptionally.
      *
      * @return a {@link CompletionStage}
-     * @throws IOException
      */
     @Retry(maxRetries = 2)
     public CompletionStage<String> serviceBFailException(final CompletionStage future) {
@@ -95,7 +92,6 @@ public class AsyncRetryClient {
      * Service A will retry a method returning a CompletionStage and configured to completeExceptionally twice.
      *
      * @return a {@link CompletionStage}
-     * @throws IOException
      */
     @Asynchronous
     @Retry(maxRetries = 3)
@@ -107,7 +103,8 @@ public class AsyncRetryClient {
         if (countInvocationsServC < 3) {
             // fail 2 first invocations
             future.completeExceptionally(new IOException("Simulated error"));
-        } else {
+        }
+        else {
             future.complete("Success");
         }
         return future;
@@ -117,7 +114,6 @@ public class AsyncRetryClient {
      * Service A will retry a method returning a chained, running sequentially, CompletionStage configured to completeExceptionally twice.
      *
      * @return a {@link CompletionStage}
-     * @throws IOException
      */
     @Asynchronous
     @Retry(maxRetries = 3)
@@ -128,7 +124,8 @@ public class AsyncRetryClient {
             // fail 2 first invocations
             return CompletableFuture.supplyAsync(doTask(null))
                 .thenCompose(s -> CompletableFuture.supplyAsync(doTask("Simulated error")));
-        } else {
+        }
+        else {
             return CompletableFuture.supplyAsync(doTask(null))
                 .thenCompose(s -> CompletableFuture.supplyAsync(doTask(null)));
         }
@@ -139,7 +136,6 @@ public class AsyncRetryClient {
      * CompletionStage configured to completeExceptionally on all calls.
      *
      * @return a {@link CompletionStage}
-     * @throws IOException
      */
     @Asynchronous
     @Retry(maxRetries = 2)
@@ -156,7 +152,6 @@ public class AsyncRetryClient {
      * always fail.
      *
      * @return a {@link CompletionStage}
-     * @throws IOException
      */
     @Asynchronous
     @Retry(maxRetries = 3)
@@ -168,7 +163,8 @@ public class AsyncRetryClient {
             return CompletableFuture.supplyAsync(doTask(null))
                 .thenCombine(CompletableFuture.supplyAsync(doTask("Simulated error")),
                     (s, s2) -> s + " then " + s2);
-        } else {
+        }
+        else {
             return CompletableFuture.supplyAsync(doTask(null))
                 .thenCombine(CompletableFuture.supplyAsync(doTask(null)),
                     (s, s2) -> s + " then " + s2);
@@ -182,7 +178,6 @@ public class AsyncRetryClient {
      * fail twice.
      *
      * @return a {@link CompletionStage}
-     * @throws IOException
      */
     @Asynchronous
     @Retry(maxRetries = 2)
@@ -232,12 +227,14 @@ public class AsyncRetryClient {
             try {
                 // simulate some processing.
                 TimeUnit.MILLISECONDS.sleep(50);
-            } catch (InterruptedException e) {
+            }
+            catch (InterruptedException e) {
                 throw new RuntimeException("Unplanned error: " + e);
             }
             if (nonNull(errorMessage)) {
                 throw new RuntimeException(errorMessage);
-            } else {
+            }
+            else {
                 return "Success";
             }
         };
