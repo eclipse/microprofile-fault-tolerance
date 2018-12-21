@@ -23,12 +23,13 @@ import static org.eclipse.microprofile.fault.tolerance.tck.Misc.Ints.contains;
 
 import javax.inject.Inject;
 
-import org.eclipse.microprofile.faulttolerance.exceptions.CircuitBreakerOpenException;
 import org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver.CircuitBreakerClassLevelClientWithDelay;
 import org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver.CircuitBreakerClientDefaultSuccessThreshold;
 import org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver.CircuitBreakerClientHigherSuccessThreshold;
 import org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver.CircuitBreakerClientNoDelay;
+import org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver.CircuitBreakerClientRollingWindow;
 import org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver.CircuitBreakerClientWithDelay;
+import org.eclipse.microprofile.faulttolerance.exceptions.CircuitBreakerOpenException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -53,6 +54,7 @@ public class CircuitBreakerTest extends Arquillian {
     private @Inject CircuitBreakerClientDefaultSuccessThreshold clientForCBDefaultSuccess;
     private @Inject CircuitBreakerClientHigherSuccessThreshold clientForCBHighSuccess;
 
+    private @Inject CircuitBreakerClientRollingWindow clientForRW;
     @Deployment
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftCircuitBreaker.jar")
@@ -61,6 +63,7 @@ public class CircuitBreakerTest extends Arquillian {
                                         CircuitBreakerClassLevelClientWithDelay.class,
                                         CircuitBreakerClientDefaultSuccessThreshold.class,
                                         CircuitBreakerClientHigherSuccessThreshold.class,
+                                        CircuitBreakerClientRollingWindow.class,
                                         Misc.class)
                         .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                         .as(JavaArchive.class);
@@ -623,5 +626,99 @@ public class CircuitBreakerTest extends Arquillian {
         int serviceAExecutions = clientForClassLevelCBWithDelay.getCounterForInvokingService();
 
         Assert.assertEquals(serviceAExecutions, 7, "The number of executions should be 7");
+    }
+    
+    /**
+     * A test to exercise Circuit Breaker rolling window
+     * 
+     * With requestVolumeThreshold = 4, failureRatio=0.5, expected behaviour is,
+     * 
+     * Execution Behaviour 
+     * ========= ========= 
+     * 1         Success 
+     * 2         RunTimeException 
+     * 3         RunTimeException  
+     * 4         Success 
+     * 5         CircuitBreakerOpenException 
+     */
+    @Test
+    public void testRollingWindowCircuitOpen() {
+        boolean cbExceptionThrown = false;
+        for (int i = 1; i < 6; i++) {
+
+            try {
+                clientForRW.serviceARollingWindowOpenAfter4();
+            }
+            catch (CircuitBreakerOpenException cboe) {
+                // Expected on iteration 5
+                cbExceptionThrown = true;
+                if (i != 5) {
+                    Assert.fail("serviceA should not throw a CircuitBreakerOpenException in testRollingWindowCircuitOpen on iteration " + i);
+                }
+            }
+            catch (RuntimeException ex) {
+                // Expected
+                if (!contains(new int[]{2, 3}, i)) {
+                    Assert.fail("serviceA should not throw a RuntimeException on iteration " + i);
+                }
+            }
+            catch (Exception ex) {
+                // Not Expected
+                Assert.fail("serviceA should throw a RuntimeException or CircuitBreakerOpenException in testRollingWindowCircuitOpen "
+                     + "on iteration " + i);
+            }
+        }
+        int serviceAExecutions = clientForRW.getCounterForInvokingServiceA();
+        Assert.assertTrue(cbExceptionThrown, "The CircuitBreaker exception in testRollingWindowCircuitOpen was not thrown correctly.");
+
+        Assert.assertEquals(serviceAExecutions, 5, "The number of executions should be 5");
+    }
+
+    /**
+     * A test to exercise Circuit Breaker rolling window
+     * 
+     * With requestVolumeThreshold = 4, failureRatio=0.5, expected behaviour is,
+     * 
+     * Execution Behaviour 
+     * ========= ========= 
+     * 1         Success 
+     * 2         RunTimeException 
+     * 3         Success  
+     * 4         Success 
+     * 5         RuntimeException
+     * 6         CircuitOpenException 
+     */
+    @Test
+    public void testRollingWindowCircuitOpen2() {
+        boolean cbExceptionThrown = false;
+        for (int i = 1; i < 7; i++) {
+
+            try {
+                clientForRW.serviceARollingWindowOpenAfter5();
+            }
+            catch (CircuitBreakerOpenException cboe) {
+                // Expected on iteration 5
+                cbExceptionThrown = true;
+                if (i != 6) {
+                    Assert.fail("serviceA should not throw a CircuitBreakerOpenException in testRollingWindowCircuitOpen2 "
+                            + "on iteration " + i);
+                }
+            }
+            catch (RuntimeException ex) {
+                // Expected
+                if (!contains(new int[]{2, 5}, i)) {
+                    Assert.fail("serviceA should not throw a RuntimeException on iteration " + i);
+                }
+            }
+            catch (Exception ex) {
+                // Not Expected
+                Assert.fail("serviceA should throw a RuntimeException or CircuitBreakerOpenException in testRollingWindowCircuitOpen2 "
+                        + "on iteration " + i);
+            }
+        }
+        int serviceAExecutions = clientForRW.getCounterForInvokingServiceA();
+        Assert.assertTrue(cbExceptionThrown, "The CircuitBreaker exception in testRollingWindowCircuitOpen2 was not thrown correctly.");
+
+        Assert.assertEquals(serviceAExecutions, 6, "The number of executions should be 6");
     }
 }
