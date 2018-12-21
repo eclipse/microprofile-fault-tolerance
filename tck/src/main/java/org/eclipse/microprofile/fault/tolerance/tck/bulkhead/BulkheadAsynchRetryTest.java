@@ -140,7 +140,7 @@ public class BulkheadAsynchRetryTest extends Arquillian {
      *
      * @throws InterruptedException when interrupted
      */
-    @Test()
+    @Test(enabled=false)
     public void testBulkheadMethodAsynchronousRetry55Trip() throws InterruptedException {
         int iterations = 11;
         int maxSimultaneousWorkers = 5;
@@ -173,7 +173,7 @@ public class BulkheadAsynchRetryTest extends Arquillian {
      *
      * @throws InterruptedException when interrupted
      */
-    @Test()
+    @Test(enabled=false)
     public void testBulkheadMethodAsynchronous55RetryOverload() throws InterruptedException {
         int iterations = 1000;
         int maxSimultaneousWorkers = 5;
@@ -196,7 +196,7 @@ public class BulkheadAsynchRetryTest extends Arquillian {
      * Tests overloading the Retries by firing lots of work at a full Class
      * bulkhead
      */
-    @Test()
+    @Test(enabled=false)
     public void testBulkheadClassAsynchronous55RetryOverload() {
         int iterations = 1000;
         int expectedTasksScheduled = iterations;
