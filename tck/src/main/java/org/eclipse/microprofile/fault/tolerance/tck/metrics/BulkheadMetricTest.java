@@ -187,7 +187,7 @@ public class BulkheadMetricTest extends Arquillian {
         assertThat("99th percentile", snap.get99thPercentile(), approxMillis(3000));
     }
     
-    @Test
+    @Test(enabled = false) 
     public void bulkheadMetricAsyncTest() throws InterruptedException, ExecutionException {
         MetricGetter m = new MetricGetter(BulkheadMetricBean.class, "waitForAsync");
         m.baselineCounters();
