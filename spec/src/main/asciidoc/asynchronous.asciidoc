@@ -30,7 +30,7 @@ This thread should have the correct security context or naming context associate
 === Asynchronous Usage
 
 A method or a class can be annotated with `@Asynchronous`, which means the method or the methods under the class will be invoked by a separate thread.
-The method annotated with `@Asynchronous` must return a `Future` or a `CompletionStage` from the `java.util.concurrent` package. Otherwise, a `FaultToleranceDefinitionException` occurs.
+The method annotated with `@Asynchronous` must return a `Future` or a `CompletionStage` from the `java.util.concurrent` package. Otherwise, a `FaultToleranceDefinitionException` occurs. 
 
 When a method annotated with `@Asynchronous` is invoked, it immediately returns a `Future` or `CompletionStage`. The execution of the any remaining interceptors and the method body will then take place on a separate thread.
 
@@ -52,7 +52,15 @@ public CompletionStage<Connection> serviceA() {
 The above code-snippet means that the `Asynchronous` policy is applied to the `serviceA` method, which means that a call to `serviceA` will return a `CompletionStage` immediately and that execution of the method body will be done on a different thread.
 
 The `@Asynchronous` annotation can be used together with `@Timeout`, `@Fallback`, `@Bulkhead`, `@CircuitBreaker` and `@Retry`.
-In this case, the method invocation and any fault tolerance processing will occur in a different thread. The returned `Future` or `CompletionStage` will be completed with the final result once all other Fault Tolerance processing has been completed.
+In this case, the method invocation and any fault tolerance processing will occur in a different thread. The returned `Future` or `CompletionStage` will be completed with the final result once all other Fault Tolerance processing has been completed. However, the two different return type have some differences, listed below.
+
+==== Return a Future
+If a `Future` completes exceptionally, the exception may not trigger other Fault Tolerance capabilities, even if specified. For instance, if a method returns a `Future` with `Asynchronous` and `Retry` specified, the `Future` that completes exceptionally will not trigger the method to be retried. 
+
+==== Return a CompletionStage 
+When a method returns a `CompletionStage`, if the `CompletionStage` returns exceptionally, the exception will trigger other Fault Tolerance capabilities, e.g. `Retry` if specified. Therefore, the usage of `CompletionStage` is more preferred.
+
+Therefore, it is highly encouraged to use `CompletionStage` instead of `Future` as a method with the return of `Future` behaves similar to synchronous calls.
 
 === Exception Handling
 
