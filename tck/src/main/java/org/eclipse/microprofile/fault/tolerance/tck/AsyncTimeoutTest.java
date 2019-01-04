@@ -207,7 +207,6 @@ public class AsyncTimeoutTest extends Arquillian {
 
         // Call future.get() with a timeout (3 seconds) that is longer than the annotated timeout (2 seconds) specified on
         // the service but shorter than the overall service duration (5 seconds sleep)
-        start = System.nanoTime();
         try {
             future.get(TEST_TIMEOUT_SERVICEA.plus(TEST_TIME_UNIT).toMillis(), TimeUnit.MILLISECONDS);
             throw new AssertionError("testAsyncClassLevelTimeout: Future not interrupted");
