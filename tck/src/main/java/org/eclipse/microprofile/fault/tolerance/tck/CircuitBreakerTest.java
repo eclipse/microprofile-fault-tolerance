@@ -647,7 +647,7 @@ public class CircuitBreakerTest extends Arquillian {
         for (int i = 1; i < 6; i++) {
 
             try {
-                clientForRW.serviceARollingWindowOpenAfter4();
+                clientForRW.service1RollingWindowOpenAfter4();
             }
             catch (CircuitBreakerOpenException cboe) {
                 // Expected on iteration 5
@@ -668,10 +668,10 @@ public class CircuitBreakerTest extends Arquillian {
                      + "on iteration " + i);
             }
         }
-        int serviceAExecutions = clientForRW.getCounterForInvokingServiceA();
+        int serviceAExecutions = clientForRW.getCounterForInvokingService1();
         Assert.assertTrue(cbExceptionThrown, "The CircuitBreaker exception in testRollingWindowCircuitOpen was not thrown correctly.");
 
-        Assert.assertEquals(serviceAExecutions, 5, "The number of executions should be 5");
+        Assert.assertEquals(serviceAExecutions, 4, "The number of executions should be 4");
     }
 
     /**
@@ -686,7 +686,7 @@ public class CircuitBreakerTest extends Arquillian {
      * 3         Success  
      * 4         Success 
      * 5         RuntimeException
-     * 6         CircuitOpenException 
+     * 6         CircuitBreakerOpenException 
      */
     @Test
     public void testRollingWindowCircuitOpen2() {
@@ -694,7 +694,7 @@ public class CircuitBreakerTest extends Arquillian {
         for (int i = 1; i < 7; i++) {
 
             try {
-                clientForRW.serviceARollingWindowOpenAfter5();
+                clientForRW.service2RollingWindowOpenAfter5();
             }
             catch (CircuitBreakerOpenException cboe) {
                 // Expected on iteration 5
@@ -716,9 +716,9 @@ public class CircuitBreakerTest extends Arquillian {
                         + "on iteration " + i);
             }
         }
-        int serviceAExecutions = clientForRW.getCounterForInvokingServiceA();
+        int serviceAExecutions = clientForRW.getCounterForInvokingService2();
         Assert.assertTrue(cbExceptionThrown, "The CircuitBreaker exception in testRollingWindowCircuitOpen2 was not thrown correctly.");
 
-        Assert.assertEquals(serviceAExecutions, 6, "The number of executions should be 6");
+        Assert.assertEquals(serviceAExecutions, 5, "The number of executions should be 5");
     }
 }

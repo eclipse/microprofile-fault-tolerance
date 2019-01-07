@@ -35,20 +35,23 @@ import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 public class CircuitBreakerClientRollingWindow implements Serializable {
         
     private static final long serialVersionUID = 1L;
-    private int counterForInvokingServiceA = 0;
+    private int counterForInvokingService1 = 0;
+    private int counterForInvokingService2 = 0;
         
-    public int getCounterForInvokingServiceA() {
-                return counterForInvokingServiceA;
-        }
 
-        public void setCounterForInvokingServiceA(int count) {
-                this.counterForInvokingServiceA = count;
-        }
+
+    public int getCounterForInvokingService1() {
+           return counterForInvokingService1;
+    }
+
+    public int getCounterForInvokingService2() {
+        return counterForInvokingService2;
+ }
 
     @CircuitBreaker(successThreshold = 2, requestVolumeThreshold = 4, failureRatio=0.5, delay = 1)
-    public Connection serviceARollingWindowOpenAfter4() {
+    public Connection service1RollingWindowOpenAfter4() {
         Connection conn = null;
-        counterForInvokingServiceA++;
+        counterForInvokingService1++;
         conn = connectionService1();
         
         return conn;
@@ -57,7 +60,7 @@ public class CircuitBreakerClientRollingWindow implements Serializable {
     //simulate a backend service
     //Throw exception for the 2nd and 3rd request.
     private Connection connectionService1() {
-        if((counterForInvokingServiceA ==2 ) || (counterForInvokingServiceA ==3)) {
+        if((counterForInvokingService1 ==2 ) || (counterForInvokingService1 ==3)) {
                 throw new RuntimeException("Connection failed");
         }
         return null;
@@ -67,9 +70,9 @@ public class CircuitBreakerClientRollingWindow implements Serializable {
     //simulate a backend service
     //Throw exception for the 2nd and 5th request.
     @CircuitBreaker(successThreshold = 2, requestVolumeThreshold = 4, failureRatio=0.5, delay = 1)
-    public Connection serviceARollingWindowOpenAfter5() {
+    public Connection service2RollingWindowOpenAfter5() {
         Connection conn = null;
-        counterForInvokingServiceA++;
+        counterForInvokingService2++;
         conn = connectionService2();
         
         return conn;
@@ -78,7 +81,7 @@ public class CircuitBreakerClientRollingWindow implements Serializable {
     //simulate a backend service
     //Throw exception for the 2nd and 5th request.
     private Connection connectionService2() {
-        if((counterForInvokingServiceA ==2 ) || (counterForInvokingServiceA ==5)) {
+        if((counterForInvokingService2 ==2 ) || (counterForInvokingService2 ==5)) {
                 throw new RuntimeException("Connection failed");
         }
         return null;

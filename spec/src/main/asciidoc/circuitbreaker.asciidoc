@@ -51,22 +51,23 @@ public Connection serviceA() {
 }
 ----
 Below are a couple scenarios to demonstrate when the circuit opens for the above code snippet.
+
 * Scenario 1
-     Request 1 - success
-     Request 2 - failure
-     Request 3 - failure
-     Request 4 - success
-     Request 5 - CircuitOpenException
+** Request 1 - success
+** Request 2 - failure
+** Request 3 - failure
+** Request 4 - success
+** Request 5 - CircuitBreakerOpenException
 
 The Request 4 will trigger the circuit to open. The Request 5 will hit the exception.
 
 * Scenario 2
-     Request 1 - success
-     Request 2 - failure
-     Request 3 - success
-     Request 4 - success
-     Request 5 - failure
-     Request 6 - CircuitOpenException
+** Request 1 - success
+** Request 2 - failure
+** Request 3 - success
+** Request 4 - success
+** Request 5 - failure
+** Request 6 - CircuitBreakerOpenException 
 
 The Request 5 will trigger the circuit to open. The Request 6 will hit the exception.
 
