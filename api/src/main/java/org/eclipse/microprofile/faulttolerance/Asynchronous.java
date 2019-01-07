@@ -34,8 +34,13 @@ import javax.interceptor.InterceptorBinding;
  * <li>{@link java.util.concurrent.Future}</li>
  * <li>{@link java.util.concurrent.CompletionStage}</li>
  * </ul>
+ * 
  * Otherwise, {@link org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException} occurs
- * (at deploy time if the bean is discovered during deployment).
+ * (at deploy time if the bean is discovered during deployment). 
+ * The return type {@link java.util.concurrent.CompletionStage} is preferred over {@link java.util.concurrent.Future}
+ * as a {@link java.util.concurrent.Future} that completes exceptionally will not trigger other Fault Tolerance operations 
+ * even if specified (e.g. Retry), while a {@link java.util.concurrent.CompletionStage} that completes exceptionally will trigger other 
+ * Fault Tolerance capabilities if specified (e.g. Retry).
  * 
  * <p>
  * When a method marked with this annotation is called from one thread (which we will call Thread A), the method call is
