@@ -20,6 +20,7 @@
 package org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver;
 
 import java.sql.Connection;
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -35,30 +36,35 @@ import org.eclipse.microprofile.faulttolerance.Retry;
 public class RetryClientWithDelay {
     private int counterForInvokingConnenectionService;
     private long timestampForConnectionService = 0;
-    private Set<Long> delayTimes = new HashSet<Long>();
+    private Set<Duration> delayTimes = new HashSet<>();
+    
+    // Expect delay between 0-800ms. Set limit to 900ms to allow a small buffer
+    private static final Duration MAX_DELAY = Duration.ofMillis(900);
+    
     //There should be 0-800ms (jitter is -400ms - 400ms) delays between each invocation
     //there should be at least 4 retries
     @Retry(delay = 400, maxDuration= 3200, jitter= 400, maxRetries = 10)
     public Connection serviceA() {
         return connectionService();
     }
+    
     //simulate a backend service
     private Connection connectionService() {
-       // the time delay between each invocation should be 0-800ms
-       if (timestampForConnectionService != 0) {
-           long currentTime = System.nanoTime();
-           delayTimes.add(currentTime -timestampForConnectionService );
-           timestampForConnectionService = currentTime;
+        // record the time delay between each invocation (should be 0-800ms)
+        long currentTime = System.nanoTime();
+        if (timestampForConnectionService != 0) {
+            delayTimes.add(Duration.ofNanos(currentTime - timestampForConnectionService));
+        }
+        timestampForConnectionService = currentTime;
         
-       }
         counterForInvokingConnenectionService++;
         throw new RuntimeException("Connection failed");
     }
     
     public boolean isDelayInRange() {
         boolean isDelayInRange = true;        
-        for (long delayTime : delayTimes) {
-            if (delayTime > 800) {
+        for (Duration delayTime : delayTimes) {
+            if (delayTime.compareTo(MAX_DELAY) > 0) {
                 return false;
             }
         }
