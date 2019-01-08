@@ -48,7 +48,7 @@ public class CircuitBreakerClientRollingWindow implements Serializable {
         return counterForInvokingService2;
  }
 
-    @CircuitBreaker(successThreshold = 2, requestVolumeThreshold = 4, failureRatio=0.5, delay = 1)
+    @CircuitBreaker(successThreshold = 2, requestVolumeThreshold = 4, failureRatio=0.5)
     public Connection service1RollingWindowOpenAfter4() {
         Connection conn = null;
         counterForInvokingService1++;
@@ -69,7 +69,7 @@ public class CircuitBreakerClientRollingWindow implements Serializable {
     }
     //simulate a backend service
     //Throw exception for the 2nd and 5th request.
-    @CircuitBreaker(successThreshold = 2, requestVolumeThreshold = 4, failureRatio=0.5, delay = 1)
+    @CircuitBreaker(successThreshold = 2, requestVolumeThreshold = 4, failureRatio=0.5)
     public Connection service2RollingWindowOpenAfter5() {
         Connection conn = null;
         counterForInvokingService2++;
