@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -28,8 +28,11 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.Assert;
 import org.testng.annotations.Test;
+
+import static org.junit.Assert.fail;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 public class ZeroRetryJitterTest extends Arquillian {
 
@@ -38,29 +41,28 @@ public class ZeroRetryJitterTest extends Arquillian {
 
     @Deployment
     public static WebArchive deploy() {
-        JavaArchive testJar = ShrinkWrap
-            .create(JavaArchive.class, "ftZeroTestJitter.jar")
+        JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftZeroTestJitter.jar")
             .addClasses(RetryClientForZeroJitter.class)
             .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
             .as(JavaArchive.class);
 
-        return ShrinkWrap
-            .create(WebArchive.class, "ftZeroTestJitter.war")
-            .addAsLibrary(testJar);
+        return ShrinkWrap.create(WebArchive.class, "ftZeroTestJitter.war").addAsLibrary(testJar);
     }
+
     /**
      * Test that checks that jitter = 0 does not generate error during method call.
-     * 
+     * <p>
      * A Service is annotated with a @Retry annotation with jitter = 0.
      */
     @Test
     public void test() {
         try {
             zeroJitterClient.serviceA();
-            Assert.fail("This should not happen");
+            fail("This should not happen");
         }
         catch (RuntimeException e) {
-            // expected
+            assertEquals("Incorrect number of retires", 3, zeroJitterClient.getRetries());
+            assertTrue("It took too much time for 3 retries", zeroJitterClient.getTotalRetryTime() < 3 * 200);
         }
     }
 }

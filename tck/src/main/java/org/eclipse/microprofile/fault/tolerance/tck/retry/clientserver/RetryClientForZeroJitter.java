@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2016-2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2016-2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,7 +19,7 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver;
 
-import javax.enterprise.context.RequestScoped;
+import javax.enterprise.context.ApplicationScoped;
 import java.sql.Connection;
 
 import org.eclipse.microprofile.faulttolerance.Retry;
@@ -30,11 +30,29 @@ import org.eclipse.microprofile.faulttolerance.Retry;
  * @author <a href="mailto:doychin@dsoft-bg.com">Doychin Bondzhev</a>
  *
  */
-@RequestScoped
+@ApplicationScoped
 public class RetryClientForZeroJitter {
+
+    private long totalRetryTime = 0;
+
+    private long previousTime = 0;
+
+    private int retries = -1; // first call is normal call
 
     @Retry(jitter = 0)
     public Connection serviceA() {
+        long currentTime = System.currentTimeMillis();
+        totalRetryTime += previousTime > 0 ? currentTime - previousTime : 0;
+        previousTime = currentTime;
+        retries++;
         throw new RuntimeException();
+    }
+
+    public int getRetries() {
+        return retries;
+    }
+
+    public long getTotalRetryTime() {
+        return totalRetryTime;
     }
 }
