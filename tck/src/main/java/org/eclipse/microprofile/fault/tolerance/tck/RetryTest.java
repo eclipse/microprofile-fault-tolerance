@@ -24,7 +24,7 @@ import javax.inject.Inject;
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClassLevelClientForMaxRetries;
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClientForMaxRetries;
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClientWithDelay;
-import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClientWithNoDelayAndJiter;
+import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClientWithNoDelayAndJitter;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -45,7 +45,8 @@ public class RetryTest extends Arquillian {
     private @Inject RetryClientForMaxRetries clientForMaxRetry;
     private @Inject RetryClientWithDelay clientForDelay;
     private @Inject RetryClassLevelClientForMaxRetries clientForClassLevelMaxRetry;
-    private @Inject RetryClientWithNoDelayAndJiter retryClientWithNoDelayAndJiter;
+    private @Inject
+    RetryClientWithNoDelayAndJitter retryClientWithNoDelayAndJitter;
     
     @Deployment
     public static WebArchive deploy() {
@@ -54,7 +55,7 @@ public class RetryTest extends Arquillian {
                 .addClasses(RetryClientForMaxRetries.class,
                             RetryClientWithDelay.class,
                             RetryClassLevelClientForMaxRetries.class,
-                            RetryClientWithNoDelayAndJiter.class)
+                            RetryClientWithNoDelayAndJitter.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                 .as(JavaArchive.class);
 
@@ -140,24 +141,24 @@ public class RetryTest extends Arquillian {
     @Test
     public void testRetryWithNoDelayAndJitter() {
         try {
-            retryClientWithNoDelayAndJiter.serviceA();
+            retryClientWithNoDelayAndJitter.serviceA();
             Assert.fail("serviceA should throw a RuntimeException in testRetryWithDelay");
         }
         catch (RuntimeException ex) {
             // Expected
         }
 
-        final int retryCountForConnectionService = retryClientWithNoDelayAndJiter.getRetryCountForConnectionService();
+        final int retryCountForConnectionService = retryClientWithNoDelayAndJitter.getRetryCountForConnectionService();
 
         // we have positive delays
-        Assert.assertTrue(retryClientWithNoDelayAndJiter.positiveDelays() > 0,
+        Assert.assertTrue(retryClientWithNoDelayAndJitter.positiveDelays() > 0,
             "Using jitter must cause some effective delay even when delay is set to 0");
 
         Assert.assertTrue(retryCountForConnectionService > 8 && retryCountForConnectionService < 50,
             "The max number of execution should be between 8 and 50 but it was " + retryCountForConnectionService +
                 ". Too many retries mean jitter is not being applied.");
 
-        Assert.assertTrue(retryClientWithNoDelayAndJiter.isDelayInRange(),
+        Assert.assertTrue(retryClientWithNoDelayAndJitter.isDelayInRange(),
             "The delay between each retry should be 0-400ms");
     }
 

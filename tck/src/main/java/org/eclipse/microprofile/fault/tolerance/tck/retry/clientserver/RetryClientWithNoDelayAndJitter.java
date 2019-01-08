@@ -32,8 +32,8 @@ import java.util.List;
  *
  */
 @RequestScoped
-public class RetryClientWithNoDelayAndJiter {
-    private int counterForInvokingConnenectionService = 0;
+public class RetryClientWithNoDelayAndJitter {
+    private int counterForInvokingConnectionService = 0;
     private long timestampForConnectionService = System.currentTimeMillis();
     private final List<Long> delayTimes = new ArrayList<>();
 
@@ -52,22 +52,21 @@ public class RetryClientWithNoDelayAndJiter {
         delayTimes.add(currentTime - timestampForConnectionService);
         timestampForConnectionService = currentTime;
 
-        counterForInvokingConnenectionService++;
+        counterForInvokingConnectionService++;
         throw new RuntimeException("Connection failed");
     }
 
     public boolean isDelayInRange() {
-        boolean isDelayInRange = true;
         for (long delayTime : delayTimes) {
             if (delayTime > 400) {
                 return false;
             }
         }
-        return isDelayInRange;
+        return true;
     }
 
     public int getRetryCountForConnectionService() {
-        return counterForInvokingConnenectionService;
+        return counterForInvokingConnectionService;
     }
 
     public int positiveDelays() {
