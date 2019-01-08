@@ -22,9 +22,7 @@ package org.eclipse.microprofile.fault.tolerance.tck;
 import javax.inject.Inject;
 
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClientForZeroJitter;
-import org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException;
 import org.jboss.arquillian.container.test.api.Deployment;
-import org.jboss.arquillian.container.test.api.ShouldThrowException;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
@@ -39,7 +37,6 @@ public class ZeroRetryJitterTest extends Arquillian {
     private RetryClientForZeroJitter zeroJitterClient;
 
     @Deployment
-    @ShouldThrowException(value = FaultToleranceDefinitionException.class)
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
             .create(JavaArchive.class, "ftZeroTestJitter.jar")
@@ -61,7 +58,8 @@ public class ZeroRetryJitterTest extends Arquillian {
         try {
             zeroJitterClient.serviceA();
             Assert.fail("This should not happen");
-        } catch (RuntimeException e) {
+        }
+        catch (RuntimeException e) {
             // expected
         }
     }
