@@ -74,7 +74,7 @@ public @interface CircuitBreaker {
     /**
      * The failure threshold to trigger the circuit to open.
      * e.g. if the requestVolumeThreshold is 20 and failureRation is .50,
-     * more than 10 failures in 20 consecutive requests will trigger
+     * 10 or more failures in 20 consecutive requests will trigger
      * the circuit to open. The value must be between 0 and 1 inclusive.
      * @return The failure threshold to open the circuit
      */
