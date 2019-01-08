@@ -60,7 +60,6 @@ public class ZeroRetryJitterTest extends Arquillian {
     public void test() {
         try {
             zeroJitterClient.serviceA();
-
             Assert.fail("This should not happen");
         } catch (RuntimeException e) {
             // expected
