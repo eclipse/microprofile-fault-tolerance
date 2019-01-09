@@ -51,16 +51,53 @@ public CompletionStage<Connection> serviceA() {
 
 The above code-snippet means that the `Asynchronous` policy is applied to the `serviceA` method, which means that a call to `serviceA` will return a `CompletionStage` immediately and that execution of the method body will be done on a different thread.
 
+=== Interactions with other Fault Tolerance annotations
 The `@Asynchronous` annotation can be used together with `@Timeout`, `@Fallback`, `@Bulkhead`, `@CircuitBreaker` and `@Retry`.
-In this case, the method invocation and any fault tolerance processing will occur in a different thread. The returned `Future` or `CompletionStage` will be completed with the final result once all other Fault Tolerance processing has been completed. However, the two different return type have some differences, listed below.
+In this case, the method invocation and any fault tolerance processing will occur in a different thread. The returned `Future` or `CompletionStage` will be completed with the final result once all other Fault Tolerance processing has been completed. However, the two different return type have some differences.
 
-==== Return a Future
-If a `Future` completes exceptionally, the exception may not trigger other Fault Tolerance capabilities, even if specified. For instance, if a method returns a `Future` with `Asynchronous` and `Retry` specified, the `Future` that completes exceptionally will not trigger the method to be retried. 
+==== Interactions when returning a `Future`
+If a method returns a `Future`, the other Fault Tolerance annotations are applied only around method invocation regardless whether the return `Future` completes exceptionally or not. In more details:
+* If the method invocation throws an exception, this will trigger other specified Fault Tolerance policies to be applied.
+* If the method returns a `Future`, then the method call is considered to be successful, which will not trigger other Fault Tolerance policies to be applied even if specified.
 
-==== Return a CompletionStage 
-When a method returns a `CompletionStage`, if the `CompletionStage` returns exceptionally, the exception will trigger other Fault Tolerance capabilities, e.g. `Retry` if specified. Therefore, the usage of `CompletionStage` is more preferred.
+In the following example, the `Retry` will not be triggered as the method invocation returns normally.
 
-Therefore, it is highly encouraged to use `CompletionStage` instead of `Future` as a method with the return of `Future` behaves similar to synchronous calls.
+[source, java]
+----
+@Asynchronous
+@Retry
+public Future<Connection> serviceA() {
+   CompletableFuture<U> future = new CompletableFuture<>();
+   future.completeExceptionally(new RuntimeException("Failure"));
+   return future;
+}
+----
+
+
+==== Interactions when returning a `CompletionStage`
+If the method returns `CompletionStage`, the other specified Fault Tolerance annotations will be trigger either on the method call or the exceptionally returned `CompletionStage`. In more details:
+
+
+*If the method invocation throws an exception, this will trigger other specified Fault Tolerance policies to be applied.
+
+*If the method returns a `CompletionStage`, then the method call is considered to be successful only if the `CompletionStage` completes successfully. Exceptionally returned `CompletionStage` or an incomplete `CompletionStage` returns first and then later completes exceptionally will cause other specified Fault Tolerance to be applied.
+
+In the following example, the `Retry` will be triggered as the returned `CompletionStage` completes exceptionally.
+
+[source, java]
+----
+@Asynchronous
+@Retry
+public CompletionStage<Connection> serviceA() {
+   CompletableFuture<U> future = new CompletableFuture<>();
+   future.completeExceptionally(new RuntimeException("Failure"));
+   return future;
+}
+----
+The above behaviour makes it easier to apply Fault Tolerance logic around a `CompletionStage` which was returned another component, e.g. applying `Asynchronous`, `@Retry` and `@Timeout` to a JAX-RS client call.
+
+It is apparent that when using `@Asynchronous`, it is much more desirable to specify the return type `CompletionStage` over `Future` to maximise the usage of Fault Tolerance.
+
 
 === Exception Handling
 
