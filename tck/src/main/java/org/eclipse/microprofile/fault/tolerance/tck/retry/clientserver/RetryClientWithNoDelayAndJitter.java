@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2016-2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2016-2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -40,7 +40,7 @@ public class RetryClientWithNoDelayAndJitter {
 
     //There should be 0-400ms (jitter is -400ms - 400ms but min value must be 0) delays between each invocation
     //there should be at least 8 retries
-    @Retry(delay = 0, maxDuration= 3200, jitter= 400, maxRetries = 50)
+    @Retry(delay = 0, maxDuration= 3200, jitter= 400, maxRetries = 100)
     public Connection serviceA() {
         return connectionService();
     }
