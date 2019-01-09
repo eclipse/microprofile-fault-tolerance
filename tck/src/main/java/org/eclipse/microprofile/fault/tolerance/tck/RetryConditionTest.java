@@ -335,7 +335,7 @@ public class RetryConditionTest extends Arquillian {
     }
 
     public void testRetryCompletionStageWithException() {
-        assertCompleteOk(asyncRetryClient.serviceH(), "Success then Success");
+        assertCompleteOk(asyncRetryClient.serviceH(), "Success");
         assertEquals(3, asyncRetryClient.getCountInvocationsServH());
     }
 
