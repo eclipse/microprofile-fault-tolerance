@@ -201,8 +201,8 @@ public class AsyncRetryClient {
     @Retry(maxRetries = 2)
     public CompletionStage<String> serviceH() {
         countInvocationsServH++;
-        // fails once
-        if (countInvocationsServH < 2) {
+        // fails twice
+        if (countInvocationsServH < 3) {
             throw new RuntimeException("Simulated error");
         }
 
