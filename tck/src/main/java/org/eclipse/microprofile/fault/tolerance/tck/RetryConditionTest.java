@@ -281,7 +281,7 @@ public class RetryConditionTest extends Arquillian {
     }
 
     /**
-     * Temporary error. Will retry 3 times, the first 2 will fail.
+     * Temporary error. Will retry 2 times, the first 2 calls fail will fail.
      * ServiceC uses {@link org.eclipse.microprofile.faulttolerance.Asynchronous}.
      */
     @Test
@@ -293,7 +293,7 @@ public class RetryConditionTest extends Arquillian {
     }
 
     /**
-     * Temporary error. Will retry 3 times, the first 2 will fail deep in a CompletableFuture chained execution.
+     * Temporary error. Will retry 2 times, the first 2 calls fail fail deep in a CompletableFuture chained execution.
      * ServiceD uses {@link org.eclipse.microprofile.faulttolerance.Asynchronous} and chains 2 CompletableFutures.
      */
     @Test
@@ -325,7 +325,7 @@ public class RetryConditionTest extends Arquillian {
     }
 
     /**
-     * Temporary error. Will retry 3 times, the first 2 will fail in a CompletableFuture parallel execution.
+     * Temporary error. Will retry 2 times, the first 2 calls fail in a CompletableFuture parallel execution.
      * ServiceG uses {@link org.eclipse.microprofile.faulttolerance.Asynchronous} and 2 CompletableFutures.
      */
     @Test
@@ -334,6 +334,9 @@ public class RetryConditionTest extends Arquillian {
         assertEquals(3, asyncRetryClient.getCountInvocationsServF());
     }
 
+    /**
+     * Temporary error. Will retry 2 times, the first 2 calls fail and the method will throw an exception.
+     */
     public void testRetryCompletionStageWithException() {
         assertCompleteOk(asyncRetryClient.serviceH(), "Success");
         assertEquals(3, asyncRetryClient.getCountInvocationsServH());
