@@ -21,9 +21,9 @@
 
 [[fallback]]
 == Fallback
-Fallback method is invoked when the method with @Fallback annotation completed exceptionally.
+A Fallback method is invoked if a method annotated with `@Fallback` completes exceptionally.
 
-Fallback annotation can be used on its own or together with other Fault Tolerance annotations.
+The Fallback annotation can be used on its own or together with other Fault Tolerance annotations. The fallback is invoked if an exception would be thrown after all other Fault Tolerance processing has taken place.
 
 For a Retry, Fallback is handled any time the Retry would exceed its maximum number of attempts.
 

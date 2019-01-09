@@ -43,7 +43,11 @@ public @interface CircuitBreaker {
 
     /**
      * Define the failure criteria
-     * @return the failure exception
+     * <p>
+     * A method call will be considered a failure if it throws an exception and the type of that exception is assignable to any of the types listed
+     * in {@code failOn}.
+     * 
+     * @return the exception types which should be considered failures
      */
     @Nonbinding
     Class<? extends Throwable>[] failOn() default {Throwable.class};
