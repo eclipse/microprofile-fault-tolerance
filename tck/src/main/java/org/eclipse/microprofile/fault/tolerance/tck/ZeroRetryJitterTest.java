@@ -58,11 +58,11 @@ public class ZeroRetryJitterTest extends Arquillian {
     public void test() {
         try {
             zeroJitterClient.serviceA();
-            fail("This should not happen");
-        }
-        catch (RuntimeException e) {
             assertEquals("Incorrect number of retires", 3, zeroJitterClient.getRetries());
             assertTrue("It took too much time for 3 retries", zeroJitterClient.getTotalRetryTime() < 3 * 200);
+        }
+        catch (Exception e) {
+            fail("Unexpected exception");
         }
     }
 }
