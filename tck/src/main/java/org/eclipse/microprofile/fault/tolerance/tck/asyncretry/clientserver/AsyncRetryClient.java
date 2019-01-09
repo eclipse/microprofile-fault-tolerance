@@ -47,6 +47,7 @@ public class AsyncRetryClient {
     private int countInvocationsServE = 0;
     private int countInvocationsServF = 0;
     private int countInvocationsServG = 0;
+    private int countInvocationsServH = 0;
 
     /**
      * Service will retry a method returning a CompletionStage and configured to always completeExceptionally.
@@ -190,6 +191,26 @@ public class AsyncRetryClient {
 
     }
 
+    /**
+     * Service will retry a method returning CompletionStages but throwing an exception.
+     * fail twice.
+     *
+     * @return a {@link CompletionStage}
+     */
+    @Asynchronous
+    @Retry(maxRetries = 2)
+    public CompletionStage<String> serviceH() {
+        countInvocationsServH++;
+        // fails twice
+        if (countInvocationsServH < 2) {
+            throw new RuntimeException("Simulated error");
+        }
+
+        CompletableFuture<String> future = new CompletableFuture<>();
+        future.complete("Success");
+        return future;
+    }
+
     public int getCountInvocationsServA() {
         return countInvocationsServA;
     }
@@ -220,6 +241,10 @@ public class AsyncRetryClient {
 
     public int getCountInvocationsServG() {
         return countInvocationsServG;
+    }
+
+    public int getCountInvocationsServH() {
+        return countInvocationsServH;
     }
 
     private Supplier<String> doTask(final String errorMessage) {

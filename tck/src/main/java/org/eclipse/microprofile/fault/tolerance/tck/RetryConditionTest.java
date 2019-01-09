@@ -310,11 +310,7 @@ public class RetryConditionTest extends Arquillian {
      */
     @Test
     public void testRetryChainExceptionally() {
-        CompletableFuture<String> future = new CompletableFuture<>();
-
-        asyncRetryClient.serviceE();
-
-        assertCompleteExceptionally(future, IOException.class, "Simulated error");
+        assertCompleteExceptionally(asyncRetryClient.serviceE(), IOException.class, "Simulated error");
         assertEquals(3, asyncRetryClient.getCountInvocationsServE());
     }
 
@@ -324,11 +320,7 @@ public class RetryConditionTest extends Arquillian {
      */
     @Test
     public void testRetryParallelExceptionally() {
-        CompletableFuture<String> future = new CompletableFuture<>();
-
-        asyncRetryClient.serviceG();
-
-        assertCompleteExceptionally(future, IOException.class, "Simulated error");
+        assertCompleteExceptionally(asyncRetryClient.serviceG(), IOException.class, "Simulated error");
         assertEquals(3, asyncRetryClient.getCountInvocationsServG());
     }
 
@@ -338,12 +330,13 @@ public class RetryConditionTest extends Arquillian {
      */
     @Test
     public void testRetryParallelSuccess() {
-        CompletableFuture<String> future = new CompletableFuture<>();
-
-        asyncRetryClient.serviceF();
-
-        assertCompleteOk(future, "Success then Success");
+        assertCompleteOk(asyncRetryClient.serviceF(), "Success then Success");
         assertEquals(3, asyncRetryClient.getCountInvocationsServF());
+    }
+
+    public void testRetryCompletionStageWithException() {
+        assertCompleteOk(asyncRetryClient.serviceH(), "Success then Success");
+        assertEquals(3, asyncRetryClient.getCountInvocationsServH());
     }
 
     private void assertCompleteExceptionally(final CompletionStage<String> future,
