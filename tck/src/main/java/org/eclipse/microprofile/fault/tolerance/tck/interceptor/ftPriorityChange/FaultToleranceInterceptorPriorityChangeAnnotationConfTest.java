@@ -74,7 +74,7 @@ public class FaultToleranceInterceptorPriorityChangeAnnotationConfTest extends A
     public void testAsync() throws InterruptedException, ExecutionException {
         Future<String> result = testInterceptor.asyncGetString();
         assertEquals(result.get(), "OK");
-        String [] expectedOrder = {"asyncGetString","LateOrderFtInterceptor","EarlyOrderFtInterceptor"};
+        String [] expectedOrder = {"asyncGetString","EarlyOrderFtInterceptor","LateOrderFtInterceptor"};
         /*After changing the FT interceptor priority the first interceptor to be called must be FT interceptor*/
         assertEquals(orderFactory.getOrderQueue().toArray(), expectedOrder);
     }
@@ -89,8 +89,8 @@ public class FaultToleranceInterceptorPriorityChangeAnnotationConfTest extends A
             assertEquals(e.getMessage().trim(), "retryGetString failed");
         }
 
-        String [] expectedOrder = {"serviceRetryA","LateOrderFtInterceptor","EarlyOrderFtInterceptor",
-            "serviceRetryA","LateOrderFtInterceptor","EarlyOrderFtInterceptor"};
+        String [] expectedOrder = {"serviceRetryA","EarlyOrderFtInterceptor","LateOrderFtInterceptor",
+            "serviceRetryA","EarlyOrderFtInterceptor","LateOrderFtInterceptor"};
         /*After changing the FT interceptor priority the first interceptor to be called must be FT interceptor*/
         assertEquals(orderFactory.getOrderQueue().toArray(), expectedOrder);
     }

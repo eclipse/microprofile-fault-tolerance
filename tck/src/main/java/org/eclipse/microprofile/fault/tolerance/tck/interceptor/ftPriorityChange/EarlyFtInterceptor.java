@@ -42,7 +42,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  */
 @Interceptor
 @InterceptEarly
-@Priority(Interceptor.Priority.PLATFORM_AFTER - 100)
+@Priority(Interceptor.Priority.PLATFORM_AFTER - 200)
 public class EarlyFtInterceptor {
 
     @Inject
