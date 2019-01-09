@@ -38,7 +38,38 @@ succeed before the circuit can be closed. After the specified number of successf
 before the successThreshold is reached the circuit will transition to open. 
 
 Note that circuit state transitions will reset the Circuit Breaker's records. For example, when the circuit transitions to closed a new
-rolling failure window is created with the configured requestVolumeThreshold and failureRatio.
+rolling failure window is created with the configured requestVolumeThreshold and failureRatio. The circuit state will only be assessed when the rolling window reaches the `requestVolumeThreshold`. 
+ 
+[source, java]
+----
+@CircuitBreaker(successThreshold = 10, requestVolumeThreshold = 4, failureRatio=0.5, delay = 1000)
+public Connection serviceA() {
+   Connection conn = null;
+   counterForInvokingServiceA++;
+   conn = connectionService();
+   return conn;
+}
+----
+Below are a couple scenarios to demonstrate when the circuit opens for the above code snippet.
+
+* Scenario 1
+** Request 1 - success
+** Request 2 - failure
+** Request 3 - failure
+** Request 4 - success
+** Request 5 - CircuitBreakerOpenException
+
+The Request 4 will trigger the circuit to open. The Request 5 will hit the exception.
+
+* Scenario 2
+** Request 1 - success
+** Request 2 - failure
+** Request 3 - success
+** Request 4 - success
+** Request 5 - failure
+** Request 6 - CircuitBreakerOpenException 
+
+The Request 5 will trigger the circuit to open. The Request 6 will hit the exception.
 
 === Circuit Breaker Usage
 
