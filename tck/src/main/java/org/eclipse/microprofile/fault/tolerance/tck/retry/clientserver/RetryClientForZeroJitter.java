@@ -20,7 +20,6 @@
 package org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver;
 
 import javax.enterprise.context.ApplicationScoped;
-import java.sql.Connection;
 
 import org.eclipse.microprofile.faulttolerance.Retry;
 
@@ -39,12 +38,14 @@ public class RetryClientForZeroJitter {
 
     private int retries = -1; // first call is normal call
 
-    @Retry(jitter = 0)
-    public Connection serviceA() {
+    @Retry(maxRetries = 3, jitter = 0)
+    public void serviceA() {
         long currentTime = System.currentTimeMillis();
         totalRetryTime += previousTime > 0 ? currentTime - previousTime : 0;
         previousTime = currentTime;
-        retries++;
+        if (++retries == 3) {
+            return;
+        }
         throw new RuntimeException();
     }
 

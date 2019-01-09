@@ -42,9 +42,9 @@ public class ZeroRetryJitterTest extends Arquillian {
     @Deployment
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftZeroTestJitter.jar")
-            .addClasses(RetryClientForZeroJitter.class)
-            .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
-            .as(JavaArchive.class);
+                                        .addClasses(RetryClientForZeroJitter.class)
+                                        .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
+                                        .as(JavaArchive.class);
 
         return ShrinkWrap.create(WebArchive.class, "ftZeroTestJitter.war").addAsLibrary(testJar);
     }
@@ -58,11 +58,11 @@ public class ZeroRetryJitterTest extends Arquillian {
     public void test() {
         try {
             zeroJitterClient.serviceA();
-            fail("This should not happen");
-        }
-        catch (RuntimeException e) {
             assertEquals("Incorrect number of retires", 3, zeroJitterClient.getRetries());
             assertTrue("It took too much time for 3 retries", zeroJitterClient.getTotalRetryTime() < 3 * 200);
+        }
+        catch (Exception e) {
+            fail("Unexpected exception");
         }
     }
 }
