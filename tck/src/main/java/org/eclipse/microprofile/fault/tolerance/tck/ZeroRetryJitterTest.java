@@ -62,6 +62,7 @@ public class ZeroRetryJitterTest extends Arquillian {
             assertTrue("It took too much time for 3 retries", zeroJitterClient.getTotalRetryTime() < 3 * 200);
         }
         catch (Exception e) {
+            e.printStackTrace();
             fail("Unexpected exception");
         }
     }
