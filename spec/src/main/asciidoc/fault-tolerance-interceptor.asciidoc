@@ -20,15 +20,15 @@
 
 [[fault-tolerance-interceptor]]
 
-== Fault Tolerance Interceptor
+== Fault Tolerance Interceptor(s)
 
-The implementor of the MicroProfile Fault Tolerance specification must provide a Fault Tolerance interceptor. This interceptor provides the functionality for all Fault Tolerance annotations. The interceptor will be called if one or more Fault Tolerance interceptor bindings are specified. For instance, the Fault Tolerance interceptor will retry the specified operation if the `Retry` annotation is specified on that operation. The default priority of the Fault Tolerance interceptor is `Priority.PLATFORM_AFTER+10`, which is `4010`. 
+The implementor of the MicroProfile Fault Tolerance specification must provide one or more Fault Tolerance interceptors. The interceptor(s) provide the functionality for Fault Tolerance annotations. The interceptor(s) will be called if one or more Fault Tolerance annotations are specified. For instance, a Fault Tolerance interceptor will retry the specified operation if the `Retry` annotation is specified on that operation. The base priority of the lowest priority Fault Tolerance interceptor is `Priority.PLATFORM_AFTER+10`, which is `4010`. If more than one Fault Tolerance interceptor is provided by an implementation, the priority number taken by Fault Tolerance interceptor(s) should be in the range of [base, base+40].
 
-The Fault Tolerance interceptor priority can be configured via MicroProfile Config with the property name of `mp.fault.tolerance.interceptor.priority`. The property value will only be read at application startup. Any subsequent value changes will not take effect until the application restarts.
+The Fault Tolerance interceptor base priority can be configured via MicroProfile Config with the property name of `mp.fault.tolerance.interceptor.priority`. The property value will only be read at application startup. Any subsequent value changes will not take effect until the application restarts.
 
 A method, annotated with any of the Fault Tolerance interceptor bindings, may also be annotated with other interceptor bindings. The bound interceptors will be invoked in ascending order of interceptor priority, as specified by https://download.oracle.com/otn-pub/jcp/interceptors-1_2A-mrel3-eval-spec/Intercept.pdf[Interceptor Specification^]. If the appliction interceptors are enabled via beans.xml, the interceptors enabled via beans.xml will be invoked after the Fault Tolerance interceptor. For more details, refer to http://docs.jboss.org/cdi/spec/2.0/cdi-spec.html#enabled_interceptors[Interceptor ordering^] in CDI specification.
 
-For instance, in the following example, `MyLogInterceptor` will be invoked first, followed by the Fault Tolerance interceptor and then `MyPrintInterceptor`.
+For instance, in the following example, `MyLogInterceptor` will be invoked first, followed by a Fault Tolerance interceptor that does `Retry` capability, and then `MyPrintInterceptor`.
 
 [source, java]
 ----
