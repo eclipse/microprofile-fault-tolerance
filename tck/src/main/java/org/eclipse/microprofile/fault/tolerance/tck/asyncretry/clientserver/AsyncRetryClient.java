@@ -49,7 +49,7 @@ public class AsyncRetryClient {
     private int countInvocationsServG = 0;
 
     /**
-     * Service A will retry a method returning a CompletionStage and configured to always completeExceptionally.
+     * Service will retry a method returning a CompletionStage and configured to always completeExceptionally.
      *
      * @return a {@link CompletionStage}
      */
@@ -64,7 +64,7 @@ public class AsyncRetryClient {
     }
 
     /**
-     * Service A will retry a method returning a CompletionStage and configured to always completeExceptionally.
+     * Service will retry a method returning a CompletionStage and configured to always completeExceptionally.
      *
      * @return a {@link CompletionStage}
      */
@@ -77,7 +77,7 @@ public class AsyncRetryClient {
     }
 
     /**
-     * Service A will retry a method returning a CompletionStage and configured to always completeExceptionally.
+     * Service will retry a method returning a CompletionStage and configured to always completeExceptionally.
      *
      * @return a {@link CompletionStage}
      */
@@ -89,7 +89,7 @@ public class AsyncRetryClient {
     }
 
     /**
-     * Service A will retry a method returning a CompletionStage and configured to completeExceptionally twice.
+     * Service will retry a method returning a CompletionStage and configured to completeExceptionally twice.
      *
      * @return a {@link CompletionStage}
      */
@@ -111,7 +111,7 @@ public class AsyncRetryClient {
     }
 
     /**
-     * Service A will retry a method returning a chained, running sequentially, CompletionStage configured to completeExceptionally twice.
+     * Service will retry a method returning a chained, running sequentially, CompletionStage configured to completeExceptionally twice.
      *
      * @return a {@link CompletionStage}
      */
@@ -132,7 +132,7 @@ public class AsyncRetryClient {
     }
 
     /**
-     * Service A will retry a method returning a chained, running sequentially,
+     * Service will retry a method returning a chained, running sequentially,
      * CompletionStage configured to completeExceptionally on all calls.
      *
      * @return a {@link CompletionStage}
@@ -148,7 +148,7 @@ public class AsyncRetryClient {
     }
 
     /**
-     * Service A will retry a method returning a parallel execution of 2 CompletionStages. One of them configured to
+     * Service will retry a method returning a parallel execution of 2 CompletionStages. One of them configured to
      * always fail.
      *
      * @return a {@link CompletionStage}
@@ -174,7 +174,7 @@ public class AsyncRetryClient {
     }
 
     /**
-     * Service A will retry a method returning a parallel execution of 2 CompletionStages. One of them configured to
+     * Service will retry a method returning a parallel execution of 2 CompletionStages. One of them configured to
      * fail twice.
      *
      * @return a {@link CompletionStage}

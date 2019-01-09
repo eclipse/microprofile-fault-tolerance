@@ -19,6 +19,7 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck;
 
+import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.CompletableFutureHelper;
 import org.eclipse.microprofile.fault.tolerance.tck.asyncretry.clientserver.AsyncRetryClient;
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClassLevelClientAbortOn;
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClassLevelClientRetryOn;
@@ -64,7 +65,9 @@ public class RetryConditionTest extends Arquillian {
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftRetryCondition.jar")
                         .addClasses(RetryClientAbortOn.class, RetryClientRetryOn.class,
                                         RetryClassLevelClientRetryOn.class,
-                                        RetryClassLevelClientAbortOn.class)
+                                        RetryClassLevelClientAbortOn.class,
+                                        AsyncRetryClient.class,
+                                        CompletableFutureHelper.class)
                         .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                         .as(JavaArchive.class);
 
@@ -238,7 +241,7 @@ public class RetryConditionTest extends Arquillian {
         final CompletionStage<String> future = asyncRetryClient.serviceA();
 
         assertCompleteExceptionally(future, IOException.class, "Simulated error");
-        assertEquals(2, asyncRetryClient.getCountInvocationsServA());
+        assertEquals(3, asyncRetryClient.getCountInvocationsServA());
     }
 
     /**
@@ -250,11 +253,11 @@ public class RetryConditionTest extends Arquillian {
     public void testNoAsynWilNotRetryExceptionally() {
         CompletableFuture<String> future = new CompletableFuture<>();
 
-        asyncRetryClient.serviceBFailExceptionally(future);
-
-        assertCompleteExceptionally(future, IOException.class, "Simulated error");
+        assertCompleteExceptionally(asyncRetryClient.serviceBFailExceptionally(future),
+            IOException.class, "Simulated error");
         // no retries
-        assertEquals("No retries are expected",0, asyncRetryClient.getCountInvocationsServBFailExceptionally());
+        assertEquals("No retries are expected",1,
+            asyncRetryClient.getCountInvocationsServBFailExceptionally());
     }
 
     /**
@@ -274,7 +277,7 @@ public class RetryConditionTest extends Arquillian {
             assertEquals("Simulated error", e.getMessage());
         }
         // 2 retries
-        assertEquals(2, asyncRetryClient.getCountInvocationsServBFailException());
+        assertEquals(3, asyncRetryClient.getCountInvocationsServBFailException());
     }
 
     /**
@@ -286,7 +289,7 @@ public class RetryConditionTest extends Arquillian {
         final CompletionStage<String> future = asyncRetryClient.serviceC();
 
         assertCompleteOk(future, "Success");
-        assertEquals(2, asyncRetryClient.getCountInvocationsServC());
+        assertEquals(3, asyncRetryClient.getCountInvocationsServC());
     }
 
     /**
@@ -298,7 +301,7 @@ public class RetryConditionTest extends Arquillian {
         final CompletionStage<String> future = asyncRetryClient.serviceD();
 
         assertCompleteOk(future, "Success");
-        assertEquals(2, asyncRetryClient.getCountInvocationsServD());
+        assertEquals(3, asyncRetryClient.getCountInvocationsServD());
     }
 
     /**
@@ -337,31 +340,33 @@ public class RetryConditionTest extends Arquillian {
     public void testRetryParallelSuccess() {
         CompletableFuture<String> future = new CompletableFuture<>();
 
-        asyncRetryClient.serviceG();
+        asyncRetryClient.serviceF();
 
         assertCompleteOk(future, "Success then Success");
-        assertEquals(2, asyncRetryClient.getCountInvocationsServG());
+        assertEquals(3, asyncRetryClient.getCountInvocationsServF());
     }
 
     private void assertCompleteExceptionally(final CompletionStage<String> future,
                                              final Class<? extends Throwable> exceptionClass,
                                              final String exceptionMessage) {
         try {
-            future.toCompletableFuture().get(200, TimeUnit.MILLISECONDS);
+            CompletableFutureHelper.toCompletableFuture(future).get(200, TimeUnit.MILLISECONDS);
             fail("We were expecting an exception: " + exceptionClass.getName() + " with message: " + exceptionMessage);
         }
         catch (InterruptedException | TimeoutException e) {
             fail("Unexpected exception" + e);
         }
         catch (ExecutionException ee) {
-            Assert.assertTrue(exceptionClass.isInstance(ee.getCause()), "Cause of ExecutionException was " + ee.getCause());
+            Assert.assertTrue(
+                exceptionClass.isInstance(ee.getCause()), "Cause of ExecutionException was " + ee.getCause());
             assertEquals(exceptionMessage, ee.getCause().getMessage());
         }
     }
 
     private void assertCompleteOk(final CompletionStage<String> future, final String expectedMessage) {
         try {
-            assertEquals(expectedMessage, future.toCompletableFuture().get(200, TimeUnit.MILLISECONDS));
+            assertEquals(
+                expectedMessage, CompletableFutureHelper.toCompletableFuture(future).get(1000, TimeUnit.MILLISECONDS));
         }
         catch (Exception e) {
             fail("Unexpected exception" + e);
