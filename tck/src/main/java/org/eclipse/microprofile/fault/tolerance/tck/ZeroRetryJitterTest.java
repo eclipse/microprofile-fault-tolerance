@@ -30,7 +30,6 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
-import static org.junit.Assert.fail;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 
@@ -56,14 +55,8 @@ public class ZeroRetryJitterTest extends Arquillian {
      */
     @Test
     public void test() {
-        try {
-            zeroJitterClient.serviceA();
-            assertEquals("Incorrect number of retires", 3, zeroJitterClient.getRetries());
-            assertTrue("It took too much time for 3 retries", zeroJitterClient.getTotalRetryTime() < 3 * 200);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            fail("Unexpected exception");
-        }
+        zeroJitterClient.serviceA();
+        assertEquals("Incorrect number of retries", 3, zeroJitterClient.getRetries());
+        assertTrue("It took too much time for 3 retries", zeroJitterClient.getTotalRetryTime() < 3 * 200);
     }
 }
