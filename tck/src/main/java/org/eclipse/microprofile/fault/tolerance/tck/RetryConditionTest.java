@@ -42,8 +42,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
 
 /**
  * Test the retryOn and abortOn conditions.
@@ -241,7 +243,7 @@ public class RetryConditionTest extends Arquillian {
         final CompletionStage<String> future = asyncRetryClient.serviceA();
 
         assertCompleteExceptionally(future, IOException.class, "Simulated error");
-        assertEquals(3, asyncRetryClient.getCountInvocationsServA());
+        assertEquals(asyncRetryClient.getCountInvocationsServA(), 3);
     }
 
     /**
@@ -256,8 +258,7 @@ public class RetryConditionTest extends Arquillian {
         assertCompleteExceptionally(asyncRetryClient.serviceBFailExceptionally(future),
             IOException.class, "Simulated error");
         // no retries
-        assertEquals("No retries are expected",1,
-            asyncRetryClient.getCountInvocationsServBFailExceptionally());
+        assertEquals(asyncRetryClient.getCountInvocationsServBFailExceptionally(), 1, "No retries are expected");
     }
 
     /**
@@ -274,10 +275,10 @@ public class RetryConditionTest extends Arquillian {
             fail("Was expecting an exception");
         }
         catch (RuntimeException e) {
-            assertEquals("Simulated error", e.getMessage());
+            assertEquals(e.getMessage(), "Simulated error");
         }
         // 2 retries
-        assertEquals(3, asyncRetryClient.getCountInvocationsServBFailException());
+        assertEquals(asyncRetryClient.getCountInvocationsServBFailException(), 3);
     }
 
     /**
@@ -289,7 +290,7 @@ public class RetryConditionTest extends Arquillian {
         final CompletionStage<String> future = asyncRetryClient.serviceC();
 
         assertCompleteOk(future, "Success");
-        assertEquals(3, asyncRetryClient.getCountInvocationsServC());
+        assertEquals(asyncRetryClient.getCountInvocationsServC(), 3);
     }
 
     /**
@@ -301,7 +302,7 @@ public class RetryConditionTest extends Arquillian {
         final CompletionStage<String> future = asyncRetryClient.serviceD();
 
         assertCompleteOk(future, "Success");
-        assertEquals(3, asyncRetryClient.getCountInvocationsServD());
+        assertEquals(asyncRetryClient.getCountInvocationsServD(), 3);
     }
 
     /**
@@ -310,8 +311,8 @@ public class RetryConditionTest extends Arquillian {
      */
     @Test
     public void testRetryChainExceptionally() {
-        assertCompleteExceptionally(asyncRetryClient.serviceE(), IOException.class, "Simulated error");
-        assertEquals(3, asyncRetryClient.getCountInvocationsServE());
+        assertCompleteExceptionally(asyncRetryClient.serviceE(), RuntimeException.class, "Simulated error");
+        assertEquals(asyncRetryClient.getCountInvocationsServE(), 3);
     }
 
     /**
@@ -320,8 +321,8 @@ public class RetryConditionTest extends Arquillian {
      */
     @Test
     public void testRetryParallelExceptionally() {
-        assertCompleteExceptionally(asyncRetryClient.serviceG(), IOException.class, "Simulated error");
-        assertEquals(3, asyncRetryClient.getCountInvocationsServG());
+        assertCompleteExceptionally(asyncRetryClient.serviceG(), RuntimeException.class, "Simulated error");
+        assertEquals(asyncRetryClient.getCountInvocationsServG(), 3);
     }
 
     /**
@@ -331,38 +332,37 @@ public class RetryConditionTest extends Arquillian {
     @Test
     public void testRetryParallelSuccess() {
         assertCompleteOk(asyncRetryClient.serviceF(), "Success then Success");
-        assertEquals(3, asyncRetryClient.getCountInvocationsServF());
+        assertEquals(asyncRetryClient.getCountInvocationsServF(), 3);
     }
 
     /**
      * Temporary error. Will retry 2 times, the first 2 executions fail and the method will throw an exception.
      */
+    @Test
     public void testRetryCompletionStageWithException() {
         assertCompleteOk(asyncRetryClient.serviceH(), "Success");
-        assertEquals(3, asyncRetryClient.getCountInvocationsServH());
+        assertEquals(asyncRetryClient.getCountInvocationsServH(), 3);
     }
 
     private void assertCompleteExceptionally(final CompletionStage<String> future,
                                              final Class<? extends Throwable> exceptionClass,
                                              final String exceptionMessage) {
         try {
-            CompletableFutureHelper.toCompletableFuture(future).get(200, TimeUnit.MILLISECONDS);
+            CompletableFutureHelper.toCompletableFuture(future).get(1000, TimeUnit.MILLISECONDS);
             fail("We were expecting an exception: " + exceptionClass.getName() + " with message: " + exceptionMessage);
         }
         catch (InterruptedException | TimeoutException e) {
-            fail("Unexpected exception" + e);
+            fail("Unexpected exception " + e, e);
         }
         catch (ExecutionException ee) {
-            Assert.assertTrue(
-                exceptionClass.isInstance(ee.getCause()), "Cause of ExecutionException was " + ee.getCause());
-            assertEquals(exceptionMessage, ee.getCause().getMessage());
+            assertThat("Cause of ExecutionException", ee.getCause(), instanceOf(exceptionClass));
+            assertEquals(ee.getCause().getMessage(), exceptionMessage);
         }
     }
 
     private void assertCompleteOk(final CompletionStage<String> future, final String expectedMessage) {
         try {
-            assertEquals(
-                expectedMessage, CompletableFutureHelper.toCompletableFuture(future).get(1000, TimeUnit.MILLISECONDS));
+            assertEquals(CompletableFutureHelper.toCompletableFuture(future).get(1000, TimeUnit.MILLISECONDS), expectedMessage);
         }
         catch (Exception e) {
             fail("Unexpected exception" + e);
