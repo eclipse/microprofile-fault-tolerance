@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2016-2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2016-2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -154,8 +154,8 @@ public class RetryTest extends Arquillian {
         Assert.assertTrue(retryClientWithNoDelayAndJitter.positiveDelays() > 0,
             "Using jitter must cause some effective delay even when delay is set to 0");
 
-        Assert.assertTrue(retryCountForConnectionService > 8 && retryCountForConnectionService < 50,
-            "The max number of execution should be between 8 and 50 but it was " + retryCountForConnectionService +
+        Assert.assertTrue(retryCountForConnectionService > 8 && retryCountForConnectionService < 100,
+            "The max number of execution should be between 8 and 100 but it was " + retryCountForConnectionService +
                 ". Too many retries mean jitter is not being applied.");
 
         Assert.assertTrue(retryClientWithNoDelayAndJitter.isDelayInRange(),
