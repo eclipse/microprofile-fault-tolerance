@@ -51,3 +51,31 @@ A full list of changes may be found on the link:https://github.com/eclipse/micro
 - Circuit Breaker Rolling window behaviour test (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/197[#197])
 - Improve Bulkhead test (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/198[#198])
 
+== Release Notes for MicroProfile Fault Tolerance 2.0
+
+The following changes occurred in the 2.0 release, compared to 1.1
+
+A full list of changes may be found on the link:https://github.com/eclipse/microprofile-fault-tolerance/milestone/5[MicroProfile Fault Tolerance 2.0 Milestone]
+
+=== API/SPI Changes
+
+- Add support of the CompletionStage return type when annotated with @Asynchronous (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/110[#110]).
+
+=== Functional Changes
+
+- Specify the invocation sequence of MicroProfile Fault Tolerance annotations when used together (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/291[#291])
+- Clarify how the Fault Tolerance annotations interact with other application defined interceptors (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/313[#313])
+
+
+=== Specification Changes
+
+- Clarify whether other Fault Tolerance functionalities will be triggered on an exceptional returned Future (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/246[#246]).
+- Specify the sequence of MicroProfile Fault Tolerance annotations when used together (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/291[#291])
+- Clarify how the Fault Tolerance annotations interact with other application defined interceptors (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/313[#313])
+
+=== Other changes
+- Clarify failOn() on CircuitBreaker and Fallback (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/240[#240])
+- Circuit Breaker - clarify how requestVolumeThreshold() and rolling window work (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/342[#342])
+- other smaller fixes (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/341[#341]) (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/252[#252]) (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/306[#306]) 
+
+
