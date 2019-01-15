@@ -19,6 +19,10 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.lessThan;
+import static org.testng.Assert.assertEquals;
+
 import javax.inject.Inject;
 
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClientForZeroJitter;
@@ -30,8 +34,6 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
 
 public class ZeroRetryJitterTest extends Arquillian {
 
@@ -56,7 +58,7 @@ public class ZeroRetryJitterTest extends Arquillian {
     @Test
     public void test() {
         zeroJitterClient.serviceA();
-        assertEquals("Incorrect number of retries", 3, zeroJitterClient.getRetries());
-        assertTrue("It took too much time for 3 retries", zeroJitterClient.getTotalRetryTime() < 3 * 200);
+        assertEquals(zeroJitterClient.getRetries(), 3, "Incorrect number of retries");
+        assertThat("It took too much time for 3 retries", zeroJitterClient.getTotalRetryTime(), lessThan(3 * 200L));
     }
 }
