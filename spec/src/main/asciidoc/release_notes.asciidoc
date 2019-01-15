@@ -53,7 +53,7 @@ A full list of changes may be found on the link:https://github.com/eclipse/micro
 
 == Release Notes for MicroProfile Fault Tolerance 2.0
 
-This release is a major release of Fault Tolerance. The reason of increasing the release version to 2.0 is that this release upgrades its CDI dependency from CDI 1.2 to CDI 2.0, in order to utilise the new features introduced by CDI 2.0. Therefore, this feature no longer works with Java EE7 features but works with Java EE8 features. However, there are no backward compatibility changes introduced in this specification.
+This release is a major release of Fault Tolerance. The reason for increasing the release version to 2.0 is that this release upgrades its CDI dependency from CDI 1.2 to CDI 2.0, in order to use the new features introduced by CDI 2.0. Therefore, this specification is not compatible with Java EE7 but is compatible with Java EE8. Other than this, there are no backward incompatible changes introduced in this specification.
 
 The following changes occurred in the 2.0 release, compared to 1.1.
 
