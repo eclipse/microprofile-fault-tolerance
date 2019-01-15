@@ -58,7 +58,7 @@ public class RetryClientWithNoDelayAndJitter {
 
     public boolean isDelayInRange() {
         for (long delayTime : delayTimes) {
-            if (delayTime > 400) {
+            if (delayTime > 500) { //Expect 400ms delay + allow 100ms margin for processing the actual method
                 return false;
             }
         }
