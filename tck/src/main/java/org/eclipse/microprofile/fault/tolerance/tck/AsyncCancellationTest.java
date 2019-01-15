@@ -41,7 +41,7 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.After;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 /**
@@ -78,7 +78,7 @@ public class AsyncCancellationTest extends Arquillian {
     
     private static List<AsyncBulkheadTask> tasks = new ArrayList<>();
     
-    @After
+    @AfterMethod
     public void cleanup() {
         for (AsyncBulkheadTask task : tasks) {
             task.complete();
