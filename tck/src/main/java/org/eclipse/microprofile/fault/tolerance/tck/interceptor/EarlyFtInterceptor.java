@@ -41,7 +41,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  */
 @Interceptor
 @InterceptEarly
-@Priority(Interceptor.Priority.LIBRARY_BEFORE - 1) // Before FT Interceptor
+@Priority(Interceptor.Priority.PLATFORM_AFTER) // Before FT Interceptor
 public class EarlyFtInterceptor {
 
     @Inject

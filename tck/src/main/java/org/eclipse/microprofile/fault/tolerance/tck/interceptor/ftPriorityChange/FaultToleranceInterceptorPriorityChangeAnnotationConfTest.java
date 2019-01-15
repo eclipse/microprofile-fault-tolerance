@@ -54,7 +54,7 @@ public class FaultToleranceInterceptorPriorityChangeAnnotationConfTest extends A
         JavaArchive testJar = ShrinkWrap
             .create(JavaArchive.class, "interceptorChangeFtAnnotation.jar")
             .addClasses(InterceptorComponent.class, EarlyFtInterceptor.class, LateFtInterceptor.class, OrderQueueProducer.class)
-            .addAsManifestResource(new StringAsset("mp.fault.tolerance.interceptor.priority=3700"), "microprofile-config.properties")
+            .addAsManifestResource(new StringAsset("mp.fault.tolerance.interceptor.priority=3850"), "microprofile-config.properties")
             .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
             .as(JavaArchive.class);
 
@@ -89,7 +89,7 @@ public class FaultToleranceInterceptorPriorityChangeAnnotationConfTest extends A
         }
 
         String [] expectedOrder = {"EarlyOrderFtInterceptor","LateOrderFtInterceptor","serviceRetryA",
-            "EarlyOrderFtInterceptor","LateOrderFtInterceptor","serviceRetryA"};
+            "LateOrderFtInterceptor","serviceRetryA"};
         assertEquals(orderFactory.getOrderQueue().toArray(), expectedOrder);
     }
 
