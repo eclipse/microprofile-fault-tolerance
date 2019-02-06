@@ -34,6 +34,7 @@ import javax.inject.Inject;
 import org.eclipse.microprofile.fault.tolerance.tck.asynctimeout.clientserver.AsyncClassLevelTimeoutClient;
 import org.eclipse.microprofile.fault.tolerance.tck.asynctimeout.clientserver.AsyncTimeoutClient;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Connection;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -50,13 +51,15 @@ import org.testng.annotations.Test;
  */
 public class AsyncTimeoutTest extends Arquillian {
 
-    private static final Duration TEST_FUTURE_THRESHOLD = Duration.ofMillis(2000); // Used to detect Futures that return too slowly
-    private static final Duration TEST_TIMEOUT_SERVICEA = Duration.ofMillis(2000); // The @Timeout specified on serviceA
-    private static final Duration TEST_TIME_UNIT = Duration.ofMillis(1000); // One second unit
-    
+
     private @Inject AsyncTimeoutClient clientForAsyncTimeout;
     private @Inject AsyncClassLevelTimeoutClient clientForClassLevelAsyncTimeout;
-    
+    private @Inject TCKConfig tckConfig;
+
+    private final Duration testFutureThreshold = Duration.ofMillis(tckConfig.getTimeoutInMillis(2000)); // Used to detect Futures that return too slowly
+    private final Duration testTimeoutServicea = Duration.ofMillis(tckConfig.getTimeoutInMillis(2000)); // The @Timeout specified on serviceA
+    private final Duration testTimeUnit = Duration.ofMillis(tckConfig.getTimeoutInMillis(1000)); // One second unit
+
     @Deployment
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
@@ -96,8 +99,8 @@ public class AsyncTimeoutTest extends Arquillian {
         long end = System.nanoTime();
 
         Duration duration = Duration.ofNanos(end - start);
-        //should have returned almost instantly, if it takes TEST_FUTURE_THRESHOLD then there is something wrong
-        assertThat("Method did not return quickly enough", duration, lessThan(TEST_FUTURE_THRESHOLD));
+        //should have returned almost instantly, if it takes testFutureThreshold then there is something wrong
+        assertThat("Method did not return quickly enough", duration, lessThan(testFutureThreshold));
         
         // serviceA is slow (5 second sleep) but is configured with a 2 second Timeout. It should complete after 2 seconds
         // throwing a wrapped TimeoutException.
@@ -110,7 +113,7 @@ public class AsyncTimeoutTest extends Arquillian {
         // Call future.get() with a timeout (3 seconds) that is longer than the annotated timeout (2 seconds) specified on
         // the service but shorter than the overall service duration (5 seconds sleep)
         try {
-            future.get(TEST_TIMEOUT_SERVICEA.plus(TEST_TIME_UNIT).toMillis(), TimeUnit.MILLISECONDS);
+            future.get(testTimeoutServicea.plus(testTimeUnit).toMillis(), TimeUnit.MILLISECONDS);
             throw new AssertionError("testAsyncTimeout: Future not interrupted");
         }
         catch (ExecutionException e) {
@@ -128,7 +131,7 @@ public class AsyncTimeoutTest extends Arquillian {
 
         duration = Duration.ofNanos(end - start);
         // duration should be greater than the timeout configured on the service
-        assertThat("the service duration was less than the configured timeout", duration, greaterThanOrEqualTo(TEST_TIMEOUT_SERVICEA));
+        assertThat("the service duration was less than the configured timeout", duration, greaterThanOrEqualTo(testTimeoutServicea));
     }
 
     /**
@@ -154,8 +157,8 @@ public class AsyncTimeoutTest extends Arquillian {
         long end = System.nanoTime();
 
         Duration duration = Duration.ofNanos(end - start);
-        // should have returned almost instantly, if it takes TEST_FUTURE_THRESHOLD then there is something wrong
-        assertThat("Method did not return quickly enough", duration, lessThan(TEST_FUTURE_THRESHOLD));
+        // should have returned almost instantly, if it takes testFutureThreshold then there is something wrong
+        assertThat("Method did not return quickly enough", duration, lessThan(testFutureThreshold));
         
         // serviceB is fast and should return normally after 0.5 seconds but check for premature
         if (future.isDone()) {
@@ -164,7 +167,7 @@ public class AsyncTimeoutTest extends Arquillian {
 
         // The service should complete normally, there should be no FT TimeoutException
         try {
-            Connection conn = future.get(TEST_TIME_UNIT.toMillis(), TimeUnit.MILLISECONDS);
+            Connection conn = future.get(testTimeUnit.toMillis(), TimeUnit.MILLISECONDS);
         } 
         catch (Exception t) {
             // Not Expected
@@ -194,8 +197,8 @@ public class AsyncTimeoutTest extends Arquillian {
         long end = System.nanoTime();
 
         Duration duration = Duration.ofNanos(end - start);
-        // should have returned almost instantly, if it takes TEST_FUTURE_THRESHOLD then there is something wrong
-        assertThat("Method did not return quickly enough", duration, lessThan(TEST_FUTURE_THRESHOLD));
+        // should have returned almost instantly, if it takes testFutureThreshold then there is something wrong
+        assertThat("Method did not return quickly enough", duration, lessThan(testFutureThreshold));
         
         // serviceA is slow (5 second sleep) but is configured with a 2 second Timeout. It should complete after 2 seconds
         // throwing a wrapped TimeoutException.
@@ -208,7 +211,7 @@ public class AsyncTimeoutTest extends Arquillian {
         // Call future.get() with a timeout (3 seconds) that is longer than the annotated timeout (2 seconds) specified on
         // the service but shorter than the overall service duration (5 seconds sleep)
         try {
-            future.get(TEST_TIMEOUT_SERVICEA.plus(TEST_TIME_UNIT).toMillis(), TimeUnit.MILLISECONDS);
+            future.get(testTimeoutServicea.plus(testTimeUnit).toMillis(), TimeUnit.MILLISECONDS);
             throw new AssertionError("testAsyncClassLevelTimeout: Future not interrupted");
         }
         catch (ExecutionException e) {
@@ -226,6 +229,6 @@ public class AsyncTimeoutTest extends Arquillian {
 
         duration = Duration.ofNanos(end - start);
         // duration should be greater than the timeout configured on the service
-        assertThat("the service duration was less than the configured timeout", duration, greaterThanOrEqualTo(TEST_TIMEOUT_SERVICEA));
+        assertThat("the service duration was less than the configured timeout", duration, greaterThanOrEqualTo(testTimeoutServicea));
     }
 }

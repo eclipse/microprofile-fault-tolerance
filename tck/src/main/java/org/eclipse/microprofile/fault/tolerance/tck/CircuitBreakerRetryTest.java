@@ -19,25 +19,13 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck;
 
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.lessThan;
-import static org.testng.Assert.fail;
-
-import java.sql.Connection;
-import java.time.Duration;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver.CircuitBreakerClassLevelClientWithRetry;
 import org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver.CircuitBreakerClientWithRetry;
 import org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver.CircuitBreakerClientWithRetryAsync;
 import org.eclipse.microprofile.fault.tolerance.tck.util.DurationMatcher;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
 import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.exceptions.CircuitBreakerOpenException;
 import org.hamcrest.MatcherAssert;
@@ -50,9 +38,21 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import javax.inject.Inject;
+import java.sql.Connection;
+import java.time.Duration;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.lessThan;
+import static org.testng.Assert.fail;
+
 /**
  * Test CircuitBreaker Thresholds and delays with Retries.
- * 
+ *
  * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  * @author <a href="mailto:anrouse@uk.ibm.com">Andrew Rouse</a>
  */
@@ -62,6 +62,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
     private @Inject CircuitBreakerClientWithRetry clientForCBWithRetry;
     private @Inject CircuitBreakerClassLevelClientWithRetry clientForClassLevelCBWithRetry;
     private @Inject CircuitBreakerClientWithRetryAsync clientForCBWithRetryAsync;
+    private @Inject TCKConfig tckConfig;
 
     @Deployment
     public static WebArchive deploy() {
@@ -87,7 +88,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
         int invokeCounter = 0;
         try {
             clientForCBWithRetry.serviceA();
-            
+
             // serviceA should retry until the CB threshold is reached. At that point a CircuitBreakerOpenException
             // should be thrown. Assert if this does not happen.
             invokeCounter = clientForCBWithRetry.getCounterForInvokingServiceA();
@@ -122,7 +123,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
         int invokeCounter = 0;
         try {
             clientForCBWithRetry.serviceB();
-            
+
             // serviceB should retry until the CB threshold is reached. At that point a CircuitBreakerOpenException
             // should be thrown. Assert if this does not happen.
             invokeCounter = clientForCBWithRetry.getCounterForInvokingServiceB();
@@ -156,7 +157,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
     }
 
     /**
-     * Analogous to testCircuitOpenWithMoreRetries with Class level @CircuitBreaker and @Retry annotations 
+     * Analogous to testCircuitOpenWithMoreRetries with Class level @CircuitBreaker and @Retry annotations
      * that are inherited by serviceA
      */
     @Test
@@ -164,7 +165,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
         int invokeCounter = 0;
         try {
             clientForClassLevelCBWithRetry.serviceA();
-            
+
             // serviceA should retry until the CB threshold is reached. At that point a CircuitBreakerOpenException
             // should be thrown. Assert if this does not happen.
             invokeCounter = clientForClassLevelCBWithRetry.getCounterForInvokingServiceA();
@@ -191,7 +192,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
     }
 
     /**
-     * Analogous to testCircuitOpenWithFewRetries with Class level @CircuitBreaker and @Retry annotations 
+     * Analogous to testCircuitOpenWithFewRetries with Class level @CircuitBreaker and @Retry annotations
      * that are overridden by serviceB.
      */
     @Test
@@ -199,7 +200,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
         int invokeCounter = 0;
         try {
             clientForClassLevelCBWithRetry.serviceB();
-            
+
             // serviceB should retry until the CB threshold is reached. At that point a CircuitBreakerOpenException
             // should be thrown. Assert if this does not happen.
             invokeCounter = clientForClassLevelCBWithRetry.getCounterForInvokingServiceB();
@@ -231,7 +232,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
         invokeCounter = clientForClassLevelCBWithRetry.getCounterForInvokingServiceB();
         Assert.assertEquals(invokeCounter, 3, "The number of executions should be 3");
     }
-    
+
     /**
      * Analogous to testCircuitOpenWithMoreRetries but execution failures are caused by timeouts.
      */
@@ -240,13 +241,13 @@ public class CircuitBreakerRetryTest extends Arquillian {
         int invokeCounter = 0;
         try {
             clientForCBWithRetry.serviceC(1000);
-            
+
             // serviceC should retry until the CB threshold is reached. At that point a CircuitBreakerOpenException
             // should be thrown. Assert if this does not happen.
             invokeCounter = clientForCBWithRetry.getCounterForInvokingServiceC();
             Assert.fail("serviceC should retry in testCircuitOpenWithMultiTimeouts on iteration "
                                 + invokeCounter);
-            
+
         }
         catch (CircuitBreakerOpenException cboe) {
             // Expected on iteration 4          
@@ -266,7 +267,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
         invokeCounter = clientForCBWithRetry.getCounterForInvokingServiceC();
         Assert.assertEquals(invokeCounter, 4, "The number of executions should be 4");
     }
-    
+
     /**
      * Test that we retry around an open circuit breaker
      * <p>
@@ -285,21 +286,22 @@ public class CircuitBreakerRetryTest extends Arquillian {
                 // Expected
             }
         }
-        
+
         // Circuit is now open for 1 second
         // Our next call should cause a CircuitBreakerOpenException which should then be retried
         // The retry delay is 100ms, maxRetries is 20 so we expect a successful call after around 1 second when the circuit closes
         long startTime = System.nanoTime();
         clientForCBWithRetry.serviceWithRetryOnCbOpen(false);
         long endTime = System.nanoTime();
-        
+
         // Check that the call took the expected time
         // Allow a margin of 250ms since there's a retry delay of 100ms
         MatcherAssert.assertThat("Call was successful but did not take the expected time",
-                                 Duration.ofNanos(endTime - startTime),
-                                 DurationMatcher.closeTo(Duration.ofSeconds(1), Duration.ofMillis(250)));
+            Duration.ofNanos(endTime - startTime),
+            DurationMatcher.closeTo(tckConfig.getTimeoutInDuration(1000),
+                tckConfig.getTimeoutInDuration(250)));
     }
-    
+
     /**
      * Test that we don't retry around an open circuit breaker if
      * CircuitBreakerOpenException is not included in the retryOn attribute of the
@@ -317,20 +319,20 @@ public class CircuitBreakerRetryTest extends Arquillian {
                 // Expected
             }
         }
-        
+
         // Circuit is now open for 1 second
         // Our next call should cause a CircuitBreakerOpenException which should not be retried
         // We expect a response almost immediately
         long startTime = System.nanoTime();
         Exceptions.expectCbOpen(() -> clientForCBWithRetry.serviceWithRetryOnTimeout(false));
         long endTime = System.nanoTime();
-        
+
         // Check that the call took less than 200ms (i.e. we didn't delay and retry)
         MatcherAssert.assertThat("Call was successful but did not take the expected time",
                                  Duration.ofNanos(endTime - startTime),
-                                 lessThan(Duration.ofMillis(200)));
+                                 lessThan(tckConfig.getTimeoutInDuration(200)));
     }
-    
+
     /**
      * Test that we don't retry around an open circuit breaker if
      * CircuitBreakerOpenException is included in the abortOn attribute of the
@@ -346,18 +348,18 @@ public class CircuitBreakerRetryTest extends Arquillian {
                 // Expected
             }
         }
-        
+
         // Circuit is now open for 1 second
         // Our next call should cause a CircuitBreakerOpenException which should not be retried
         // We expect a response almost immediately
         long startTime = System.nanoTime();
         Exceptions.expectCbOpen(() -> clientForCBWithRetry.serviceWithRetryFailOnCbOpen(false));
         long endTime = System.nanoTime();
-        
+
         // Check that the call took less than 200ms (i.e. we didn't delay and retry)
         MatcherAssert.assertThat("Call was successful but did not take the expected time",
                                  Duration.ofNanos(endTime - startTime),
-                                 lessThan(Duration.ofMillis(200)));
+                                 lessThan(tckConfig.getTimeoutInDuration(200)));
     }
 
 
@@ -370,8 +372,8 @@ public class CircuitBreakerRetryTest extends Arquillian {
         int invokeCounter = 0;
         Future<Connection> result = clientForCBWithRetryAsync.serviceA();
         try {
-            result.get(5, TimeUnit.SECONDS);
-            
+            result.get(tckConfig.getTimeoutInMillis(5000), TimeUnit.MILLISECONDS);
+
             // serviceA should retry until the CB threshold is reached. At that point a CircuitBreakerOpenException
             // should be thrown. Assert if this does not happen.
             invokeCounter = clientForCBWithRetryAsync.getCounterForInvokingServiceA();
@@ -383,7 +385,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
             MatcherAssert.assertThat("Thrown exception is the wrong type",
                                      executionException.getCause(),
                                      instanceOf(CircuitBreakerOpenException.class));
-            
+
             // Expected on iteration 4
             invokeCounter = clientForCBWithRetryAsync.getCounterForInvokingServiceA();
             if (invokeCounter < 4) {
@@ -397,7 +399,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
             Assert.fail("serviceA should retry or throw a CircuitBreakerOpenException in testCircuitOpenWithMoreRetries on iteration "
                             + invokeCounter);
         }
-    
+
         invokeCounter = clientForCBWithRetryAsync.getCounterForInvokingServiceA();
         Assert.assertEquals(invokeCounter, 4, "The number of executions should be 4");
     }
@@ -412,8 +414,8 @@ public class CircuitBreakerRetryTest extends Arquillian {
         int invokeCounter = 0;
         Future<Connection> result = clientForCBWithRetryAsync.serviceB();
         try {
-            result.get(5, TimeUnit.SECONDS);
-            
+            result.get(tckConfig.getTimeoutInMillis(5000), TimeUnit.MILLISECONDS);
+
             // serviceB should retry until the CB threshold is reached. At that point a CircuitBreakerOpenException
             // should be thrown. Assert if this does not happen.
             invokeCounter = clientForCBWithRetryAsync.getCounterForInvokingServiceB();
@@ -439,7 +441,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
             Assert.fail("serviceB should retry or throw a RuntimeException in testCircuitOpenWithFewRetries on iteration "
                             + invokeCounter);
         }
-    
+
         invokeCounter = clientForCBWithRetryAsync.getCounterForInvokingServiceB();
         Assert.assertEquals(invokeCounter, 3, "The number of executions should be 3");
     }
@@ -450,23 +452,23 @@ public class CircuitBreakerRetryTest extends Arquillian {
     @Test
     public void testCircuitOpenWithMultiTimeoutsAsync() {
         int invokeCounter = 0;
-        Future<Connection> result = clientForCBWithRetryAsync.serviceC(1000);
+        Future<Connection> result = clientForCBWithRetryAsync.serviceC(tckConfig.getTimeoutInMillis(1000));
         try {
-            result.get(10, TimeUnit.SECONDS); // Expected to finish after about 2 seconds
-            
+            result.get(tckConfig.getTimeoutInMillis(10000), TimeUnit.MILLISECONDS); // Expected to finish after about 2 seconds
+
             // serviceC should retry until the CB threshold is reached. At that point a CircuitBreakerOpenException
             // should be thrown. Assert if this does not happen.
             invokeCounter = clientForCBWithRetryAsync.getCounterForInvokingServiceC();
             Assert.fail("serviceC should retry in testCircuitOpenWithMultiTimeouts on iteration "
                                 + invokeCounter);
-            
+
         }
         catch (ExecutionException executionException) {
             // Expected execution exception wrapping CircuitBreakerOpenException
             MatcherAssert.assertThat("Thrown exception is the wrong type",
                                      executionException.getCause(),
                                      instanceOf(CircuitBreakerOpenException.class));
-            
+
             // Expected on iteration 4          
             invokeCounter = clientForCBWithRetryAsync.getCounterForInvokingServiceC();
             if (invokeCounter < 4) {
@@ -480,7 +482,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
             Assert.fail("serviceC should retry or throw a CircuitBreakerOpenException in testCircuitOpenWithMultiTimeouts on iteration "
                             + invokeCounter + ", caught exception: " + ex);
         }
-    
+
         invokeCounter = clientForCBWithRetryAsync.getCounterForInvokingServiceC();
         Assert.assertEquals(invokeCounter, 4, "The number of executions should be 4");
     }
@@ -499,14 +501,14 @@ public class CircuitBreakerRetryTest extends Arquillian {
             Future<String> result = clientForCBWithRetryAsync.serviceWithRetryOnCbOpen(true);
             Exceptions.expect(TestException.class, result);
         }
-        
+
         // Circuit is now open for 1 second
         // Our next call should cause a CircuitBreakerOpenException which should then be retried
         // The retry delay is 100ms, maxRetries is 20 so we expect a successful call after around 1 second when the circuit closes
         long startTime = System.nanoTime();
         Future<String> result = clientForCBWithRetryAsync.serviceWithRetryOnCbOpen(false);
         try {
-            result.get(10, TimeUnit.SECONDS);
+            result.get(tckConfig.getTimeoutInMillis(10000), TimeUnit.MILLISECONDS);
         }
         catch (TimeoutException e) {
             fail("Call to serviceWithRetryOnCbOpen did not succeed within 10 seconds");
@@ -518,14 +520,15 @@ public class CircuitBreakerRetryTest extends Arquillian {
             fail("Call to serviceWithRetryOnCbOpen was interrupted", e);
         }
         long endTime = System.nanoTime();
-        
+
         // Check that the call took the expected time
         // Allow a margin of 250ms since there's a retry delay of 100ms
         MatcherAssert.assertThat("Call was successful but did not take the expected time",
-                                 Duration.ofNanos(endTime - startTime),
-                                 DurationMatcher.closeTo(Duration.ofSeconds(1), Duration.ofMillis(250)));
+            Duration.ofNanos(endTime - startTime),
+            DurationMatcher.closeTo(tckConfig.getTimeoutInDuration(1000),
+                tckConfig.getTimeoutInDuration(250)));
     }
-    
+
     /**
      * Test that we don't retry around an open circuit breaker if
      * CircuitBreakerOpenException is not included in the retryOn attribute of the
@@ -540,7 +543,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
             Future<String> result = clientForCBWithRetryAsync.serviceWithRetryOnTimeout(true);
             Exceptions.expect(TestException.class, result);
         }
-        
+
         // Circuit is now open for 1 second
         // Our next call should cause a CircuitBreakerOpenException which should then be retried
         // The retry delay is 100ms, maxRetries is 20 so we expect a successful call after around 1 second when the circuit closes
@@ -548,13 +551,13 @@ public class CircuitBreakerRetryTest extends Arquillian {
         Future<String> result = clientForCBWithRetryAsync.serviceWithRetryOnTimeout(false);
         Exceptions.expect(CircuitBreakerOpenException.class, result);
         long endTime = System.nanoTime();
-        
+
         // Check that the call took less than 200ms (i.e. we didn't delay and retry)
         MatcherAssert.assertThat("Call was successful but did not take the expected time",
                                  Duration.ofNanos(endTime - startTime),
-                                 lessThan(Duration.ofMillis(200)));
+                                 lessThan(tckConfig.getTimeoutInDuration(200)));
     }
-    
+
     /**
      * Test that we don't retry around an open circuit breaker if
      * CircuitBreakerOpenException is included in the abortOn attribute of the
@@ -567,7 +570,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
             Future<String> result = clientForCBWithRetryAsync.serviceWithRetryFailOnCbOpen(true);
             Exceptions.expect(TestException.class, result);
         }
-        
+
         // Circuit is now open for 1 second
         // Our next call should cause a CircuitBreakerOpenException which should then be retried
         // The retry delay is 100ms, maxRetries is 20 so we expect a successful call after around 1 second when the circuit closes
@@ -575,11 +578,11 @@ public class CircuitBreakerRetryTest extends Arquillian {
         Future<String> result = clientForCBWithRetryAsync.serviceWithRetryFailOnCbOpen(false);
         Exceptions.expect(CircuitBreakerOpenException.class, result);
         long endTime = System.nanoTime();
-        
+
         // Check that the call took less than 200ms (i.e. we didn't delay and retry)
         MatcherAssert.assertThat("Call was successful but did not take the expected time",
                                  Duration.ofNanos(endTime - startTime),
-                                 lessThan(Duration.ofMillis(200)));
+                                 lessThan(tckConfig.getTimeoutInDuration(200)));
     }
 
 

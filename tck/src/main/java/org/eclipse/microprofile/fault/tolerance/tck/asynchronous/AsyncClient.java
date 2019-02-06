@@ -27,8 +27,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 
 import org.eclipse.microprofile.fault.tolerance.tck.util.Connection;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 
 /**
@@ -39,6 +41,8 @@ import org.eclipse.microprofile.faulttolerance.Asynchronous;
  */
 @RequestScoped
 public class AsyncClient {
+
+    private @Inject TCKConfig tckConfig;
 
     /**
      * Service an operation until waitCondition is completed or 1000 second timeout.
@@ -86,7 +90,7 @@ public class AsyncClient {
 
         Throwable exception = null;
         try {
-            waitCondition.get(1000, TimeUnit.SECONDS);
+            waitCondition.get(tckConfig.getTimeoutInMillis(), TimeUnit.SECONDS);
         }
         catch (ExecutionException e) {
             exception = e.getCause();
