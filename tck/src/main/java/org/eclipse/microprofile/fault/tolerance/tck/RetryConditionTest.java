@@ -25,6 +25,7 @@ import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClas
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClassLevelClientRetryOn;
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClientAbortOn;
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClientRetryOn;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -61,6 +62,7 @@ public class RetryConditionTest extends Arquillian {
     private @Inject RetryClassLevelClientRetryOn clientForClassLevelRetryOn;
     private @Inject RetryClassLevelClientAbortOn clientForClassLevelAbortOn;
     private @Inject AsyncRetryClient asyncRetryClient;
+    private @Inject TCKConfig tckConfig;
 
     @Deployment
     public static WebArchive deploy() {
@@ -348,7 +350,7 @@ public class RetryConditionTest extends Arquillian {
                                              final Class<? extends Throwable> exceptionClass,
                                              final String exceptionMessage) {
         try {
-            CompletableFutureHelper.toCompletableFuture(future).get(1000, TimeUnit.MILLISECONDS);
+            CompletableFutureHelper.toCompletableFuture(future).get(tckConfig.getTimeoutInMillis(), TimeUnit.MILLISECONDS);
             fail("We were expecting an exception: " + exceptionClass.getName() + " with message: " + exceptionMessage);
         }
         catch (InterruptedException | TimeoutException e) {
@@ -362,7 +364,7 @@ public class RetryConditionTest extends Arquillian {
 
     private void assertCompleteOk(final CompletionStage<String> future, final String expectedMessage) {
         try {
-            assertEquals(CompletableFutureHelper.toCompletableFuture(future).get(1000, TimeUnit.MILLISECONDS), expectedMessage);
+            assertEquals(CompletableFutureHelper.toCompletableFuture(future).get(tckConfig.getTimeoutInMillis(), TimeUnit.MILLISECONDS), expectedMessage);
         }
         catch (Exception e) {
             fail("Unexpected exception" + e);
