@@ -57,6 +57,7 @@ In this case, the method invocation and any fault tolerance processing will occu
 
 ==== Interactions when returning a `Future`
 If a method returns a `Future`, the other Fault Tolerance annotations are applied only around the method invocation regardless of whether the returned `Future` completes exceptionally or not. In more detail:
+
 * If the method invocation throws an exception, this will trigger other specified Fault Tolerance policies to be applied.
 * If the method returns a `Future`, then the method call is considered to be successful, which will not trigger other Fault Tolerance policies to be applied even if specified.
 
@@ -77,9 +78,9 @@ public Future<Connection> serviceA() {
 ==== Interactions when returning a `CompletionStage`
 If the method returns `CompletionStage`, the other specified Fault Tolerance annotations will be triggered if either an exception is thrown from the method call or the returned `CompletionStage` completes exceptionally. In more detail:
 
-*If the method invocation throws an exception, this will trigger other specified Fault Tolerance policies to be applied.
+* If the method invocation throws an exception, this will trigger other specified Fault Tolerance policies to be applied.
 
-*If the method returns a `CompletionStage`, then the method call is considered to be successful only if the `CompletionStage` completes successfully. If an exceptionally completed `CompletionStage` is returned, or if an incomplete `CompletionStage` is returned which later completes exceptionally, then this will cause other specified Fault Tolerance policies to be applied.
+* If the method returns a `CompletionStage`, then the method call is considered to be successful only if the `CompletionStage` completes successfully. If an exceptionally completed `CompletionStage` is returned, or if an incomplete `CompletionStage` is returned which later completes exceptionally, then this will cause other specified Fault Tolerance policies to be applied.
 
 In the following example, the `Retry` will be triggered as the returned `CompletionStage` completes exceptionally.
 
