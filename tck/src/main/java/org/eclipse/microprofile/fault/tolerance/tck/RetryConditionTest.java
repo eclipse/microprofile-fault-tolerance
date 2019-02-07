@@ -364,7 +364,9 @@ public class RetryConditionTest extends Arquillian {
 
     private void assertCompleteOk(final CompletionStage<String> future, final String expectedMessage) {
         try {
-            assertEquals(CompletableFutureHelper.toCompletableFuture(future).get(tckConfig.getTimeoutInMillis(), TimeUnit.MILLISECONDS), expectedMessage);
+            assertEquals(CompletableFutureHelper
+                .toCompletableFuture(future)
+                .get(tckConfig.getTimeoutInMillis(), TimeUnit.MILLISECONDS), expectedMessage);
         }
         catch (Exception e) {
             fail("Unexpected exception" + e);
