@@ -42,8 +42,6 @@ import org.eclipse.microprofile.faulttolerance.Asynchronous;
 @RequestScoped
 public class AsyncClient {
 
-    private @Inject TCKConfig tckConfig;
-
     /**
      * service 1 second in normal operation.
      *
