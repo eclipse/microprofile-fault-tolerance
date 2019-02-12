@@ -24,6 +24,7 @@ import java.util.concurrent.Future;
 
 import javax.enterprise.context.RequestScoped;
 
+import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Timeout;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Connection;
@@ -50,7 +51,7 @@ public class AsyncTimeoutClient {
 
         Connection conn = new Connection() {
             {
-                Thread.sleep(5000);
+                Thread.sleep(TCKConfig.getInstance().getTimeoutInMillis(5000));
             }
             
             @Override
@@ -74,7 +75,7 @@ public class AsyncTimeoutClient {
 
         Connection conn = new Connection() {
             {
-                Thread.sleep(500);
+                Thread.sleep(TCKConfig.getInstance().getTimeoutInMillis(500));
             }
             
             @Override
