@@ -42,8 +42,6 @@ import org.eclipse.microprofile.faulttolerance.Asynchronous;
 @RequestScoped
 public class AsyncClient {
 
-    private @Inject TCKConfig tckConfig;
-
     /**
      * Service an operation until waitCondition is completed or 1000 second timeout.
      * @param waitCondition Execution of this method will delay until the condition is finished

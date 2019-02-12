@@ -18,27 +18,38 @@ package org.eclipse.microprofile.fault.tolerance.tck.util;/*
  * limitations under the License.
  *******************************************************************************/
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.config.Config;
+import org.eclipse.microprofile.config.ConfigProvider;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import java.time.Duration;
 
-@ApplicationScoped
+
 public class TCKConfig {
+
+    private static final TCKConfig INSTANCE = new TCKConfig();
+
+    public static TCKConfig getInstance() {
+        return INSTANCE;
+    }
+
+    private final long baseTimeout;
+
+    private final int baseMultiplier;
+
+    private TCKConfig() {
+        final Config config = ConfigProvider.getConfig();
+        baseTimeout = config
+            .getOptionalValue("org.eclipse.microprofile.fault.tolerance.basetimeout", Long.class)
+            .orElse(100L);
+        baseMultiplier = config
+            .getOptionalValue("org.eclipse.microprofile.fault.tolerance.basemultiplier", Integer.class)
+            .orElse(10);
+    }
 
     /**
      * The base timeout serves as the base multiplier for all timeouts and is expressed in milliseconds.
      * Must not be less than 10ms.
      */
-    @Inject
-    @ConfigProperty(name = "org.eclipse.microprofile.fault.tolerance.basetimeout", defaultValue = "100")
-    private long baseTimeout;
-
-    @Inject
-    @ConfigProperty(name = "org.eclipse.microprofile.fault.tolerance.basemultiplier", defaultValue = "10")
-    private int baseMultiplier;
-
     public long getBaseTimeout() {
         return baseTimeout;
     }
@@ -63,6 +74,5 @@ public class TCKConfig {
     public long getTimeoutInMillis() {
         return baseTimeout * baseMultiplier;
     }
-
 
 }
