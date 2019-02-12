@@ -62,7 +62,6 @@ public class CircuitBreakerRetryTest extends Arquillian {
     private @Inject CircuitBreakerClientWithRetry clientForCBWithRetry;
     private @Inject CircuitBreakerClassLevelClientWithRetry clientForClassLevelCBWithRetry;
     private @Inject CircuitBreakerClientWithRetryAsync clientForCBWithRetryAsync;
-    private @Inject TCKConfig tckConfig;
 
     @Deployment
     public static WebArchive deploy() {

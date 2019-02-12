@@ -62,7 +62,6 @@ public class RetryConditionTest extends Arquillian {
     private @Inject RetryClassLevelClientRetryOn clientForClassLevelRetryOn;
     private @Inject RetryClassLevelClientAbortOn clientForClassLevelAbortOn;
     private @Inject AsyncRetryClient asyncRetryClient;
-    private @Inject TCKConfig tckConfig;
 
     @Deployment
     public static WebArchive deploy() {
