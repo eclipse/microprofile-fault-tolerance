@@ -54,14 +54,13 @@ public class AsyncTimeoutTest extends Arquillian {
 
     private @Inject AsyncTimeoutClient clientForAsyncTimeout;
     private @Inject AsyncClassLevelTimeoutClient clientForClassLevelAsyncTimeout;
-    private @Inject TCKConfig tckConfig;
 
     // Used to detect Futures that return too slowly
-    private final Duration testFutureThreshold = Duration.ofMillis(tckConfig.getTimeoutInMillis(2000));
+    private final Duration testFutureThreshold = Duration.ofMillis(TCKConfig.getInstance().getTimeoutInMillis(2000));
     // The @Timeout specified on serviceA
-    private final Duration testTimeoutServicea = Duration.ofMillis(tckConfig.getTimeoutInMillis(2000));
+    private final Duration testTimeoutServicea = Duration.ofMillis(TCKConfig.getInstance().getTimeoutInMillis(2000));
     // One second unit
-    private final Duration testTimeUnit = Duration.ofMillis(tckConfig.getTimeoutInMillis(1000));
+    private final Duration testTimeUnit = Duration.ofMillis(TCKConfig.getInstance().getTimeoutInMillis(1000));
 
     @Deployment
     public static WebArchive deploy() {
