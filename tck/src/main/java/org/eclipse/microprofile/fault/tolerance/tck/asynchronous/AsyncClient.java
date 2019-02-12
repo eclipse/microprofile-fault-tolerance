@@ -27,7 +27,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
 
 import org.eclipse.microprofile.fault.tolerance.tck.util.Connection;
 import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
@@ -93,7 +92,7 @@ public class AsyncClient {
 
         Throwable exception = null;
         try {
-            waitCondition.get(tckConfig.getTimeoutInMillis(), TimeUnit.SECONDS);
+            waitCondition.get(TCKConfig.getInstance().getTimeoutInMillis(), TimeUnit.SECONDS);
         }
         catch (ExecutionException e) {
             exception = e.getCause();
