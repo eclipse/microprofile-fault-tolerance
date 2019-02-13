@@ -32,18 +32,28 @@ public class TCKConfig {
         return INSTANCE;
     }
 
-    private final long baseTimeout;
+    private long baseTimeout;
 
-    private final int baseMultiplier;
+    private int baseMultiplier;
 
     private TCKConfig() {
-        final Config config = ConfigProvider.getConfig();
-        baseTimeout = config
-            .getOptionalValue("org.eclipse.microprofile.fault.tolerance.basetimeout", Long.class)
-            .orElse(100L);
-        baseMultiplier = config
-            .getOptionalValue("org.eclipse.microprofile.fault.tolerance.basemultiplier", Integer.class)
-            .orElse(10);
+        // TODO catch exceptions and try to load from system properties.
+        try {
+            final Config config = ConfigProvider.getConfig();
+            baseTimeout = config
+                .getOptionalValue("org.eclipse.microprofile.fault.tolerance.basetimeout", Long.class)
+                .orElse(100L);
+            baseMultiplier = config
+                .getOptionalValue("org.eclipse.microprofile.fault.tolerance.basemultiplier", Integer.class)
+                .orElse(10);
+        }
+        catch (Exception e) {
+            System.out.println("Could not use microprofile config. Falling back to system properties. Problem:" + e.getMessage());
+            baseTimeout = Long.valueOf(
+                System.getProperty("org.eclipse.microprofile.fault.tolerance.basetimeout", "100"));
+            baseMultiplier = Integer.valueOf(
+                System.getProperty("org.eclipse.microprofile.fault.tolerance.basemultiplier", "10"));
+        }
     }
 
     /**
