@@ -297,8 +297,8 @@ public class CircuitBreakerRetryTest extends Arquillian {
         // Allow a margin of 250ms since there's a retry delay of 100ms
         MatcherAssert.assertThat("Call was successful but did not take the expected time",
             Duration.ofNanos(endTime - startTime),
-            DurationMatcher.closeTo(TCKConfig.getInstance().getTimeoutInDuration(1000),
-                TCKConfig.getInstance().getTimeoutInDuration(250)));
+            DurationMatcher.closeTo(TCKConfig.getConfig().getTimeoutInDuration(1000),
+                TCKConfig.getConfig().getTimeoutInDuration(250)));
     }
 
     /**
@@ -329,7 +329,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
         // Check that the call took less than 200ms (i.e. we didn't delay and retry)
         MatcherAssert.assertThat("Call was successful but did not take the expected time",
                                  Duration.ofNanos(endTime - startTime),
-                                 lessThan(TCKConfig.getInstance().getTimeoutInDuration(200)));
+                                 lessThan(TCKConfig.getConfig().getTimeoutInDuration(200)));
     }
 
     /**
@@ -358,7 +358,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
         // Check that the call took less than 200ms (i.e. we didn't delay and retry)
         MatcherAssert.assertThat("Call was successful but did not take the expected time",
                                  Duration.ofNanos(endTime - startTime),
-                                 lessThan(TCKConfig.getInstance().getTimeoutInDuration(200)));
+                                 lessThan(TCKConfig.getConfig().getTimeoutInDuration(200)));
     }
 
 
@@ -371,7 +371,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
         int invokeCounter = 0;
         Future<Connection> result = clientForCBWithRetryAsync.serviceA();
         try {
-            result.get(TCKConfig.getInstance().getTimeoutInMillis(5000), TimeUnit.MILLISECONDS);
+            result.get(TCKConfig.getConfig().getTimeoutInMillis(5000), TimeUnit.MILLISECONDS);
 
             // serviceA should retry until the CB threshold is reached. At that point a CircuitBreakerOpenException
             // should be thrown. Assert if this does not happen.
@@ -413,7 +413,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
         int invokeCounter = 0;
         Future<Connection> result = clientForCBWithRetryAsync.serviceB();
         try {
-            result.get(TCKConfig.getInstance().getTimeoutInMillis(5000), TimeUnit.MILLISECONDS);
+            result.get(TCKConfig.getConfig().getTimeoutInMillis(5000), TimeUnit.MILLISECONDS);
 
             // serviceB should retry until the CB threshold is reached. At that point a CircuitBreakerOpenException
             // should be thrown. Assert if this does not happen.
@@ -451,9 +451,9 @@ public class CircuitBreakerRetryTest extends Arquillian {
     @Test
     public void testCircuitOpenWithMultiTimeoutsAsync() {
         int invokeCounter = 0;
-        Future<Connection> result = clientForCBWithRetryAsync.serviceC(TCKConfig.getInstance().getTimeoutInMillis(1000));
+        Future<Connection> result = clientForCBWithRetryAsync.serviceC(TCKConfig.getConfig().getTimeoutInMillis(1000));
         try {
-            result.get(TCKConfig.getInstance().getTimeoutInMillis(10000), TimeUnit.MILLISECONDS); // Expected to finish after about 2 seconds
+            result.get(TCKConfig.getConfig().getTimeoutInMillis(10000), TimeUnit.MILLISECONDS); // Expected to finish after about 2 seconds
 
             // serviceC should retry until the CB threshold is reached. At that point a CircuitBreakerOpenException
             // should be thrown. Assert if this does not happen.
@@ -507,7 +507,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
         long startTime = System.nanoTime();
         Future<String> result = clientForCBWithRetryAsync.serviceWithRetryOnCbOpen(false);
         try {
-            result.get(TCKConfig.getInstance().getTimeoutInMillis(10000), TimeUnit.MILLISECONDS);
+            result.get(TCKConfig.getConfig().getTimeoutInMillis(10000), TimeUnit.MILLISECONDS);
         }
         catch (TimeoutException e) {
             fail("Call to serviceWithRetryOnCbOpen did not succeed within 10 seconds");
@@ -524,8 +524,8 @@ public class CircuitBreakerRetryTest extends Arquillian {
         // Allow a margin of 250ms since there's a retry delay of 100ms
         MatcherAssert.assertThat("Call was successful but did not take the expected time",
             Duration.ofNanos(endTime - startTime),
-            DurationMatcher.closeTo(TCKConfig.getInstance().getTimeoutInDuration(1000),
-                TCKConfig.getInstance().getTimeoutInDuration(250)));
+            DurationMatcher.closeTo(TCKConfig.getConfig().getTimeoutInDuration(1000),
+                TCKConfig.getConfig().getTimeoutInDuration(250)));
     }
 
     /**
@@ -554,7 +554,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
         // Check that the call took less than 200ms (i.e. we didn't delay and retry)
         MatcherAssert.assertThat("Call was successful but did not take the expected time",
                                  Duration.ofNanos(endTime - startTime),
-                                 lessThan(TCKConfig.getInstance().getTimeoutInDuration(200)));
+                                 lessThan(TCKConfig.getConfig().getTimeoutInDuration(200)));
     }
 
     /**
@@ -581,7 +581,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
         // Check that the call took less than 200ms (i.e. we didn't delay and retry)
         MatcherAssert.assertThat("Call was successful but did not take the expected time",
                                  Duration.ofNanos(endTime - startTime),
-                                 lessThan(TCKConfig.getInstance().getTimeoutInDuration(200)));
+                                 lessThan(TCKConfig.getConfig().getTimeoutInDuration(200)));
     }
 
 
