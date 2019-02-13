@@ -52,7 +52,7 @@ public class AsyncClient {
 
         Connection conn = new Connection() {
             {
-                Thread.sleep(1000);
+                Thread.sleep(TCKConfig.getConfig().getTimeoutInMillis(1000));
             }
 
             @Override
@@ -92,7 +92,7 @@ public class AsyncClient {
 
         Throwable exception = null;
         try {
-            waitCondition.get(TCKConfig.getInstance().getTimeoutInMillis(), TimeUnit.SECONDS);
+            waitCondition.get(TCKConfig.getConfig().getTimeoutInMillis(), TimeUnit.SECONDS);
         }
         catch (ExecutionException e) {
             exception = e.getCause();

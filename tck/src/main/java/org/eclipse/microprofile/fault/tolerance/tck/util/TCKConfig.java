@@ -28,7 +28,7 @@ public class TCKConfig {
 
     private static final TCKConfig INSTANCE = new TCKConfig();
 
-    public static TCKConfig getInstance() {
+    public static TCKConfig getConfig() {
         return INSTANCE;
     }
 
@@ -52,6 +52,10 @@ public class TCKConfig {
      */
     public long getBaseTimeout() {
         return baseTimeout;
+    }
+
+    public String getTimeoutInStr(final int originalInMillis) {
+        return String.valueOf(getTimeoutInMillis(originalInMillis));
     }
 
     public long getTimeoutInMillis(final int originalInMillis) {
