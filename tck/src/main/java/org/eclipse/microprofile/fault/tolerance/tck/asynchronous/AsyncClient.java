@@ -87,7 +87,7 @@ public class AsyncClient {
 
         Throwable exception = null;
         try {
-            waitCondition.get(TCKConfig.getInstance().getTimeoutInMillis(), TimeUnit.SECONDS);
+            waitCondition.get(TCKConfig.getConfig().getTimeoutInMillis(), TimeUnit.SECONDS);
         }
         catch (ExecutionException e) {
             exception = e.getCause();
