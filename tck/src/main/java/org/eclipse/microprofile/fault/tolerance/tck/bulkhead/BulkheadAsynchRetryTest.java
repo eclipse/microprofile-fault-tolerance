@@ -405,15 +405,14 @@ public class BulkheadAsynchRetryTest extends Arquillian {
     public void testRetriesJoinBackOfQueue() throws InterruptedException, ExecutionException, TimeoutException {
         AsyncBulkheadTask taskA = newTask();
         Future resultA = retryQueueAsyncBean.test(taskA);
+        taskA.assertStarting(resultA);
         
         AsyncBulkheadTask taskB = newTask();
         Future resultB = retryQueueAsyncBean.test(taskB);
+        taskB.assertNotStarting();
         
         AsyncBulkheadTask taskC = newTask();
         Future resultC = retryQueueAsyncBean.test(taskC);
-        
-        taskA.assertStarting(resultA);
-        taskB.assertNotStarting();
         taskC.assertNotStarting();
         
         taskA.completeExceptionally(new TestException()); // fail A, causes instant retry which puts taskA on the back of the queue
