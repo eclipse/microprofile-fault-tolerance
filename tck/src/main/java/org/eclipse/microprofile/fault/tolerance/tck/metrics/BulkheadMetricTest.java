@@ -198,11 +198,13 @@ public class BulkheadMetricTest extends Arquillian {
         Future<?> f2 = bulkheadBean.waitForAsync(waitingFuture);
         bulkheadBean.waitForRunningExecutions(2);
         long startTime = System.nanoTime();
-        
+
         Future<?> f3 = bulkheadBean.waitForAsync(waitingFuture);
         Future<?> f4 = bulkheadBean.waitForAsync(waitingFuture);
-        expectBulkheadException(bulkheadBean.waitForAsync(waitingFuture));
+        waitForQueuePopulation(m, 2, 2000);
         
+        expectBulkheadException(bulkheadBean.waitForAsync(waitingFuture));
+
         assertThat("concurrent executions", m.getBulkheadConcurrentExecutions().get(), is(2L));
         assertThat("queue population", m.getBulkheadQueuePopulation().get(), is(2L));
         
@@ -214,7 +216,7 @@ public class BulkheadMetricTest extends Arquillian {
         f2.get();
         f3.get();
         f4.get();
-        
+
         assertThat("concurrent executions", m.getBulkheadConcurrentExecutions().get(), is(0L));
         assertThat("accepted calls", m.getBulkheadCallsAcceptedDelta(), is(4L));
         assertThat("rejections", m.getBulkheadCallsRejectedDelta(), is(1L));
@@ -228,6 +230,18 @@ public class BulkheadMetricTest extends Arquillian {
         // General metrics should be updated
         assertThat("invocations", m.getInvocationsDelta(), is(5L));
         assertThat("failed invocations", m.getInvocationsFailedDelta(), is(1L));
+    }
+
+    private void waitForQueuePopulation(MetricGetter m,
+                                        int expectedQueuePopulation,
+                                        int timeoutInMs) throws InterruptedException {
+        long timeoutTime = System.currentTimeMillis() + timeoutInMs;
+        while (System.currentTimeMillis() < timeoutTime) {
+            if (m.getBulkheadQueuePopulation().orElse(0L) == expectedQueuePopulation) {
+                return;
+            }
+            Thread.sleep(100L);
+        }
     }
 
 }
