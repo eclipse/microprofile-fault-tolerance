@@ -19,7 +19,7 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.awaitility.poc;
 
-public class FakeServiceTask implements  Task{
+public class FakeServiceTask implements Task {
 
     private String taskResult;
 

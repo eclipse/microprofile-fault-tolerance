@@ -27,8 +27,7 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.Rule;
-import org.junit.rules.ExpectedException;
+import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.testng.annotations.Test;
 
 import javax.inject.Inject;
@@ -37,34 +36,43 @@ import static org.awaitility.Awaitility.await;
 import static org.awaitility.Awaitility.with;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.assertEquals;
-import static org.hamcrest.Matchers.startsWith;
-import static org.hamcrest.Matchers.endsWith;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.testng.Assert.fail;
 
+
+import java.io.File;
+//import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Future;
+import java.util.regex.Pattern;
 
 public class AsyncClientTest  extends Arquillian {
 
     @Inject
     private AsyncClient client;
 
-    @Rule
-    public ExpectedException exception = ExpectedException.none();
-
     @Deployment
     public static WebArchive deploy() {
+        File[] libs = Maven.resolver().loadPomFromFile("pom.xml")
+            .resolve("org.awaitility:awaitility", "org.assertj:assertj-core").withTransitivity()
+            .asFile();
+
+
         JavaArchive testJar = ShrinkWrap
             .create(JavaArchive.class, "ftAsynchronousAwaitPOC.jar")
             .addClasses(AsyncClient.class, AsyncBridge.class, Task.class, FakeServiceTask.class)
             .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
             .as(JavaArchive.class);
 
-        WebArchive war = ShrinkWrap.create(WebArchive.class, "ftAsynchronousAwaitPOC.war").addAsLibrary(testJar);
+        WebArchive war = ShrinkWrap.create(WebArchive.class, "ftAsynchronousAwaitPOC.war")
+            .addAsLibrary(testJar)
+            .addAsLibraries(libs);
         return war;
     }
 
-    @Test(timeOut = 2000)
+    @Test
     public void awaitAssertJAssertionAsLambda(){
         Task taskToPerform = new FakeServiceTask();
          Future<Task> taskResult = client.service(taskToPerform);
@@ -75,17 +83,35 @@ public class AsyncClientTest  extends Arquillian {
 
     }
 
-    @Test(timeOut = 2000)
-    public void awaitJUnitAssertionDisplaysOriginalErrorMessageAndTimeoutWhenConditionTimeoutExceptionOccurs() {
+    @Test(expectedExceptions = ConditionTimeoutException.class )
+    public void awaitAssertionTimeoutWhenConditionTimeoutExceptionOccurs() {
         Task taskToPerform = new FakeServiceTask();
-        CompletionStage<Task> taskResult = client.serviceCS(taskToPerform);
-        exception.expect(ConditionTimeoutException.class);
-        exception.expectMessage(startsWith("Assertion condition defined as a lambda expression in " + AsyncClientTest.class.getName()));
-        exception.expectMessage(endsWith("expected:<Task Done!!> but was:<null> within 120 milliseconds."));
+        client.serviceCS(taskToPerform);
 
         with().pollInterval(10, MILLISECONDS).then().await().atMost(120, MILLISECONDS).untilAsserted(
-            () -> assertEquals("Task Done!!", taskToPerform.getTaskResult()));
+            () -> assertEquals(taskToPerform.getTaskResult(), "Task Done!!"));
+    }
 
-        assertTrue(taskResult.toCompletableFuture().completeExceptionally(new Exception("Async task fails")));
+    @Test
+    public void awaitAssertionTimeoutWhenConditionTimeoutExceptionOccursWithExceptionHandling() {
+        Task taskToPerform = new FakeServiceTask();
+        CompletionStage<Task> taskResult = client.serviceCS(taskToPerform);
+
+        try {
+            with().pollInterval(10, MILLISECONDS).then().await("my alias").atMost(120, MILLISECONDS).untilAsserted(
+                () -> assertEquals(taskToPerform.getTaskResult(), "Task Done!!"));
+            fail("Should throw ConditionTimeoutException");
+        }
+        catch (ConditionTimeoutException e) {
+            assertThat(countOfOccurrences(e.getMessage(), "my alias")).isEqualTo(1);
+            CompletableFuture<Task>taskFuture = taskResult.toCompletableFuture();
+            assertEquals(taskToPerform.getTaskResult(), null);
+            assertTrue(taskFuture.isDone());
+        }
+
+    }
+
+    private static int countOfOccurrences(String str, String subStr) {
+        return (str.length() - str.replaceAll(Pattern.quote(subStr), "").length()) / subStr.length();
     }
 }
