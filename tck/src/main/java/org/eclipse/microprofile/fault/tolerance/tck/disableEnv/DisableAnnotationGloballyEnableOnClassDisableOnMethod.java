@@ -66,7 +66,7 @@ public class DisableAnnotationGloballyEnableOnClassDisableOnMethod extends Arqui
     @Deployment
     public static WebArchive deploy() {
         
-        Asset config = new DisableConfigAsset()
+        final Asset config = new DisableConfigAsset()
                 .disable(Retry.class)
                 .disable(CircuitBreaker.class)
                 .disable(Timeout.class)
@@ -86,10 +86,9 @@ public class DisableAnnotationGloballyEnableOnClassDisableOnMethod extends Arqui
                 .disable(DisableAnnotationClient.class, "failRetryOnceThenFallback", Fallback.class)
                 .disable(DisableAnnotationClient.class, "waitWithBulkhead", Bulkhead.class);
 
-        ConfigAnnotationAsset mpAnnotationConfig = new ConfigAnnotationAsset()
-            .setValue(DisableAnnotationClient.class,"failWithTimeout",Timeout.class,getConfig().getTimeoutInStr(500));
-
-         mpAnnotationConfig.mergeProperties(((DisableConfigAsset) config).getProps());
+        final ConfigAnnotationAsset mpAnnotationConfig = new ConfigAnnotationAsset()
+            .setValue(DisableAnnotationClient.class,"failWithTimeout",Timeout.class,getConfig().getTimeoutInStr(500))
+            .mergeProperties(((DisableConfigAsset) config).getProps());
 
         JavaArchive testJar = ShrinkWrap
             .create(JavaArchive.class, "ftDisableGloballyEnableClassDisableMethod.jar")
