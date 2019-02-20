@@ -37,7 +37,6 @@ public class TCKConfig {
     private int baseMultiplier;
 
     private TCKConfig() {
-        // TODO catch exceptions and try to load from system properties.
         try {
             final Config config = ConfigProvider.getConfig();
             baseTimeout = config
@@ -62,6 +61,15 @@ public class TCKConfig {
      */
     public long getBaseTimeout() {
         return baseTimeout;
+    }
+
+    /**
+     * Should be the Timeout default
+     *
+     * @return
+     */
+    public String getTimeoutInStr() {
+        return String.valueOf(getTimeoutInMillis(1000));
     }
 
     public String getTimeoutInStr(final int originalInMillis) {
