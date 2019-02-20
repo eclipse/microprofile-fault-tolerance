@@ -77,6 +77,10 @@ public class TCKConfig {
     }
 
     public long getTimeoutInMillis(final int originalInMillis) {
+        return getTimeoutInMillis(Long.valueOf(originalInMillis));
+    }
+
+    public long getTimeoutInMillis(final long originalInMillis) {
         if (originalInMillis < baseTimeout) {
             throw new IllegalArgumentException("Timeout must be bigger than " + baseTimeout + "ms, the baseTimeout.");
         }

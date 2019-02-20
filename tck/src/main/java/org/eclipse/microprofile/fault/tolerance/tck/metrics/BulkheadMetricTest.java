@@ -48,6 +48,8 @@ public class BulkheadMetricTest extends Arquillian {
 
     @Deployment
     public static WebArchive deploy() {
+
+
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftMetricBulkhead.war")
                 .addClasses(BulkheadMetricBean.class)
                 .addPackage(Packages.UTILS)

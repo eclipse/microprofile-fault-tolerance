@@ -80,7 +80,8 @@ public class ConfigAnnotationAsset implements Asset {
         return sb.toString();
     }
 
-    public void mergeProperties(final Properties properties) {
+    public ConfigAnnotationAsset mergeProperties(final Properties properties) {
         this.props.putAll(properties);
+        return this;
     }
 }

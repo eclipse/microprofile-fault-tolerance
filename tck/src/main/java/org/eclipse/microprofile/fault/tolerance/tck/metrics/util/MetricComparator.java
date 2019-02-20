@@ -21,6 +21,7 @@ package org.eclipse.microprofile.fault.tolerance.tck.metrics.util;
 
 import static org.hamcrest.Matchers.closeTo;
 
+import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
 import org.hamcrest.Matcher;
 
 public class MetricComparator {
@@ -35,10 +36,12 @@ public class MetricComparator {
      * <p>
      * Useful for checking the results from Histograms.
      * 
-     * @param millis the expected time in milliseconds
+     * @param originalMillis the expected time in milliseconds
      * @return a {@link Matcher} which matches against a time in milliseconds
      */
-    public static Matcher<Double> approxMillis(long millis) {
+    public static Matcher<Double> approxMillis(final long originalMillis) {
+
+        final long millis = TCKConfig.getConfig().getTimeoutInMillis(originalMillis);
         long nanos = millis * 1_000_000;
         return closeTo(nanos, 1_000_000 * 100);
     }
