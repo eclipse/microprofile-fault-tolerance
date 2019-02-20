@@ -27,7 +27,7 @@ import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.util.Properties;
 
-public class ConfigAnnotation implements Asset {
+public class ConfigAnnotationAsset implements Asset {
 
     private final Properties props = new Properties();
 
@@ -44,8 +44,8 @@ public class ConfigAnnotation implements Asset {
         }
     }
 
-    public ConfigAnnotation setValue(final Class<?> clazz, final String method,
-                                     final Class<? extends Annotation> annotation, final String value) {
+    public ConfigAnnotationAsset setValue(final Class<?> clazz, final String method,
+                                          final Class<? extends Annotation> annotation, final String value) {
         props.put(keyFor(clazz, method, annotation, "value"), value);
         return this;
     }
@@ -78,5 +78,9 @@ public class ConfigAnnotation implements Asset {
         sb.append(property);
 
         return sb.toString();
+    }
+
+    public void mergeProperties(final Properties properties) {
+        this.props.putAll(properties);
     }
 }

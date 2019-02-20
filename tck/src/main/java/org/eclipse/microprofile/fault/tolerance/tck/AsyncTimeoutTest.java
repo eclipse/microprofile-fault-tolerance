@@ -21,7 +21,7 @@ package org.eclipse.microprofile.fault.tolerance.tck;
 
 import org.eclipse.microprofile.fault.tolerance.tck.asynctimeout.clientserver.AsyncClassLevelTimeoutClient;
 import org.eclipse.microprofile.fault.tolerance.tck.asynctimeout.clientserver.AsyncTimeoutClient;
-import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotation;
+import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Connection;
 import org.eclipse.microprofile.faulttolerance.Timeout;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -68,7 +68,7 @@ public class AsyncTimeoutTest extends Arquillian {
     @Deployment
     public static WebArchive deploy() {
 
-        final Asset config = new ConfigAnnotation()
+        final Asset config = new ConfigAnnotationAsset()
             .setValue(AsyncTimeoutClient.class, "serviceA", Timeout.class, String.valueOf(TEST_TIMEOUT_SERVICEA.toMillis()))
             .setValue(AsyncTimeoutClient.class, "serviceB", Timeout.class, String.valueOf(TEST_TIMEOUT_SERVICEB.toMillis()))
             .setValue(AsyncClassLevelTimeoutClient.class, null, Timeout.class, getConfig().getTimeoutInStr(2000));

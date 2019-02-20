@@ -27,6 +27,7 @@ import java.util.concurrent.Future;
 
 import javax.inject.Inject;
 
+import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
@@ -44,6 +45,8 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import static org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig.getConfig;
 
 /**
  * Test that annotations can be disabled globally, then enabled at the class level and then disabled at the method level.
@@ -83,11 +86,16 @@ public class DisableAnnotationGloballyEnableOnClassDisableOnMethod extends Arqui
                 .disable(DisableAnnotationClient.class, "failRetryOnceThenFallback", Fallback.class)
                 .disable(DisableAnnotationClient.class, "waitWithBulkhead", Bulkhead.class);
 
+        ConfigAnnotationAsset mpAnnotationConfig = new ConfigAnnotationAsset()
+            .setValue(DisableAnnotationClient.class,"failWithTimeout",Timeout.class,getConfig().getTimeoutInStr(500));
+
+         mpAnnotationConfig.mergeProperties(((DisableConfigAsset) config).getProps());
+
         JavaArchive testJar = ShrinkWrap
             .create(JavaArchive.class, "ftDisableGloballyEnableClassDisableMethod.jar")
             .addClasses(DisableAnnotationClient.class)
             .addPackage(Packages.UTILS)
-            .addAsManifestResource(config, "microprofile-config.properties")
+            .addAsManifestResource(mpAnnotationConfig, "microprofile-config.properties")
             .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
             .as(JavaArchive.class);
 
