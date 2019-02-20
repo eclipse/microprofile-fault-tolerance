@@ -26,7 +26,7 @@ image:https://badges.gitter.im/eclipse/microprofile-fault-tolerance.svg[link="ht
 Do you want to contribute to this project? Here is what you can do:
 
 * Fork the repository, make changes, then do a pull request.
-* https://github.com/eclipse/microprofile-fault-tolerance/issues[Create or fix an issues].
+* https://github.com/eclipse/microprofile-fault-tolerance/issues[Create or fix an issue].
 * https://gitter.im/eclipse/microprofile-fault-tolerance[Join us on Gitter to discuss this project].
 * Join our https://calendar.google.com/calendar/embed?src=gbnbc373ga40n0tvbl88nkc3r4%40group.calendar.google.com[weekly meeting] on Wednesdays at https://www.timeanddate.com/time/map/[14h00 GMT]. 
 ** https://docs.google.com/document/d/12Tm_JP2Ws8W1fU5IIhhIbNHbrEIf27wgTbTIv80JoXY/edit[Minutes and Agenda].
