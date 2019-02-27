@@ -17,28 +17,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.eclipse.microprofile.fault.tolerance.tck.awaitility.poc;
+package org.eclipse.microprofile.fault.tolerance.tck.asynchronous.common;
 
-public class AsyncBridge {
+import org.eclipse.microprofile.fault.tolerance.tck.util.Connection;
 
-    private final Task task;
+/**
+ * A common task common behavior to be used for asynchronous tests
+ * @author <a href="mailto:kusanagi12002@gmail.com">Carlos Andres De La Rosa</a>
+ *
+ */
+public interface Task  extends Connection {
+    /**
+     * execute the service task
+     * @param taskResult the expected task result string
+     */
+    void doTask(String taskResult);
 
-    public AsyncBridge(Task task) {
-        this.task = task;
-    }
-
-    public void perform() {
-        Thread thread = new Thread(new Runnable() {
-            public void run() {
-                try {
-                    Thread.sleep(600);
-                    task.doTask("Task Done!!");
-                }
-                catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        });
-        thread.start();
-    }
+    /**
+     * get the task result
+     * @return  task result value
+     */
+    String getTaskResult();
 }

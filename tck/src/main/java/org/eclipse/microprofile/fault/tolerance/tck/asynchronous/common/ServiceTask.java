@@ -17,11 +17,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.eclipse.microprofile.fault.tolerance.tck.awaitility.poc;
+package org.eclipse.microprofile.fault.tolerance.tck.asynchronous.common;
 
-public interface Task {
+/**
+ * A common task class implementation to be used for asynchronous tests
+ * @author <a href="mailto:kusanagi12002@gmail.com">Carlos Andres De La Rosa</a>
+ *
+ */
+public class ServiceTask implements Task {
 
-    void doTask(String taskResult);
+    private String taskResult;
 
-    String getTaskResult();
+    @Override
+    public void doTask(String taskResult) {
+        this.taskResult = taskResult;
+    }
+
+    @Override
+    public String getTaskResult() {
+        return taskResult;
+    }
+
+    @Override
+    public String getData() {
+        return taskResult;
+    }
 }

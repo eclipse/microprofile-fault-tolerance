@@ -20,12 +20,17 @@
 package org.eclipse.microprofile.fault.tolerance.tck;
 
 
+import java.io.File;
 import java.util.concurrent.Future;
 
 import javax.inject.Inject;
 
+import org.assertj.core.api.Assertions;
 import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.AsyncClassLevelClient;
 import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.AsyncClient;
+import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.common.AsyncBridge;
+import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.common.ServiceTask;
+import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.common.Task;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Connection;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
@@ -33,8 +38,10 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.testng.Assert;
+import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.testng.annotations.Test;
+
+import static org.awaitility.Awaitility.await;
 
 /**
  * Verify the asynchronous invocation
@@ -49,32 +56,31 @@ public class AsynchronousTest extends Arquillian {
 
     @Deployment
     public static WebArchive deploy() {
+        File[] libs = Maven.resolver().loadPomFromFile("pom.xml")
+            .resolve("org.awaitility:awaitility", "org.assertj:assertj-core").withTransitivity()
+            .asFile();
+
         JavaArchive testJar = ShrinkWrap
             .create(JavaArchive.class, "ftAsynchronous.jar")
-            .addClasses(AsyncClient.class, AsyncClassLevelClient.class, Connection.class)
+            .addClasses(AsyncClient.class, AsyncClassLevelClient.class, AsyncBridge.class, Task.class,
+                Connection.class, ServiceTask.class)
             .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
             .as(JavaArchive.class);
 
-        WebArchive war = ShrinkWrap.create(WebArchive.class, "ftAsynchronous.war").addAsLibrary(testJar);
-        return war;
+        return ShrinkWrap.create(WebArchive.class, "ftAsynchronous.war")
+            .addAsLibrary(testJar)
+            .addAsLibraries(libs);
     }
-
 
     /**
      * Test that the future returned by calling an asynchronous method is not done if called right after the operation
      */
     @Test
     public void testAsyncIsNotFinished() {
-        Future<Connection> future = null;
-        try {
-            future = client.service();
-        }
-        catch (InterruptedException e) {
-            throw new AssertionError("testAsync: unexpected InterruptedException calling service");
-        }
-
-        Assert.assertFalse(future.isDone());
-
+        Task taskToPerform = new ServiceTask();
+        Future<Task> taskResult = client.service(taskToPerform);
+        await().untilAsserted(()->  Assertions.
+            assertThat(taskResult.isDone()).isFalse());
     }
 
     /**
@@ -82,17 +88,10 @@ public class AsynchronousTest extends Arquillian {
      */
     @Test
     public void testAsyncIsFinished() {
-        Future<Connection> future = null;
-        try {
-            future = client.service();
-            Thread.sleep(1500);
-        }
-        catch (InterruptedException e) {
-            throw new AssertionError("testAsync: unexpected InterruptedException calling service");
-        }
-
-        Assert.assertTrue(future.isDone());
-
+        Task taskToPerform = new ServiceTask();
+        Future<Task> taskResult = client.service(taskToPerform);
+        await().untilAsserted(()->  Assertions.
+            assertThat(taskResult.isDone()).isTrue());
     }
 
 
@@ -101,16 +100,10 @@ public class AsynchronousTest extends Arquillian {
      */
     @Test
     public void testClassLevelAsyncIsNotFinished() {
-        Future<Connection> future = null;
-        try {
-            future = clientClass.service();
-        }
-        catch (InterruptedException e) {
-            throw new AssertionError("testAsync: unexpected InterruptedException calling service");
-        }
-
-        Assert.assertFalse(future.isDone());
-
+        Task taskToPerform = new ServiceTask();
+        Future<Task> taskResult = clientClass.service(taskToPerform);
+        await().untilAsserted(()->  Assertions.
+            assertThat(taskResult.isDone()).isFalse());
     }
 
     /**
@@ -118,16 +111,9 @@ public class AsynchronousTest extends Arquillian {
      */
     @Test
     public void testClassLevelAsyncIsFinished() {
-        Future<Connection> future = null;
-        try {
-            future = clientClass.service();
-            Thread.sleep(1500);
-        }
-        catch (InterruptedException e) {
-            throw new AssertionError("testAsync: unexpected InterruptedException calling service");
-        }
-
-        Assert.assertTrue(future.isDone());
-
+        Task taskToPerform = new ServiceTask();
+        Future<Task> taskResult = clientClass.service(taskToPerform);
+        await().untilAsserted(()->  Assertions.
+            assertThat(taskResult.isDone()).isTrue());
     }
 }

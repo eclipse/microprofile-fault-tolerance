@@ -25,9 +25,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
 import javax.enterprise.context.RequestScoped;
-
+import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.common.AsyncBridge;
+import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.common.Task;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Connection;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 
@@ -44,23 +44,11 @@ public class AsyncClient {
      * service 1 second in normal operation.
      *
      * @return the result as a Future
-     * @throws InterruptedException the interrupted exception
      */
     @Asynchronous
-    public Future<Connection> service() throws InterruptedException {
-
-        Connection conn = new Connection() {
-            {
-                Thread.sleep(1000);
-            }
-
-            @Override
-            public String getData() {
-                return "service DATA";
-            }
-        };
-
-        return CompletableFuture.completedFuture(conn);
+    public Future<Task> service(Task task) {
+        new AsyncBridge(task).perform(1000,"service DATA");
+        return CompletableFuture.completedFuture(task);
     }
 
     /**
