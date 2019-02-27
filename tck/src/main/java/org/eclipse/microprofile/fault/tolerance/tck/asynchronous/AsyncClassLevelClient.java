@@ -49,7 +49,7 @@ public class AsyncClassLevelClient {
      * @return the result as a Future
      */
     public Future<Task> service(Task task) {
-        new AsyncBridge(task).perform(100,"service DATA");
+        new AsyncBridge(task).perform(1000,"service DATA");
         return CompletableFuture.completedFuture(task);
     }
     /**
