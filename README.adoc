@@ -127,26 +127,6 @@ public class FaultToleranceBean {
 }
 }
 ```
-##### Timeout Configs
-Since v2.1 we can configure the existing test timeouts. With the following configurations, timeouts can be greatly 
-reduced for local usage or in fast CI environments. 
-
-The properties can be set either with MP Config or System Properties. 
-
-.TCK Timeout configs
-|===
-|Property |Default |unit
-
-|org.eclipse.microprofile.fault.tolerance.basetimeout
-|100
-|ms
-
-|org.eclipse.microprofile.fault.tolerance.basemultiplier
-|10
-|Dimensionless
-|===
-
-
 ## Impact on existing code
 
 n/a
