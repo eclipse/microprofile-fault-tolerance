@@ -26,41 +26,30 @@ import java.time.Duration;
 
 public class TCKConfig {
 
+    private static final int DEFAULT_TIMEOUT = 1000;
     private static final TCKConfig INSTANCE = new TCKConfig();
 
     public static TCKConfig getConfig() {
         return INSTANCE;
     }
 
-    private long baseTimeout;
-
-    private int baseMultiplier;
+    private double baseMultiplier;
 
     private TCKConfig() {
         try {
             final Config config = ConfigProvider.getConfig();
-            baseTimeout = config
-                .getOptionalValue("org.eclipse.microprofile.fault.tolerance.basetimeout", Long.class)
-                .orElse(100L);
             baseMultiplier = config
-                .getOptionalValue("org.eclipse.microprofile.fault.tolerance.basemultiplier", Integer.class)
-                .orElse(10);
+                .getOptionalValue("org.eclipse.microprofile.fault.tolerance.tck.timeout.multiplier", Double.class)
+                .orElse(1.0D);
         }
         catch (Exception e) {
             System.out.println("Could not use microprofile config. Falling back to system properties. Problem:" + e.getMessage());
-            baseTimeout = Long.valueOf(
-                System.getProperty("org.eclipse.microprofile.fault.tolerance.basetimeout", "100"));
-            baseMultiplier = Integer.valueOf(
-                System.getProperty("org.eclipse.microprofile.fault.tolerance.basemultiplier", "10"));
+            baseMultiplier = Double.valueOf(
+                System.getProperty("org.eclipse.microprofile.fault.tolerance.tck.timeout.multiplier", "1.0"));
         }
-    }
-
-    /**
-     * The base timeout serves as the base multiplier for all timeouts and is expressed in milliseconds.
-     * Must not be less than 10ms.
-     */
-    public long getBaseTimeout() {
-        return baseTimeout;
+        if (baseMultiplier <= 0) {
+            throw new IllegalArgumentException("baseMultiplier must be a positive number. Was set to: " + baseMultiplier);
+        }
     }
 
     /**
@@ -69,7 +58,7 @@ public class TCKConfig {
      * @return
      */
     public String getTimeoutInStr() {
-        return String.valueOf(getTimeoutInMillis(1000));
+        return String.valueOf(getTimeoutInMillis(DEFAULT_TIMEOUT));
     }
 
     public String getTimeoutInStr(final int originalInMillis) {
@@ -81,10 +70,7 @@ public class TCKConfig {
     }
 
     public long getTimeoutInMillis(final long originalInMillis) {
-        if (originalInMillis < baseTimeout) {
-            throw new IllegalArgumentException("Timeout must be bigger than " + baseTimeout + "ms, the baseTimeout.");
-        }
-        final float offset = Float.valueOf(originalInMillis) / 1000;
+        final double offset = Double.valueOf(originalInMillis) / DEFAULT_TIMEOUT;
         return Math.round(getTimeoutInMillis() * offset);
     }
 
@@ -98,7 +84,7 @@ public class TCKConfig {
      * @return
      */
     public long getTimeoutInMillis() {
-        return baseTimeout * baseMultiplier;
+        return Math.round(DEFAULT_TIMEOUT * baseMultiplier);
     }
 
 }
