@@ -19,20 +19,22 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
 import javax.inject.Inject;
 
+import org.assertj.core.api.Assertions;
+import org.awaitility.core.ConditionTimeoutException;
 import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.AsyncClassLevelClient;
 import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.AsyncClient;
 import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.CompletableFutureHelper;
+import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.common.AsyncBridge;
+import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.common.ServiceTask;
+import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.common.Task;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Connection;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
@@ -40,13 +42,19 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.testng.Assert;
-import org.testng.Assert.ThrowingRunnable;
-import org.testng.annotations.AfterTest;
+import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.testng.annotations.Test;
 
+import static org.awaitility.Awaitility.await;
+import static org.awaitility.Awaitility.with;
+import static org.testng.Assert.fail;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+
+
 /**
- * Verify the asynchronous invocation with COmpletionStage
+ * Verify the asynchronous invocation with {@link CompletionStage}
  *
  * @author Ondro Mihalyi
  */
@@ -62,14 +70,20 @@ public class AsynchronousCSTest extends Arquillian {
 
     @Deployment
     public static WebArchive deploy() {
-        JavaArchive testJar = ShrinkWrap
-                .create(JavaArchive.class, "ftAsynchronous.jar")
-                .addClasses(AsyncClient.class, AsyncClassLevelClient.class, Connection.class, CompletableFutureHelper.class)
-                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
-                .as(JavaArchive.class);
+        File[] libs = Maven.resolver().loadPomFromFile("pom.xml")
+            .resolve("org.awaitility:awaitility", "org.assertj:assertj-core").withTransitivity()
+            .asFile();
 
-        WebArchive war = ShrinkWrap.create(WebArchive.class, "ftAsynchronous.war").addAsLibrary(testJar);
-        return war;
+        JavaArchive testJar = ShrinkWrap
+            .create(JavaArchive.class, "ftAsynchronous.jar")
+            .addClasses(AsyncClient.class, AsyncClassLevelClient.class, Connection.class, CompletableFutureHelper.class,
+                AsyncBridge.class, Task.class, ServiceTask.class)
+            .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
+            .as(JavaArchive.class);
+
+        return ShrinkWrap.create(WebArchive.class, "ftAsynchronous.war")
+            .addAsLibrary(testJar)
+            .addAsLibraries(libs);
     }
 
     /**
@@ -78,20 +92,9 @@ public class AsynchronousCSTest extends Arquillian {
      */
     @Test
     public void testAsyncIsNotFinished() {
-        CompletableFuture<Void> waitingFuture = newWaitingFuture();
-        
-        CompletionStage<Connection> resultFuture = client.serviceCS(waitingFuture);
-
-        Assert.assertFalse(completesQuickly(resultFuture));
-
-        complete(waitingFuture);
-
-        try {
-            waitUntilCompleted(resultFuture);
-        }
-        catch (CompletionException e) {
-            handleCompletionException(e);
-        }
+        Task taskToPerform = new ServiceTask();
+        CompletionStage<Task> taskResult = client.serviceCS(taskToPerform);
+        assertFalse(taskResult.toCompletableFuture().isDone());
     }
 
     /**
@@ -100,20 +103,10 @@ public class AsynchronousCSTest extends Arquillian {
      */
     @Test
     public void testAsyncIsFinished() {
-        CompletableFuture<Void> waitingFuture = newWaitingFuture();
-        
-        CompletionStage<Connection> resultFuture = client.serviceCS(waitingFuture);
-        complete(waitingFuture);
-
-        Assert.assertTrue(completesQuickly(resultFuture));
-
-
-        try {
-            waitUntilCompleted(resultFuture);
-        }
-        catch (CompletionException e) {
-            handleCompletionException(e);
-        }
+        Task taskToPerform = new ServiceTask();
+        CompletionStage<Task> taskResult = client.serviceCS(taskToPerform);
+        await().untilAsserted(() -> Assertions.
+            assertThat(taskResult.toCompletableFuture().isDone()).isTrue());
     }
 
     /**
@@ -122,20 +115,9 @@ public class AsynchronousCSTest extends Arquillian {
      */
     @Test
     public void testClassLevelAsyncIsNotFinished() {
-        CompletableFuture<Void> waitingFuture = newWaitingFuture();
-        
-        CompletionStage<Connection> resultFuture = clientClass.serviceCS(waitingFuture);
-
-        Assert.assertFalse(completesQuickly(resultFuture));
-
-        complete(waitingFuture);
-
-        try {
-            waitUntilCompleted(resultFuture);
-        }
-        catch (CompletionException e) {
-            handleCompletionException(e);
-        }
+        Task taskToPerform = new ServiceTask();
+        CompletionStage<Task> taskResult = clientClass.serviceCS(taskToPerform);
+        assertFalse(taskResult.toCompletableFuture().isDone());
     }
 
     /**
@@ -144,205 +126,60 @@ public class AsynchronousCSTest extends Arquillian {
      */
     @Test
     public void testClassLevelAsyncIsFinished() {
-        CompletableFuture<Void> waitingFuture = newWaitingFuture();
-        
-        CompletionStage<Connection> resultFuture = clientClass.serviceCS(waitingFuture);
-        complete(waitingFuture);
-
-        Assert.assertTrue(completesQuickly(resultFuture));
-
-
-        try {
-            waitUntilCompleted(resultFuture);
-        }
-        catch (CompletionException e) {
-            handleCompletionException(e);
-        }
+        Task taskToPerform = new ServiceTask();
+        CompletionStage<Task> taskResult = clientClass.serviceCS(taskToPerform);
+        await().untilAsserted(() -> Assertions.
+            assertThat(taskResult.toCompletableFuture().isDone()).isTrue());
     }
 
     /**
      * Test that the callbacks added to the initial stage are executed
      * after the stage returned by the asynchronous method call is completed.
-     * 
-     * The callbacks added inside method invocation must be called first and 
+     * <p>
+     * The callbacks added inside method invocation must be called first and
      * then callbacks added to the result of the call (on the calling thread)
      * must be executed in the order they were added.
      */
     @Test
     public void testAsyncCallbacksChained() {
-        CompletableFuture<Void> waitingFuture = newWaitingFuture();
         StringBuilder executionRecord = new StringBuilder();
-        
-        CompletableFuture<Connection> innerFuture = new CompletableFuture<Connection>();
-        CompletableFuture<Connection> returnedFuture = innerFuture
-                .thenApply(v -> {
-                    executionRecord.append("1");
-                    return v;
-                });
-        CompletionStage<Connection> resultFuture = client
-                .serviceCS(waitingFuture, returnedFuture)
-                .thenApply(v -> {
-                    executionRecord.append("2");
-                    return v;
-                });
-        complete(waitingFuture);
-        resultFuture = resultFuture.thenApply(v -> {
-                    executionRecord.append("3");
-                    return v;
-                });
+        Task taskToPerform = new ServiceTask();
+        CompletionStage<Task> taskResult = client.serviceCS(taskToPerform).thenApply(v -> {
+            executionRecord.append("1");
+            return v;
+        }).thenApply(v -> {
+            executionRecord.append("2");
+            return v;
+        }).thenApply(v -> {
+            executionRecord.append("3");
+            return v;
+        });
 
-        Assert.assertFalse(completesQuickly(resultFuture), 
-                "Stage returned by the method isn't completed yet so also the outer stage mustn't be completed");
-        innerFuture.complete(new EmptyConnection());
-        Assert.assertTrue(completesQuickly(resultFuture),
-                "Stage returned by the method is completed so also the outer stage must be completed");
-        Assert.assertEquals(executionRecord.toString(), "123", 
-                "The execution didn't happen in the expected order");
+        await().untilAsserted(() -> Assertions.
+            assertThat(taskResult.toCompletableFuture().isDone()).isTrue());
 
-        try {
-            waitUntilCompleted(resultFuture);
-        }
-        catch (CompletionException e) {
-            handleCompletionException(e);
-        }
+        assertEquals(executionRecord.toString(), "123");
     }
 
     /**
-     * Test that the stage returned by calling an asynchronous method is 
+     * Test that the stage returned by calling an asynchronous method is
      * completed exceptionally if the method throws an exception
      */
     @Test
     public void testAsyncCompletesExceptionallyWhenExceptionThrown() {
-        CompletableFuture<Void> waitingFuture = newWaitingFuture();
-        
-        CompletionStage<Connection> resultFuture = client.serviceCS(waitingFuture, true);
-        waitingFuture.completeExceptionally(new SimulatedException("completedExceptionally"));
-
-        Assert.assertTrue(completesQuickly(resultFuture));
-        Assert.assertTrue(isCompletedExceptionally(resultFuture));
-        Assert.assertFalse(isCancelled(resultFuture));
-        assertThrowsExecutionExceptionWithCause(SimulatedException.class, CompletableFutureHelper.toCompletableFuture(resultFuture)::get);
-    }
-
-    /**
-     * Test that the stage returned by calling an asynchronous method is 
-     * completed exceptionally if the method returns a stage completed exceptionally
-     */
-    @Test
-    public void testAsyncCompletesExceptionallyWhenCompletedExceptionally() {
-        CompletableFuture<Void> waitingFuture = newWaitingFuture();
-        
-        CompletionStage<Connection> resultFuture = client.serviceCS(waitingFuture, false);
-        waitingFuture.completeExceptionally(new SimulatedException("completedExceptionally"));
-
-        Assert.assertTrue(completesQuickly(resultFuture));
-        Assert.assertTrue(isCompletedExceptionally(resultFuture));
-        Assert.assertFalse(isCancelled(resultFuture));
-        assertThrowsExecutionExceptionWithCause(SimulatedException.class, CompletableFutureHelper.toCompletableFuture(resultFuture)::get);
-    }
-
-    /**
-     * Ensure that any waiting futures get completed at the end of each test
-     * <p>
-     * Important in case tests end early due to an exception or failure.
-     */
-    @AfterTest
-    public void completeWaitingFutures() {
-        waitingFutures.forEach((future) -> {
-            future.complete(null);
-        });
-        waitingFutures.clear();
-    }
-
-    /**
-     * Use this method to obtain futures for passing to methods on
-     * {@link AsyncClient}
-     * <p>
-     * Using this factory method ensures they will be completed at the end of
-     * the test if your test fails.
-     */
-    private CompletableFuture<Void> newWaitingFuture() {
-        CompletableFuture<Void> result = new CompletableFuture<>();
-        waitingFutures.add(result);
-        return result;
-    }
-
-    /**
-     * A helper method to complete a waiting future with a more readable syntax
-     */
-    private void complete(CompletableFuture<?> future) {
-        future.complete(null);
-    }
-
-    private void handleCompletionException(CompletionException e) throws AssertionError {
-        throw new AssertionError("testAsync: unexpected Exception calling service: "
-                + e.getCause().getMessage(), e);
-    }
-    
-    private static Connection waitUntilCompleted(CompletionStage<Connection> resultFuture) {
-        return CompletableFutureHelper.toCompletableFuture(resultFuture).join();
-    }
-    
-    /**
-     * Tests whether the given CompletionStage completes within 500ms
-     * <p>
-     * Used to avoid a race condition where a test wants to take some action which
-     * should cause the CompletionStage to complete, but asynchronous execution
-     * means it may not happen immediately.
-     */
-    private static boolean completesQuickly(CompletionStage<Connection> resultFuture) {
+        Task taskToPerform = new ServiceTask();
+        CompletionStage<Task> taskResult = client.serviceCS(taskToPerform);
         try {
-            CompletableFutureHelper.toCompletableFuture(resultFuture).get(500, TimeUnit.MILLISECONDS);
-        }
-        catch (TimeoutException ex) {
-            // Did not complete quickly
-            return false;
-        }
-        catch (Exception ex) {
-            // Completed with exception, fall through, we don't care about the result
-        }
-        return true;
-    }
+            with().pollThread(Thread::new).await()
+                .atMost(120, TimeUnit.MILLISECONDS).until(
+                () -> taskToPerform.getTaskResult() == "service DATA");
 
-    private static boolean isCancelled(CompletionStage<Connection> resultFuture) {
-        return CompletableFutureHelper.toCompletableFuture(resultFuture).isCancelled();
-    }
+            assertTrue(taskResult.toCompletableFuture().isCompletedExceptionally());
 
-    private static boolean isCompletedExceptionally(CompletionStage<Connection> resultFuture) {
-        return CompletableFutureHelper.toCompletableFuture(resultFuture).isCompletedExceptionally();
-    }
-    
-    private static void assertThrowsExecutionExceptionWithCause(Class<? extends Throwable> causeClazz, ThrowingRunnable runnable) {
-        try {
-            runnable.run();
-            Assert.fail("ExecutionException not thrown");
+            fail("Should throw ConditionTimeoutException");
         }
-        catch (ExecutionException ex) {
-            Assert.assertTrue(causeClazz.isInstance(ex.getCause()), "Cause of ExecutionException was " + ex.getCause());
-        }
-        catch (Throwable ex) {
-            Assert.fail("Unexpected exception thrown", ex);
+        catch (ConditionTimeoutException e) {
+            assertTrue(taskResult.toCompletableFuture().isDone());
         }
     }
-
-    private static class SimulatedException extends RuntimeException {
-
-        public SimulatedException() {
-        }
-
-        public SimulatedException(String message) {
-            super(message);
-        }
-        
-    }
-    
-    private static class EmptyConnection implements Connection {
-
-        @Override
-        public String getData() {
-            return null;
-        }
-        
-    }
-
 }

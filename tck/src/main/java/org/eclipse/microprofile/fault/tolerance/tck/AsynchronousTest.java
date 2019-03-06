@@ -42,6 +42,7 @@ import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.testng.annotations.Test;
 
 import static org.awaitility.Awaitility.await;
+import static org.testng.Assert.assertFalse;
 
 /**
  * Verify the asynchronous invocation
@@ -79,8 +80,7 @@ public class AsynchronousTest extends Arquillian {
     public void testAsyncIsNotFinished() {
         Task taskToPerform = new ServiceTask();
         Future<Task> taskResult = client.service(taskToPerform);
-        await().untilAsserted(()->  Assertions.
-            assertThat(taskResult.isDone()).isFalse());
+        assertFalse(taskResult.isDone());
     }
 
     /**
@@ -102,8 +102,7 @@ public class AsynchronousTest extends Arquillian {
     public void testClassLevelAsyncIsNotFinished() {
         Task taskToPerform = new ServiceTask();
         Future<Task> taskResult = clientClass.service(taskToPerform);
-        await().untilAsserted(()->  Assertions.
-            assertThat(taskResult.isDone()).isFalse());
+        assertFalse(taskResult.isDone());
     }
 
     /**
