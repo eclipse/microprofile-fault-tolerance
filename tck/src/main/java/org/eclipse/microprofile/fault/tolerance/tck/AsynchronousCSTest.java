@@ -20,9 +20,6 @@
 package org.eclipse.microprofile.fault.tolerance.tck;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
@@ -65,8 +62,6 @@ public class AsynchronousCSTest extends Arquillian {
 
     private @Inject
     AsyncClassLevelClient clientClass;
-
-    private List<CompletableFuture<Void>> waitingFutures = new ArrayList<>();
 
     @Deployment
     public static WebArchive deploy() {
