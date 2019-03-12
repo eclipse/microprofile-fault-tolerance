@@ -1,1 +1,2 @@
 org.eclipse.microprofile.fault.tolerance.tck.extension.HamcrestLoadableExtension
+org.eclipse.microprofile.fault.tolerance.tck.extension.AwaitilityLoadableExtension

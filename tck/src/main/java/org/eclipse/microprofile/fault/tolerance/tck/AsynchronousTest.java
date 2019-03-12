@@ -20,12 +20,10 @@
 package org.eclipse.microprofile.fault.tolerance.tck;
 
 
-import java.io.File;
 import java.util.concurrent.Future;
 
 import javax.inject.Inject;
 
-import org.assertj.core.api.Assertions;
 import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.AsyncClassLevelClient;
 import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.AsyncClient;
 import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.common.AsyncBridge;
@@ -38,11 +36,11 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.testng.annotations.Test;
 
 import static org.awaitility.Awaitility.await;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 /**
  * Verify the asynchronous invocation
@@ -57,10 +55,6 @@ public class AsynchronousTest extends Arquillian {
 
     @Deployment
     public static WebArchive deploy() {
-        File[] libs = Maven.resolver().loadPomFromFile("pom.xml")
-            .resolve("org.awaitility:awaitility", "org.assertj:assertj-core").withTransitivity()
-            .asFile();
-
         JavaArchive testJar = ShrinkWrap
             .create(JavaArchive.class, "ftAsynchronous.jar")
             .addClasses(AsyncClient.class, AsyncClassLevelClient.class, AsyncBridge.class, Task.class,
@@ -69,8 +63,7 @@ public class AsynchronousTest extends Arquillian {
             .as(JavaArchive.class);
 
         return ShrinkWrap.create(WebArchive.class, "ftAsynchronous.war")
-            .addAsLibrary(testJar)
-            .addAsLibraries(libs);
+            .addAsLibrary(testJar);
     }
 
     /**
@@ -90,8 +83,7 @@ public class AsynchronousTest extends Arquillian {
     public void testAsyncIsFinished() {
         Task taskToPerform = new ServiceTask();
         Future<Task> taskResult = client.service(taskToPerform);
-        await().untilAsserted(()->  Assertions.
-            assertThat(taskResult.isDone()).isTrue());
+        await().untilAsserted(()-> assertTrue(taskResult.isDone()));
     }
 
 
@@ -112,7 +104,6 @@ public class AsynchronousTest extends Arquillian {
     public void testClassLevelAsyncIsFinished() {
         Task taskToPerform = new ServiceTask();
         Future<Task> taskResult = clientClass.service(taskToPerform);
-        await().untilAsserted(()->  Assertions.
-            assertThat(taskResult.isDone()).isTrue());
+        await().untilAsserted(()-> assertTrue(taskResult.isDone()));
     }
 }

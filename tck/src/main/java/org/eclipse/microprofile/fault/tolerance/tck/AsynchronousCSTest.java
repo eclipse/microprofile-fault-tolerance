@@ -19,12 +19,10 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck;
 
-import java.io.File;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
-import org.assertj.core.api.Assertions;
 import org.awaitility.core.ConditionTimeoutException;
 import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.AsyncClassLevelClient;
 import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.AsyncClient;
@@ -39,7 +37,6 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.testng.annotations.Test;
 
 import static org.awaitility.Awaitility.await;
@@ -65,10 +62,6 @@ public class AsynchronousCSTest extends Arquillian {
 
     @Deployment
     public static WebArchive deploy() {
-        File[] libs = Maven.resolver().loadPomFromFile("pom.xml")
-            .resolve("org.awaitility:awaitility", "org.assertj:assertj-core").withTransitivity()
-            .asFile();
-
         JavaArchive testJar = ShrinkWrap
             .create(JavaArchive.class, "ftAsynchronous.jar")
             .addClasses(AsyncClient.class, AsyncClassLevelClient.class, Connection.class, CompletableFutureHelper.class,
@@ -77,8 +70,7 @@ public class AsynchronousCSTest extends Arquillian {
             .as(JavaArchive.class);
 
         return ShrinkWrap.create(WebArchive.class, "ftAsynchronous.war")
-            .addAsLibrary(testJar)
-            .addAsLibraries(libs);
+            .addAsLibrary(testJar);
     }
 
     /**
@@ -100,8 +92,7 @@ public class AsynchronousCSTest extends Arquillian {
     public void testAsyncIsFinished() {
         Task taskToPerform = new ServiceTask();
         CompletionStage<Task> taskResult = client.serviceCS(taskToPerform);
-        await().untilAsserted(() -> Assertions.
-            assertThat(taskResult.toCompletableFuture().isDone()).isTrue());
+        await().untilAsserted(() -> assertTrue(taskResult.toCompletableFuture().isDone()));
     }
 
     /**
@@ -123,8 +114,7 @@ public class AsynchronousCSTest extends Arquillian {
     public void testClassLevelAsyncIsFinished() {
         Task taskToPerform = new ServiceTask();
         CompletionStage<Task> taskResult = clientClass.serviceCS(taskToPerform);
-        await().untilAsserted(() -> Assertions.
-            assertThat(taskResult.toCompletableFuture().isDone()).isTrue());
+        await().untilAsserted(() -> assertTrue(taskResult.toCompletableFuture().isDone()));
     }
 
     /**
@@ -150,9 +140,7 @@ public class AsynchronousCSTest extends Arquillian {
             return v;
         });
 
-        await().untilAsserted(() -> Assertions.
-            assertThat(taskResult.toCompletableFuture().isDone()).isTrue());
-
+        await().untilAsserted(() -> assertTrue(taskResult.toCompletableFuture().isDone()));
         assertEquals(executionRecord.toString(), "123");
     }
 
