@@ -162,7 +162,7 @@ public class AsynchronousCSTest extends Arquillian {
             fail("Should throw ConditionTimeoutException");
         }
         catch (ConditionTimeoutException e) {
-            assertTrue(taskResult.toCompletableFuture().isDone());
+            assertFalse(taskResult.toCompletableFuture().isDone());
         }
     }
 }

@@ -18,6 +18,12 @@
  * limitations under the License.
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.asynchronous.common;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
 /**
  * Bridge class that creates a thread and execute the service task operation in an asynchronous way
  * @author <a href="mailto:kusanagi12002@gmail.com">Carlos Andres De La Rosa</a>
@@ -40,17 +46,14 @@ public class AsyncBridge {
      * @param expectedTaskResult the expected task result string after the process
      */
     public void perform(long taskTime, String expectedTaskResult) {
-        Thread thread = new Thread(new Runnable() {
-            public void run() {
-                try {
-                    Thread.sleep(taskTime);
-                    task.doTask(expectedTaskResult);
-                }
-                catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        });
-        thread.start();
+        CompletableFuture<Task> waitingFuture = new CompletableFuture<>();
+        try {
+            waitingFuture.get(taskTime, TimeUnit.MILLISECONDS);
+            task.doTask(expectedTaskResult);
+            waitingFuture.completedFuture(task);
+        }
+        catch (InterruptedException | ExecutionException | TimeoutException e) {
+            waitingFuture.completeExceptionally(e);
+        }
     }
 }
