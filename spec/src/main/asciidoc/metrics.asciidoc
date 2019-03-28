@@ -102,15 +102,15 @@ Note that the sum of `ft.<name>.timeout.callsTimedOut.total` and `ft.<name>.time
 
 |`ft.<name>.circuitbreaker.callsSucceeded.total`
 | Counter | None
-| Number of calls allowed to run by the circuit breaker that returned successfully
+| Number of calls which were allowed to run and were considered a success by the circuit breaker
 
 |`ft.<name>.circuitbreaker.callsFailed.total`
 | Counter | None
-| Number of calls allowed to run by the circuit breaker that then failed
+| Number of calls which were allowed to run and were considered a failure by the circuit breaker
 
 |`ft.<name>.circuitbreaker.callsPrevented.total`
 | Counter | None
-| Number of calls prevented from running by an open circuit breaker
+| Number of calls which were prevented from running by the circuit breaker
 
 |`ft.<name>.circuitbreaker.open.total`
 | Gauge<Long> | Nanoseconds

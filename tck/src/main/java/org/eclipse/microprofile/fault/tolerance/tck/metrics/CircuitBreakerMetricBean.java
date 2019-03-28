@@ -27,16 +27,19 @@ import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 @RequestScoped
 public class CircuitBreakerMetricBean {
 
-    public static enum Result {
+    public enum Result {
         PASS,
+        PASS_EXCEPTION,
         FAIL
     }
-    
-    @CircuitBreaker(requestVolumeThreshold = 2, failureRatio = 1.0D, delay = 1000, successThreshold = 2)
+
+    @CircuitBreaker(requestVolumeThreshold = 2, failureRatio = 1.0D, delay = 1000, successThreshold = 2, failOn = {TestException.class})
     public void doWork(Result result) {
         switch (result) {
         case PASS:
                 return;
+        case PASS_EXCEPTION:
+                throw new RuntimeException();
         case FAIL:
                 throw new TestException();
         default:
