@@ -19,6 +19,11 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead;
 
+import static org.junit.Assert.assertNotNull;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -50,7 +55,6 @@ import org.testng.annotations.Test;
 public class BulkheadFutureTest extends Arquillian {
 
     private static final int SHORT_TIME = 100;
-    private static final int LONG_TIME = 3000;
     @Inject
     private BulkheadMethodAsynchronousDefaultBean bhBeanMethodAsynchronousDefault;
     @Inject
@@ -87,19 +91,18 @@ public class BulkheadFutureTest extends Arquillian {
             result = bhBeanMethodAsynchronousDefault.test(fc);
         }
         catch (InterruptedException e1) {
-            Assert.fail("Unexpected interruption", e1);
+            fail("Unexpected interruption", e1);
         }
 
-        Assert.assertFalse(result.isDone(), "Future reporting Done when not");
+        assertFalse(result.isDone(), "Future reporting Done when not");
         try {
-            String r;
-            Assert.assertTrue("GET.".equals(r = result.get()), r);
-            Assert.assertTrue("GET.GET_TO.".equals(r = result.get(1, TimeUnit.SECONDS)), r);
+            assertNotNull(result.get());
+            assertNotNull(result.get(1, TimeUnit.SECONDS));
         }
-        catch (Throwable t) {
-            Assert.assertNull(t);
+        catch (Exception e) {
+            throw new AssertionError("Unexpected exception: ", e);
         }
-        Assert.assertTrue(result.isDone(), "Future done not reporting true");
+        assertTrue(result.isDone(), "Future done not reporting true");
     }
 
     /**
@@ -116,10 +119,10 @@ public class BulkheadFutureTest extends Arquillian {
             result = bhBeanMethodAsynchronousDefault.test(fc);
         }
         catch (InterruptedException e1) {
-            Assert.fail("Unexpected interruption", e1);
+            fail("Unexpected interruption", e1);
         }
 
-        Assert.assertFalse(result.isDone(), "Future reporting Done when not");
+        assertFalse(result.isDone(), "Future reporting Done when not");
         try {
             Thread.sleep(SHORT_TIME + SHORT_TIME);
             // Usually, we will not enter the loop, 
@@ -129,10 +132,10 @@ public class BulkheadFutureTest extends Arquillian {
                 Thread.sleep(SHORT_TIME);
             }
         }
-        catch (Throwable t) {
-            Assert.assertNull(t);
+        catch (Exception e) {
+            throw new AssertionError("Unexpected exception: ", e);
         }
-        Assert.assertTrue(result.isDone(), "Future done not reporting true");
+        assertTrue(result.isDone(), "Future done not reporting true");
     }
   
     /**
@@ -151,18 +154,17 @@ public class BulkheadFutureTest extends Arquillian {
             result = bhBeanClassAsynchronousDefault.test(fc);
         }
         catch (InterruptedException e1) {
-            Assert.fail("Unexpected interruption", e1);
+            fail("Unexpected interruption", e1);
         }
 
-        Assert.assertFalse(result.isDone(), "Future reporting Done when not");
+        assertFalse(result.isDone(), "Future reporting Done when not");
         try {
-            String r;
-            Assert.assertTrue("GET_TO.".equals(r = result.get(1, TimeUnit.SECONDS)), r);
-            Assert.assertTrue("GET_TO.GET.".equals(r = result.get()), r);
+            assertNotNull(result.get(1, TimeUnit.SECONDS));
+            assertNotNull(result.get());
 
         }
-        catch (Throwable t) {
-            Assert.assertNull(t);
+        catch (Exception e) {
+            throw new AssertionError("Unexpected exception: ", e);
         }
         Assert.assertTrue(result.isDone(), "Future done not reporting true");
     }
@@ -181,9 +183,9 @@ public class BulkheadFutureTest extends Arquillian {
             result = bhBeanMethodAsynchronousDefault.test(fc);
         }
         catch (InterruptedException e1) {
-            Assert.fail("Unexpected interruption", e1);
+            fail("Unexpected interruption", e1);
         }
-        Assert.assertFalse(result.isDone(), "Future reporting Done when not");
+        assertFalse(result.isDone(), "Future reporting Done when not");
         try {
             Thread.sleep(SHORT_TIME + SHORT_TIME);
             // Usually, we will not enter the loop, 
@@ -193,10 +195,10 @@ public class BulkheadFutureTest extends Arquillian {
                 Thread.sleep(SHORT_TIME);
             }
         }
-        catch (Throwable t) {
-            Assert.assertNull(t);
+        catch (Exception e) {
+            throw new AssertionError("Unexpected exception: ", e);
         }
-        Assert.assertTrue(result.isDone(), "Future done not reporting true");
+        assertTrue(result.isDone(), "Future done not reporting true");
     }
 
 }
