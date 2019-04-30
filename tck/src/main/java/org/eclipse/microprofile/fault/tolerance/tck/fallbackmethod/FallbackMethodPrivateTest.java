@@ -41,11 +41,11 @@ public class FallbackMethodPrivateTest extends Arquillian {
     @Deployment
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodPrivate.jar")
+                .addClass(FallbackMethodPrivateBean.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
         
         WebArchive war = ShrinkWrap
                 .create(WebArchive.class, "ftFallbackMethodPrivate.war")
-                .addClass(FallbackMethodPrivateBean.class)
                 .addAsLibrary(testJar);
         return war;
     }
