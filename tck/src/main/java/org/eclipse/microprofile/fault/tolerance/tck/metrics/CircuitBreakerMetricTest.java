@@ -18,6 +18,7 @@
  */
 package org.eclipse.microprofile.fault.tolerance.tck.metrics;
 
+import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expect;
 import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expectCbOpen;
 import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expectTestException;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -39,7 +40,7 @@ import org.testng.annotations.Test;
 
 public class CircuitBreakerMetricTest extends Arquillian {
     
-    private static final long CB_CLOSE_TIMEOUT = 5 * 1000 * 1_000_000;
+    private static final long CB_CLOSE_TIMEOUT = 5L * 1000 * 1_000_000;
 
     @Deployment
     public static WebArchive deploy() {
@@ -122,9 +123,17 @@ public class CircuitBreakerMetricTest extends Arquillian {
         assertThat("circuitbreaker calls failed", m.getCircuitBreakerCallsFailedDelta(), is(2L));
         assertThat("circuitbreaker calls prevented", m.getCircuitBreakerCallsPreventedDelta(), is(1L));
         assertThat("circuit breaker times opened", m.getCircuitBreakerOpenedDelta(), is(1L));
-        
+
+        // exception that is considered a success
+        expect(RuntimeException.class, () -> cbBean.doWork(Result.PASS_EXCEPTION));
+
+        assertThat("circuitbreaker calls succeeded", m.getCircuitBreakerCallsSucceededDelta(), is(3L));
+        assertThat("circuitbreaker calls failed", m.getCircuitBreakerCallsFailedDelta(), is(2L));
+        assertThat("circuitbreaker calls prevented", m.getCircuitBreakerCallsPreventedDelta(), is(1L));
+        assertThat("circuit breaker times opened", m.getCircuitBreakerOpenedDelta(), is(1L));
+
         // General metrics should be updated
-        assertThat("invocations", m.getInvocationsDelta(), is(5L));
-        assertThat("failed invocations", m.getInvocationsFailedDelta(), is(3L));
+        assertThat("invocations", m.getInvocationsDelta(), is(6L));
+        assertThat("failed invocations", m.getInvocationsFailedDelta(), is(4L));
     }
 }
