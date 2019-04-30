@@ -19,10 +19,10 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.metrics.util;
 
-import static org.hamcrest.Matchers.closeTo;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
 import org.hamcrest.Matcher;
+
+import static org.hamcrest.Matchers.closeTo;
 
 public class MetricComparator {
 
@@ -30,7 +30,7 @@ public class MetricComparator {
     private MetricComparator() {}
     
     /**
-     * Check that a nanosecond time is with 100ms of an expected time in milliseconds
+     * Check that a nanosecond time is withith 20% of an expected time in milliseconds
      * <p>
      * Note that this method does both the millseconds to nanoseconds conversion and creates a {@link Matcher} to do the check.
      * <p>
@@ -42,8 +42,9 @@ public class MetricComparator {
     public static Matcher<Double> approxMillis(final long originalMillis) {
 
         final long millis = TCKConfig.getConfig().getTimeoutInMillis(originalMillis);
+        final long margin = TCKConfig.getConfig().getTimeoutInMillis(Math.round(originalMillis * 0.2));
         long nanos = millis * 1_000_000;
-        return closeTo(nanos, 1_000_000 * 100);
+        return closeTo(nanos, 1_000_000 * margin);
     }
     
 }
