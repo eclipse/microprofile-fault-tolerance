@@ -41,28 +41,6 @@ import org.eclipse.microprofile.faulttolerance.Asynchronous;
 @Asynchronous
 public class AsyncClassLevelClient {
 
-
-    /**
-     * service 1 second in normal operation.
-     * @return the result as a Future
-     * @throws InterruptedException the interrupted exception
-     */
-    public Future<Connection> service() throws InterruptedException {
-
-        Connection conn = new Connection() {
-            {
-                Thread.sleep(1000);
-            }
-
-            @Override
-            public String getData() {
-                return "service DATA";
-            }
-        };
-
-        return CompletableFuture.completedFuture(conn);
-    }
-    
     /**
      * Service an operation until waitCondition is completed or 1 second timeout.
      *
@@ -75,7 +53,7 @@ public class AsyncClassLevelClient {
 
         Throwable exception = null;
         try {
-            waitCondition.get(1000, TimeUnit.SECONDS);
+            waitCondition.get(1000, TimeUnit.MILLISECONDS);
         }
         catch (ExecutionException e) {
             exception = e.getCause();
@@ -98,12 +76,7 @@ public class AsyncClassLevelClient {
             }
         }
 
-        return CompletableFuture.completedFuture(new Connection() {
-            @Override
-            public String getData() {
-                return "service DATA";
-            }
-        });
+        return CompletableFuture.completedFuture(() -> "service DATA");
 
     }
 

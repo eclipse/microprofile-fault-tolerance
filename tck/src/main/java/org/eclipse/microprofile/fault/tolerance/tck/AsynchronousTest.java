@@ -19,13 +19,11 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck;
 
-
-import java.util.concurrent.Future;
-
 import javax.inject.Inject;
 
 import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.AsyncClassLevelClient;
 import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.AsyncClient;
+import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.CompletableFutureHelper;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Connection;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
@@ -35,6 +33,13 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
+import static org.awaitility.Awaitility.await;
 
 /**
  * Verify the asynchronous invocation
@@ -51,7 +56,7 @@ public class AsynchronousTest extends Arquillian {
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
             .create(JavaArchive.class, "ftAsynchronous.jar")
-            .addClasses(AsyncClient.class, AsyncClassLevelClient.class, Connection.class)
+            .addClasses(AsyncClient.class, AsyncClassLevelClient.class, Connection.class, CompletableFutureHelper.class)
             .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
             .as(JavaArchive.class);
 
@@ -65,16 +70,10 @@ public class AsynchronousTest extends Arquillian {
      */
     @Test
     public void testAsyncIsNotFinished() {
-        Future<Connection> future = null;
-        try {
-            future = client.service();
-        }
-        catch (InterruptedException e) {
-            throw new AssertionError("testAsync: unexpected InterruptedException calling service");
-        }
-
-        Assert.assertFalse(future.isDone());
-
+        CompletableFuture<Void> waitingFuture = newWaitingFuture();
+        CompletionStage<Connection> resultFuture = client.serviceCS(waitingFuture);
+        Future<Connection> future = resultFuture.toCompletableFuture();
+        await().atMost(200, TimeUnit.MILLISECONDS).untilAsserted(()-> Assert.assertFalse(future.isDone()));
     }
 
     /**
@@ -82,17 +81,10 @@ public class AsynchronousTest extends Arquillian {
      */
     @Test
     public void testAsyncIsFinished() {
-        Future<Connection> future = null;
-        try {
-            future = client.service();
-            Thread.sleep(1500);
-        }
-        catch (InterruptedException e) {
-            throw new AssertionError("testAsync: unexpected InterruptedException calling service");
-        }
-
-        Assert.assertTrue(future.isDone());
-
+        CompletableFuture<Void> waitingFuture = newWaitingFuture();
+        CompletionStage<Connection> resultFuture = client.serviceCS(waitingFuture);
+        Future<Connection> future = resultFuture.toCompletableFuture();
+        await().atLeast(1000, TimeUnit.MILLISECONDS).untilAsserted(()-> Assert.assertTrue(future.isDone()));
     }
 
 
@@ -101,16 +93,10 @@ public class AsynchronousTest extends Arquillian {
      */
     @Test
     public void testClassLevelAsyncIsNotFinished() {
-        Future<Connection> future = null;
-        try {
-            future = clientClass.service();
-        }
-        catch (InterruptedException e) {
-            throw new AssertionError("testAsync: unexpected InterruptedException calling service");
-        }
-
-        Assert.assertFalse(future.isDone());
-
+        CompletableFuture<Void> waitingFuture = newWaitingFuture();
+        CompletionStage<Connection> resultFuture = clientClass.serviceCS(waitingFuture);
+        Future<Connection> future = resultFuture.toCompletableFuture();
+        await().atMost(400, TimeUnit.MILLISECONDS).untilAsserted(()-> Assert.assertFalse(future.isDone()));
     }
 
     /**
@@ -118,16 +104,20 @@ public class AsynchronousTest extends Arquillian {
      */
     @Test
     public void testClassLevelAsyncIsFinished() {
-        Future<Connection> future = null;
-        try {
-            future = clientClass.service();
-            Thread.sleep(1500);
-        }
-        catch (InterruptedException e) {
-            throw new AssertionError("testAsync: unexpected InterruptedException calling service");
-        }
+        CompletableFuture<Void> waitingFuture = newWaitingFuture();
+        CompletionStage<Connection> resultFuture = clientClass.serviceCS(waitingFuture);
+        Future<Connection> future = resultFuture.toCompletableFuture();
+        await().atLeast(1000, TimeUnit.MILLISECONDS).untilAsserted(()-> Assert.assertTrue(future.isDone()));
+    }
 
-        Assert.assertTrue(future.isDone());
-
+    /**
+     * Use this method to obtain futures for passing to methods on
+     * {@link AsyncClient}
+     * <p>
+     * Using this factory method ensures they will be completed at the end of
+     * the test if your test fails.
+     */
+    private CompletableFuture<Void> newWaitingFuture() {
+        return new CompletableFuture<>();
     }
 }
