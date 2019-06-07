@@ -32,7 +32,6 @@ import org.eclipse.microprofile.metrics.Counter;
 import org.eclipse.microprofile.metrics.Gauge;
 import org.eclipse.microprofile.metrics.Histogram;
 import org.eclipse.microprofile.metrics.Metric;
-import org.eclipse.microprofile.metrics.MetricID;
 import org.eclipse.microprofile.metrics.MetricRegistry;
 
 /**
@@ -52,7 +51,20 @@ import org.eclipse.microprofile.metrics.MetricRegistry;
  * </ul>
  */
 public class MetricGetter {
-    
+    // need to be compatible with both Metrics 1.1 and 2.0 for a while
+    private static boolean isMetrics20;
+    private static Class<?> metricIdClass;
+
+    static {
+        try {
+            metricIdClass = Class.forName("org.eclipse.microprofile.metrics.MetricID");
+            isMetrics20 = true;
+        }
+        catch (ClassNotFoundException e) {
+            isMetrics20 = false;
+        }
+    }
+
     private String prefix;
     private MetricRegistry registry;
     
@@ -332,8 +344,19 @@ public class MetricGetter {
     }
     
     private <T> Optional<T> getMetric(String name, Class<T> metricType) {
-        MetricID metricID = new MetricID(name);
-        Metric m = registry.getMetrics().get(metricID);
+        Object key;
+        if (isMetrics20) {
+            try {
+                key = metricIdClass.getConstructor(String.class).newInstance(name);
+            }
+            catch (ReflectiveOperationException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        else {
+            key = name;
+        }
+        Metric m = registry.getMetrics().get(key);
         if (m != null) {
             assertThat("Metric " + name, m, instanceOf(metricType));
             return Optional.of(metricType.cast(m));
