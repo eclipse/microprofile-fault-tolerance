@@ -81,7 +81,8 @@ public class AsynchronousTest extends Arquillian {
     public void testAsyncIsFinished() {
         CompletableFuture<Void> waitingFuture = newWaitingFuture();
         Future<Connection> future = client.service(waitingFuture);
-        await().atLeast(1000, TimeUnit.MILLISECONDS).untilAsserted(()-> Assert.assertTrue(future.isDone()));
+        await().atLeast(1000, TimeUnit.MILLISECONDS).atMost(2000, TimeUnit.MILLISECONDS)
+            .untilAsserted(()-> Assert.assertTrue(future.isDone()));
     }
 
 
