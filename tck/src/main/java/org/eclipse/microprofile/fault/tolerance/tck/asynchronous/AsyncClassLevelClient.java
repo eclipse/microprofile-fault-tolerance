@@ -43,6 +43,16 @@ public class AsyncClassLevelClient {
 
     /**
      * Service an operation until waitCondition is completed or 1 second timeout.
+     * @param waitCondition Execution of this method will delay until the condition is finished
+     * @return the result as a Future.
+     */
+    @Asynchronous
+    public Future<Connection> service(Future<?> waitCondition) {
+        return serviceCS(waitCondition, false).toCompletableFuture();
+    }
+
+    /**
+     * Service an operation until waitCondition is completed or 1 second timeout.
      *
      * @param waitCondition Execution of this method will delay until the condition is finished
      * @param throwException Whether the method should throw an exception (true) or return a stage completed with exception (false)
@@ -76,7 +86,12 @@ public class AsyncClassLevelClient {
             }
         }
 
-        return CompletableFuture.completedFuture(() -> "service DATA");
+        return CompletableFuture.completedFuture(new Connection() {
+            @Override
+            public String getData() {
+                return "service DATA";
+            }
+        });
 
     }
 

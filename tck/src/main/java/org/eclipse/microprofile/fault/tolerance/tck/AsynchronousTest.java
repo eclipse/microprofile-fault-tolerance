@@ -60,8 +60,7 @@ public class AsynchronousTest extends Arquillian {
             .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
             .as(JavaArchive.class);
 
-        WebArchive war = ShrinkWrap.create(WebArchive.class, "ftAsynchronous.war").addAsLibrary(testJar);
-        return war;
+        return ShrinkWrap.create(WebArchive.class, "ftAsynchronous.war").addAsLibrary(testJar);
     }
 
 
@@ -71,9 +70,8 @@ public class AsynchronousTest extends Arquillian {
     @Test
     public void testAsyncIsNotFinished() {
         CompletableFuture<Void> waitingFuture = newWaitingFuture();
-        CompletionStage<Connection> resultFuture = client.serviceCS(waitingFuture);
-        Future<Connection> future = resultFuture.toCompletableFuture();
-        await().atMost(200, TimeUnit.MILLISECONDS).untilAsserted(()-> Assert.assertFalse(future.isDone()));
+        Future<Connection> future = client.service(waitingFuture);
+        Assert.assertFalse(future.isDone());
     }
 
     /**
@@ -82,8 +80,7 @@ public class AsynchronousTest extends Arquillian {
     @Test
     public void testAsyncIsFinished() {
         CompletableFuture<Void> waitingFuture = newWaitingFuture();
-        CompletionStage<Connection> resultFuture = client.serviceCS(waitingFuture);
-        Future<Connection> future = resultFuture.toCompletableFuture();
+        Future<Connection> future = client.service(waitingFuture);
         await().atLeast(1000, TimeUnit.MILLISECONDS).untilAsserted(()-> Assert.assertTrue(future.isDone()));
     }
 
