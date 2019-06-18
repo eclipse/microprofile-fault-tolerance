@@ -35,7 +35,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -92,9 +91,8 @@ public class AsynchronousTest extends Arquillian {
     @Test
     public void testClassLevelAsyncIsNotFinished() {
         CompletableFuture<Void> waitingFuture = newWaitingFuture();
-        CompletionStage<Connection> resultFuture = clientClass.serviceCS(waitingFuture);
-        Future<Connection> future = resultFuture.toCompletableFuture();
-        await().atMost(400, TimeUnit.MILLISECONDS).untilAsserted(()-> Assert.assertFalse(future.isDone()));
+        Future<Connection> future = clientClass.service(waitingFuture);
+        Assert.assertFalse(future.isDone());
     }
 
     /**
@@ -103,9 +101,9 @@ public class AsynchronousTest extends Arquillian {
     @Test
     public void testClassLevelAsyncIsFinished() {
         CompletableFuture<Void> waitingFuture = newWaitingFuture();
-        CompletionStage<Connection> resultFuture = clientClass.serviceCS(waitingFuture);
-        Future<Connection> future = resultFuture.toCompletableFuture();
-        await().atLeast(1000, TimeUnit.MILLISECONDS).untilAsserted(()-> Assert.assertTrue(future.isDone()));
+        Future<Connection> future = clientClass.service(waitingFuture);
+        await().atLeast(1000, TimeUnit.MILLISECONDS).atMost(2000, TimeUnit.MILLISECONDS)
+            .untilAsserted(()-> Assert.assertTrue(future.isDone()));
     }
 
     /**

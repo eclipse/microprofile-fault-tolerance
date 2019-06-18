@@ -48,7 +48,7 @@ public class AsyncClassLevelClient {
      */
     @Asynchronous
     public Future<Connection> service(Future<?> waitCondition) {
-        return serviceCS(waitCondition, false).toCompletableFuture();
+        return CompletableFutureHelper.toCompletableFuture(serviceCS(waitCondition, false));
     }
 
     /**
