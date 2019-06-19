@@ -36,6 +36,7 @@ import java.util.concurrent.ExecutionException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
+import static org.testng.Assert.fail;
 
 /**
  * Test the combination of the @Asynchronous and @Fallback annotations.
@@ -74,6 +75,7 @@ public class AsyncFallbackTest extends Arquillian {
     public void testAsyncFallbackFutureCompletesExceptionally() throws InterruptedException {
         try {
             client.service3().get();
+            fail("ExecutionException not thrown");
         }
         catch (ExecutionException expected) {
             assertThat("Future-returning method that returns failing future should not fallback",
