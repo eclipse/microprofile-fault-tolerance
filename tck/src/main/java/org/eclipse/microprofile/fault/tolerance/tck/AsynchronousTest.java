@@ -32,8 +32,11 @@ import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.Assert;
+import org.testng.annotations.AfterTest;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -50,6 +53,8 @@ public class AsynchronousTest extends Arquillian {
 
     private @Inject
     AsyncClassLevelClient clientClass;
+
+    private List<CompletableFuture<Void>> waitingFutures = new ArrayList<>();
 
     @Deployment
     public static WebArchive deploy() {
@@ -80,7 +85,7 @@ public class AsynchronousTest extends Arquillian {
     public void testAsyncIsFinished() {
         CompletableFuture<Void> waitingFuture = newWaitingFuture();
         Future<Connection> future = client.service(waitingFuture);
-        await().atLeast(1000, TimeUnit.MILLISECONDS).atMost(2000, TimeUnit.MILLISECONDS)
+        await().atMost(2000, TimeUnit.MILLISECONDS)
             .untilAsserted(()-> Assert.assertTrue(future.isDone()));
     }
 
@@ -102,7 +107,7 @@ public class AsynchronousTest extends Arquillian {
     public void testClassLevelAsyncIsFinished() {
         CompletableFuture<Void> waitingFuture = newWaitingFuture();
         Future<Connection> future = clientClass.service(waitingFuture);
-        await().atLeast(1000, TimeUnit.MILLISECONDS).atMost(2000, TimeUnit.MILLISECONDS)
+        await().atMost(2000, TimeUnit.MILLISECONDS)
             .untilAsserted(()-> Assert.assertTrue(future.isDone()));
     }
 
@@ -114,6 +119,21 @@ public class AsynchronousTest extends Arquillian {
      * the test if your test fails.
      */
     private CompletableFuture<Void> newWaitingFuture() {
-        return new CompletableFuture<>();
+        CompletableFuture<Void> result = new CompletableFuture<>();
+        waitingFutures.add(result);
+        return result;
+    }
+
+    /**
+     * Ensure that any waiting futures get completed at the end of each test
+     * <p>
+     * Important in case tests end early due to an exception or failure.
+     */
+    @AfterTest
+    public void completeWaitingFutures() {
+        waitingFutures.forEach((future) -> {
+            future.complete(null);
+        });
+        waitingFutures.clear();
     }
 }
