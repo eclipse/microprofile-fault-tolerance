@@ -76,6 +76,7 @@ public class AsynchronousTest extends Arquillian {
         CompletableFuture<Void> waitingFuture = newWaitingFuture();
         Future<Connection> future = client.service(waitingFuture);
         Assert.assertFalse(future.isDone());
+        waitingFuture.complete(null);
     }
 
     /**
@@ -87,6 +88,7 @@ public class AsynchronousTest extends Arquillian {
         Future<Connection> future = client.service(waitingFuture);
         await().atMost(2000, TimeUnit.MILLISECONDS)
             .untilAsserted(()-> Assert.assertTrue(future.isDone()));
+        waitingFuture.complete(null);
     }
 
 
@@ -98,6 +100,7 @@ public class AsynchronousTest extends Arquillian {
         CompletableFuture<Void> waitingFuture = newWaitingFuture();
         Future<Connection> future = clientClass.service(waitingFuture);
         Assert.assertFalse(future.isDone());
+        waitingFuture.complete(null);
     }
 
     /**
@@ -109,6 +112,7 @@ public class AsynchronousTest extends Arquillian {
         Future<Connection> future = clientClass.service(waitingFuture);
         await().atMost(2000, TimeUnit.MILLISECONDS)
             .untilAsserted(()-> Assert.assertTrue(future.isDone()));
+        waitingFuture.complete(null);
     }
 
     /**
