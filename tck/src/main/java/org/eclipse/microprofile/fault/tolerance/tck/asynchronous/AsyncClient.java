@@ -78,7 +78,7 @@ public class AsyncClient {
 
         Throwable exception = null;
         try {
-            waitCondition.get(1000, TimeUnit.MILLISECONDS);
+            waitCondition.get(1000, TimeUnit.SECONDS);
         }
         catch (ExecutionException e) {
             exception = e.getCause();
