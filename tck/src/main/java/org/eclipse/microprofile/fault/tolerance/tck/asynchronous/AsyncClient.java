@@ -77,11 +77,7 @@ public class AsyncClient {
     /**
      * Helper method that allows to complete a future in an exceptional or a non exceptional way also simulates a
      * service processing waiting time.
-     * NOTE: The timeout used in the waiting condition (1000 SECONDS) will simulate a large service processing time, to allow use in the
-     * test cases a strategy to improve the waiting time and avoid has process waiting for ever the strategy is described below:
-     * In the cases that are necessary test if the @{@link Future} is finished we can me make this finish immediately and use
-     * awaitility library to control at most how much time will wait for the test before to finish in cases that the service
-     * takes more time due to external factors like infrastructure in a continuous integration context or stress testing.
+     * NOTE: This 1000 second timeout is to ensure test timeout kicks in before the operation timeout for a better test error to be displayed.
      * @param waitCondition Future that will simulate the services processing
      * @param throwException True to complete in an exceptional way
      * @param stageToReturn Completion stage
