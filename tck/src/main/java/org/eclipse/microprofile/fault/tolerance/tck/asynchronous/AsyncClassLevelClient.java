@@ -42,7 +42,7 @@ import org.eclipse.microprofile.faulttolerance.Asynchronous;
 public class AsyncClassLevelClient {
 
     /**
-     * Service an operation until waitCondition is completed or 1 second timeout.
+     * Service an operation until waitCondition is completed or 1000 second timeout.
      * @param waitCondition Execution of this method will delay until the condition is finished
      * @return the result as a Future.
      */
