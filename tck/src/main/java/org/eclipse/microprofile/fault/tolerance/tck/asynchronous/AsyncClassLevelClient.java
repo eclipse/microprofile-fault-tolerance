@@ -41,31 +41,19 @@ import org.eclipse.microprofile.faulttolerance.Asynchronous;
 @Asynchronous
 public class AsyncClassLevelClient {
 
-
     /**
-     * service 1 second in normal operation.
-     * @return the result as a Future
-     * @throws InterruptedException the interrupted exception
+     * Service an operation until waitCondition is completed or 1000 second timeout.
+     * @param waitCondition Execution of this method will delay until the condition is finished
+     * @return the result as a Future.
      */
-    public Future<Connection> service() throws InterruptedException {
-
-        Connection conn = new Connection() {
-            {
-                Thread.sleep(1000);
-            }
-
-            @Override
-            public String getData() {
-                return "service DATA";
-            }
-        };
-
-        return CompletableFuture.completedFuture(conn);
+    @Asynchronous
+    public Future<Connection> service(Future<?> waitCondition) {
+        return CompletableFutureHelper.toCompletableFuture(serviceCS(waitCondition, false));
     }
-    
+
     /**
-     * Service an operation until waitCondition is completed or 1 second timeout.
-     *
+     * Service an operation until waitCondition is completed or 1000 second timeout.
+     * NOTE: This 1000 second timeout is to ensure test timeout kicks in before the operation timeout for a better test error to be displayed.
      * @param waitCondition Execution of this method will delay until the condition is finished
      * @param throwException Whether the method should throw an exception (true) or return a stage completed with exception (false)
      * @return the result as a CompletionStage. It may be completed with
