@@ -19,6 +19,14 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck;
 
+import static org.awaitility.Awaitility.await;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
 import javax.inject.Inject;
 
 import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.AsyncClassLevelClient;
@@ -32,16 +40,8 @@ import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.Assert;
-import org.testng.annotations.AfterTest;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-
-import static org.awaitility.Awaitility.await;
 
 /**
  * Verify the asynchronous invocation
@@ -131,7 +131,7 @@ public class AsynchronousTest extends Arquillian {
      * <p>
      * Important in case tests end early due to an exception or failure.
      */
-    @AfterTest
+    @AfterMethod
     public void completeWaitingFutures() {
         waitingFutures.forEach((future) -> {
             future.complete(null);

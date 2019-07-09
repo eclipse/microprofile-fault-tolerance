@@ -42,7 +42,7 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.Assert;
 import org.testng.Assert.ThrowingRunnable;
-import org.testng.annotations.AfterTest;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 /**
@@ -246,7 +246,7 @@ public class AsynchronousCSTest extends Arquillian {
      * <p>
      * Important in case tests end early due to an exception or failure.
      */
-    @AfterTest
+    @AfterMethod
     public void completeWaitingFutures() {
         waitingFutures.forEach((future) -> {
             future.complete(null);
