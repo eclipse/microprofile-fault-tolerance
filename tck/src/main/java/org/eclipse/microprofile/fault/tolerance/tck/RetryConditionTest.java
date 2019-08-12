@@ -25,6 +25,8 @@ import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClas
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClassLevelClientRetryOn;
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClientAbortOn;
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClientRetryOn;
+import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.exceptions.RetryChildException;
+import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.exceptions.RetryParentException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -69,7 +71,9 @@ public class RetryConditionTest extends Arquillian {
                                         RetryClassLevelClientRetryOn.class,
                                         RetryClassLevelClientAbortOn.class,
                                         AsyncRetryClient.class,
-                                        CompletableFutureHelper.class)
+                                        CompletableFutureHelper.class,
+                            RetryChildException.class,
+                            RetryParentException.class)
                         .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                         .as(JavaArchive.class);
 
@@ -115,6 +119,50 @@ public class RetryConditionTest extends Arquillian {
         Assert.assertEquals(clientForRetryOn.getRetryCountForWritingService(), 1,
             "The max invocation counter should be 1 as the retry condition is false");
     }
+
+    /**
+     * Test that retries are executed where a failure declared as "retry on" in the {@code @Retry}
+     * annotation is encountered by inheritance.
+     *
+     * Service that throws a child custom exception but in the retry on list is configured child's parent custom exception
+     */
+    @Test
+    public void testRetryOnTrueThrowingAChildCustomException() {
+        try {
+            clientForRetryOn.serviceC();
+            Assert.fail("serviceC should throw a RetryChildException in testRetryOnTrueThrowingAChildCustomException");
+        }
+        catch(RetryChildException ex) {
+            // Expected
+        }
+        Assert.assertEquals(clientForRetryOn.getRetryCountForConnectionService(), 4,
+            "The execution count should be 4 (3 retries + 1)");
+    }
+
+    /**
+     * Test that retries are executed where a failure declared as "retry on" in the {@code @Retry}
+     * annotation is encountered by inheritance.
+     *
+     * Service that throws a child custom exception but in the retry on list is configured child's parent custom exception
+     * and in the abort on list is configured the child custom exception.
+     *
+     * For this case the retry on will be false and the abort on will be true due the class configured in the abort on list
+     * is equals to the exception that is throwing by the serviceD not like in the retry on list where is configured the
+     * parent exception class of the throwing by the serviceD. So the highest priority will be when the exception type is equals
+     */
+    @Test
+    public void testRetryOnFalseAndAbortOnTrueThrowingAChildCustomException() {
+        try {
+            clientForRetryOn.serviceD();
+            Assert.fail("serviceC should throw a RetryChildException in testRetryOnFalseAndAbortOnTrueThrowingAChildCustomException");
+        }
+        catch(RetryChildException ex) {
+            // Expected
+        }
+        Assert.assertEquals(clientForRetryOn.getRetryCountForConnectionService(), 1,
+            "The max invocation counter should be 1 as the retry condition is false");
+    }
+
 
     /**
      * Test that the default number of retries are executed where a failure declared as "abort on" in the {@code @Retry} annotation
