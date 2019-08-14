@@ -86,4 +86,4 @@ The `@Retry` annotation can be used together with `@Fallback`, `@CircuitBreaker`
 
 A `@Fallback` can be specified and it will be invoked if the method still fails after any retires have been run.
 
-If `@Retry` is used with `@Asynchronous` and a retry is required, the new retry attempt may be run on the same thread as the previous attempt, or on a different thread.
+If `@Retry` is used with `@Asynchronous` and a retry is required, the new retry attempt may be run on the same thread as the previous attempt, or on a different thread. (However, note that if `@Retry` is used with `@Timeout` and `@Asynchronous`, it's required to run retries caused by a `TimeoutException` on a different thread. See <<timeout-usage>>.) 
