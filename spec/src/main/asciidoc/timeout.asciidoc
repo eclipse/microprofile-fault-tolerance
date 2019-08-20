@@ -56,7 +56,6 @@ In the above situations, it is impossible to suspend the execution. The executio
 
 If a timeout occurs, the thread interrupted status must be cleared when the method returns.
 
-[[timeout-async]]
 If `@Timeout` is used with `@Asynchronous`, then a separate thread will be spawned to perform the work in the annotated method or methods, while a `Future` or `CompletionStage` is returned on the main thread. If the work on the spawned thread does time out, then a get() call to the `Future` on the main thread will throw an `ExecutionException` that wraps a fault tolerance `TimeoutException`.
 
 If `@Timeout` is used with `@Fallback` then the fallback method or handler will be invoked if a `TimeoutException` is thrown (unless the exception is handled by another fault tolerance component).
