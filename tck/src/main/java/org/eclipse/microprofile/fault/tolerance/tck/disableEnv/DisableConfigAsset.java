@@ -30,11 +30,11 @@ import org.jboss.shrinkwrap.api.asset.Asset;
 
 /**
  * Asset which writes a config file with lines to enable and disable annotations
- * 
+ *
  * @author <a href="mailto:anrouse@uk.ibm.com">Andrew Rouse</a>
  */
 public class DisableConfigAsset implements Asset {
-    
+
     private Properties props = new Properties();
 
     @Override
@@ -49,10 +49,21 @@ public class DisableConfigAsset implements Asset {
             throw new RuntimeException("Unexpected error saving properties", e);
         }
     }
-    
+
+    /**
+     * Directly add a property to the underlying Properties instance.
+     *
+     * @param key property key
+     * @param value property value
+     */
+    public DisableConfigAsset addProperty(String key, String value) {
+        props.put(key, value);
+        return this;
+    }
+
     /**
      * Add config entry to disable an annotation on the given class and method
-     * 
+     *
      * @param clazz the class
      * @param method the method
      * @param annotation the annotation
@@ -62,10 +73,10 @@ public class DisableConfigAsset implements Asset {
         props.put(keyFor(clazz, method, annotation), "false");
         return this;
     }
-    
+
     /**
      * Add config entry to disable an annotation on the given class
-     * 
+     *
      * @param clazz the class
      * @param annotation the annotation
      * @return itself
@@ -74,10 +85,10 @@ public class DisableConfigAsset implements Asset {
         props.put(keyFor(clazz, null, annotation), "false");
         return this;
     }
-    
+
     /**
      * Add config entry to disable an annotation globally
-     * 
+     *
      * @param annotation the annotation
      * @return itself
      */
@@ -88,7 +99,7 @@ public class DisableConfigAsset implements Asset {
 
     /**
      * Add config entry to enable an annotation on the given class and method
-     * 
+     *
      * @param clazz the class
      * @param method the method
      * @param annotation the annotation
@@ -98,10 +109,10 @@ public class DisableConfigAsset implements Asset {
         props.put(keyFor(clazz, method, annotation), "true");
         return this;
     }
-    
+
     /**
      * Add config entry to enable an annotation on the given class
-     * 
+     *
      * @param clazz the class
      * @param annotation the annotation
      * @return itself
@@ -110,10 +121,10 @@ public class DisableConfigAsset implements Asset {
         props.put(keyFor(clazz, null, annotation), "true");
         return this;
     }
-    
+
     /**
      * Add config entry to enable an annotation globally
-     * 
+     *
      * @param annotation the annotation
      * @return itself
      */
@@ -122,12 +133,12 @@ public class DisableConfigAsset implements Asset {
         return this;
     }
 
-    
+
     /**
      * Build config key used to enable an annotation for a class and method
      * <p>
      * E.g. {@code com.example.MyClass/myMethod/Retry/enabled}
-     * 
+     *
      * @param clazz may be null
      * @param method may be null
      * @param annotation required
@@ -139,16 +150,16 @@ public class DisableConfigAsset implements Asset {
             sb.append(clazz.getCanonicalName());
             sb.append("/");
         }
-        
+
         if (method != null) {
             sb.append(method);
             sb.append("/");
         }
-        
+
         sb.append(annotation.getSimpleName());
         sb.append("/");
         sb.append("enabled");
-        
+
         return sb.toString();
     }
 
