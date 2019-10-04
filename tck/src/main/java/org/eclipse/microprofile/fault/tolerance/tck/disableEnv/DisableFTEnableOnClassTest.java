@@ -69,7 +69,7 @@ public class DisableFTEnableOnClassTest extends Arquillian {
                .enable(DisableAnnotationClient.class, Asynchronous.class)
                .enable(DisableAnnotationClient.class, Fallback.class)
                .enable(DisableAnnotationClient.class, Bulkhead.class)
-               .addProperty("MP_Fault_Tolerance_NonFallback_Enabled", "false");
+               .disableGlobally();
 
         JavaArchive testJar = ShrinkWrap
             .create(JavaArchive.class, "ftDisableGlobalEnableClass.jar")

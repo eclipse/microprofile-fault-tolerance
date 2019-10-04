@@ -51,13 +51,10 @@ public class DisableConfigAsset implements Asset {
     }
 
     /**
-     * Directly add a property to the underlying Properties instance.
-     *
-     * @param key property key
-     * @param value property value
+     * Globally disable Fault Tolerance except Fallback by setting MP_Fault_Tolerance_NonFallback_Enabled to false.
      */
-    public DisableConfigAsset addProperty(String key, String value) {
-        props.put(key, value);
+    public DisableConfigAsset disableGlobally() {
+        props.put("MP_Fault_Tolerance_NonFallback_Enabled", "false");
         return this;
     }
 

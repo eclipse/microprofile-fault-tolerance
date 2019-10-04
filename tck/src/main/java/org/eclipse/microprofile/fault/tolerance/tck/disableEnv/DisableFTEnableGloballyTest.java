@@ -69,7 +69,7 @@ public class DisableFTEnableGloballyTest extends Arquillian {
                .enable(Asynchronous.class)
                .enable(Fallback.class)
                .enable(Bulkhead.class)
-               .addProperty("MP_Fault_Tolerance_NonFallback_Enabled", "false");
+               .disableGlobally();
 
         JavaArchive testJar = ShrinkWrap
             .create(JavaArchive.class, "ftDisableGlobalEnableClass.jar")
