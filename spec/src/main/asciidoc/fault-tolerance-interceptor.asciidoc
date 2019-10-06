@@ -33,25 +33,32 @@ For instance, in the following example, `MyLogInterceptor` will be invoked first
 [source, java]
 ----
 @Retry
-@MyLog 
+@MyLog
 @MyPrint
-public void myInvok() {
-
- //do something
+public void myInvoke() {
+  // do something
 }
+
 @Priority(3000)
 @MyLog
-public class MyLogInterceptor{
- //do logging
+public class MyLogInterceptor {
+  // do logging
 }
 
 @Priority(5000)
 @MyPrint
-public class MyPrintInterceptor{
- //do printing
+public class MyPrintInterceptor {
+  // do printing
 }
 ----
 
+=== Custom throwables
 
+Throwing custom throwables from business methods annotated with any of the Fault Tolerance interceptor bindings results in non-portable behavior.
+The term "custom throwable" means: any class that is a subtype of `Throwable`, but isn't a subtype of `Error` or `Exception`.
+This includes `Throwable` itself, and _doesn't_ include `Error` and `Exception`.
 
-
+[NOTE]
+Some Fault Tolerance annotations allow configuring a set of exception types for various purposes.
+For example, `@Retry` includes the `retryOn` attribute which configures the set of exceptions on which retry will be performed.
+In these cases, it is possible to specify `Throwable` and it is guaranteed to cover all ``Error``s and ``Exception``s.
