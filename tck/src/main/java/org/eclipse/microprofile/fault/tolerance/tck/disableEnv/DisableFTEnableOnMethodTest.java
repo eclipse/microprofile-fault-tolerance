@@ -43,7 +43,6 @@ import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
-import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.Assert;
@@ -51,7 +50,7 @@ import org.testng.annotations.Test;
 
 /**
  * Test that annotations can be disabled at the class level and then re-enabled at the method level.
- * 
+ *
  * @author <a href="mailto:antoine@sabot-durand.net">Antoine Sabot-Durand</a>
  * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  * @author <a href="mailto:anrouse@uk.ibm.com">Andrew Rouse</a>
@@ -69,14 +68,13 @@ public class DisableFTEnableOnMethodTest extends Arquillian {
                .enable(DisableAnnotationClient.class, "failWithTimeout", Timeout.class)
                .enable(DisableAnnotationClient.class, "asyncWaitThenReturn", Asynchronous.class)
                .enable(DisableAnnotationClient.class, "failRetryOnceThenFallback", Fallback.class)
-               .enable(DisableAnnotationClient.class, "waitWithBulkhead", Bulkhead.class);
-        
+               .enable(DisableAnnotationClient.class, "waitWithBulkhead", Bulkhead.class)
+               .disableGlobally();
+
         JavaArchive testJar = ShrinkWrap
             .create(JavaArchive.class, "ftDisableGloballyEnableMethod.jar")
             .addClasses(DisableAnnotationClient.class)
             .addPackage(Packages.UTILS)
-            .addAsManifestResource(new StringAsset("MP_Fault_Tolerance_NonFallback_Enabled=false"),
-                    "microprofile-config.properties")
             .addAsManifestResource(config, "microprofile-config.properties")
             .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
             .as(JavaArchive.class);
@@ -134,7 +132,7 @@ public class DisableFTEnableOnMethodTest extends Arquillian {
             result.get(); // Success or failure, don't leave the future lying around
         }
     }
-    
+
     /**
      * Test whether Bulkhead is enabled on {@code waitWithBulkhead()}
      *
@@ -144,15 +142,15 @@ public class DisableFTEnableOnMethodTest extends Arquillian {
     @Test
     public void testBulkhead() throws ExecutionException, InterruptedException {
         ExecutorService executor = Executors.newFixedThreadPool(10);
-        
+
         // Start two executions at once
         CompletableFuture<Void> waitingFuture = new CompletableFuture<>();
         Future<?> result1 = executor.submit(() -> disableClient.waitWithBulkhead(waitingFuture));
         Future<?> result2 = executor.submit(() -> disableClient.waitWithBulkhead(waitingFuture));
-        
+
         try {
             disableClient.waitForBulkheadExecutions(2);
-            
+
             // Try to start a third execution. This would throw a BulkheadException if Bulkhead is enabled.
             // Bulkhead is enabled on the method, so expect exception
             Assert.assertThrows(BulkheadException.class, () -> disableClient.waitWithBulkhead(CompletableFuture.completedFuture(null)));
@@ -160,7 +158,7 @@ public class DisableFTEnableOnMethodTest extends Arquillian {
         finally {
             // Clean up executor and first two executions
             executor.shutdown();
-            
+
             waitingFuture.complete(null);
             result1.get();
             result2.get();
