@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2017-2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -58,6 +58,15 @@ import javax.interceptor.InterceptorBinding;
  * </li>
  * </ul>
  * Circuit state transitions will reset the circuit breaker's records.
+ * <p>
+ * When a method returns a result, the following rules are applied to determine whether the result is a success or a failure:
+ * <ul>
+ * <li>If the method does not throw a {@link Throwable}, it is considered a success
+ * <li>Otherwise, if the thrown object is assignable to any value in the {@link #skipOn()} parameter, is is considered a success
+ * <li>Otherwise, if the thrown object is assignable to any value in the {@link #failOn()} parameter, it is considered a failure
+ * <li>Otherwise it is considered a success
+ * </ul>
+ * If a method throws a {@link Throwable} which is not an {@link Error} or {@link Exception}, non-portable behavior results.
  *
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  */
@@ -69,15 +78,28 @@ import javax.interceptor.InterceptorBinding;
 public @interface CircuitBreaker {
 
     /**
-     * Defines the failure criteria.
+     * The list of exception types which should be considered failures
      * <p>
-     * A method call will be considered a failure if it throws an exception and the type of that exception is assignable
-     * to any of the types listed in {@code failOn}.
+     * Note that if a method throws a {@link Throwable} which is not an {@link Error} or {@link Exception}, non-portable behavior
+     * results.
      *
      * @return the exception types which should be considered failures
      */
     @Nonbinding
     Class<? extends Throwable>[] failOn() default {Throwable.class};
+    
+    /**
+     * The list of exception types which should not be considered failures
+     * <p>
+     * This list takes priority over the types listed in {@link #failOn}
+     * <p>
+     * Note that if a method throws a {@link Throwable} which is not an {@link Error} or {@link Exception}, non-portable behavior results.
+     *
+     * @return the exception types which should not be considered failures
+     */
+    @Nonbinding
+    Class<? extends Throwable>[] skipOn() default {};
+
 
     /**
      * The delay after which an open circuit will transitions to half-open state.
