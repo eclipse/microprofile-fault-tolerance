@@ -28,14 +28,17 @@ import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 
+import javax.enterprise.context.RequestScoped;
+
 /**
  * Client bean with CircuitBreaker, Bulkhead and Asynchronous
  */
 @CircuitBreaker(requestVolumeThreshold = 3, failureRatio = 1.0, delay = 50000, failOn = TestException.class)
 @Bulkhead(value = 1, waitingTaskQueue = 1)
 @Asynchronous
+@RequestScoped
 public class CircuitBreakerClientWithAsyncBulkheadNoFail implements BulkheadTestBackend {
-    
+
     public Future test(BackendTestDelegate action) throws InterruptedException {
         return action.perform();
     }
