@@ -24,6 +24,8 @@ import java.sql.Connection;
 
 import javax.enterprise.context.RequestScoped;
 
+import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.exceptions.RetryChildException;
+import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.exceptions.RetryParentException;
 import org.eclipse.microprofile.faulttolerance.Retry;
 /**
  * A client to demonstrate the retryOn conditions
@@ -43,7 +45,29 @@ public class RetryClientRetryOn {
         counterForInvokingConnenectionService++;
         throw new RuntimeException("Connection failed");
     }
-    
+
+    /**
+     * Service that throws a child custom exception but in the retry on list is configured child's parent custom exception
+     * @return Connection
+     */
+    @Retry(retryOn = {RetryParentException.class})
+    public Connection serviceC() {
+        counterForInvokingConnenectionService++;
+        throw new RetryChildException("Connection failed");
+    }
+
+    /**
+     * Service that throws a child custom exception but in the retry on list is configured child's parent custom exception
+     * and is configured in the abort on list the child custom exception
+     * @return Connection
+     */
+    @Retry(retryOn = {RetryParentException.class}, abortOn = {RetryChildException.class})
+    public Connection serviceD() {
+        counterForInvokingConnenectionService++;
+        throw new RetryChildException("Connection failed");
+    }
+
+
     public int getRetryCountForConnectionService() {
         return counterForInvokingConnenectionService;
     }

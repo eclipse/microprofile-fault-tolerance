@@ -20,7 +20,7 @@
     <artifactId>microprofile-fault-tolerance-parent</artifactId>
     <version>2.1-SNAPSHOT</version>
     <packaging>pom</packaging>
-    
+
     <name>MicroProfile Fault Tolerance</name>
     <description>Eclipse MicroProfile Fault Tolerance Feature :: Parent POM</description>
 
@@ -100,11 +100,16 @@
                 <groupId>javax.enterprise</groupId>
                 <artifactId>cdi-api</artifactId>
                 <version>1.2</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.el</groupId>
+                        <artifactId>javax.el-api</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
         </dependencies>
     </dependencyManagement>
 
-   
     <build>
         <pluginManagement>
             <plugins>
@@ -203,7 +208,7 @@
 
         </plugins>
     </build>
-    
+
     <profiles>
         <profile>
             <id>release</id>

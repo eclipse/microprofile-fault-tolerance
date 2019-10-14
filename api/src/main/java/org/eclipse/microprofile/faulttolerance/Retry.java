@@ -30,9 +30,17 @@ import javax.enterprise.util.Nonbinding;
 import javax.interceptor.InterceptorBinding;
 
 /**
- * The Retry annotation to define the number of the retries and the fallback method on reaching the
- * retry counts. Any invalid config value causes 
+ * The Retry annotation to define the number of the retries. Any invalid config value causes
  * {@link org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException}.
+ * <p>
+ * When a method returns and the retry policy is present, the following rules are applied:
+ * <ol>
+ * <li>If the method returns normally (doesn't throw), the result is simply returned.
+ * <li>Otherwise, if the thrown object is assignable to any value in the {@link #abortOn()} parameter, the thrown object is rethrown.
+ * <li>Otherwise, if the thrown object is assignable to any value in the {@link #retryOn()} parameter, the method call is retried.
+ * <li>Otherwise the thrown object is rethrown.
+ * </ol>
+ * If a method throws a {@link Throwable} which is not an {@link Error} or {@link Exception}, non-portable behavior results.
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  * @author John Ament
  */
@@ -101,17 +109,23 @@ public @interface Retry {
 
 
     /**
+     * The list of exception types which should trigger a retry.
+     * <p>
+     * Note that if a method throws a {@link Throwable} which is not an {@link Error} or {@link Exception}, non-portable behavior results.
      *
-     * @return Specify the failure to retry on. Only a type assignable from {@link java.lang.Error} or {@link java.lang.Exception} can be specified.
-     * Specifying a custom java.lang.Throwable will be ignored.
+     * @return the exception types on which to retry
      */
     @Nonbinding
     Class<? extends Throwable>[] retryOn() default { Exception.class };
 
     /**
-     * 
-     * @return Specify the failure to abort on. Only a type assignable from {@link java.lang.Error} or {@link java.lang.Exception} can be specified.
-     * Specifying a custom java.lang.Throwable will be ignored.
+     * The list of exception types which should <i>not</i> trigger a retry.
+     * <p>
+     * This list takes priority over the types listed in {@link #retryOn()}.
+     * <p>
+     * Note that if a method throws a {@link Throwable} which is not an {@link Error} or {@link Exception}, non-portable behavior results.
+     *
+     * @return the exception types on which to abort (not retry)
      */
     @Nonbinding
     Class<? extends Throwable>[] abortOn() default {};

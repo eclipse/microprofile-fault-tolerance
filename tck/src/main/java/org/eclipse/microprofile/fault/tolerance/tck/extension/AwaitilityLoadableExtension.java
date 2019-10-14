@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -18,19 +18,22 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans;
+package org.eclipse.microprofile.fault.tolerance.tck.extension;
 
-import org.eclipse.microprofile.faulttolerance.Fallback;
+import org.jboss.arquillian.container.test.spi.client.deployment.AuxiliaryArchiveAppender;
+import org.jboss.arquillian.core.spi.LoadableExtension;
 
-import javax.enterprise.inject.Vetoed;
+/**
+ * Extension to register the {@link AwaitilityArchiveAppender}
+ */
+public class AwaitilityLoadableExtension implements LoadableExtension {
 
-// bean is vetoed to avoid accidentally picking it up and execution validation
-@Vetoed
-public class FallbackMethodSubclassBeanB {
-
-    @Fallback(fallbackMethod = "fallback")
-    public String method(int a, Long b) {
-        throw new RuntimeException("test");
+    /* (non-Javadoc)
+     * @see org.jboss.arquillian.core.spi.LoadableExtension#register(org.jboss.arquillian.core.spi.LoadableExtension.ExtensionBuilder)
+     */
+    @Override
+    public void register(ExtensionBuilder builder) {
+        builder.service(AuxiliaryArchiveAppender.class, AwaitilityArchiveAppender.class);
     }
 
 }

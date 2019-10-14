@@ -24,6 +24,7 @@
 `Timeout` prevents from the execution from waiting forever.
 It is recommended that a microservice invocation should have timeout associated with.
 
+[[timeout-usage]]
 === Timeout Usage
 
 A method or a class can be annotated with `@Timeout`, which means the method or the methods under the class will have Timeout policy applied.

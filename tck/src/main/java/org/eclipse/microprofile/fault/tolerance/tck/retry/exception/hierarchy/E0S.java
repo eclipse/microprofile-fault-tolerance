@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -17,20 +17,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
+package org.eclipse.microprofile.fault.tolerance.tck.retry.exception.hierarchy;
 
-package org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans;
-
-import org.eclipse.microprofile.faulttolerance.Fallback;
-
-import javax.enterprise.inject.Vetoed;
-
-// bean is vetoed to avoid accidentally picking it up and execution validation
-@Vetoed
-public class FallbackMethodSubclassBeanB {
-
-    @Fallback(fallbackMethod = "fallback")
-    public String method(int a, Long b) {
-        throw new RuntimeException("test");
-    }
-
+/**
+ * Subclass of E0 that isn't subclass of E1.
+ */
+public class E0S extends E0 {
 }

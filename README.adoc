@@ -134,3 +134,7 @@ n/a
 ## Alternatives considered
 
 n/a
+
+## Contributing
+
+Do you want to contribute to this project? link:CONTRIBUTING.adoc[Find out how you can help here].
