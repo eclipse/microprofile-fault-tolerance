@@ -34,7 +34,7 @@ public class Utils {
 
     /**
      * Get the Thread ID
-     * 
+     *
      * @return thread id
      */
     private static long tid() {
@@ -49,11 +49,11 @@ public class Utils {
      * If one or more of the results throws an ExecutionException, the first
      * exception thrown will be propagated, after waiting for all results to
      * complete.
-     * 
+     *
      * @param number number of futures in results
      * @param results futures of background processes
      */
-    static void handleResults(int number, Future[] results) {
+    public static void handleResults(int number, Future[] results) {
         // Wait for all the backends to finish
         for (int i = 0; i < number; i++) {
             try {
@@ -72,7 +72,7 @@ public class Utils {
      * Run a number of Callable's (usually Asynch's) in a loop on one thread.
      * Here we do not check that amount that were successfully through the
      * Bulkhead
-     * 
+     *
      * @param iterations number of iterations
      * @param test test instance
      * @param maxSimultaneousWorkers simultaneous workers
@@ -95,14 +95,14 @@ public class Utils {
         catch (InterruptedException e1) {
             Assert.fail("Unexpected interruption", e1);
         }
-        
+
         return results;
     }
 
     /**
      * A simple local logger. Messages are logged with a prefix of the threadId
      * and the current time.
-     * 
+     *
      * @param s - message
      */
     public static void log(String s) {
@@ -111,7 +111,7 @@ public class Utils {
 
     /**
      * Get the time in simple format
-     * 
+     *
      * @return
      */
     private static String hms() {

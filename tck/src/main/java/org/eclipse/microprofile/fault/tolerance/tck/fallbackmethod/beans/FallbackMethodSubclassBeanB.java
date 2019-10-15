@@ -22,11 +22,15 @@ package org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans;
 
 import org.eclipse.microprofile.faulttolerance.Fallback;
 
+import javax.enterprise.inject.Vetoed;
+
+// bean is vetoed to avoid accidentally picking it up and execution validation
+@Vetoed
 public class FallbackMethodSubclassBeanB {
 
     @Fallback(fallbackMethod = "fallback")
     public String method(int a, Long b) {
         throw new RuntimeException("test");
     }
-    
+
 }
