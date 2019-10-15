@@ -37,13 +37,6 @@ public class ConfigClient {
 
     @Retry(maxRetries = 5)
     public Connection serviceA() {
-        try {
-            Thread.sleep(100);
-        }
-        catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
         return connectionService();
     }
     
@@ -56,7 +49,8 @@ public class ConfigClient {
     @Retry(maxRetries = 90, maxDuration= 3000)
     public void serviceC() {
         writingService();
-    }    
+    }
+    
     private Connection connectionService() {
         counterForInvokingConnenectionService++;
         throw new RuntimeException("Connection failed");
