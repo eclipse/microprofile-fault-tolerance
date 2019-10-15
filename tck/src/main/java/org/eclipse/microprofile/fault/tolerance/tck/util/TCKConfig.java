@@ -61,12 +61,8 @@ public class TCKConfig {
         return String.valueOf(getTimeoutInMillis(DEFAULT_TIMEOUT));
     }
 
-    public String getTimeoutInStr(final int originalInMillis) {
+    public String getTimeoutInStr(final long originalInMillis) {
         return String.valueOf(getTimeoutInMillis(originalInMillis));
-    }
-
-    public long getTimeoutInMillis(final int originalInMillis) {
-        return getTimeoutInMillis(Long.valueOf(originalInMillis));
     }
 
     public long getTimeoutInMillis(final long originalInMillis) {
