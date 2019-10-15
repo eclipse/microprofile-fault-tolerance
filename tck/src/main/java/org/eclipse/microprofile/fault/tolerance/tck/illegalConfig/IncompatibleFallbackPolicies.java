@@ -34,7 +34,7 @@ import org.testng.annotations.Test;
 public class IncompatibleFallbackPolicies extends Arquillian {
     private
     @Inject
-    FallbackClient fallbackClient;
+    FallbackClientWithBothFallbacks fallbackClient;
 
     @Deployment
     @ShouldThrowException(value = FaultToleranceDefinitionException.class)
