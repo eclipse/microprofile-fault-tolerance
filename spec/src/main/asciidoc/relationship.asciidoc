@@ -23,7 +23,7 @@
 
 This specification defines a set of annotations to be used by classes or methods.
 The annotations are interceptor bindings.
-Therefore, this specification depends on the Java Interceptors and Contexts and Dependency Injection specifications define in Java EE platform.
+Therefore, this specification depends on the Java Interceptors and Contexts and Dependency Injection specifications defined in Java EE platform.
 
 
 === Relationship to Contexts and Dependency Injection
