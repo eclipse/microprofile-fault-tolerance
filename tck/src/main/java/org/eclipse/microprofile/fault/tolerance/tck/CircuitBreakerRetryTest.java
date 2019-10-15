@@ -22,6 +22,7 @@ package org.eclipse.microprofile.fault.tolerance.tck;
 import org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver.CircuitBreakerClassLevelClientWithRetry;
 import org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver.CircuitBreakerClientWithRetry;
 import org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver.CircuitBreakerClientWithRetryAsync;
+import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
 import org.eclipse.microprofile.fault.tolerance.tck.util.DurationMatcher;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
@@ -65,12 +66,24 @@ public class CircuitBreakerRetryTest extends Arquillian {
 
     @Deployment
     public static WebArchive deploy() {
+        
+        ConfigAnnotationAsset config = new ConfigAnnotationAsset()
+                .autoscaleMethod(CircuitBreakerClientWithRetry.class, "serviceC")
+                .autoscaleMethod(CircuitBreakerClientWithRetry.class, "serviceWithRetryOnCbOpen")
+                .autoscaleMethod(CircuitBreakerClientWithRetry.class, "serviceWithRetryOnTimeout")
+                .autoscaleMethod(CircuitBreakerClientWithRetry.class, "serviceWithRetryFailOnCbOpen")
+                .autoscaleMethod(CircuitBreakerClientWithRetryAsync.class, "serviceC")
+                .autoscaleMethod(CircuitBreakerClientWithRetryAsync.class, "serviceWithRetryOnCbOpen")
+                .autoscaleMethod(CircuitBreakerClientWithRetryAsync.class, "serviceWithRetryOnTimeout")
+                .autoscaleMethod(CircuitBreakerClientWithRetryAsync.class, "serviceWithRetryFailOnCbOpen");
+        
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftCircuitBreakerRetry.jar")
                         .addClasses(CircuitBreakerClientWithRetry.class,
                                     CircuitBreakerClassLevelClientWithRetry.class,
                                     CircuitBreakerClientWithRetryAsync.class)
                         .addPackage(Packages.UTILS)
                         .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
+                        .addAsResource(config, "META-INF/microprofile-config.properties")
                         .as(JavaArchive.class);
 
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftCircuitBreakerRetry.war")
@@ -105,7 +118,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
         catch (Exception ex) {
             // Not Expected
             invokeCounter = clientForCBWithRetry.getCounterForInvokingServiceA();
-            Assert.fail("serviceA should retry or throw a CircuitBreakerOpenException in testCircuitOpenWithMoreRetries on iteration "
+            Assert.fail("serviceA should retry or throw a CircuitthenBreakerOpenException in testCircuitOpenWithMoreRetries on iteration "
                             + invokeCounter);
         }
 
@@ -239,7 +252,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
     public void testCircuitOpenWithMultiTimeouts() {
         int invokeCounter = 0;
         try {
-            clientForCBWithRetry.serviceC(1000);
+            clientForCBWithRetry.serviceC();
 
             // serviceC should retry until the CB threshold is reached. At that point a CircuitBreakerOpenException
             // should be thrown. Assert if this does not happen.
@@ -415,7 +428,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
         try {
             result.get(TCKConfig.getConfig().getTimeoutInMillis(5000), TimeUnit.MILLISECONDS);
 
-            // serviceB should retry until the CB threshold is reached. At that point a CircuitBreakerOpenException
+            // serviceB should retry until the Retry maxRetries is reached. At that point a TestException
             // should be thrown. Assert if this does not happen.
             invokeCounter = clientForCBWithRetryAsync.getCounterForInvokingServiceB();
             Assert.fail("serviceB should retry in testCircuitOpenWithFewRetries on iteration "
@@ -451,9 +464,9 @@ public class CircuitBreakerRetryTest extends Arquillian {
     @Test
     public void testCircuitOpenWithMultiTimeoutsAsync() {
         int invokeCounter = 0;
-        Future<Connection> result = clientForCBWithRetryAsync.serviceC(TCKConfig.getConfig().getTimeoutInMillis(1000));
+        Future<Connection> result = clientForCBWithRetryAsync.serviceC();
         try {
-            result.get(TCKConfig.getConfig().getTimeoutInMillis(10000), TimeUnit.MILLISECONDS); // Expected to finish after about 2 seconds
+            result.get(TCKConfig.getConfig().getTimeoutInMillis(10000), TimeUnit.MILLISECONDS); // Expected to finish after < 1 second
 
             // serviceC should retry until the CB threshold is reached. At that point a CircuitBreakerOpenException
             // should be thrown. Assert if this does not happen.
@@ -544,8 +557,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
         }
 
         // Circuit is now open for 1 second
-        // Our next call should cause a CircuitBreakerOpenException which should then be retried
-        // The retry delay is 100ms, maxRetries is 20 so we expect a successful call after around 1 second when the circuit closes
+        // Our next call should cause a CircuitBreakerOpenException which should not be retried
         long startTime = System.nanoTime();
         Future<String> result = clientForCBWithRetryAsync.serviceWithRetryOnTimeout(false);
         Exceptions.expect(CircuitBreakerOpenException.class, result);
@@ -571,8 +583,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
         }
 
         // Circuit is now open for 1 second
-        // Our next call should cause a CircuitBreakerOpenException which should then be retried
-        // The retry delay is 100ms, maxRetries is 20 so we expect a successful call after around 1 second when the circuit closes
+        // Our next call should cause a CircuitBreakerOpenException which should not be retried
         long startTime = System.nanoTime();
         Future<String> result = clientForCBWithRetryAsync.serviceWithRetryFailOnCbOpen(false);
         Exceptions.expect(CircuitBreakerOpenException.class, result);
