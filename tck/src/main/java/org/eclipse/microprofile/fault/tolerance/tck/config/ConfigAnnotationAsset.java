@@ -18,14 +18,24 @@ package org.eclipse.microprofile.fault.tolerance.tck.config;/*
  * limitations under the License.
  *******************************************************************************/
 
-import org.jboss.shrinkwrap.api.asset.Asset;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
+
+import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
+import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
+import org.eclipse.microprofile.faulttolerance.Retry;
+import org.eclipse.microprofile.faulttolerance.Timeout;
+import org.jboss.shrinkwrap.api.asset.Asset;
 
 public class ConfigAnnotationAsset implements Asset {
 
@@ -42,6 +52,66 @@ public class ConfigAnnotationAsset implements Asset {
             // Shouldn't happen since we're only using in memory streams
             throw new RuntimeException("Unexpected error saving properties", e);
         }
+    }
+    
+    /**
+     * Generate config which scales the timeout values of all annotations on a single method
+     * <p>
+     * The following values are scaled using the scale factor in TCKConfig:
+     * <ul>
+     * <li>Retry.maxDuration</li>
+     * <li>Retry.delay</li>
+     * <li>Retry.jitter</li>
+     * <li>Timeout.value</li>
+     * <li>CircuitBreaker.delay</li>
+     * </ul>
+     */
+    public ConfigAnnotationAsset autoscaleMethod(Class<?> clazz, final String method) {
+        List<Method> methods = Arrays.stream(clazz.getMethods())
+            .filter(m -> m.getName().equals(method))
+            .collect(Collectors.toList());
+        
+        if (methods.size() == 0) {
+            throw new RuntimeException("No such method " + method + " on class " + clazz.getName());
+        }
+        
+        if (methods.size() > 1) {
+            throw new RuntimeException("More than one method named " + method + " on class " + clazz.getName());
+        }
+        
+        TCKConfig config = TCKConfig.getConfig();
+        
+        Method m = methods.get(0);
+        Retry retry = m.getAnnotation(Retry.class);
+        if (retry != null) {
+            Duration maxDuration = Duration.of(retry.maxDuration(), retry.durationUnit());
+            props.put(keyFor(clazz, method, Retry.class, "maxDuration"), config.getTimeoutInStr(maxDuration.toMillis()));
+            props.put(keyFor(clazz, method, Retry.class, "maxDurationUnit"), ChronoUnit.MILLIS.name());
+            
+            Duration delay = Duration.of(retry.delay(), retry.delayUnit());
+            props.put(keyFor(clazz, method, Retry.class, "delay"), config.getTimeoutInStr(delay.toMillis()));
+            props.put(keyFor(clazz, method, Retry.class, "delayUnit"), ChronoUnit.MILLIS.name());
+            
+            Duration jitter = Duration.of(retry.jitter(), retry.jitterDelayUnit());
+            props.put(keyFor(clazz, method, Retry.class, "jitter"), config.getTimeoutInStr(jitter.toMillis()));
+            props.put(keyFor(clazz, method, Retry.class, "jitterDelayUnit"), ChronoUnit.MILLIS.name());
+        }
+        
+        Timeout timeout = m.getAnnotation(Timeout.class);
+        if (timeout != null) {
+            Duration maxDuration = Duration.of(timeout.value(), timeout.unit());
+            props.put(keyFor(clazz, method, Timeout.class, "value"), config.getTimeoutInStr(maxDuration.toMillis()));
+            props.put(keyFor(clazz, method, Timeout.class, "unit"), ChronoUnit.MILLIS.name());
+        }
+        
+        CircuitBreaker cb = m.getAnnotation(CircuitBreaker.class);
+        if (cb != null) {
+            Duration delay = Duration.of(cb.delay(), cb.delayUnit());
+            props.put(keyFor(clazz, method, CircuitBreaker.class, "delay"), config.getTimeoutInStr(delay.toMillis()));
+            props.put(keyFor(clazz, method, CircuitBreaker.class, "delayUnit"), ChronoUnit.MILLIS.name());
+        }
+        
+        return this;
     }
 
     public ConfigAnnotationAsset setValue(final Class<?> clazz, final String method,
