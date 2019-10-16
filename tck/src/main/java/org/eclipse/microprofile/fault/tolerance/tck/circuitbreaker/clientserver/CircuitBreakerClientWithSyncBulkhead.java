@@ -21,19 +21,19 @@ package org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver
 
 import java.util.concurrent.Future;
 
+import javax.enterprise.context.Dependent;
+
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BackendTestDelegate;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadTestBackend;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
-
-import javax.enterprise.context.RequestScoped;
 
 /**
  * Client bean with CircuitBreaker and Bulkhead
  */
 @CircuitBreaker(requestVolumeThreshold = 3, failureRatio = 1.0)
 @Bulkhead(value = 1, waitingTaskQueue = 1)
-@RequestScoped
+@Dependent
 public class CircuitBreakerClientWithSyncBulkhead implements BulkheadTestBackend {
 
     public Future test(BackendTestDelegate action) throws InterruptedException {
