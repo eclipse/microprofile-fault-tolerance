@@ -23,6 +23,7 @@ import org.eclipse.microprofile.faulttolerance.Retry;
 
 import javax.enterprise.context.RequestScoped;
 import java.sql.Connection;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +35,7 @@ import java.util.List;
 @RequestScoped
 public class RetryClientWithNoDelayAndJitter {
     private int counterForInvokingConnectionService = 0;
-    private long timestampForConnectionService = System.currentTimeMillis();
+    private long timestampForConnectionService = 0L;
     private final List<Long> delayTimes = new ArrayList<>();
 
 
@@ -48,21 +49,15 @@ public class RetryClientWithNoDelayAndJitter {
     //simulate a backend service
     private Connection connectionService() {
         // the time delay between each invocation should be 0-400ms
-        long currentTime = System.currentTimeMillis();
-        delayTimes.add(currentTime - timestampForConnectionService);
+        long currentTime = System.nanoTime();
+        if (timestampForConnectionService != 0) {
+            Duration delayDuration = Duration.ofNanos(currentTime - timestampForConnectionService);
+            delayTimes.add(delayDuration.toMillis());
+        }
         timestampForConnectionService = currentTime;
 
         counterForInvokingConnectionService++;
         throw new RuntimeException("Connection failed");
-    }
-
-    public boolean isDelayInRange() {
-        for (long delayTime : delayTimes) {
-            if (delayTime > 500) { //Expect 400ms delay + allow 100ms margin for processing the actual method
-                return false;
-            }
-        }
-        return true;
     }
 
     public int getRetryCountForConnectionService() {
