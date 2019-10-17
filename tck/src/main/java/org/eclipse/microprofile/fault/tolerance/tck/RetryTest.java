@@ -157,9 +157,6 @@ public class RetryTest extends Arquillian {
         Assert.assertTrue(retryCountForConnectionService > 8 && retryCountForConnectionService < 100,
             "The max number of execution should be between 8 and 100 but it was " + retryCountForConnectionService +
                 ". Too many retries mean jitter is not being applied.");
-
-        Assert.assertTrue(retryClientWithNoDelayAndJitter.isDelayInRange(),
-            "The delay between each retry should be 0-400ms");
     }
 
     /**
