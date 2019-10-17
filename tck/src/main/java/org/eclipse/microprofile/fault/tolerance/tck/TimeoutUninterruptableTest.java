@@ -40,8 +40,10 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
 
+import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
 import org.eclipse.microprofile.fault.tolerance.tck.timeout.clientserver.UninterruptableTimeoutClient;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
 import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
 import org.eclipse.microprofile.faulttolerance.exceptions.TimeoutException;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -64,10 +66,20 @@ public class TimeoutUninterruptableTest extends Arquillian {
 
     @Deployment
     public static WebArchive deployment() {
+        ConfigAnnotationAsset timeoutConfig = new ConfigAnnotationAsset()
+                .autoscaleMethod(UninterruptableTimeoutClient.class, "serviceTimeout")
+                .autoscaleMethod(UninterruptableTimeoutClient.class, "serviceTimeoutAsync")
+                .autoscaleMethod(UninterruptableTimeoutClient.class, "serviceTimeoutAsyncCS")
+                .autoscaleMethod(UninterruptableTimeoutClient.class, "serviceTimeoutAsyncBulkhead")
+                .autoscaleMethod(UninterruptableTimeoutClient.class, "serviceTimeoutAsyncBulkheadQueueTimed")
+                .autoscaleMethod(UninterruptableTimeoutClient.class, "serviceTimeoutAsyncRetry")
+                .autoscaleMethod(UninterruptableTimeoutClient.class, "serviceTimeoutAsyncFallback");
+                
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftTimeoutUninterruptable.jar")
                                         .addClass(UninterruptableTimeoutClient.class)
                                         .addPackage(Packages.UTILS)
-                                        .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
+                                        .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
+                                        .addAsManifestResource(timeoutConfig, "microprofile-config.properties");
 
         WebArchive testWar = ShrinkWrap.create(WebArchive.class, "ftTimeoutUninterruptable.war")
                                        .addAsLibrary(testJar);
@@ -79,19 +91,20 @@ public class TimeoutUninterruptableTest extends Arquillian {
 
     @Inject
     private UninterruptableTimeoutClient client;
+    
+    private final TCKConfig config = TCKConfig.getConfig();
 
     @Test
     public void testTimeout() {
         long startTime = System.nanoTime();
-        expectTimeout(() -> client.serviceTimeout(1000));
+        expectTimeout(() -> client.serviceTimeout(config.getTimeoutInMillis(1000)));
         long endTime = System.nanoTime();
         
         // Interrupt flag should not be set
         assertFalse(Thread.interrupted(), "Thread was still interrupted when method returned");
 
-        // Expect that execution will take at least the full 1000ms because the method does not respond to being
-        // interrupted
-        assertThat("Execution time (ns)", endTime - startTime, greaterThanOrEqualTo(Duration.ofMillis(1000).toNanos()));
+        // Expect that execution will take the full 1000ms because the method does not respond to being interrupted
+        assertThat("Execution time", Duration.ofNanos(endTime - startTime), greaterThanOrEqualTo(config.getTimeoutInDuration(800)));
     }
 
     @Test
@@ -103,15 +116,15 @@ public class TimeoutUninterruptableTest extends Arquillian {
         Future<Void> result = client.serviceTimeoutAsync(waitingFuture, completionFuture);
         expect(TimeoutException.class, result);
         long resultTime = System.nanoTime();
-
+        
         // We should get the TimeoutException after 500ms, allow up to 1500ms
-        assertThat("Time for result to be complete", Duration.ofNanos(resultTime - startTime), lessThan(Duration.ofMillis(1500)));
+        assertThat("Time for result to be complete", Duration.ofNanos(resultTime - startTime), lessThan(config.getTimeoutInDuration(1500)));
 
         assertFalse(completionFuture.isDone(), "Method should still be running");
 
         // If we release the waitingFuture, the method should quickly complete
         waitingFuture.complete(null);
-        completionFuture.get(2, TimeUnit.SECONDS);
+        completionFuture.get(config.getTimeoutInMillis(5000), TimeUnit.MILLISECONDS);
     }
     
     @Test
@@ -121,7 +134,7 @@ public class TimeoutUninterruptableTest extends Arquillian {
         AtomicLong endTime = new AtomicLong();
         
         long startTime = System.nanoTime();
-        client.serviceTimeoutAsyncCS(4000)
+        client.serviceTimeoutAsyncCS(config.getTimeoutInMillis(4000))
               .thenRun(() -> completionFuture.complete(null))
               .exceptionally((e) -> {
                   completionFuture.completeExceptionally(e);
@@ -136,7 +149,7 @@ public class TimeoutUninterruptableTest extends Arquillian {
         assertFalse(wasInterrupted.get(), "Thread was still interrupted when thenRun steps were run");
         
         // Expect that the method will timeout after 500ms, allow up to 1500ms
-        assertThat("Execution time", Duration.ofNanos(endTime.get() - startTime), lessThan(Duration.ofMillis(1500)));
+        assertThat("Execution time", Duration.ofNanos(endTime.get() - startTime), lessThan(config.getTimeoutInDuration(1500)));
 
     }
 
@@ -150,7 +163,7 @@ public class TimeoutUninterruptableTest extends Arquillian {
         long resultTime = System.nanoTime();
 
         // Should get the TimeoutException after 500ms, allow up to 1500ms
-        assertThat("Time for result to be complete", Duration.ofNanos(resultTime - startTime), lessThan(Duration.ofMillis(1500)));
+        assertThat("Time for result to be complete", Duration.ofNanos(resultTime - startTime), lessThan(config.getTimeoutInDuration(1500)));
 
         // Should record one execution
         assertEquals(client.getTimeoutAsyncBulkheadCounter(), 1, "Execution count after first call");
@@ -162,14 +175,14 @@ public class TimeoutUninterruptableTest extends Arquillian {
         resultTime = System.nanoTime();
 
         // Should get the TimeoutException after 500ms, allow up to 1500ms
-        assertThat("Time for result to be complete", Duration.ofNanos(resultTime - startTime), lessThan(Duration.ofMillis(1500)));
+        assertThat("Time for result to be complete", Duration.ofNanos(resultTime - startTime), lessThan(config.getTimeoutInDuration(1500)));
 
         // This time though, we shouldn't record a second execution since the request timed out before it got to start running
         assertEquals(client.getTimeoutAsyncBulkheadCounter(), 1, "Execution count after second call");
 
         // Make two more calls with a short gap
         Future<Void> resultC = client.serviceTimeoutAsyncBulkhead(waitingFuture);
-        Thread.sleep(100);
+        Thread.sleep(config.getTimeoutInMillis(100));
         Future<Void> resultD = client.serviceTimeoutAsyncBulkhead(waitingFuture);
 
         // The first call should be queued and eventually time out
@@ -182,7 +195,7 @@ public class TimeoutUninterruptableTest extends Arquillian {
         
         // Complete the waiting future and check that, after a short wait, we have no additional executions
         waitingFuture.complete(null);
-        Thread.sleep(300);
+        Thread.sleep(config.getTimeoutInMillis(300));
         assertEquals(client.getTimeoutAsyncBulkheadCounter(), 1, "Execution count after completing all tasks");
     }
     
@@ -197,12 +210,12 @@ public class TimeoutUninterruptableTest extends Arquillian {
         CompletableFuture<Void> waitingFutureB = newWaitingFuture();
         
         client.serviceTimeoutAsyncBulkheadQueueTimed(waitingFutureA);
-        Thread.sleep(100);
+        Thread.sleep(config.getTimeoutInMillis(100));
         
         long startTime = System.nanoTime();
         Future<Void> resultB = client.serviceTimeoutAsyncBulkheadQueueTimed(waitingFutureB);
         
-        Thread.sleep(300);
+        Thread.sleep(config.getTimeoutInMillis(300));
         
         // Allow call A to finish, this should allow call B to start
         waitingFutureA.complete(null);
@@ -213,7 +226,7 @@ public class TimeoutUninterruptableTest extends Arquillian {
         
         // B should time out 500ms after it was submitted, even though it spent 300ms queued
         // Allow up to 750ms. Bound is tighter here as more than 800ms would represent incorrect behavior
-        assertThat("Time taken for call B to timeout", Duration.ofNanos(endTime - startTime), lessThan(Duration.ofMillis(750)));
+        assertThat("Time taken for call B to timeout", Duration.ofNanos(endTime - startTime), lessThan(config.getTimeoutInDuration(750)));
     }
 
     @Test
@@ -227,7 +240,7 @@ public class TimeoutUninterruptableTest extends Arquillian {
         long resultTime = System.nanoTime();
 
         // Should get TimeoutException after 1500ms (3 attempts * 500ms), allow up to 3000ms
-        assertThat("Time for result to complete", Duration.ofNanos(resultTime - startTime), lessThan(Duration.ofMillis(3000)));
+        assertThat("Time for result to complete", Duration.ofNanos(resultTime - startTime), lessThan(config.getTimeoutInDuration(3000)));
         
         // Expect all executions to be run
         assertEquals(client.getTimeoutAsyncRetryCounter(), 3, "Execution count after one call");
@@ -247,7 +260,7 @@ public class TimeoutUninterruptableTest extends Arquillian {
         
         try {
             // Expect TimeoutException causing fallback to be invoked and the result returned
-            assertEquals(resultFuture.get(1, TimeUnit.MINUTES), "FALLBACK");
+            assertEquals(resultFuture.get(config.getTimeoutInMillis(10000), TimeUnit.MILLISECONDS), "FALLBACK");
         }
         catch (java.util.concurrent.TimeoutException e) {
             fail("Method did not complete", e);
@@ -259,7 +272,7 @@ public class TimeoutUninterruptableTest extends Arquillian {
         long resultTime = System.nanoTime();
         
         // Should get the TimeoutException + Fallback after 500ms, allow up to 1500ms
-        assertThat("Time for result to be complete", Duration.ofNanos(resultTime - startTime), lessThan(Duration.ofMillis(1500)));
+        assertThat("Time for result to be complete", Duration.ofNanos(resultTime - startTime), lessThan(config.getTimeoutInDuration(1500)));
     }
 
     /**
