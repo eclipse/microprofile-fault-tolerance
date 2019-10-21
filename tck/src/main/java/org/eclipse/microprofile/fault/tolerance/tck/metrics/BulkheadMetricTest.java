@@ -19,6 +19,7 @@
 package org.eclipse.microprofile.fault.tolerance.tck.metrics;
 
 import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricComparator.approxMillis;
+import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricComparator.lessThanMillis;
 import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expectBulkheadException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -34,6 +35,7 @@ import javax.inject.Inject;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricGetter;
 import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncCaller;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
 import org.eclipse.microprofile.metrics.Histogram;
 import org.eclipse.microprofile.metrics.Snapshot;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -60,6 +62,8 @@ public class BulkheadMetricTest extends Arquillian {
     
     @Inject private BulkheadMetricBean bulkheadBean;
     @Inject private AsyncCaller async;
+    
+    private TCKConfig config = TCKConfig.getConfig();
     
     private List<CompletableFuture<Void>> waitingFutures = new ArrayList<>();
     
@@ -162,7 +166,7 @@ public class BulkheadMetricTest extends Arquillian {
 
         expectBulkheadException(f3);
         
-        Thread.sleep(1000);
+        Thread.sleep(config.getTimeoutInMillis(1000));
         
         waitingFuture.complete(null);
         f1.get();
@@ -181,11 +185,10 @@ public class BulkheadMetricTest extends Arquillian {
         }
         
         // Should have ~0ms * 10 and ~1000ms * 2
-        // Note approxMillis(0) allows up to 100ms
         snap = executionTimes.getSnapshot();
         assertThat("histogram count", executionTimes.getCount(), is(12L));
-        assertThat("median", snap.getMedian(), approxMillis(0));
-        assertThat("75th percentile", snap.get75thPercentile(), approxMillis(0));
+        assertThat("median", snap.getMedian(), lessThanMillis(500));
+        assertThat("75th percentile", snap.get75thPercentile(), lessThanMillis(500));
         assertThat("99th percentile", snap.get99thPercentile(), approxMillis(1000));
     }
     
@@ -203,14 +206,14 @@ public class BulkheadMetricTest extends Arquillian {
 
         Future<?> f3 = bulkheadBean.waitForAsync(waitingFuture);
         Future<?> f4 = bulkheadBean.waitForAsync(waitingFuture);
-        waitForQueuePopulation(m, 2, 2000);
+        waitForQueuePopulation(m, 2, config.getTimeoutInMillis(2000));
         
         expectBulkheadException(bulkheadBean.waitForAsync(waitingFuture));
 
         assertThat("concurrent executions", m.getBulkheadConcurrentExecutions().get(), is(2L));
         assertThat("queue population", m.getBulkheadQueuePopulation().get(), is(2L));
         
-        Thread.sleep(2000);
+        Thread.sleep(config.getTimeoutInMillis(2000));
         waitingFuture.complete(null);
         long durationms = (System.nanoTime() - startTime) / 1_000_000;
         
@@ -236,7 +239,7 @@ public class BulkheadMetricTest extends Arquillian {
 
     private void waitForQueuePopulation(MetricGetter m,
                                         int expectedQueuePopulation,
-                                        int timeoutInMs) throws InterruptedException {
+                                        long timeoutInMs) throws InterruptedException {
         long timeoutTime = System.currentTimeMillis() + timeoutInMs;
         while (System.currentTimeMillis() < timeoutTime) {
             if (m.getBulkheadQueuePopulation().orElse(0L) == expectedQueuePopulation) {
