@@ -79,12 +79,12 @@ public class TimeoutMetricTest extends Arquillian {
     public void testTimeoutHistogram() {
         MetricGetter m = new MetricGetter(TimeoutMetricBean.class, "histogramTestWorkForMillis");
         
-        timeoutBean.histogramTestWorkForMillis(getConfig().getTimeoutInMillis(100));
-        timeoutBean.histogramTestWorkForMillis(getConfig().getTimeoutInMillis(100));
-        timeoutBean.histogramTestWorkForMillis(getConfig().getTimeoutInMillis(100));
-        timeoutBean.histogramTestWorkForMillis(getConfig().getTimeoutInMillis(100));
-        timeoutBean.histogramTestWorkForMillis(getConfig().getTimeoutInMillis(100)); // 50th Percentile
-        timeoutBean.histogramTestWorkForMillis(getConfig().getTimeoutInMillis(100));
+        timeoutBean.histogramTestWorkForMillis(getConfig().getTimeoutInMillis(300));
+        timeoutBean.histogramTestWorkForMillis(getConfig().getTimeoutInMillis(300));
+        timeoutBean.histogramTestWorkForMillis(getConfig().getTimeoutInMillis(300));
+        timeoutBean.histogramTestWorkForMillis(getConfig().getTimeoutInMillis(300));
+        timeoutBean.histogramTestWorkForMillis(getConfig().getTimeoutInMillis(300)); // 50th Percentile
+        timeoutBean.histogramTestWorkForMillis(getConfig().getTimeoutInMillis(300));
         timeoutBean.histogramTestWorkForMillis(getConfig().getTimeoutInMillis(1000));
         timeoutBean.histogramTestWorkForMillis(getConfig().getTimeoutInMillis(1000)); // 75th Percentile
         expectTimeout(() -> timeoutBean.histogramTestWorkForMillis(getConfig().getTimeoutInMillis(5000))); // Will timeout after 2000
@@ -94,7 +94,7 @@ public class TimeoutMetricTest extends Arquillian {
         Snapshot snapshot = histogram.getSnapshot();
         
         assertThat("Histogram count", histogram.getCount(), is(10L));
-        assertThat("Median", snapshot.getMedian(), MetricComparator.approxMillis(100));
+        assertThat("Median", snapshot.getMedian(), MetricComparator.approxMillis(300));
         assertThat("75th percentile", snapshot.get75thPercentile(), MetricComparator.approxMillis(1000));
         assertThat("99th percentile", snapshot.get99thPercentile(), MetricComparator.approxMillis(2000));
         assertThat("99.9th percentile", snapshot.get999thPercentile(), MetricComparator.approxMillis(2000));
