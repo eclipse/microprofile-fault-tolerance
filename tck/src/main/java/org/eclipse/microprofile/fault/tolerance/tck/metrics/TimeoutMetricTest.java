@@ -18,6 +18,18 @@
  */
 package org.eclipse.microprofile.fault.tolerance.tck.metrics;
 
+import static java.util.stream.Collectors.toList;
+import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expectTimeout;
+import static org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig.getConfig;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.is;
+
+import java.util.Arrays;
+import java.util.List;
+
+import javax.inject.Inject;
+
 import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricComparator;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricGetter;
@@ -31,13 +43,6 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
-
-import javax.inject.Inject;
-
-import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expectTimeout;
-import static org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig.getConfig;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 
 public class TimeoutMetricTest extends Arquillian {
 
@@ -76,28 +81,20 @@ public class TimeoutMetricTest extends Arquillian {
     }
     
     @Test
+    @SuppressWarnings("unchecked")
     public void testTimeoutHistogram() {
         MetricGetter m = new MetricGetter(TimeoutMetricBean.class, "histogramTestWorkForMillis");
         
         timeoutBean.histogramTestWorkForMillis(getConfig().getTimeoutInMillis(300));
-        timeoutBean.histogramTestWorkForMillis(getConfig().getTimeoutInMillis(300));
-        timeoutBean.histogramTestWorkForMillis(getConfig().getTimeoutInMillis(300));
-        timeoutBean.histogramTestWorkForMillis(getConfig().getTimeoutInMillis(300));
-        timeoutBean.histogramTestWorkForMillis(getConfig().getTimeoutInMillis(300)); // 50th Percentile
-        timeoutBean.histogramTestWorkForMillis(getConfig().getTimeoutInMillis(300));
-        timeoutBean.histogramTestWorkForMillis(getConfig().getTimeoutInMillis(1000));
-        timeoutBean.histogramTestWorkForMillis(getConfig().getTimeoutInMillis(1000)); // 75th Percentile
-        expectTimeout(() -> timeoutBean.histogramTestWorkForMillis(getConfig().getTimeoutInMillis(5000))); // Will timeout after 2000
         expectTimeout(() -> timeoutBean.histogramTestWorkForMillis(getConfig().getTimeoutInMillis(5000))); // Will timeout after 2000
         
         Histogram histogram = m.getTimeoutExecutionDuration().get();
         Snapshot snapshot = histogram.getSnapshot();
+        List<Long> values = Arrays.stream(snapshot.getValues()).boxed().sorted().collect(toList());
         
-        assertThat("Histogram count", histogram.getCount(), is(10L));
-        assertThat("Median", snapshot.getMedian(), MetricComparator.approxMillis(300));
-        assertThat("75th percentile", snapshot.get75thPercentile(), MetricComparator.approxMillis(1000));
-        assertThat("99th percentile", snapshot.get99thPercentile(), MetricComparator.approxMillis(2000));
-        assertThat("99.9th percentile", snapshot.get999thPercentile(), MetricComparator.approxMillis(2000));
+        assertThat("Histogram count", histogram.getCount(), is(2L));
+        assertThat("SnapshotValues", values, contains(MetricComparator.approxMillis(300),
+                                                      MetricComparator.approxMillis(2000)));
     }
     
 }

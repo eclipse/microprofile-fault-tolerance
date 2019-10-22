@@ -19,11 +19,12 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.metrics.util;
 
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.lessThan;
+
 import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
 import org.hamcrest.Matcher;
-
-import static org.hamcrest.Matchers.closeTo;
-import static org.hamcrest.Matchers.lessThan;
+import org.hamcrest.Matchers;
 
 public class MetricComparator {
 
@@ -41,11 +42,11 @@ public class MetricComparator {
      * @param originalMillis the expected time in milliseconds
      * @return a {@link Matcher} which matches against a time in nanoseconds
      */
-    public static Matcher<Double> approxMillis(final long originalMillis) {
+    public static Matcher<Long> approxMillis(final long originalMillis) {
         long millis = TCKConfig.getConfig().getTimeoutInMillis(originalMillis);
         long nanos = millis * 1_000_000;
         long error = Math.round(nanos * 0.2);
-        return closeTo(nanos, error);
+        return Matchers.allOf(greaterThan(nanos-error), lessThan(nanos+error));
     }
     
     /**
@@ -59,10 +60,10 @@ public class MetricComparator {
      * @param originalMillis the expected time in milliseconds
      * @return a {@link Matcher} which matches against a time in nanoseconds
      */
-    public static Matcher<Double> lessThanMillis(final long originalMillis) {
+    public static Matcher<Long> lessThanMillis(final long originalMillis) {
         long millis = TCKConfig.getConfig().getTimeoutInMillis(originalMillis);
         long nanos = millis * 1_000_000;
-        return lessThan((double) nanos);
+        return lessThan(nanos);
     }
     
 }
