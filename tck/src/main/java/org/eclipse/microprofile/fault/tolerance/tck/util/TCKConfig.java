@@ -18,9 +18,13 @@ package org.eclipse.microprofile.fault.tolerance.tck.util;/*
  * limitations under the License.
  *******************************************************************************/
 
-import org.eclipse.microprofile.config.Config;
-import org.eclipse.microprofile.config.ConfigProvider;
+import static org.testng.Assert.fail;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
 
@@ -28,6 +32,7 @@ public class TCKConfig {
 
     private static final int DEFAULT_TIMEOUT = 1000;
     private static final TCKConfig INSTANCE = new TCKConfig();
+    public static final String RESOURCE_NAME = "timeout-multiplier";
 
     public static TCKConfig getConfig() {
         return INSTANCE;
@@ -36,19 +41,23 @@ public class TCKConfig {
     private double baseMultiplier;
 
     private TCKConfig() {
-        try {
-            final Config config = ConfigProvider.getConfig();
-            baseMultiplier = config
-                .getOptionalValue("org.eclipse.microprofile.fault.tolerance.tck.timeout.multiplier", Double.class)
-                .orElse(1.0D);
+        
+        try (InputStream s = TCKConfig.class.getResourceAsStream("/" + RESOURCE_NAME)) {
+            if (s != null) {
+                // Expected path when in deployed application
+                BufferedReader reader = new BufferedReader(new InputStreamReader(s, StandardCharsets.UTF_8));
+                String multiplier = reader.readLine();
+                baseMultiplier = Double.valueOf(multiplier);
+                System.out.println("Loaded timeout-multiplier from resource: " + baseMultiplier);
+            }
+            else {
+                // Expected path when running in client
+                baseMultiplier = Double.valueOf(System.getProperty("org.eclipse.microprofile.fault.tolerance.tck.timeout.multiplier", "1.0"));
+                System.out.println("Loaded timeout-multiplier from system property: " + baseMultiplier);
+            }
         }
-        catch (Exception e) {
-            System.out.println("Could not use microprofile config. Falling back to system properties. Problem:" + e.getMessage());
-            baseMultiplier = Double.valueOf(
-                System.getProperty("org.eclipse.microprofile.fault.tolerance.tck.timeout.multiplier", "1.0"));
-        }
-        if (baseMultiplier <= 0) {
-            throw new IllegalArgumentException("baseMultiplier must be a positive number. Was set to: " + baseMultiplier);
+        catch (IOException e) {
+            fail("Resource " + RESOURCE_NAME + " is present but could not be read", e);
         }
     }
 
@@ -82,5 +91,8 @@ public class TCKConfig {
     public long getTimeoutInMillis() {
         return Math.round(DEFAULT_TIMEOUT * baseMultiplier);
     }
-
+    
+    public double getBaseMultiplier() {
+        return baseMultiplier;
+    }
 }
