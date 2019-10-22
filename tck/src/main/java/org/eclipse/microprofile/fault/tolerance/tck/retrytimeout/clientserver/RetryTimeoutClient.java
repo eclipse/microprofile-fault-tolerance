@@ -23,6 +23,7 @@ import static org.testng.Assert.fail;
 
 import javax.enterprise.context.RequestScoped;
 
+import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.faulttolerance.Timeout;
 import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
@@ -40,6 +41,7 @@ public class RetryTimeoutClient {
     private int counterForInvokingServiceA = 0;
     private int counterForInvokingServiceWithoutRetryOn = 0;
     private int counterForInvokingServiceWithAbortOn = 0;
+    private TCKConfig config = TCKConfig.getConfig();
 
     public int getCounterForInvokingServiceA() {
         return counterForInvokingServiceA;
@@ -85,7 +87,7 @@ public class RetryTimeoutClient {
     public String serviceWithoutRetryOn() {
         try {
             counterForInvokingServiceWithoutRetryOn++;
-            Thread.sleep(1000);
+            Thread.sleep(config.getTimeoutInMillis(1000));
             fail("Timeout did not interrupt");
         }
         catch (InterruptedException e) {
@@ -104,7 +106,7 @@ public class RetryTimeoutClient {
     public String serviceWithAbortOn() {
         try {
             counterForInvokingServiceWithAbortOn++;
-            Thread.sleep(1000);
+            Thread.sleep(config.getTimeoutInMillis(1000));
             fail("Timeout did not interrupt");
         }
         catch (InterruptedException e) {
