@@ -18,13 +18,16 @@
  */
 package org.eclipse.microprofile.fault.tolerance.tck.metrics;
 
+import static java.util.stream.Collectors.toList;
 import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricComparator.approxMillis;
 import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricComparator.lessThanMillis;
 import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expectBulkheadException;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -153,6 +156,7 @@ public class BulkheadMetricTest extends Arquillian {
     }
     
     @Test
+    @SuppressWarnings("unchecked")
     public void bulkheadMetricHistogramTest() throws InterruptedException, ExecutionException {
         MetricGetter m = new MetricGetter(BulkheadMetricBean.class, "waitForHistogram");
         m.baselineCounters();
@@ -176,23 +180,25 @@ public class BulkheadMetricTest extends Arquillian {
         Snapshot snap = executionTimes.getSnapshot();
         
         assertThat("histogram count", executionTimes.getCount(), is(2L)); // Rejected executions not recorded in histogram
-        assertThat("median", snap.getMedian(), approxMillis(1000));
-        assertThat("mean", snap.getMean(), approxMillis(1000));
+        assertThat("median", Math.round(snap.getMedian()), approxMillis(1000));
+        assertThat("mean", Math.round(snap.getMean()), approxMillis(1000));
         
-        // Now let's put some quick results through the bulkhead so we can check the quantiles
-        for (int i = 0; i < 10; i++) {
-            bulkheadBean.waitForHistogram(CompletableFuture.completedFuture(null));
-        }
+        // Now let's put some quick results through the bulkhead
+        bulkheadBean.waitForHistogram(CompletableFuture.completedFuture(null));
+        bulkheadBean.waitForHistogram(CompletableFuture.completedFuture(null));
         
-        // Should have ~0ms * 10 and ~1000ms * 2
+        // Should have 4 results, ~0ms * 2 and ~1000ms * 2
         snap = executionTimes.getSnapshot();
-        assertThat("histogram count", executionTimes.getCount(), is(12L));
-        assertThat("median", snap.getMedian(), lessThanMillis(500));
-        assertThat("75th percentile", snap.get75thPercentile(), lessThanMillis(500));
-        assertThat("99th percentile", snap.get99thPercentile(), approxMillis(1000));
+        assertThat("histogram count", executionTimes.getCount(), is(4L));
+        List<Long> values = Arrays.stream(snap.getValues()).sorted().boxed().collect(toList());
+        assertThat("histogram values", values, contains(lessThanMillis(500),
+                                                        lessThanMillis(500),
+                                                        approxMillis(1000),
+                                                        approxMillis(1000)));
     }
     
     @Test
+    @SuppressWarnings("unchecked")
     public void bulkheadMetricAsyncTest() throws InterruptedException, ExecutionException {
         MetricGetter m = new MetricGetter(BulkheadMetricBean.class, "waitForAsync");
         m.baselineCounters();
@@ -213,9 +219,11 @@ public class BulkheadMetricTest extends Arquillian {
         assertThat("concurrent executions", m.getBulkheadConcurrentExecutions().get(), is(2L));
         assertThat("queue population", m.getBulkheadQueuePopulation().get(), is(2L));
         
-        Thread.sleep(config.getTimeoutInMillis(2000));
+        Thread.sleep(config.getTimeoutInMillis(1000));
         waitingFuture.complete(null);
         long durationms = (System.nanoTime() - startTime) / 1_000_000;
+        durationms /= config.getBaseMultiplier(); // This value is used with approxMillis which always applies the baseMultiplier
+                                                  // so preemptively divide it by the baseMultiplier here
         
         f1.get();
         f2.get();
@@ -228,9 +236,14 @@ public class BulkheadMetricTest extends Arquillian {
         
         Histogram queueWaits = m.getBulkheadWaitTime().get();
         Snapshot snap = queueWaits.getSnapshot();
+        List<Long> values = Arrays.stream(snap.getValues()).sorted().boxed().collect(toList());
         
+        // Expect 2 * wait for 0ms, 2 * wait for durationms
         assertThat("queue wait histogram counts", queueWaits.getCount(), is(4L));
-        assertThat("queue wait mean", snap.getMean(), approxMillis(durationms/2)); // Two wait for zero, two wait for durationms
+        assertThat("queue wait histogram values", values, contains(lessThanMillis(500),
+                                                                   lessThanMillis(500),
+                                                                   approxMillis(durationms),
+                                                                   approxMillis(durationms)));
         
         // General metrics should be updated
         assertThat("invocations", m.getInvocationsDelta(), is(5L));
