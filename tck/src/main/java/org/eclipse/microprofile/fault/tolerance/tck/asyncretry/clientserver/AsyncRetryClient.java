@@ -19,6 +19,7 @@ package org.eclipse.microprofile.fault.tolerance.tck.asyncretry.clientserver;
  * limitations under the License.
  *******************************************************************************/
 
+import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Retry;
 
@@ -48,6 +49,7 @@ public class AsyncRetryClient {
     private int countInvocationsServF = 0;
     private int countInvocationsServG = 0;
     private int countInvocationsServH = 0;
+    private TCKConfig config = TCKConfig.getConfig();
 
     /**
      * Service will retry a method returning a CompletionStage and configured to always completeExceptionally.
@@ -251,7 +253,7 @@ public class AsyncRetryClient {
         return () -> {
             try {
                 // simulate some processing.
-                TimeUnit.MILLISECONDS.sleep(50);
+                TimeUnit.MILLISECONDS.sleep(config.getTimeoutInMillis(50));
             }
             catch (InterruptedException e) {
                 throw new RuntimeException("Unplanned error: " + e);
