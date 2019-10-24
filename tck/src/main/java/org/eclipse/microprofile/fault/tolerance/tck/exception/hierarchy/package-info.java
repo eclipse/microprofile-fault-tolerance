@@ -24,15 +24,15 @@
  * Exceptions in this package:
  * 
  * <pre>
- * The <: symbol denotes the subtyping relation (Foo <: Bar means "Foo is a subtype of Bar")
- * Note that subtyping is reflexive (Foo <: Foo)
+ * The &lt;: symbol denotes the subtyping relation (Foo &lt;: Bar means "Foo is a subtype of Bar")
+ * Note that subtyping is reflexive (Foo &lt;: Foo)
  * 
- * E0  <: Exception
- * E1  <: E0
- * E2  <: E1
- * E2S <: E2
- * E1S <: E1, but not E1S <: E2
- * E0S <: E0, but not E0S <: E1
+ * E0  &lt;: Exception
+ * E1  &lt;: E0
+ * E2  &lt;: E1
+ * E2S &lt;: E2
+ * E1S &lt;: E1, but E1S &lt;/: E2
+ * E0S &lt;: E0, but E0S &lt;/: E1
  * </pre>
  */
 package org.eclipse.microprofile.fault.tolerance.tck.exception.hierarchy;
