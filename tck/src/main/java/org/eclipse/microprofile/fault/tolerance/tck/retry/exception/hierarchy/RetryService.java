@@ -19,6 +19,9 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.retry.exception.hierarchy;
 
+import org.eclipse.microprofile.fault.tolerance.tck.exception.hierarchy.E0;
+import org.eclipse.microprofile.fault.tolerance.tck.exception.hierarchy.E1;
+import org.eclipse.microprofile.fault.tolerance.tck.exception.hierarchy.E2;
 import org.eclipse.microprofile.faulttolerance.Retry;
 
 import javax.enterprise.context.RequestScoped;

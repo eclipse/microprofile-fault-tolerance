@@ -19,12 +19,12 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck;
 
-import org.eclipse.microprofile.fault.tolerance.tck.retry.exception.hierarchy.E0;
-import org.eclipse.microprofile.fault.tolerance.tck.retry.exception.hierarchy.E0S;
-import org.eclipse.microprofile.fault.tolerance.tck.retry.exception.hierarchy.E1;
-import org.eclipse.microprofile.fault.tolerance.tck.retry.exception.hierarchy.E1S;
-import org.eclipse.microprofile.fault.tolerance.tck.retry.exception.hierarchy.E2;
-import org.eclipse.microprofile.fault.tolerance.tck.retry.exception.hierarchy.E2S;
+import org.eclipse.microprofile.fault.tolerance.tck.exception.hierarchy.E0;
+import org.eclipse.microprofile.fault.tolerance.tck.exception.hierarchy.E0S;
+import org.eclipse.microprofile.fault.tolerance.tck.exception.hierarchy.E1;
+import org.eclipse.microprofile.fault.tolerance.tck.exception.hierarchy.E1S;
+import org.eclipse.microprofile.fault.tolerance.tck.exception.hierarchy.E2;
+import org.eclipse.microprofile.fault.tolerance.tck.exception.hierarchy.E2S;
 import org.eclipse.microprofile.fault.tolerance.tck.retry.exception.hierarchy.RetryService;
 import org.eclipse.microprofile.fault.tolerance.tck.retry.exception.hierarchy.RetryStatus;
 import org.jboss.arquillian.container.test.api.Deployment;
