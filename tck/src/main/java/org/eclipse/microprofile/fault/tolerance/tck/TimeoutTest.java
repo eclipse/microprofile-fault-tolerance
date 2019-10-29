@@ -54,7 +54,7 @@ public class TimeoutTest extends Arquillian {
     @Deployment
     public static WebArchive deploy() {
         final Asset config = new ConfigAnnotationAsset()
-            .setValue(TimeoutClient.class,"serviceA", Timeout.class, getConfig().getTimeoutInStr())
+            .setValue(TimeoutClient.class,"serviceA", Timeout.class, getConfig().getTimeoutInStr(1000))
             .setValue(TimeoutClient.class,"serviceB", Timeout.class, getConfig().getTimeoutInStr(2000))
             .setValue(TimeoutClient.class,"serviceC", Timeout.class, getConfig().getTimeoutInStr(500));
         // serviceD uses SECONDS time unit and will not be configured

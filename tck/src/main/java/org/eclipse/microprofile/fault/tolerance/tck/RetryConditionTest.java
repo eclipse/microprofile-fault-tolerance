@@ -349,7 +349,7 @@ public class RetryConditionTest extends Arquillian {
                                              final Class<? extends Throwable> exceptionClass,
                                              final String exceptionMessage) {
         try {
-            CompletableFutureHelper.toCompletableFuture(future).get(TCKConfig.getConfig().getTimeoutInMillis(), TimeUnit.MILLISECONDS);
+            CompletableFutureHelper.toCompletableFuture(future).get(TCKConfig.getConfig().getTimeoutInMillis(1000), TimeUnit.MILLISECONDS);
             fail("We were expecting an exception: " + exceptionClass.getName() + " with message: " + exceptionMessage);
         }
         catch (InterruptedException | TimeoutException e) {
@@ -365,7 +365,7 @@ public class RetryConditionTest extends Arquillian {
         try {
             assertEquals(CompletableFutureHelper
                 .toCompletableFuture(future)
-                .get(TCKConfig.getConfig().getTimeoutInMillis(), TimeUnit.MILLISECONDS), expectedMessage);
+                .get(TCKConfig.getConfig().getTimeoutInMillis(1000), TimeUnit.MILLISECONDS), expectedMessage);
         }
         catch (Exception e) {
             fail("Unexpected exception" + e);
