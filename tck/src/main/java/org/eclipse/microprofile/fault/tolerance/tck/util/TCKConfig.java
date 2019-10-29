@@ -30,7 +30,6 @@ import java.time.Duration;
 
 public class TCKConfig {
 
-    private static final int DEFAULT_TIMEOUT = 1000;
     private static final TCKConfig INSTANCE = new TCKConfig();
     public static final String RESOURCE_NAME = "timeout-multiplier";
 
@@ -61,37 +60,18 @@ public class TCKConfig {
         }
     }
 
-    /**
-     * Should be the Timeout default
-     *
-     * @return
-     */
-    public String getTimeoutInStr() {
-        return String.valueOf(getTimeoutInMillis(DEFAULT_TIMEOUT));
-    }
-
     public String getTimeoutInStr(final long originalInMillis) {
         return String.valueOf(getTimeoutInMillis(originalInMillis));
     }
 
     public long getTimeoutInMillis(final long originalInMillis) {
-        final double offset = Double.valueOf(originalInMillis) / DEFAULT_TIMEOUT;
-        return Math.round(getTimeoutInMillis() * offset);
+        return Math.round(originalInMillis * baseMultiplier);
     }
 
     public Duration getTimeoutInDuration(final int originalInMillis) {
         return Duration.ofMillis(getTimeoutInMillis(originalInMillis));
     }
 
-    /**
-     * Reference value is 1000ms
-     *
-     * @return
-     */
-    public long getTimeoutInMillis() {
-        return Math.round(DEFAULT_TIMEOUT * baseMultiplier);
-    }
-    
     public double getBaseMultiplier() {
         return baseMultiplier;
     }
