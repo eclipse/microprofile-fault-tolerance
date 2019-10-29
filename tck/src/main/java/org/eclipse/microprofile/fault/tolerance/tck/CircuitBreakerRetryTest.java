@@ -118,7 +118,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
         catch (Exception ex) {
             // Not Expected
             invokeCounter = clientForCBWithRetry.getCounterForInvokingServiceA();
-            Assert.fail("serviceA should retry or throw a CircuitthenBreakerOpenException in testCircuitOpenWithMoreRetries on iteration "
+            Assert.fail("serviceA should retry or throw a CircuitBreakerOpenException in testCircuitOpenWithMoreRetries on iteration "
                             + invokeCounter);
         }
 
