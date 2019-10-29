@@ -19,29 +19,32 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.lessThan;
+import org.eclipse.microprofile.fault.tolerance.tck.asynctimeout.clientserver.AsyncClassLevelTimeoutClient;
+import org.eclipse.microprofile.fault.tolerance.tck.asynctimeout.clientserver.AsyncTimeoutClient;
+import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
+import org.eclipse.microprofile.fault.tolerance.tck.util.Connection;
+import org.eclipse.microprofile.faulttolerance.Timeout;
+import org.jboss.arquillian.container.test.api.Deployment;
+import org.jboss.arquillian.testng.Arquillian;
+import org.jboss.shrinkwrap.api.ShrinkWrap;
+import org.jboss.shrinkwrap.api.asset.Asset;
+import org.jboss.shrinkwrap.api.asset.EmptyAsset;
+import org.jboss.shrinkwrap.api.spec.JavaArchive;
+import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
+import javax.inject.Inject;
 import java.time.Duration;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import javax.inject.Inject;
-
-import org.eclipse.microprofile.fault.tolerance.tck.asynctimeout.clientserver.AsyncClassLevelTimeoutClient;
-import org.eclipse.microprofile.fault.tolerance.tck.asynctimeout.clientserver.AsyncTimeoutClient;
-import org.eclipse.microprofile.fault.tolerance.tck.util.Connection;
-import org.jboss.arquillian.container.test.api.Deployment;
-import org.jboss.arquillian.testng.Arquillian;
-import org.jboss.shrinkwrap.api.ShrinkWrap;
-import org.jboss.shrinkwrap.api.asset.EmptyAsset;
-import org.jboss.shrinkwrap.api.spec.JavaArchive;
-import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import static org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig.getConfig;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.lessThan;
 /**
  * Test the combination of the @Asynchronous and @Timeout annotations.
  * 
@@ -50,24 +53,36 @@ import org.testng.annotations.Test;
  */
 public class AsyncTimeoutTest extends Arquillian {
 
-    private static final Duration TEST_FUTURE_THRESHOLD = Duration.ofMillis(2000); // Used to detect Futures that return too slowly
-    private static final Duration TEST_TIMEOUT_SERVICEA = Duration.ofMillis(2000); // The @Timeout specified on serviceA
-    private static final Duration TEST_TIME_UNIT = Duration.ofMillis(1000); // One second unit
-    
+
     private @Inject AsyncTimeoutClient clientForAsyncTimeout;
     private @Inject AsyncClassLevelTimeoutClient clientForClassLevelAsyncTimeout;
-    
+
+    // Used to detect Futures that return too slowly
+    private static final Duration TEST_FUTURE_THRESHOLD = getConfig().getTimeoutInDuration(2000);
+    // The @Timeout specified on serviceA
+    private static final Duration TEST_TIMEOUT_SERVICEA = getConfig().getTimeoutInDuration(2000);
+    private static final Duration TEST_TIMEOUT_SERVICEB = getConfig().getTimeoutInDuration(2000);
+    // One second unit
+    private static final Duration TEST_TIME_UNIT = getConfig().getTimeoutInDuration(1000);
+
     @Deployment
     public static WebArchive deploy() {
+
+        final Asset config = new ConfigAnnotationAsset()
+            .setValue(AsyncTimeoutClient.class, "serviceA", Timeout.class, String.valueOf(TEST_TIMEOUT_SERVICEA.toMillis()))
+            .setValue(AsyncTimeoutClient.class, "serviceB", Timeout.class, String.valueOf(TEST_TIMEOUT_SERVICEB.toMillis()))
+            .setValue(AsyncClassLevelTimeoutClient.class, null, Timeout.class, getConfig().getTimeoutInStr(2000));
+
         JavaArchive testJar = ShrinkWrap
-                .create(JavaArchive.class, "ftAsyncTimeout.jar")
-                .addClasses(AsyncTimeoutClient.class,AsyncClassLevelTimeoutClient.class,Connection.class)
-                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
-                .as(JavaArchive.class);
+            .create(JavaArchive.class, "ftAsyncTimeout.jar")
+            .addClasses(AsyncTimeoutClient.class, AsyncClassLevelTimeoutClient.class, Connection.class)
+            .addAsManifestResource(config, "microprofile-config.properties")
+            .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
+            .as(JavaArchive.class);
 
         WebArchive war = ShrinkWrap
-                .create(WebArchive.class, "ftAsyncTimeout.war")
-                .addAsLibrary(testJar);
+            .create(WebArchive.class, "ftAsyncTimeout.war")
+            .addAsLibrary(testJar);
         return war;
     }
 

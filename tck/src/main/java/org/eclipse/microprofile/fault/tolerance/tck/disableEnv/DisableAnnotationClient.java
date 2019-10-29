@@ -27,6 +27,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.eclipse.microprofile.fault.tolerance.tck.util.ConcurrentExecutionTracker;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
 import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
@@ -113,7 +114,7 @@ public class DisableAnnotationClient {
     @Timeout(500)
     public void failWithTimeout() {
         try {
-            Thread.sleep(2000);
+            Thread.sleep(TCKConfig.getConfig().getTimeoutInMillis(2000));
             throw new TestException();
         }
         catch (InterruptedException e) {

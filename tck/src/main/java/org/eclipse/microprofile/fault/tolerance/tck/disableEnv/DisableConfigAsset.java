@@ -37,6 +37,10 @@ public class DisableConfigAsset implements Asset {
 
     private Properties props = new Properties();
 
+    public Properties getProps() {
+        return props;
+    }
+
     @Override
     public InputStream openStream() {
         try {

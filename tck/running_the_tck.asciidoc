@@ -115,3 +115,43 @@ Once you've added the dependency, you don't need a `tck-suite.xml` you can just 
     </plugins>
 </build>
 ----
+
+== Timeout Configs
+We can configure the existing tck test timeouts. With the following configurations, timeouts can be greatly
+reduced for use in local executions or in fast CI environments.
+
+The property is a multiplier applied to all timeouts linearly, namely @Timeout annotation values, workload simulations
+and test assertions.
+
+.TCK Timeout config
+|===
+|Property |Default |Unit
+
+|org.eclipse.microprofile.fault.tolerance.tck.timeout.multiplier
+|1.0
+|Dimensionless double
+|===
+
+The property can be set as a System Property when running the TCK.
+
+Example:
+[source,xml]
+----
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>2.19.1</version>
+            <configuration>
+                <dependenciesToScan>
+                    <dependency>org.eclipse.microprofile.fault.tolerance:microprofile-fault-tolerance-tck</dependency>
+                </dependenciesToScan>
+                <systemPropertyVariables>
+                    <org.eclipse.microprofile.fault.tolerance.tck.timeout.multiplier>2.0</org.eclipse.microprofile.fault.tolerance.tck.timeout.multiplier>
+                </systemPropertyVariables>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+----

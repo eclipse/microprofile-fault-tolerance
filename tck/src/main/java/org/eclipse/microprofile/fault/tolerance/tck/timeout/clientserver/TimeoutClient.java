@@ -87,7 +87,8 @@ public class TimeoutClient {
     
     /**
      * serviceD specifies a Timeout longer than the default, at 2 
-     * seconds 
+     * seconds.<br>
+     * Tests using this method will not have the timeout dynamically configured.
      * @param timeToSleepInMillis  How long should the execution take in millis
      * @return null or exception is raised
      */
