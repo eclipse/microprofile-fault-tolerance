@@ -62,8 +62,8 @@ public class RetryTimeoutTest extends Arquillian {
         JavaArchive testJar = ShrinkWrap
                 .create(JavaArchive.class, "ftRetryTimeout.jar")
                 .addClasses(RetryTimeoutClient.class)
-            .addAsManifestResource(config, "microprofile-config.properties")
-            .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
+                .addAsManifestResource(config, "microprofile-config.properties")
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                 .as(JavaArchive.class);
 
         WebArchive war = ShrinkWrap
