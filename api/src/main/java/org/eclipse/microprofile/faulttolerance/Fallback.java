@@ -102,7 +102,7 @@ public @interface Fallback {
     Class<? extends Throwable>[] applyOn() default {Throwable.class};
     
     /**
-     * The list of exception types which should not be trigger Fallback
+     * The list of exception types which should <i>not</i> trigger Fallback
      * <p>
      * This list takes priority over the types listed in {@link #applyOn}
      * <p>

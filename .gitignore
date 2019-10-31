@@ -13,3 +13,4 @@ test-output
 *.iml
 *.iwl
 *.ipr
+.DS_Store

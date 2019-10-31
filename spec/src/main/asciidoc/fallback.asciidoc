@@ -94,10 +94,12 @@ When `fallbackMethod` is used a `FaultToleranceDefinitionException` will be thro
 The parameter `value` and `fallbackMethod` on `@Fallback` cannot be specified at the same time.
 Otherwise, the `FaultToleranceDefinitionException` exception will be thrown.
 
-The fallback might be triggered when an exception occurs (e.g. `BulkheadException`, `CircuitBreakerOpenException`, `TimeoutException`, etc), detailed below.
+==== Specify the criteria for triggering Fallback
+
+The fallback might be triggered when an exception occurs, including the ones defined in this spec (e.g. `BulkheadException`, `CircuitBreakerOpenException`, `TimeoutException`, etc), detailed below.
 When a method returns and the Fallback policy is present, the following rules are applied:
 
-* If the method returns normally (doesn't throw), the result will be simply returned.
+* If the method returns normally (doesn't throw an exception), the result will be simply returned.
 * Otherwise, if the thrown object is assignable to any value in the `skipOn` parameter, the thrown object will be rethrown.
 * Otherwise, if the thrown object is assignable to any value in the `applyOn` parameter, the specified fallback will be triggered.
 * Otherwise the thrown object will be rethrown.
@@ -108,7 +110,6 @@ In the following example, all exceptions assignable to `ExceptionA` and `Excepti
     @Retry(maxRetries = 2)
     @Fallback(applyOn={ExceptionA.class, ExceptionB.class}, skipOn=ExceptionBSub.class, fallbackMethod= "fallbackForServiceB")
     public String serviceB() {
-        counterForInvokingServiceB++;
        return nameService();
     }
 
