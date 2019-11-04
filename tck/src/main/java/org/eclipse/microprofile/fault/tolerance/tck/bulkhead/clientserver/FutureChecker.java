@@ -19,17 +19,15 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
 
 /**
  * A backend that is used in the tests of the operations on the Future returned
  * by the user.
- * 
+ *
  * @author Gordon Hutchison
  */
 public class FutureChecker extends Checker {
@@ -45,7 +43,7 @@ public class FutureChecker extends Checker {
     /*
      * This method is the one called from the business method of the injected
      * object that has the annotations.
-     * 
+     *
      * @see org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.
      * BulkheadTestAction#perform()
      */
@@ -77,54 +75,32 @@ public class FutureChecker extends Checker {
     }
 
     public final class TestFuture implements Future<String> {
-
-        private AtomicBoolean done = new AtomicBoolean(false);
-        private String result = "";
-        private boolean isCancelCalled;
-        private boolean isDoneCalled;
-        private boolean isIsCancelledCalled;
+        private boolean isCancelled;
 
         @Override
         public boolean cancel(boolean mayInterruptIfRunning) {
-            isCancelCalled = true;
+            isCancelled = true;
             return true;
         }
 
         @Override
         public boolean isCancelled() {
-            isIsCancelledCalled = true;
-            return isCancelCalled;
+            return isCancelled;
         }
 
         @Override
         public boolean isDone() {
-            isDoneCalled = true;
             return true;
         }
 
-        /*
-         * We just return a string representing the methods we have seen called.
-         * 
-         * @see java.util.concurrent.Future#get()
-         */
         @Override
-        public String get() throws InterruptedException, ExecutionException {
-            result = result + "GET.";
-            Utils.log("Result is " + result);
-            return result;
+        public String get() {
+            return "RESULT";
         }
 
-        /*
-         * We just return a string representing the methods we have seen called.
-         * 
-         * @see java.util.concurrent.Future#get(long,
-         * java.util.concurrent.TimeUnit)
-         */
         @Override
         public String get(long timeout, TimeUnit unit) {
-            result = result + "GET_TO.";
-            Utils.log("Result is " + result);
-            return result;
+            return "RESULT";
         }
 
     }
