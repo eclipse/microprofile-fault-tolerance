@@ -64,7 +64,6 @@ Otherwise, the `FaultToleranceDefinitionException` exception will be thrown.
 ==== Specify the fallbackMethod
 
 This is used to specify that a named method should be called if a fallback is required.
-
 [source, java]
 ----
 
@@ -104,6 +103,7 @@ When a method returns and the Fallback policy is present, the following rules ar
 * Otherwise, if the thrown object is assignable to any value in the `applyOn` parameter, the specified fallback will be triggered.
 * Otherwise the thrown object will be rethrown.
 In the following example, all exceptions assignable to `ExceptionA` and `ExceptionB`, except the ones assignable to `ExceptionBSub` will trigger the fallback operation.
+
 [source, java]
 ----
 
