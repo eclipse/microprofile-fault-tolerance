@@ -85,16 +85,19 @@ An annotation to specify the max retries, delays, maxDuration, Duration unit, ji
 An annotation to specify when to open a circuit, when to half open, close the circuit.
 
 #### Fallback
+
 Define the fallback method or fallback handler for a failed execution.
 
-#### Timeout to be used specifying the maximum time for an execution
+#### Timeout: specifying the maximum time for an execution
 
 Timeout to specify the maximum time for a particular execution.
 
-#### Bulkhead - threadpool or semaphore style
+#### Bulkhead: limit number of parallel executions
 
 Use this annotation without `Asynchronous` annotation for semaphore style. When used with `Asynchronous`, it means threadpool style of bulkhead.
+
 #### Usage
+
 The annotations can be applied to a bean or methods. They can be used together. For an instance, `@Retry` can be used with `@Fallback` in order to trigger the `fallback` when the `Retry` policy fails.
 
 ```
@@ -111,6 +114,7 @@ public class FaultToleranceBean {
 }
 ```
 #### Configuration
+
 The annotation parameters can be configured via MicroProfile Config. In order to configure the `maxRetries` to be `6` for the following `Retry` policy, define a property `org.microprofile.readme.FaultToleranceBean/doWork/Retry/maxRetries=6`. Alternatively, if the `maxRetries` of the `Retry` is to be configured to `6`, just specify the property of `Retry/maxRetries=6`.
 
 ```
