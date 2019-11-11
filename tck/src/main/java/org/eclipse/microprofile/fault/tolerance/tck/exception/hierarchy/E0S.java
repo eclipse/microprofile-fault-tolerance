@@ -17,10 +17,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.eclipse.microprofile.fault.tolerance.tck.retry.exception.hierarchy;
+package org.eclipse.microprofile.fault.tolerance.tck.exception.hierarchy;
 
 /**
- * Subclass of E0.
+ * Subclass of E0 that isn't subclass of E1.
  */
-public class E1 extends E0 {
+public class E0S extends E0 {
 }

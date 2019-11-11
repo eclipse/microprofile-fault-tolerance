@@ -17,47 +17,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.eclipse.microprofile.fault.tolerance.tck.retry.exception.hierarchy;
+
+package org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.exception.hierarchy;
+
+import javax.enterprise.context.Dependent;
 
 import org.eclipse.microprofile.fault.tolerance.tck.exception.hierarchy.E0;
 import org.eclipse.microprofile.fault.tolerance.tck.exception.hierarchy.E1;
 import org.eclipse.microprofile.fault.tolerance.tck.exception.hierarchy.E2;
-import org.eclipse.microprofile.faulttolerance.Retry;
+import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 
-import javax.enterprise.context.RequestScoped;
-
-@RequestScoped
-public class RetryService {
-    private RetryStatus status = RetryStatus.NOT_YET_INVOKED;
-
-    @Retry(retryOn = {E0.class, E2.class}, abortOn = E1.class, maxRetries = 1)
+@Dependent
+public class CircuitBreakerService {
+    
+    @CircuitBreaker(failOn = {E0.class, E2.class}, skipOn = E1.class, requestVolumeThreshold = 1, delay = 20000)
     public void serviceA(Throwable exception) throws Throwable {
-        stateTransition();
         throw exception;
     }
-
-    @Retry(retryOn = {Exception.class, E1.class}, abortOn = {E0.class, E2.class}, maxRetries = 1)
+    
+    @CircuitBreaker(failOn = {Exception.class, E1.class}, skipOn = {E0.class, E2.class}, requestVolumeThreshold = 1, delay = 20000)
     public void serviceB(Throwable exception) throws Throwable {
-        stateTransition();
         throw exception;
     }
-
-    @Retry(retryOn = {E1.class, E2.class}, abortOn = E0.class, maxRetries = 1)
+    
+    @CircuitBreaker(failOn = {E1.class, E2.class}, skipOn = E0.class, requestVolumeThreshold = 1, delay = 20000)
     public void serviceC(Throwable exception) throws Throwable {
-        stateTransition();
         throw exception;
-    }
-
-    private void stateTransition() {
-        if (status == RetryStatus.NOT_YET_INVOKED) {
-            status = RetryStatus.FIRST_INVOCATION;
-        }
-        else if (status == RetryStatus.FIRST_INVOCATION) {
-            status = RetryStatus.RETRIED_INVOCATION;
-        }
-    }
-
-    public RetryStatus getStatus() {
-        return status;
     }
 }
