@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2016-2017 Contributors to the Eclipse Foundation
+// Copyright (c) 2016-2019 Contributors to the Eclipse Foundation
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information regarding copyright ownership.
@@ -64,7 +64,6 @@ Otherwise, the `FaultToleranceDefinitionException` exception will be thrown.
 ==== Specify the fallbackMethod
 
 This is used to specify that a named method should be called if a fallback is required.
-
 [source, java]
 ----
 
@@ -94,5 +93,30 @@ When `fallbackMethod` is used a `FaultToleranceDefinitionException` will be thro
 The parameter `value` and `fallbackMethod` on `@Fallback` cannot be specified at the same time.
 Otherwise, the `FaultToleranceDefinitionException` exception will be thrown.
 
-The fallback should be triggered when an exception occurs.
-For instance, `BulkheadException`, `CircuitBreakerOpenException`, `TimeoutException` should trigger the fallback.
+==== Specify the criteria for triggering Fallback
+
+The fallback might be triggered when an exception occurs, including the ones defined in this spec (e.g. `BulkheadException`, `CircuitBreakerOpenException`, `TimeoutException`, etc), detailed below.
+When a method returns and the Fallback policy is present, the following rules are applied:
+
+* If the method returns normally (doesn't throw an exception), the result will be simply returned.
+* Otherwise, if the thrown object is assignable to any value in the `skipOn` parameter, the thrown object will be rethrown.
+* Otherwise, if the thrown object is assignable to any value in the `applyOn` parameter, the specified fallback will be triggered.
+* Otherwise the thrown object will be rethrown.
+In the following example, all exceptions assignable to `ExceptionA` and `ExceptionB`, except the ones assignable to `ExceptionBSub` will trigger the fallback operation.
+
+[source, java]
+----
+
+    @Retry(maxRetries = 2)
+    @Fallback(applyOn={ExceptionA.class, ExceptionB.class}, skipOn=ExceptionBSub.class, fallbackMethod= "fallbackForServiceB")
+    public String serviceB() {
+       return nameService();
+    }
+
+    private String fallbackForServiceB() {
+        return "myFallback";
+    }
+
+----
+
+If a method throws a `Throwable` which is not an `Error` or `Exception`, non-portable behavior results.
