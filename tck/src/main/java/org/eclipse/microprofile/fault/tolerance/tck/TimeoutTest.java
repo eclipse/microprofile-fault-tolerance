@@ -21,23 +21,18 @@ package org.eclipse.microprofile.fault.tolerance.tck;
 
 import javax.inject.Inject;
 
-import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
 import org.eclipse.microprofile.fault.tolerance.tck.timeout.clientserver.DefaultTimeoutClient;
 import org.eclipse.microprofile.fault.tolerance.tck.timeout.clientserver.ShorterTimeoutClient;
 import org.eclipse.microprofile.fault.tolerance.tck.timeout.clientserver.TimeoutClient;
-import org.eclipse.microprofile.faulttolerance.Timeout;
 import org.eclipse.microprofile.faulttolerance.exceptions.TimeoutException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
-import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
-import static org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig.getConfig;
 
 /**
  * Tests to exercise Fault Tolerance Timeouts.
@@ -53,12 +48,6 @@ public class TimeoutTest extends Arquillian {
 
     @Deployment
     public static WebArchive deploy() {
-        final Asset config = new ConfigAnnotationAsset()
-            .setValue(TimeoutClient.class,"serviceA", Timeout.class, getConfig().getTimeoutInStr(1000))
-            .setValue(TimeoutClient.class,"serviceB", Timeout.class, getConfig().getTimeoutInStr(2000))
-            .setValue(TimeoutClient.class,"serviceC", Timeout.class, getConfig().getTimeoutInStr(500));
-        // serviceD uses SECONDS time unit and will not be configured
-
         JavaArchive testJar = ShrinkWrap
                 .create(JavaArchive.class, "ftTimeout.jar")
                 .addClasses(TimeoutClient.class, DefaultTimeoutClient.class, ShorterTimeoutClient.class)
@@ -199,7 +188,7 @@ public class TimeoutTest extends Arquillian {
     @Test
     public void testSecondsTimeout() {
         try {
-            clientForTimeout.serviceD(2500);// timeout will not be dynamically configured
+            clientForTimeout.serviceD(2500);
             Assert.fail("serviceD should throw a TimeoutException in testSecondsTimeout");
         } 
         catch (TimeoutException ex) {
@@ -221,7 +210,7 @@ public class TimeoutTest extends Arquillian {
     @Test
     public void testSecondsNoTimeout() {
         try {
-            clientForTimeout.serviceD(1500);// timeout will not be dynamically configured
+            clientForTimeout.serviceD(1500);
             Assert.fail("serviceD should throw a RuntimeException in testSecondsNoTimeout");
         } 
         catch (TimeoutException ex) {
