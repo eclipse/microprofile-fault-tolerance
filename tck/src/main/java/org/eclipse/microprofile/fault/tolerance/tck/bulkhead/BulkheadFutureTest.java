@@ -187,8 +187,7 @@ public class BulkheadFutureTest extends Arquillian {
      */
     private void waitingSimulation(Future<String> result) {
         try {
-            int loops = 0;
-            final int waitingInitialCondition = loops;
+            final int waitingInitialCondition = 0;
 
             await().atMost(SHORT_TIME * 2, MILLISECONDS)
                 .untilAsserted(() -> assertEquals(waitingInitialCondition, 0));
