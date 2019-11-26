@@ -40,14 +40,14 @@ import static org.testng.Assert.assertTrue;
  */
 public class Checker implements BackendTestDelegate {
 
-    private int millis = 1;
+    private int millis;
     private int fails = 0;
-    private TestData td = null;
+    private TestData td;
     /*
      * This string is used for varying substr's barcharts in the log, for
      * example for the number of concurrent workers.
      */
-    static final String BAR = "**************************************************************************************+++";
+    private static final String BAR = "**************************************************************************************+++";
 
     /**
      * Constructor
@@ -82,28 +82,28 @@ public class Checker implements BackendTestDelegate {
             int now = td.getWorkers().incrementAndGet();
             int max = td.getMaxSimultaneousWorkers().get();
 
-        while ((now > max) && !td.getMaxSimultaneousWorkers().compareAndSet(max, now)) {
-            max = td.getMaxSimultaneousWorkers().get();
-        }
+            while ((now > max) && !td.getMaxSimultaneousWorkers().compareAndSet(max, now)) {
+                max = td.getMaxSimultaneousWorkers().get();
+            }
 
-        if (fails > 0) {
-            fails--;
-            await().atMost(millis / 2, MILLISECONDS).
-                untilAsserted(()-> assertEquals(fails, fails -1));
+            if (fails > 0) {
+                fails--;
+                await().atMost(millis / 2, MILLISECONDS).
+                    untilAsserted(() -> assertEquals(fails, fails - 1));
 
-            RuntimeErrorException e = new RuntimeErrorException(new Error("fake error for Retry Testing"));
-            log(e.toString());
+                RuntimeErrorException e = new RuntimeErrorException(new Error("fake error for Retry Testing"));
+                log(e.toString());
+                // We will countDown the latch in the finally block
+                throw e;
+            }
+
+            log("Task " + taskId + " sleeping for " + millis + " milliseconds. " + now
+                + " workers inside Bulkhead from " + td.getInstances() + " instances " + BAR.substring(0, now));
+
+            await().atMost(millis, MILLISECONDS).untilAsserted(() -> assertTrue(fails < 0));
+
+            log("Task " + taskId + " woke.");
             // We will countDown the latch in the finally block
-            throw e;
-        }
-
-        log("Task " + taskId + " sleeping for " + millis + " milliseconds. " + now
-            + " workers inside Bulkhead from " + td.getInstances() + " instances " + BAR.substring(0, now));
-
-        await().atMost(millis, MILLISECONDS).untilAsserted(()-> assertTrue(fails < 0));
-
-        log("Task " + taskId + " woke.");
-        // We will countDown the latch in the finally block
         }
         catch (RuntimeException e) {
             log(e.toString());
