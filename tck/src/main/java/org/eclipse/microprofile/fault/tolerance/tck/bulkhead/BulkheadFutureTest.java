@@ -195,9 +195,7 @@ public class BulkheadFutureTest extends Arquillian {
 
             // Usually, we will not enter the loop,
             // but we are prepared to wait up to 100 SHORT_TIMES (10sec)
-            while(!result.isDone() && loops++ < 100) {
-                await().atMost(SHORT_TIME, MILLISECONDS).untilAsserted(()-> assertFalse(result.isDone()));
-            }
+            await().atMost(SHORT_TIME * SHORT_TIME, MILLISECONDS).untilAsserted(()-> assertTrue(result.isDone()));
         }
         catch (Throwable t) {
             assertNull(t);
