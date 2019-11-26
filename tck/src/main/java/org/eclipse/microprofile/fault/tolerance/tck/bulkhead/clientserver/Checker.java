@@ -27,7 +27,6 @@ import javax.management.RuntimeErrorException;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils.log;
 import static org.awaitility.Awaitility.await;
-import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -37,6 +36,7 @@ import static org.testng.Assert.assertTrue;
  * parameter to the business method.
  *
  * @author Gordon Hutchison
+ * @author carlosdlr
  */
 public class Checker implements BackendTestDelegate {
 
@@ -87,10 +87,8 @@ public class Checker implements BackendTestDelegate {
             }
 
             if (fails > 0) {
+                Thread.sleep(millis / 2);
                 fails--;
-                await().atMost(millis / 2, MILLISECONDS).
-                    untilAsserted(() -> assertEquals(fails, fails - 1));
-
                 RuntimeErrorException e = new RuntimeErrorException(new Error("fake error for Retry Testing"));
                 log(e.toString());
                 // We will countDown the latch in the finally block
