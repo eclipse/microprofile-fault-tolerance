@@ -22,7 +22,7 @@ package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
+import static org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils.log;
 import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
 import org.testng.Assert;
 
@@ -36,13 +36,9 @@ public class ParrallelBulkheadTest implements Callable<Future> {
     protected BackendTestDelegate action;
 
     /**
-     * This class is Callable in parallel and then makes calls to Bulkheaded
-     * classes
-     * 
-     * @param target
-     *            the backend bulkheaded test class
-     * @param action
-     *            a delegate class to get the backend to do different things
+     * This class is Callable in parallel and then makes calls to Bulkhead classes
+     * @param target the backend Bulkhead test class
+     * @param action a delegate class to get the backend to do different things
      */
     public ParrallelBulkheadTest(BulkheadTestBackend target, BackendTestDelegate action) {
         this.target = target;
@@ -52,9 +48,7 @@ public class ParrallelBulkheadTest implements Callable<Future> {
     /**
      * This class is Callable in parallel and then makes calls to Bulkheaded
      * test classes. This constructor set a default sleeping backend
-     * 
-     * @param target
-     *            the backend bulkheaded test class
+     * @param target the backend bulkheaded test class
      * @param td test data
      */
     public ParrallelBulkheadTest(BulkheadTestBackend target, TestData td) {
@@ -64,15 +58,15 @@ public class ParrallelBulkheadTest implements Callable<Future> {
 
     @Override
     public Future call() throws Exception {
-        Utils.log("action " + action);
-        Utils.log("target " + target);
+        log("action " + action);
+        log("target " + target);
         Future result = null;
 
         try {
             result = target.test(action);
         }
         catch( BulkheadException b) {
-            Utils.log("Might expect a Bulkhead exception from some tests : " + b.toString() + b.getMessage());
+            log("Might expect a Bulkhead exception from some tests : " + b.toString() + b.getMessage());
         }
         catch( Throwable t ){
             Assert.fail("Unexpected exception: " + t.toString(), t);

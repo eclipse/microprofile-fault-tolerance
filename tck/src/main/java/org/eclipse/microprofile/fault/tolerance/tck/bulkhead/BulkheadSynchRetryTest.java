@@ -19,6 +19,7 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead;
 
+import static org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils.handleResults;
 import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expectBulkheadException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
@@ -74,7 +75,7 @@ public class BulkheadSynchRetryTest extends Arquillian {
      * simultaneous requests
      */
     private BulkheadTaskManager manager = new BulkheadTaskManager();
-    
+
     @Inject
     private AsyncCaller asyncCaller;
 
@@ -95,23 +96,23 @@ public class BulkheadSynchRetryTest extends Arquillian {
 
     @Inject
     private Bulkhead55RapidRetry10ClassSynchBean rrClassBean;
-    
+
     @Inject
     private Bulkhead5RapidRetry0MethodSynchBean zeroRetryBean;
-    
+
     @Inject
     private Bulkhead5RapidRetry12MethodSynchBean zeroRetryWaitingQueueBean;
-    
+
     @Inject
     private BulkheadRetryDelaySyncBean retryDelaySyncBean;
-    
+
     @Inject
     private BulkheadRetryAbortOnSyncBean retryAbortOnSyncBean;
-    
+
     /**
      * This is the Arquillian deploy method that controls the contents of the
      * war that contains all the tests.
-     * 
+     *
      * @return the test war "ftBulkheadSynchRetryTest.war"
      */
     @Deployment
@@ -120,20 +121,19 @@ public class BulkheadSynchRetryTest extends Arquillian {
                 .addPackage(Bulkhead5ClassSynchronousRetry12Bean.class.getPackage()).addClass(Utils.class)
                 .addPackage(Packages.UTILS)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml").as(JavaArchive.class);
-        WebArchive war = ShrinkWrap.create(WebArchive.class, "ftBulkheadSynchRetryTest.war").addAsLibrary(testJar);
-        return war;
+        return ShrinkWrap.create(WebArchive.class, "ftBulkheadSynchRetryTest.war").addAsLibrary(testJar);
     }
 
     @BeforeTest
     public void beforeTest(final ITestContext testContext) {
         Utils.log("Testmethod: " + testContext.getName());
     }
-    
+
     @AfterMethod
     public void afterMethod() throws InterruptedException {
         manager.cleanup();
     }
-    
+
     @AfterClass
     public void afterClass() throws InterruptedException {
         manager.cleanup();
@@ -143,7 +143,7 @@ public class BulkheadSynchRetryTest extends Arquillian {
      * Test no regression due to passive Retry. The Bulkhead is 5
      * so the Retry should not come into effect for 5 tasks
      */
-    @Test()
+    @Test
     public void testBulkheadClassSynchronousPassiveRetry55() {
         int threads = 5;
         int maxSimultaneousWorkers = 5;
@@ -158,7 +158,7 @@ public class BulkheadSynchRetryTest extends Arquillian {
      * exception the first time their 'perform' method is called but will run OK
      * when retried.
      */
-    @Test()
+    @Test
     public void testBulkheadRetriedMethodDueToFailures() {
         int threads = 5;
         int maxSimultaneousWorkers = 5;
@@ -180,17 +180,17 @@ public class BulkheadSynchRetryTest extends Arquillian {
             results[i] = asyncCaller.submit(new ParrallelBulkheadTest(rrMethodBean, failOnce));
         }
 
-        Utils.handleResults(threads, results);
+        handleResults(threads, results);
         td.check();
     }
-    
+
     /**
      * Check we do not loose anything due to exceptions covered
      * by Retry at the class level. The Checker backends will throw an
      * exception the first time their 'perform' method is called but will run OK
      * when retried.
      */
-    @Test()
+    @Test
     public void testBulkheadRetriedClassDueToFailures() {
         int threads = 5;
         int maxSimultaneousWorkers = 5;
@@ -212,7 +212,7 @@ public class BulkheadSynchRetryTest extends Arquillian {
             results[i] = asyncCaller.submit(new ParrallelBulkheadTest(rrClassBean, failOnce));
         }
 
-        Utils.handleResults(threads, results);
+        handleResults(threads, results);
         td.check();
     }
 
@@ -222,7 +222,7 @@ public class BulkheadSynchRetryTest extends Arquillian {
      * done 20 times so this gives 20 seconds of retrying, which is enough to
      * get the calls through the bulkhead.
      */
-    @Test()
+    @Test
     public void testBulkheadMethodSynchronousRetry55() {
         int threads = 20;
         int maxSimultaneousWorkers = 5;
@@ -235,13 +235,12 @@ public class BulkheadSynchRetryTest extends Arquillian {
      * Test no regression due to passive Retry. The Bulkhead is 5 so the Retry
      * should not come into effect.
      */
-    @Test()
+    @Test
     public void testBulkheadPassiveRetryMethodSynchronous55() {
         int threads = 5;
         int maxSimultaneousWorkers = 5;
-        int expectedTasks = threads;
-        TestData td = new TestData(new CountDownLatch(expectedTasks));
-        threads(threads, methodBean, maxSimultaneousWorkers, expectedTasks, td);
+        TestData td = new TestData(new CountDownLatch(threads));
+        threads(threads, methodBean, maxSimultaneousWorkers, threads, td);
         td.check();
     }
 
@@ -251,7 +250,7 @@ public class BulkheadSynchRetryTest extends Arquillian {
      * bulkhead overflow to allow only ONE extra generation so we should loose 5
      * calls.
      */
-    @Test()
+    @Test
     public void testBulkheadRetryClassSynchronous55() {
         int threads = 20;
         int expectedTasks = 15; // We Retry just long enough for the first
@@ -266,7 +265,7 @@ public class BulkheadSynchRetryTest extends Arquillian {
      * Test that without retries that bulkhead exceptions are raised and that no
      * more than the expected number of tests go through.
      */
-    @Test()
+    @Test
     public void testNoRetriesBulkhead() {
         int threads = 30;
         int maxSimultaneousWorkers = 5;
@@ -275,13 +274,13 @@ public class BulkheadSynchRetryTest extends Arquillian {
         threads(threads, zeroRetryBean, maxSimultaneousWorkers, expectedTasks, td);
         td.check();
     }
-    
+
     /**
-     * Test that that the waitingTaskQueue parameter is ignored due to the absence of 
+     * Test that that the waitingTaskQueue parameter is ignored due to the absence of
      * the Asynchronous annotation. Only 5 tasks should go through, as the waiting
      * queue size should be ignored.
      */
-    @Test()
+    @Test
     public void testIgnoreWaitingTaskQueueBulkhead() {
         int threads = 30;
         int maxSimultaneousWorkers = 5;
@@ -290,7 +289,7 @@ public class BulkheadSynchRetryTest extends Arquillian {
         threads(threads, zeroRetryWaitingQueueBean, maxSimultaneousWorkers, expectedTasks, td);
         td.check();
     }
-    
+
     /**
      * Test that when an execution is retried, it doesn't hold onto its bulkhead slot.
      * <p>
@@ -302,29 +301,29 @@ public class BulkheadSynchRetryTest extends Arquillian {
         // Start taskA
         BulkheadTask taskA = manager.startTask(retryDelaySyncBean);
         taskA.assertStarting();
-        
+
         // Cause it to fail, prompting a retry after 1 second
         taskA.completeExceptionally(new TestException());
-        
+
         // Wait a short while for taskA to clear the bulkhead
         Thread.sleep(100);
-        
+
         // Now, start taskB
         BulkheadTask taskB = manager.startTask(retryDelaySyncBean);
         // Task B should start because the bulkhead is empty while taskA waits to retry
         taskB.assertStarting();
-        
+
         // Now, when taskA retries, it should complete with a BulkheadException because the bulkhead is full because taskB is running
         expectBulkheadException(taskA.getResultFuture());
-        
+
         // Now let taskB complete
         taskB.complete();
         taskB.assertFinishing();
     }
-    
+
     /**
      * Test that retries do not occur when BulkheadException is not included in the retryOn attribute
-     * 
+     *
      * @throws InterruptedException if the test is interrupted
      */
     @Test
@@ -332,19 +331,19 @@ public class BulkheadSynchRetryTest extends Arquillian {
         // Start taskA
         BulkheadTask taskA = manager.startTask(retryDelaySyncBean);
         taskA.assertStarting();
-        
+
         // Now, start taskB, which should quickly fail because there are no retries
         long startTime = System.nanoTime();
         BulkheadTask taskB = manager.startTask(retryDelaySyncBean);
         expectBulkheadException(taskB.getResultFuture());
         long endTime = System.nanoTime();
-        
+
         assertThat("Task took to long to return, may have done retries", Duration.ofNanos(endTime - startTime), lessThan(Duration.ofMillis(250)));
     }
-    
+
     /**
      * Test that retries do not occur when BulkheadException is included in the abortOn attribute
-     * 
+     *
      * @throws InterruptedException if the test is interrupted
      */
     @Test
@@ -352,23 +351,24 @@ public class BulkheadSynchRetryTest extends Arquillian {
         // Start taskA
         BulkheadTask taskA = manager.startTask(retryAbortOnSyncBean);
         taskA.assertStarting();
-        
+
         // Now, start taskB, which should quickly fail because there are no retries
         long startTime = System.nanoTime();
         BulkheadTask taskB = manager.startTask(retryAbortOnSyncBean);
         expectBulkheadException(taskB.getResultFuture());
         long endTime = System.nanoTime();
-        
+
         assertThat("Task took to long to return, may have done retries", Duration.ofNanos(endTime - startTime), lessThan(Duration.ofMillis(250)));
     }
 
 
     /**
      * Run a number of Callable's in parallel
-     * 
-     * @param number
-     * @param test
-     * @param maxSimultaneousWorkers
+     * @param number expected instances
+     * @param test bulkhead component to test
+     * @param maxSimultaneousWorkers max number of simultaneous workers
+     * @param expectedTasks number of expected tasks
+     * @param td testData component to simulate the execution
      */
     private void threads(int number, BulkheadTestBackend test, int maxSimultaneousWorkers, int expectedTasks,
             TestData td) {
@@ -383,6 +383,6 @@ public class BulkheadSynchRetryTest extends Arquillian {
             results[i] = asyncCaller.submit(new ParrallelBulkheadTest(test, td));
         }
 
-        Utils.handleResults(number, results);
+        handleResults(number, results);
     }
 }

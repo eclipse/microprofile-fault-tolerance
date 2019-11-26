@@ -19,20 +19,23 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
-
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CompletableFuture;
 import javax.management.RuntimeErrorException;
 
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils.log;
+import static org.awaitility.Awaitility.await;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 /**
  * A simple sleeping test backend worker. Having this backend as a delegate
- * means that we can perform more than one kind of test using a common 
+ * means that we can perform more than one kind of test using a common
  * {@code @Inject}-ed object that delegates to one of these that is passed in as a
  * parameter to the business method.
- * 
+ *
  * @author Gordon Hutchison
  */
 public class Checker implements BackendTestDelegate {
@@ -48,7 +51,7 @@ public class Checker implements BackendTestDelegate {
 
     /**
      * Constructor
-     * 
+     *
      * @param sleepMillis  how long to sleep for in milliseconds
      * @param td test data
      */
@@ -68,7 +71,7 @@ public class Checker implements BackendTestDelegate {
     /*
      * This is the method that simulates the backend work inside the
      * Bulkhead.
-     * 
+     *
      * @see org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.
      * BulkheadTestAction#perform()
      */
@@ -79,44 +82,41 @@ public class Checker implements BackendTestDelegate {
             int now = td.getWorkers().incrementAndGet();
             int max = td.getMaxSimultaneousWorkers().get();
 
-            while ((now > max) && !td.getMaxSimultaneousWorkers().compareAndSet(max, now)) {
-                max = td.getMaxSimultaneousWorkers().get();
-            }
-            if (fails > 0) {
-                Thread.sleep(millis / 2);
-                fails--;
-                RuntimeErrorException e = new RuntimeErrorException(new Error("fake error for Retry Testing"));
-                Utils.log(e.toString());
-
-                // We will countDown the latch in the finally block
-
-                throw e;
-            }
-
-            Utils.log("Task " + taskId + " sleeping for " + millis + " milliseconds. " + now
-                    + " workers inside Bulkhead from " + td.getInstances() + " instances " + BAR.substring(0, now));
-
-            Thread.sleep(millis);
-
-            Utils.log("Task " + taskId + " woke.");
-
-            // We will countDown the latch in the finally block
-
+        while ((now > max) && !td.getMaxSimultaneousWorkers().compareAndSet(max, now)) {
+            max = td.getMaxSimultaneousWorkers().get();
         }
-        catch (InterruptedException e) {
-            Utils.log(e.toString());
+
+        if (fails > 0) {
+            fails--;
+            await().atMost(millis / 2, MILLISECONDS).
+                untilAsserted(()-> assertEquals(fails, fails -1));
+
+            RuntimeErrorException e = new RuntimeErrorException(new Error("fake error for Retry Testing"));
+            log(e.toString());
+            // We will countDown the latch in the finally block
+            throw e;
+        }
+
+        log("Task " + taskId + " sleeping for " + millis + " milliseconds. " + now
+            + " workers inside Bulkhead from " + td.getInstances() + " instances " + BAR.substring(0, now));
+
+        await().atMost(millis, MILLISECONDS).untilAsserted(()-> assertTrue(fails < 0));
+
+        log("Task " + taskId + " woke.");
+        // We will countDown the latch in the finally block
+        }
+        catch (RuntimeException e) {
+            log(e.toString());
         }
         finally {
-
             // We want to decrement this before the latch
             td.getWorkers().decrementAndGet();
-
             CountDownLatch latch = td.getLatch();
             if (latch != null ) {
                 latch.countDown();
             }
-
         }
+
         CompletableFuture<String> result = new CompletableFuture<>();
         result.complete("max workers was " + td.getMaxSimultaneousWorkers().get());
         return result;
