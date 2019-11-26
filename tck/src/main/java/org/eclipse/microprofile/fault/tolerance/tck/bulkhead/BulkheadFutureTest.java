@@ -44,7 +44,6 @@ import static org.awaitility.Awaitility.await;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -97,12 +96,11 @@ public class BulkheadFutureTest extends Arquillian {
 
         assertFalse(result.isDone(), "Future reporting Done when not");
         try {
-            String r;
-            assertEquals(r = result.get(), "GET.", r);
-            assertEquals(r = result.get(1, TimeUnit.SECONDS), "GET.GET_TO.", r);
+            assertEquals(result.get(), "GET.");
+            assertEquals(result.get(1, TimeUnit.SECONDS), "GET.GET_TO.");
         }
         catch (Throwable t) {
-            assertNull(t);
+            fail("Unexpected exception", t);
         }
         assertTrue(result.isDone(), "Future done not reporting true");
     }
@@ -115,17 +113,14 @@ public class BulkheadFutureTest extends Arquillian {
     @Test
     public void testBulkheadMethodAsynchFutureDoneWithoutGet() {
         Checker fc = new FutureChecker(SHORT_TIME);
-        Future<String> result = null;
         try {
-            result = bhBeanMethodAsynchronousDefault.test(fc);
+            final Future<String> result = bhBeanMethodAsynchronousDefault.test(fc);
+            assertFalse(result.isDone(), "Future reporting Done when not");
+            await().atMost(SHORT_TIME * SHORT_TIME, MILLISECONDS).untilAsserted(()-> assertTrue(result.isDone()));
         }
         catch (InterruptedException e1) {
             fail("Unexpected interruption", e1);
         }
-
-        assertFalse(result.isDone(), "Future reporting Done when not");
-        waitingSimulation(result);
-        assertTrue(result.isDone(), "Future done not reporting true");
     }
 
     /**
@@ -148,13 +143,12 @@ public class BulkheadFutureTest extends Arquillian {
 
         assertFalse(result.isDone(), "Future reporting Done when not");
         try {
-            String r;
-            assertEquals(r = result.get(1, TimeUnit.SECONDS), "GET_TO.", r);
-            assertEquals(r = result.get(), "GET_TO.GET.", r);
+            assertEquals(result.get(1, TimeUnit.SECONDS), "GET_TO.");
+            assertEquals(result.get(), "GET_TO.GET.");
 
         }
         catch (Throwable t) {
-            assertNull(t);
+            fail("Unexpected exception", t);
         }
         assertTrue(result.isDone(), "Future done not reporting true");
     }
@@ -167,37 +161,13 @@ public class BulkheadFutureTest extends Arquillian {
     @Test
     public void testBulkheadClassAsynchFutureDoneWithoutGet() {
         Checker fc = new FutureChecker(SHORT_TIME);
-        Future<String> result = null;
-
         try {
-            result = bhBeanMethodAsynchronousDefault.test(fc);
+            final Future<String> result = bhBeanClassAsynchronousDefault.test(fc);
+            assertFalse(result.isDone(), "Future reporting Done when not");
+            await().atMost(SHORT_TIME * SHORT_TIME, MILLISECONDS).untilAsserted(()-> assertTrue(result.isDone()));
         }
         catch (InterruptedException e1) {
             fail("Unexpected interruption", e1);
-        }
-
-        assertFalse(result.isDone(), "Future reporting Done when not");
-        waitingSimulation(result);
-        assertTrue(result.isDone(), "Future done not reporting true");
-    }
-
-    /**
-     * method that simulates the waiting time using awaitility library
-     * @param result future to simulate the waiting time
-     */
-    private void waitingSimulation(Future<String> result) {
-        try {
-            final int waitingInitialCondition = 0;
-
-            await().atMost(SHORT_TIME * 2, MILLISECONDS)
-                .untilAsserted(() -> assertEquals(waitingInitialCondition, 0));
-
-            // Usually, we will not enter the loop,
-            // but we are prepared to wait up to 100 SHORT_TIMES (10sec)
-            await().atMost(SHORT_TIME * SHORT_TIME, MILLISECONDS).untilAsserted(()-> assertTrue(result.isDone()));
-        }
-        catch (Throwable t) {
-            assertNull(t);
         }
     }
 }
