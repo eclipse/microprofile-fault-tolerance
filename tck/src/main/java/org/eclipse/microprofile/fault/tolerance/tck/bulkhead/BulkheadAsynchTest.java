@@ -23,7 +23,6 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 
 import javax.inject.Inject;
@@ -90,7 +89,7 @@ public class BulkheadAsynchTest extends Arquillian {
     /**
      * This is the Arquillian deploy method that controls the contents of the
      * war that contains all the tests.
-     * 
+     *
      * @return the test war "ftBulkheadAsynchTest.war"
      */
     @Deployment
@@ -117,7 +116,7 @@ public class BulkheadAsynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadClassAsynchronous10() {
-        TestData td = new TestData(new CountDownLatch(10));
+        TestData td = new TestData();
         loop(10, bhBeanClassAsynchronous10, 10, td);
         td.check();
     }
@@ -129,7 +128,7 @@ public class BulkheadAsynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadMethodAsynchronous10() {
-        TestData td = new TestData(new CountDownLatch(10));
+        TestData td = new TestData();
         loop(10, bhBeanMethodAsynchronous10, 10, td);
         td.check();
     }
@@ -141,7 +140,7 @@ public class BulkheadAsynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadClassAsynchronous3() {
-        TestData td = new TestData(new CountDownLatch(10));
+        TestData td = new TestData();
         loop(10, bhBeanClassAsynchronous3, 3, td);
         td.check();
     }
@@ -153,7 +152,7 @@ public class BulkheadAsynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadMethodAsynchronous3() {
-        TestData td = new TestData(new CountDownLatch(10));
+        TestData td = new TestData();
         loop(10, bhBeanMethodAsynchronous3, 3, td);
         td.check();
     }
@@ -165,7 +164,7 @@ public class BulkheadAsynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadClassAsynchronousDefault() {
-        TestData td = new TestData(new CountDownLatch(10));
+        TestData td = new TestData();
         loop(10, bhBeanClassAsynchronousDefault, 10, td);
         td.check();
     }
@@ -177,7 +176,7 @@ public class BulkheadAsynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadMethodAsynchronousDefault() {
-        TestData td = new TestData(new CountDownLatch(10));
+        TestData td = new TestData();
         loop(10, bhBeanMethodAsynchronousDefault, 10, td);
         td.check();
     }
@@ -189,7 +188,7 @@ public class BulkheadAsynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadClassAsynchronousQueueing10() {
-        TestData td = new TestData(new CountDownLatch(20));
+        TestData td = new TestData();
         loop(20, bhBeanClassAsynchronousQueueing, 10, 20, td);
         td.check();
     }
@@ -201,20 +200,20 @@ public class BulkheadAsynchTest extends Arquillian {
      */
     @Test()
     public void testBulkheadMethodAsynchronousQueueing10() {
-        TestData td = new TestData(new CountDownLatch(20));
+        TestData td = new TestData();
         loop(20, bhBeanMethodAsynchronousQueueing, 10, 20, td);
         td.check();
     }
-    
+
     /**
      * Test that when the bulkhead is full, a BulkheadException is thrown
-     * 
+     *
      * @throws InterruptedException if the test is interrupted
      */
     @Test
     public void testBulkheadExceptionThrownWhenQueueFullAsync() throws InterruptedException {
         List<AsyncBulkheadTask> tasks = new ArrayList<>();
-        
+
         try {
             // Fill the bulkhead
             for (int i = 0; i < 10; i++) {
@@ -223,7 +222,7 @@ public class BulkheadAsynchTest extends Arquillian {
                 Future<?> result = bhBeanClassAsynchronousDefault.test(task);
                 task.assertStarting(result);
             }
-            
+
             // Fill the queue
             List<AsyncBulkheadTask> queuingTasks = new ArrayList<>();
             for (int i = 0; i < 10; i++) {
@@ -234,13 +233,13 @@ public class BulkheadAsynchTest extends Arquillian {
             }
             // Queued tasks should not start
             AbstractBulkheadTask.assertAllNotStarting(queuingTasks);
-            
+
             // Try to run one more (should get a bulkhead exception)
             AsyncBulkheadTask task = new AsyncBulkheadTask();
             tasks.add(task);
             Future<?> result = bhBeanClassAsynchronousDefault.test(task);
             task.assertNotStarting();
-            
+
             assertTrue(result.isDone(), "When a task is rejected from the bulkhead, the returned future should report as done");
             Exceptions.expect(BulkheadException.class, result);
         }
@@ -250,12 +249,12 @@ public class BulkheadAsynchTest extends Arquillian {
             }
         }
     }
-    
+
     /**
      * Run a number of Callable's (usually Asynch's) in a loop on one thread.
      * Here we do not check that amount that were successfully through the
      * Bulkhead
-     * 
+     *
      * @param loops
      * @param test
      * @param maxSimultaneousWorkers
