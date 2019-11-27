@@ -24,9 +24,9 @@ import org.jboss.arquillian.container.test.spi.client.deployment.AuxiliaryArchiv
 import org.jboss.arquillian.core.spi.LoadableExtension;
 
 /**
- * Extension to register the {@link HamcrestArchiveAppender}
+ * Extension to register extensions required by the TCK
  */
-public class HamcrestLoadableExtension implements LoadableExtension {
+public class TckLoadableExtension implements LoadableExtension {
 
     /* (non-Javadoc)
      * @see org.jboss.arquillian.core.spi.LoadableExtension#register(org.jboss.arquillian.core.spi.LoadableExtension.ExtensionBuilder)
@@ -34,6 +34,8 @@ public class HamcrestLoadableExtension implements LoadableExtension {
     @Override
     public void register(ExtensionBuilder builder) {
         builder.service(AuxiliaryArchiveAppender.class, HamcrestArchiveAppender.class);
+        builder.service(AuxiliaryArchiveAppender.class, AwaitilityArchiveAppender.class);
+        builder.service(AuxiliaryArchiveAppender.class, TCKConfigArchiveAppender.class);
     }
 
 }

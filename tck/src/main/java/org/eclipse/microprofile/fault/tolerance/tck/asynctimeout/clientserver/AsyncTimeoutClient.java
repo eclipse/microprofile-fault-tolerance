@@ -24,6 +24,7 @@ import java.util.concurrent.Future;
 
 import javax.enterprise.context.RequestScoped;
 
+import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Timeout;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Connection;
@@ -36,8 +37,8 @@ import org.eclipse.microprofile.fault.tolerance.tck.util.Connection;
  */
 @RequestScoped
 public class AsyncTimeoutClient {
-    
-    
+
+
     /**
      * serviceA is a slow running service that will take 5 seconds in normal operation. Here it is
      * configured to time out after 2 seconds.
@@ -50,7 +51,7 @@ public class AsyncTimeoutClient {
 
         Connection conn = new Connection() {
             {
-                Thread.sleep(5000);
+                Thread.sleep(TCKConfig.getConfig().getTimeoutInMillis(5000));
             }
             
             @Override
@@ -74,7 +75,7 @@ public class AsyncTimeoutClient {
 
         Connection conn = new Connection() {
             {
-                Thread.sleep(500);
+                Thread.sleep(TCKConfig.getConfig().getTimeoutInMillis(500));
             }
             
             @Override

@@ -26,6 +26,7 @@ import java.util.concurrent.Future;
 
 import javax.enterprise.context.RequestScoped;
 
+import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
 import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
@@ -81,16 +82,19 @@ public class CircuitBreakerClientWithRetryAsync implements Serializable {
         return CompletableFuture.completedFuture(conn);
     }
     
+    /**
+     * Configured to always time out and Retry until CircuitBreaker is triggered on 4th call. Runs asynchronously.
+     */
     @CircuitBreaker(successThreshold = 2, requestVolumeThreshold = 4, failureRatio = 0.75, delay = 50000)
     @Retry(retryOn = {TestException.class, TimeoutException.class}, maxRetries = 7, maxDuration = 20000)
-    @Timeout(500)
+    @Timeout(100) // Scaled via config
     @Asynchronous
-    public Future<Connection> serviceC(long timeToSleep) {
+    public Future<Connection> serviceC() {
         Connection conn = null;
         counterForInvokingServiceC++;
 
         try {
-            Thread.sleep(timeToSleep);
+            Thread.sleep(TCKConfig.getConfig().getTimeoutInMillis(5000));
             throw new RuntimeException("Timeout did not interrupt");
         } 
         catch (InterruptedException e) {
@@ -108,6 +112,7 @@ public class CircuitBreakerClientWithRetryAsync implements Serializable {
     @CircuitBreaker(requestVolumeThreshold = 4, failureRatio = 0.75, delay = 1000)
     @Retry(retryOn = CircuitBreakerOpenException.class, maxRetries = 20, delay = 100, jitter = 0)
     @Asynchronous
+    // Scaled via config
     public Future<String> serviceWithRetryOnCbOpen(boolean throwException) {
         if (throwException) {
             throw new TestException("Test Exception");
@@ -128,6 +133,7 @@ public class CircuitBreakerClientWithRetryAsync implements Serializable {
     @CircuitBreaker(requestVolumeThreshold = 4, failureRatio = 0.75, delay = 1000)
     @Retry(retryOn = TimeoutException.class, maxRetries = 20, delay = 200)
     @Asynchronous
+    // Delays scaled via config
     public Future<String> serviceWithRetryOnTimeout(boolean throwException) {
         if (throwException) {
             throw new TestException("Test Exception");
@@ -146,6 +152,7 @@ public class CircuitBreakerClientWithRetryAsync implements Serializable {
     @CircuitBreaker(requestVolumeThreshold = 4, failureRatio = 0.75, delay = 1000)
     @Retry(abortOn = { TestException.class, CircuitBreakerOpenException.class }, maxRetries = 20, delay = 200)
     @Asynchronous
+    // Delays scaled via config
     public Future<String> serviceWithRetryFailOnCbOpen(boolean throwException) {
         if (throwException) {
             throw new TestException("Test Exception");

@@ -19,12 +19,16 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck;
 
+import static org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig.getConfig;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
 import javax.inject.Inject;
 
+import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
 import org.eclipse.microprofile.fault.tolerance.tck.retrytimeout.clientserver.RetryTimeoutClient;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
+import org.eclipse.microprofile.faulttolerance.Timeout;
 import org.eclipse.microprofile.faulttolerance.exceptions.TimeoutException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
@@ -45,11 +49,20 @@ public class RetryTimeoutTest extends Arquillian {
 
     private @Inject RetryTimeoutClient clientForRetryTimeout;
     
+    private TCKConfig config = TCKConfig.getConfig();
+    
     @Deployment
     public static WebArchive deploy() {
+
+        final ConfigAnnotationAsset config = new ConfigAnnotationAsset()
+            .setValue(RetryTimeoutClient.class,"serviceA", Timeout.class,getConfig().getTimeoutInStr(500))
+            .setValue(RetryTimeoutClient.class,"serviceWithoutRetryOn", Timeout.class,getConfig().getTimeoutInStr(500))
+            .setValue(RetryTimeoutClient.class,"serviceWithAbortOn", Timeout.class,getConfig().getTimeoutInStr(500));
+
         JavaArchive testJar = ShrinkWrap
                 .create(JavaArchive.class, "ftRetryTimeout.jar")
                 .addClasses(RetryTimeoutClient.class)
+                .addAsManifestResource(config, "microprofile-config.properties")
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                 .as(JavaArchive.class);
 
@@ -69,7 +82,7 @@ public class RetryTimeoutTest extends Arquillian {
     @Test
     public void testRetryTimeout() {
         try {
-            String result = clientForRetryTimeout.serviceA(1000);
+            String result = clientForRetryTimeout.serviceA(config.getTimeoutInMillis(1000));
         } 
         catch (TimeoutException ex) {
             // Expected
@@ -93,7 +106,7 @@ public class RetryTimeoutTest extends Arquillian {
     @Test
     public void testRetryNoTimeout() {
         try {
-            String result = clientForRetryTimeout.serviceA(10);
+            String result = clientForRetryTimeout.serviceA(config.getTimeoutInMillis(10));
         } 
         catch (TimeoutException ex) {
             // Not Expected

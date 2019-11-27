@@ -19,9 +19,12 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.metrics.util;
 
-import static org.hamcrest.Matchers.closeTo;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.lessThan;
 
+import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
 import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
 
 public class MetricComparator {
 
@@ -29,18 +32,38 @@ public class MetricComparator {
     private MetricComparator() {}
     
     /**
-     * Check that a nanosecond time is with 100ms of an expected time in milliseconds
+     * Check that a nanosecond time is within 20% of an expected time in milliseconds
      * <p>
-     * Note that this method does both the millseconds to nanoseconds conversion and creates a {@link Matcher} to do the check.
+     * Note that this method applies any timeout scaling configured in TCKConfig, does the millseconds to nanoseconds conversion and creates a
+     * {@link Matcher} to do the check.
      * <p>
      * Useful for checking the results from Histograms.
      * 
-     * @param millis the expected time in milliseconds
-     * @return a {@link Matcher} which matches against a time in milliseconds
+     * @param originalMillis the expected time in milliseconds
+     * @return a {@link Matcher} which matches against a time in nanoseconds
      */
-    public static Matcher<Double> approxMillis(long millis) {
+    public static Matcher<Long> approxMillis(final long originalMillis) {
+        long millis = TCKConfig.getConfig().getTimeoutInMillis(originalMillis);
         long nanos = millis * 1_000_000;
-        return closeTo(nanos, 1_000_000 * 100);
+        long error = Math.round(nanos * 0.2);
+        return Matchers.allOf(greaterThan(nanos-error), lessThan(nanos+error));
+    }
+    
+    /**
+     * Check that a nanosecond time is less than an expected time in milliseconds
+     * <p>
+     * This method applies any timeout scaling configured in TCKConfig, does the millseconds to nanoseconds conversion and creates a
+     * {@link Matcher} to do the check.
+     * <p>
+     * Useful for checking the results from Histograms.
+     * 
+     * @param originalMillis the expected time in milliseconds
+     * @return a {@link Matcher} which matches against a time in nanoseconds
+     */
+    public static Matcher<Long> lessThanMillis(final long originalMillis) {
+        long millis = TCKConfig.getConfig().getTimeoutInMillis(originalMillis);
+        long nanos = millis * 1_000_000;
+        return lessThan(nanos);
     }
     
 }

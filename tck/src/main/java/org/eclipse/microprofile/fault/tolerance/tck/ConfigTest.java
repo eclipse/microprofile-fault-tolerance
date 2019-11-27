@@ -141,7 +141,7 @@ public class ConfigTest extends Arquillian {
      * Test the configuration of maxDuration on a specific method. 
      * 
      * The serviceA is annotated with maxDuration=3000 but a configuration property overrides it with a value of 1000,
-     * so serviceA should be executed less than 11 times.
+     * so serviceA should be executed 11 or less times.
      * 
      * The test assumes that the container has been configured with the property,
      * org.eclipse.microprofile.fault.tolerance.tck.config.clientserver.ConfigClient/serviceC/Retry/maxDuration=1000
@@ -157,16 +157,17 @@ public class ConfigTest extends Arquillian {
         }
 
         //The writing service invocation takes 100ms plus a jitter of 0-200ms with the max duration of 1000ms, 
-        //the max invocation should be less than 10
+        //the max invocation should be 11 or less
+        //(minimum time for 10 invocations is 1000ms, that leaves the possibility of starting the 11th invocation just as we hit the maxDuration)
         int count = clientForConfig.getRetryCountForWritingService();
-        Assert.assertTrue(count< 11, "The max retry counter should be less than 11");
+        Assert.assertTrue(count <= 11, "The max retry counter should be 11 or less");
     }
 
     /**
      * Test the configuration of maxDuration on a class. 
      * 
      * The class is annotated with maxDuration=3000 but a configuration property overrides it with a value of 1000
-     * so serviceA should be executed less than 11 times.
+     * so serviceA should be executed 11 or less times.
      * 
      * The test assumes that the container has been configured with the property,
      * org.eclipse.microprofile.fault.tolerance.tck.config.clientserver.ConfigClassLevelMaxDurationClient/Retry/maxDuration=1000
@@ -182,8 +183,9 @@ public class ConfigTest extends Arquillian {
         }
 
         //The writing service invocation takes 100ms plus a jitter of 0-200ms with the max duration of 1000ms, 
-        //the max invocation should be less than 10
-        int retryCountforWritingService = clientForClassLevelMaxDurationConfig.getRetryCountForWritingService();        
-        Assert.assertTrue(retryCountforWritingService< 11, "The max retry counter should be less than 11");
+        //the max invocation should be 11 or less
+        //(minimum time for 10 invocations is 1000ms, that leaves the possibility of starting the 11th invocation just as we hit the maxDuration)
+        int retryCountforWritingService = clientForClassLevelMaxDurationConfig.getRetryCountForWritingService();
+        Assert.assertTrue(retryCountforWritingService <= 11, "The max retry counter should be 11 or less");
     }
 }

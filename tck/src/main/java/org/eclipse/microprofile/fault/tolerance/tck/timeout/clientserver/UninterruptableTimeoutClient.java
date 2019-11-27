@@ -54,7 +54,7 @@ public class UninterruptableTimeoutClient {
      * @param waitMs the time to wait
      */
     @Timeout(value = 500, unit = ChronoUnit.MILLIS)
-    public void serviceTimeout(int waitMs) {
+    public void serviceTimeout(long waitMs) {
         long waitNs = Duration.ofMillis(waitMs).toNanos();
         long startTime = System.nanoTime();
         
