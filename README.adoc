@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2016-2017 Contributors to the Eclipse Foundation
+// Copyright (c) 2016-2019 Contributors to the Eclipse Foundation
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information regarding copyright ownership.
@@ -18,122 +18,85 @@
 //
 image:https://badges.gitter.im/eclipse/microprofile-fault-tolerance.svg[link="https://gitter.im/eclipse/microprofile-fault-tolerance"]
 
-# Fault Tolerance
-
-* Proposal: link:0004-FaultTolerance.md[MP-0004]
-* Authors: link:https://github.com/Emily-Jiang[Emily Jiang], link:https://github.com/jhalterman/[Jonathan Halterman], link:https://github.com/antoinesd[Antoine Sabot-Durand], link:https://github.com/johnament[John Ament]
-* Status: **v1.0 released**
-
-*During the review process, add the following fields as needed:*
-
-* Decision Notes: link:https://groups.google.com/forum/#!topic/microprofile/ezFC1TLGozU[Discussion thread topic covering the  Rationale], link:https://groups.google.com/forum/#!forum/microprofile[Discussion thread topic with additional Commentary]
+# Eclipse MicroProfile Fault Tolerance
 
 ## Introduction
 
-It is increasingly important to build fault tolerant micro services. Fault tolerance is about leveraging different strategies to guide the execution and result of some logic. Retry policies, bulkheads, and circuit breakers are popular concepts in this area. They dictate whether and when executions should take place, and fallbacks offer an alternative result when an execution does not complete successfully. 
+It is increasingly important to build fault tolerant micro services. Fault tolerance is about leveraging different strategies to guide the execution and result of some logic. Retry policies, bulkheads, and circuit breakers are popular concepts in this area. They dictate whether and when executions should take place, and fallbacks offer an alternative result when an execution does not complete successfully.
 
-As mentioned above, the Fault Tolerance proposal is to focus the aspects: TimeOut, RetryPolicy, Fallback, bulkhead and circuit breaker.
+## Overview 
 
-* TimeOut: Define a duration for timeout
-* RetryPolicy: Define a criteria on when to retry 
-* Fallback: provide an alternative solution for a failed execution.
-* Bulkhead: isolate failures in part of the system while the rest part of the system can still function.
-* CircuitBreaker: offer a way of fail fast by automatically failing execution to prevent the system overloading and indefinite wait or timeout by the clients.
+Fault Tolerance provides developers with the following strategies for dealing with failure:
 
-The main design is to separate execution logic from execution. The execution can be configured with fault tolerance policies, such as RetryPolicy, fallback, Bulkhead and CircuitBreaker. 
+* Timeout: Define a maximum duration for execution
+* Retry: Attempt execution again if it fails
+* Bulkhead: Limit concurrent execution so that failures in that area can't overload the whole system
+* CircuitBreaker: Automatically fail fast when execution repeatedly fails
+* Fallback: Provide an alternative solution when execution fails
 
-link:https://github.com/Netflix/Hystrix[Hystrix] and link:https://github.com/jhalterman/failsafe[Failsafe] are two popular libraries for handling failures. This proposal is to define a standard API and approach for applications to follow in order to achieve the fault tolerance.
+Fault Tolerance provides an annotation for each strategy which can be placed on the methods of CDI beans. When an annotated method is called, the call is intercepted and the corresponding fault tolerance strategies are applied to the execution of that method.
 
-The requirements are as follows:
+## Documentation
 
-* Loose coupling: Execution logic should not know anything about the execution status or fault tolerance. 
-* Failure handling strategy should be configured when the execution takes place.
-* Support for synchronous and asynchronous execution
-* Integration with 3rd party asynchronous APIs. This is necessary to handle executions that are completed at some time in the future, where retries will need to be explicitly scheduled from within the asynchronous execution. This is common when working with various 3rd party asynchronous tools such as Netty, RxJava, Vert.x, etc.
-* Require immutable failure handling policy configuration
-* Some Failure policy configurations, e.g. CircuitBreaker, RetryPolicy, can be used stand alone. For example, it has been very useful for circuit breakers to be standalone constructs which can be plugged into and intentionally shared across multiple executions. Likewise for retry policies. Additionally, an Execution construct can be offered that allows retry policies to be applied to some logic in a standalone, manually controlled way.
+For links to the latest maven artifacts, Javadoc and specification document, see the link:https://github.com/eclipse/microprofile-fault-tolerance/releases/latest[latest release].
 
-Mailinglist thread: link:https://groups.google.com/forum/#!topic/microprofile/ezFC1TLGozU[Discussion thread topic for that proposal]
+## Example
 
-## Motivation
+Apply the retry and fallback strategies to `doWork()`. It will be executed up to two additional times if if throws an exception. If all executions throw an exception, `doWorkFallback()` will be called and the result of that returned instead.
 
-Currently there are at least two libraries to provide fault tolerance. It is best to uniform the technologies and define a standard so that micro service applications can adopt and the implementation of fault tolerance can be provided by the containers if possible.
-
-## Proposed solution
-
-Separate the responsibility of executing logic (Runnables/Callables/etc) from guiding when execution should take place (through retry policies, bulkheads, circuit breakers). In this way, failure handling strategies become configuration that can influence executions, and the execution API itself is just responsible for receiving some configuration and performing executions.
-
-By default, a failure handling strategy could assume, for example, that any exception is a failure. This is what the RetryPolicy's `retryOn`, `abortOn` clauses are about - defining a failure.
-
-Standardise the Fallback, Bulkhead and CircuitBreaker APIs and provide implementations.
-
-* CDI-first approach to apply RetryPolicy, Fallback, BulkHead, CircuitBreaker using annotations
-
-## Detailed design (One example of implementations)
-This specification utilises CDI to simplify the programming model.
-
-### CDI-based approach 
-Use interceptor binding to specify the execution and policy configuration.
-An annotation of Asynchronous has to be specified for any asynchronous calls. Otherwise, synchronous execution is assumed. 
-
-#### RetryPolicy: A policy to define the retry criteria
-
-An annotation to specify the max retries, delays, maxDuration, Duration unit, jitter, retryOn etc.
-
-#### CircuitBreaker: a rule to achieve fail fast, in order to prevent from repeating timeout
-
-An annotation to specify when to open a circuit, when to half open, close the circuit.
-
-#### Fallback
-Define the fallback method or fallback handler for a failed execution.
-
-#### Timeout to be used specifying the maximum time for an execution
-
-Timeout to specify the maximum time for a particular execution.
-
-#### Bulkhead - threadpool or semaphore style
-
-Use this annotation without `Asynchronous` annotation for semaphore style. When used with `Asynchronous`, it means threadpool style of bulkhead.
-#### Usage
-The annotations can be applied to a bean or methods. They can be used together. For an instance, `@Retry` can be used with `@Fallback` in order to trigger the `fallback` when the `Retry` policy fails.
-
-```
+```java
 @ApplicationScoped
 public class FaultToleranceBean {
-   int i = 0;
+   
    @Retry(maxRetries = 2)
-   public Runnable doWork() {
-      Runnable mainService = () -> serviceA(); // This unreliable service sometimes succeeds but
-                                         // sometimes throws a RuntimeException
-	  return mainService;								 
+   @Fallback(fallbackMethod = "doWorkFallback")
+   public Result doWork() {
+      return callServiceA(); // This service usually works but sometimes
+                             // throws a RuntimeException
+   }
+   
+   private Result doWorkFallback() {
+      return Result.emptyResult();
    }
 }
+```
+
+From elsewhere, inject the `FaultToleranceBean` and call the method:
+
+```java
+@ApplicationScoped
+public class TestBean {
+
+    @Inject private FaultToleranceBean faultToleranceBean;
+    
+    public void test() {
+        Result theResult = faultToleranceBean.doWork();
+    }
 }
 ```
-#### Configuration
-The annotation parameters can be configured via MicroProfile Config. In order to configure the `maxRetries` to be `6` for the following `Retry` policy, define a property `org.microprofile.readme.FaultToleranceBean/doWork/Retry/maxRetries=6`. Alternatively, if the `maxRetries` of the `Retry` is to be configured to `6`, just specify the property of `Retry/maxRetries=6`.
 
-```
-package org.microprofile.readme
+### Configuration
+
+The annotation parameters can be configured via MicroProfile Config. For example, imagine you have the following code in your application:
+
+```java
+package org.microprofile.readme;
+
 @ApplicationScoped
 public class FaultToleranceBean {
-   int i = 0;
+
    @Retry(maxRetries = 2)
-   public Runnable doWork() {
-      Runnable mainService = () -> serviceA(); // This unreliable service sometimes succeeds but
-                                         // sometimes throws a RuntimeException
-	  return mainService;								 
+   public Result doWork() {
+      return callServiceA(); // This service usually works but sometimes
+                             // throws a RuntimeException
    }
 }
-}
 ```
-## Impact on existing code
 
-n/a
+At runtime, you can configure `maxRetries` to be `6` instead of `2` for this method by defining the config property `org.microprofile.readme.FaultToleranceBean/doWork/Retry/maxRetries=6`.
 
-## Alternatives considered
+Alternatively, you can configure `maxRetries` to be `6` for all instances of `Retry` in your application by specifying the property `Retry/maxRetries=6`.
 
-n/a
 
 ## Contributing
 
