@@ -292,7 +292,7 @@ public class FallbackExceptionHierarchyTest extends Arquillian {
 
     private FallbackStatus invokeServiceC(Throwable exception) {
         try {
-            String result = service.serviceB(exception);
+            String result = service.serviceC(exception);
             if (service.getFallbackValue().equals(result)) {
                 return FallbackStatus.FALLBACK;
             } 
