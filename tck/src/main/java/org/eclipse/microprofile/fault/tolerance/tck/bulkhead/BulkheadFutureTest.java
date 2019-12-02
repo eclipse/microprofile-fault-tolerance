@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2017-2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -116,7 +116,7 @@ public class BulkheadFutureTest extends Arquillian {
         try {
             final Future<String> result = bhBeanMethodAsynchronousDefault.test(fc);
             assertFalse(result.isDone(), "Future reporting Done when not");
-            await().atMost(SHORT_TIME * SHORT_TIME, MILLISECONDS).untilAsserted(()-> assertTrue(result.isDone()));
+            await().atMost(SHORT_TIME * 100, MILLISECONDS).untilAsserted(()-> assertTrue(result.isDone()));
         }
         catch (InterruptedException e1) {
             fail("Unexpected interruption", e1);
@@ -164,7 +164,7 @@ public class BulkheadFutureTest extends Arquillian {
         try {
             final Future<String> result = bhBeanClassAsynchronousDefault.test(fc);
             assertFalse(result.isDone(), "Future reporting Done when not");
-            await().atMost(SHORT_TIME * SHORT_TIME, MILLISECONDS).untilAsserted(()-> assertTrue(result.isDone()));
+            await().atMost(SHORT_TIME * 100, MILLISECONDS).untilAsserted(()-> assertTrue(result.isDone()));
         }
         catch (InterruptedException e1) {
             fail("Unexpected interruption", e1);

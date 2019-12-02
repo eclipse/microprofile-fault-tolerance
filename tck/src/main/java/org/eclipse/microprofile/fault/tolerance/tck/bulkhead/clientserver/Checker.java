@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2017 - 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -24,10 +24,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CompletableFuture;
 import javax.management.RuntimeErrorException;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils.log;
-import static org.awaitility.Awaitility.await;
-import static org.testng.Assert.assertTrue;
 
 /**
  * A simple sleeping test backend worker. Having this backend as a delegate
@@ -98,7 +95,11 @@ public class Checker implements BackendTestDelegate {
             log("Task " + taskId + " sleeping for " + millis + " milliseconds. " + now
                 + " workers inside Bulkhead from " + td.getInstances() + " instances " + BAR.substring(0, now));
 
-            await().atMost(millis, MILLISECONDS).untilAsserted(() -> assertTrue(fails < 0));
+            Thread.sleep(millis);
+
+            if (td.getLatch() != null) {
+                td.getLatch().countDown();
+            }
 
             log("Task " + taskId + " woke.");
             // We will countDown the latch in the finally block
