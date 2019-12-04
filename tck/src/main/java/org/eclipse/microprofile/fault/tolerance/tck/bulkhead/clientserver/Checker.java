@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2017 - 2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2017-2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -96,10 +96,6 @@ public class Checker implements BackendTestDelegate {
                 + " workers inside Bulkhead from " + td.getInstances() + " instances " + BAR.substring(0, now));
 
             Thread.sleep(millis);
-
-            if (td.getLatch() != null) {
-                td.getLatch().countDown();
-            }
 
             log("Task " + taskId + " woke.");
             // We will countDown the latch in the finally block
