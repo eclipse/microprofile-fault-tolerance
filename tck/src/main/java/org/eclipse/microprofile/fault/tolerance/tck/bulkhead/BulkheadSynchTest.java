@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2017-2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2017-2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -36,7 +36,6 @@ import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhe
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.ParrallelBulkheadTest;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.TestData;
 import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncCaller;
-import org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -48,6 +47,10 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.ITestContext;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+
+import static org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils.handleResults;
+import static org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils.log;
+import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expect;
 
 /**
  * @author Gordon Hutchison
@@ -81,7 +84,6 @@ public class BulkheadSynchTest extends Arquillian {
     /**
      * This is the Arquillian deploy method that controls the contents of the
      * war that contains all the tests.
-     * 
      * @return the test war "ftBulkheadSynchTest.war"
      */
     @Deployment
@@ -92,13 +94,12 @@ public class BulkheadSynchTest extends Arquillian {
                 .addPackage(Packages.UTILS)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                 .as(JavaArchive.class);
-        WebArchive war = ShrinkWrap.create(WebArchive.class, "ftBulkheadSynchTest.war").addAsLibrary(testJar);
-        return war;
+        return ShrinkWrap.create(WebArchive.class, "ftBulkheadSynchTest.war").addAsLibrary(testJar);
     }
 
     @BeforeTest
     public void beforeTest(final ITestContext testContext) {
-        Utils.log("Testmethod: " + testContext.getName());
+        log("Testmethod: " + testContext.getName());
     }
 
     /**
@@ -106,7 +107,7 @@ public class BulkheadSynchTest extends Arquillian {
      * more than 3 parallel synchronous calls are allowed into a method that is
      * a member of a {@code @Bulkhead(3)} Class.
      */
-    @Test()
+    @Test
     public void testBulkheadClassSemaphore3() {
         TestData td = new TestData(new CountDownLatch(3));
         threads(20, bhBeanClassSemaphore3, 3, td);
@@ -118,26 +119,23 @@ public class BulkheadSynchTest extends Arquillian {
      * no more than 10 parallel synchronous calls are allowed into a method that
      * is a member of a {@code @Bulkhead(10)} Class.
      */
-    @Test()
+    @Test
     public void testBulkheadClassSemaphore10() {
         TestData td = new TestData(new CountDownLatch(10));
-
         threads(20, bhBeanClassSemaphore10, 10, td);
         td.check();
-
     }
 
     /**
      * Tests the method synchronous Bulkhead10. This test will check that 10 and
      * no more than 10 parallel synchronous calls are allowed into a method that
      * has an individual
-     * 
+     *
      * {@code @Bulkhead(10)} annotation
      */
-    @Test()
+    @Test
     public void testBulkheadMethodSemaphore10() {
         TestData td = new TestData(new CountDownLatch(10));
-
         threads(20, bhBeanMethodSemaphore10, 10, td);
         td.check();
     }
@@ -147,10 +145,9 @@ public class BulkheadSynchTest extends Arquillian {
      * no more than 3 parallel synchronous calls are allowed into a method that
      * has an individual Bulkhead(3) annotation
      */
-    @Test()
+    @Test
     public void testBulkheadMethodSemaphore3() {
         TestData td = new TestData(new CountDownLatch(3));
-
         threads(20, bhBeanMethodSemaphore3, 3, td);
         td.check();
     }
@@ -160,13 +157,11 @@ public class BulkheadSynchTest extends Arquillian {
      * and no more than 10 parallel synchronous calls are allowed into a method
      * that is a member of a {@code @Bulkhead(10)} Class.
      */
-    @Test()
+    @Test
     public void testBulkheadClassSemaphoreDefault() {
         TestData td = new TestData(new CountDownLatch(10));
-
         threads(20, bhBeanClassSemaphoreDefault, 10, td);
         td.check();
-
     }
 
     /**
@@ -174,17 +169,15 @@ public class BulkheadSynchTest extends Arquillian {
      * parameter. This will check that more than 1 but not more than 10 threads get
      * into the bulkhead at once.
      */
-    @Test()
+    @Test
     public void testBulkheadMethodSemaphoreDefault() {
         TestData td = new TestData(new CountDownLatch(10));
-
         threads(20, bhBeanMethodSemaphoreDefault, 10, td);
         td.check();
     }
-    
+
     /**
      * Test that when the bulkhead is full, a BulkheadException is thrown
-     * 
      * @throws InterruptedException if the test is interrupted
      */
     @Test
@@ -196,12 +189,11 @@ public class BulkheadSynchTest extends Arquillian {
                 BulkheadTask task = manager.startTask(bhBeanMethodSemaphoreDefault);
                 task.assertStarting();
             }
-            
+
             // Try to run one more (should get a bulkhead exception)
             BulkheadTask task = manager.startTask(bhBeanMethodSemaphoreDefault);
             task.assertNotStarting();
-            
-            Exceptions.expect(BulkheadException.class, task.getResultFuture());
+            expect(BulkheadException.class, task.getResultFuture());
         }
         finally {
             manager.cleanup();
@@ -211,22 +203,19 @@ public class BulkheadSynchTest extends Arquillian {
 
     /**
      * Run a number of Callable's in parallel
-     * 
-     * @param number
-     * @param test
-     * @param maxSimultaneousWorkers
+     * @param number expected instances
+     * @param test bulkhead component to test
+     * @param maxSimultaneousWorkers max number of simultaneous workers
      */
     private void threads(int number, BulkheadTestBackend test, int maxSimultaneousWorkers, TestData td) {
-
         td.setExpectedMaxSimultaneousWorkers(maxSimultaneousWorkers);
         td.setExpectedInstances(number);
         Future[] results = new Future[number];
         for (int i = 0; i < number; i++) {
-            Utils.log("Starting test " + i);
+            log("Starting test " + i);
             results[i] = xService.submit(new ParrallelBulkheadTest(test, td));
         }
 
-        Utils.handleResults(number, results);
+        handleResults(number, results);
     }
-
 }

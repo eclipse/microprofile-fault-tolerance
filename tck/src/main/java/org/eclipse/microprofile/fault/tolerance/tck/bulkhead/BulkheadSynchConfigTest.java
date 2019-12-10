@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2017-2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -42,6 +42,8 @@ import org.testng.ITestContext;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import static org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils.handleResults;
+
 /**
  * @author Gordon Hutchison
  */
@@ -62,8 +64,7 @@ public class BulkheadSynchConfigTest extends Arquillian {
             .addAsManifestResource(new StringAsset(
                 "Bulkhead/value=5"), "microprofile-config.properties")
             .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml").as(JavaArchive.class);
-        WebArchive war = ShrinkWrap.create(WebArchive.class, "ftBulkheadSynchTest.war").addAsLibrary(testJar);
-        return war;
+        return ShrinkWrap.create(WebArchive.class, "ftBulkheadSynchTest.war").addAsLibrary(testJar);
     }
 
     @BeforeTest
@@ -84,13 +85,11 @@ public class BulkheadSynchConfigTest extends Arquillian {
 
     /**
      * Run a number of Callable's in parallel
-     *
-     * @param number
-     * @param test
-     * @param maxSimultaneousWorkers
+     * @param number expected instances
+     * @param test bulkhead component to test
+     * @param maxSimultaneousWorkers max number of simultaneous workers
      */
     private void threads(int number, BulkheadTestBackend test, int maxSimultaneousWorkers, TestData td) {
-
         td.setExpectedMaxSimultaneousWorkers(maxSimultaneousWorkers);
         td.setExpectedInstances(number);
         Future[] results = new Future[number];
@@ -99,7 +98,7 @@ public class BulkheadSynchConfigTest extends Arquillian {
             results[i] = xService.submit(new ParrallelBulkheadTest(test, td));
         }
 
-        Utils.handleResults(number, results);
+        handleResults(number, results);
     }
 
     /*
