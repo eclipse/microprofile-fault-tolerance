@@ -96,8 +96,8 @@ public class BulkheadFutureTest extends Arquillian {
 
         assertFalse(result.isDone(), "Future reporting Done when not");
         try {
-            assertEquals(result.get(), "GET.");
-            assertEquals(result.get(1, TimeUnit.SECONDS), "GET.GET_TO.");
+            assertEquals(result.get(), "RESULT");
+            assertEquals(result.get(1, TimeUnit.SECONDS), "RESULT");
         }
         catch (Throwable t) {
             fail("Unexpected exception", t);
@@ -143,8 +143,8 @@ public class BulkheadFutureTest extends Arquillian {
 
         assertFalse(result.isDone(), "Future reporting Done when not");
         try {
-            assertEquals(result.get(1, TimeUnit.SECONDS), "GET_TO.");
-            assertEquals(result.get(), "GET_TO.GET.");
+            assertEquals(result.get(1, TimeUnit.SECONDS), "RESULT");
+            assertEquals(result.get(), "RESULT");
 
         }
         catch (Throwable t) {
