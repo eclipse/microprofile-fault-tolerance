@@ -20,11 +20,13 @@
 package org.eclipse.microprofile.fault.tolerance.tck.util;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.util.concurrent.Executor;
 
 @ApplicationScoped
 public class AsyncCallerExecutor implements Executor {
 
+    @Inject
     private AsyncCaller asyncCaller;
 
     @Override
