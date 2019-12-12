@@ -36,7 +36,7 @@ When a method annotated with `@Asynchronous` is invoked, it immediately returns 
 
 * Until the execution has finished, the `Future` or `CompletionStage` which was returned will be incomplete.
 * If the execution throws an exception, the `Future` or `CompletionStage` will be completed with that exception. (I.e. `Future.get()` will throw an `ExecutionException` which wraps the thrown exception and any functions passed to `CompletionStage.exceptionally()` will run.)
-* If the execution completes normally and returns a value, the `Future` or `CompletionStage` will then delegate to the returned value.
+* If the execution ends normally and returns a value, the `Future` or `CompletionStage` will be behaviorally equivalent to the return value (which, itself, is a `Future` or `CompletionStage`).
 
 [source, java]
 ----

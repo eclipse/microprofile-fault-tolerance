@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2017-2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -35,22 +35,28 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.testng.Assert;
 import org.testng.ITestContext;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.awaitility.Awaitility.await;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertEquals;
 
 /**
  * This set of tests will test correct operation on the relevant methods of the
  * Future object that is returned from the business method of a Asynchronous
  * Method or Class.
- * 
+ *
  * @author Gordon Hutchison
+ * @author carlosdlr
  */
 public class BulkheadFutureTest extends Arquillian {
 
     private static final int SHORT_TIME = 100;
-    private static final int LONG_TIME = 3000;
     @Inject
     private BulkheadMethodAsynchronousDefaultBean bhBeanMethodAsynchronousDefault;
     @Inject
@@ -64,8 +70,7 @@ public class BulkheadFutureTest extends Arquillian {
                 .addPackage(Packages.UTILS)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                 .as(JavaArchive.class);
-        WebArchive war = ShrinkWrap.create(WebArchive.class, "ftBulkheadTest.war").addAsLibrary(testJar);
-        return war;
+        return ShrinkWrap.create(WebArchive.class, "ftBulkheadTest.war").addAsLibrary(testJar);
     }
 
     @BeforeTest
@@ -77,9 +82,8 @@ public class BulkheadFutureTest extends Arquillian {
      * Tests that the Future that is returned from an asynchronous bulkhead
      * method can be queried for Done OK before and after a goodpath .get()
      */
-    @Test()
+    @Test
     public void testBulkheadMethodAsynchFutureDoneAfterGet() {
-
         Checker fc = new FutureChecker(SHORT_TIME);
         Future<String> result = null;
 
@@ -87,19 +91,18 @@ public class BulkheadFutureTest extends Arquillian {
             result = bhBeanMethodAsynchronousDefault.test(fc);
         }
         catch (InterruptedException e1) {
-            Assert.fail("Unexpected interruption", e1);
+            fail("Unexpected interruption", e1);
         }
 
-        Assert.assertFalse(result.isDone(), "Future reporting Done when not");
+        assertFalse(result.isDone(), "Future reporting Done when not");
         try {
-            String r;
-            Assert.assertTrue("GET.".equals(r = result.get()), r);
-            Assert.assertTrue("GET.GET_TO.".equals(r = result.get(1, TimeUnit.SECONDS)), r);
+            assertEquals(result.get(), "RESULT");
+            assertEquals(result.get(1, TimeUnit.SECONDS), "RESULT");
         }
         catch (Throwable t) {
-            Assert.assertNull(t);
+            fail("Unexpected exception", t);
         }
-        Assert.assertTrue(result.isDone(), "Future done not reporting true");
+        assertTrue(result.isDone(), "Future done not reporting true");
     }
 
     /**
@@ -107,43 +110,27 @@ public class BulkheadFutureTest extends Arquillian {
      * method can be queried for Done OK even if the user never calls get() to
      * drive the backend (i.e. the method is called non-lazily)
      */
-    @Test()
+    @Test
     public void testBulkheadMethodAsynchFutureDoneWithoutGet() {
-
         Checker fc = new FutureChecker(SHORT_TIME);
-        Future<String> result = null;
         try {
-            result = bhBeanMethodAsynchronousDefault.test(fc);
+            final Future<String> result = bhBeanMethodAsynchronousDefault.test(fc);
+            assertFalse(result.isDone(), "Future reporting Done when not");
+            await().atMost(SHORT_TIME * 100, MILLISECONDS).untilAsserted(()-> assertTrue(result.isDone()));
         }
         catch (InterruptedException e1) {
-            Assert.fail("Unexpected interruption", e1);
+            fail("Unexpected interruption", e1);
         }
-
-        Assert.assertFalse(result.isDone(), "Future reporting Done when not");
-        try {
-            Thread.sleep(SHORT_TIME + SHORT_TIME);
-            // Usually, we will not enter the loop, 
-            // but we are prepared to wait up to 100 SHORT_TIMES (10sec)
-            int loops = 0;
-            while(!result.isDone() && loops++ < 100) {
-                Thread.sleep(SHORT_TIME);
-            }
-        }
-        catch (Throwable t) {
-            Assert.assertNull(t);
-        }
-        Assert.assertTrue(result.isDone(), "Future done not reporting true");
     }
-  
+
     /**
      * Tests that the Future that is returned from a asynchronous bulkhead can
      * be queried for Done OK after a goodpath get with timeout and also
      * multiple gets can be called ok. This test is for the annotation at a
      * Class level.
      */
-    @Test()
+    @Test
     public void testBulkheadClassAsynchFutureDoneAfterGet() {
-
         Checker fc = new FutureChecker(SHORT_TIME);
         Future<String> result = null;
 
@@ -151,20 +138,19 @@ public class BulkheadFutureTest extends Arquillian {
             result = bhBeanClassAsynchronousDefault.test(fc);
         }
         catch (InterruptedException e1) {
-            Assert.fail("Unexpected interruption", e1);
+            fail("Unexpected interruption", e1);
         }
 
-        Assert.assertFalse(result.isDone(), "Future reporting Done when not");
+        assertFalse(result.isDone(), "Future reporting Done when not");
         try {
-            String r;
-            Assert.assertTrue("GET_TO.".equals(r = result.get(1, TimeUnit.SECONDS)), r);
-            Assert.assertTrue("GET_TO.GET.".equals(r = result.get()), r);
+            assertEquals(result.get(1, TimeUnit.SECONDS), "RESULT");
+            assertEquals(result.get(), "RESULT");
 
         }
         catch (Throwable t) {
-            Assert.assertNull(t);
+            fail("Unexpected exception", t);
         }
-        Assert.assertTrue(result.isDone(), "Future done not reporting true");
+        assertTrue(result.isDone(), "Future done not reporting true");
     }
 
     /**
@@ -172,31 +158,16 @@ public class BulkheadFutureTest extends Arquillian {
      * be queried for Done OK when get() is not called. This test is for the
      * annotation at a Class level.
      */
-    @Test()
+    @Test
     public void testBulkheadClassAsynchFutureDoneWithoutGet() {
-
         Checker fc = new FutureChecker(SHORT_TIME);
-        Future<String> result = null;
         try {
-            result = bhBeanMethodAsynchronousDefault.test(fc);
+            final Future<String> result = bhBeanClassAsynchronousDefault.test(fc);
+            assertFalse(result.isDone(), "Future reporting Done when not");
+            await().atMost(SHORT_TIME * 100, MILLISECONDS).untilAsserted(()-> assertTrue(result.isDone()));
         }
         catch (InterruptedException e1) {
-            Assert.fail("Unexpected interruption", e1);
+            fail("Unexpected interruption", e1);
         }
-        Assert.assertFalse(result.isDone(), "Future reporting Done when not");
-        try {
-            Thread.sleep(SHORT_TIME + SHORT_TIME);
-            // Usually, we will not enter the loop, 
-            // but we are prepared to wait up to 100 SHORT_TIMES (10sec)
-            int loops = 0;
-            while(!result.isDone() && loops++ < 100) {
-                Thread.sleep(SHORT_TIME);
-            }
-        }
-        catch (Throwable t) {
-            Assert.assertNull(t);
-        }
-        Assert.assertTrue(result.isDone(), "Future done not reporting true");
     }
-
 }

@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2017-2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -23,12 +23,14 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
-import org.testng.Assert;
-
+import static org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils.log;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+import static org.awaitility.Awaitility.await;
 /**
  * A class to hold a set of data that is has the scope of a test.
- * 
+ *
  * @author Gordon Hutchison
  */
 public class TestData {
@@ -121,7 +123,7 @@ public class TestData {
     public void setExpectedTasksScheduled(int expected) {
         if (tasksScheduled.get() != 0 && // test being set up
                 expectedTasksScheduled != tasksScheduled.get()) {
-            Utils.log("WARNING: expectedTasksScheduled being set to " + expected + " while tasksScheduled was "
+            log("WARNING: expectedTasksScheduled being set to " + expected + " while tasksScheduled was "
                     + tasksScheduled.get() + " this will make this check likely to FAIL.");
         }
         this.expectedTasksScheduled = expected;
@@ -134,37 +136,28 @@ public class TestData {
      * just BEFORE returning.
      */
     public void check() {
-        
-        if( latch != null ) {
-            try {
-                latch.await(50000, TimeUnit.MILLISECONDS);
-                Assert.assertEquals(getWorkers().get(), 0, "Some workers still active. ");
-            }
-            catch (InterruptedException e) {
-                Utils.log(e.getLocalizedMessage());
-            }
-        }
-        
+        await().atMost(50000, TimeUnit.MILLISECONDS).
+            untilAsserted(() -> assertEquals(getWorkers().get(), 0, "Some workers still active. "));
 
-        Assert.assertFalse(getExpectedInstances() != 0 && getInstances().get() < getExpectedInstances(),
-                " Not all workers launched. " + getInstances().get() + "/" + getExpectedInstances());
+        assertFalse(getExpectedInstances() != 0 && getInstances().get() < getExpectedInstances(),
+            " Not all workers launched. " + getInstances().get() + "/" + getExpectedInstances());
 
-        Assert.assertTrue(getMaxSimultaneousWorkers().get() <= getExpectedMaxSimultaneousWorkers(),
-                " Bulkhead appears to have been breeched " + getMaxSimultaneousWorkers() + " workers, expected "
-                        + getExpectedMaxSimultaneousWorkers() + ". ");
-        Assert.assertFalse(isMaxFill() && getExpectedMaxSimultaneousWorkers() > 1 && getMaxSimultaneousWorkers().get() == 1,
-                " Workers are not in parrallel. ");
-        Assert.assertTrue(
-                !isMaxFill() || getExpectedMaxSimultaneousWorkers() == getMaxSimultaneousWorkers().get(),
-                " Work is not being done simultaneously enough, only " + getMaxSimultaneousWorkers() + " "
-                        + " workers at once. Expecting " + getExpectedMaxSimultaneousWorkers() + ". ");
-        Assert.assertFalse(
-                getExpectedTasksScheduled() != 0 && getTasksScheduled().get() < getExpectedTasksScheduled(),
-                " Some tasks are missing, expected " + getExpectedTasksScheduled() + " got "
-                        + getTasksScheduled().get() + ". ");
+        assertTrue(getMaxSimultaneousWorkers().get() <= getExpectedMaxSimultaneousWorkers(),
+            " Bulkhead appears to have been breeched " + getMaxSimultaneousWorkers() + " workers, expected "
+                + getExpectedMaxSimultaneousWorkers() + ". ");
+        assertFalse(isMaxFill() && getExpectedMaxSimultaneousWorkers() > 1 && getMaxSimultaneousWorkers().get() == 1,
+            " Workers are not in parrallel. ");
+        assertTrue(
+            !isMaxFill() || getExpectedMaxSimultaneousWorkers() == getMaxSimultaneousWorkers().get(),
+            " Work is not being done simultaneously enough, only " + getMaxSimultaneousWorkers() + " "
+                + " workers at once. Expecting " + getExpectedMaxSimultaneousWorkers() + ". ");
+        assertFalse(
+            getExpectedTasksScheduled() != 0 && getTasksScheduled().get() < getExpectedTasksScheduled(),
+            " Some tasks are missing, expected " + getExpectedTasksScheduled() + " got "
+                + getTasksScheduled().get() + ". ");
 
-        Utils.log("Checks passed: " + "tasks: " + getTasksScheduled() + "/" + getExpectedTasksScheduled()
-                + ", bulkhead: " + getMaxSimultaneousWorkers() + "/" + getExpectedMaxSimultaneousWorkers());
+        log("Checks passed: " + "tasks: " + getTasksScheduled() + "/" + getExpectedTasksScheduled()
+            + ", bulkhead: " + getMaxSimultaneousWorkers() + "/" + getExpectedMaxSimultaneousWorkers());
     }
 
 }

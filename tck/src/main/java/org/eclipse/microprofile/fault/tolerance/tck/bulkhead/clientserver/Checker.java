@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2017-2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,36 +19,36 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
-
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CompletableFuture;
 import javax.management.RuntimeErrorException;
 
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
+import static org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils.log;
 
 /**
  * A simple sleeping test backend worker. Having this backend as a delegate
- * means that we can perform more than one kind of test using a common 
+ * means that we can perform more than one kind of test using a common
  * {@code @Inject}-ed object that delegates to one of these that is passed in as a
  * parameter to the business method.
- * 
+ *
  * @author Gordon Hutchison
+ * @author carlosdlr
  */
 public class Checker implements BackendTestDelegate {
 
-    private int millis = 1;
+    private int millis;
     private int fails = 0;
-    private TestData td = null;
+    private TestData td;
     /*
      * This string is used for varying substr's barcharts in the log, for
      * example for the number of concurrent workers.
      */
-    static final String BAR = "**************************************************************************************+++";
+    private static final String BAR = "**************************************************************************************+++";
 
     /**
      * Constructor
-     * 
+     *
      * @param sleepMillis  how long to sleep for in milliseconds
      * @param td test data
      */
@@ -68,7 +68,7 @@ public class Checker implements BackendTestDelegate {
     /*
      * This is the method that simulates the backend work inside the
      * Bulkhead.
-     * 
+     *
      * @see org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.
      * BulkheadTestAction#perform()
      */
@@ -82,41 +82,36 @@ public class Checker implements BackendTestDelegate {
             while ((now > max) && !td.getMaxSimultaneousWorkers().compareAndSet(max, now)) {
                 max = td.getMaxSimultaneousWorkers().get();
             }
+
             if (fails > 0) {
                 Thread.sleep(millis / 2);
                 fails--;
                 RuntimeErrorException e = new RuntimeErrorException(new Error("fake error for Retry Testing"));
-                Utils.log(e.toString());
-
+                log(e.toString());
                 // We will countDown the latch in the finally block
-
                 throw e;
             }
 
-            Utils.log("Task " + taskId + " sleeping for " + millis + " milliseconds. " + now
-                    + " workers inside Bulkhead from " + td.getInstances() + " instances " + BAR.substring(0, now));
+            log("Task " + taskId + " sleeping for " + millis + " milliseconds. " + now
+                + " workers inside Bulkhead from " + td.getInstances() + " instances " + BAR.substring(0, now));
 
             Thread.sleep(millis);
 
-            Utils.log("Task " + taskId + " woke.");
-
+            log("Task " + taskId + " woke.");
             // We will countDown the latch in the finally block
-
         }
-        catch (InterruptedException e) {
-            Utils.log(e.toString());
+        catch (RuntimeException e) {
+            log(e.toString());
         }
         finally {
-
             // We want to decrement this before the latch
             td.getWorkers().decrementAndGet();
-
             CountDownLatch latch = td.getLatch();
             if (latch != null ) {
                 latch.countDown();
             }
-
         }
+
         CompletableFuture<String> result = new CompletableFuture<>();
         result.complete("max workers was " + td.getMaxSimultaneousWorkers().get());
         return result;
