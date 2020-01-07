@@ -99,7 +99,7 @@ When a method returns a result, the following rules are applied to determine whe
 
 If a method throws a `Throwable` which is not a subclass of either `Error` or `Exception`, non-portable behavior results.
 
-In the following example, all exceptions assignable to `ExceptionA` and `ExceptionB`, except the ones assignable to `ExeptionBSub` will be considered failures. `ExceptionBSub` and all other exceptions will be considered successes.
+In the following example, all exceptions assignable to `ExceptionA` and `ExceptionB`, except the ones assignable to `ExeptionBSub` will be considered failures. `ExceptionBSub` and all other exceptions will not be considered failures for the purpose of deciding whether the circuit breaker should open.
 
 [source, java]
 ----
