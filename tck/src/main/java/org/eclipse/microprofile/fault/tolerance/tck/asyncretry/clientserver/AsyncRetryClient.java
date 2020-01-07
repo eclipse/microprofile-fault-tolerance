@@ -19,11 +19,13 @@ package org.eclipse.microprofile.fault.tolerance.tck.asyncretry.clientserver;
  * limitations under the License.
  *******************************************************************************/
 
+import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncCallerExecutor;
 import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Retry;
 
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -50,6 +52,9 @@ public class AsyncRetryClient {
     private int countInvocationsServG = 0;
     private int countInvocationsServH = 0;
     private TCKConfig config = TCKConfig.getConfig();
+
+    @Inject
+    private AsyncCallerExecutor executor;
 
     /**
      * Service will retry a method returning a CompletionStage and configured to always completeExceptionally.
@@ -125,12 +130,12 @@ public class AsyncRetryClient {
 
         if (countInvocationsServD < 3) {
             // fail 2 first invocations
-            return CompletableFuture.supplyAsync(doTask(null))
-                .thenCompose(s -> CompletableFuture.supplyAsync(doTask("Simulated error")));
+            return CompletableFuture.supplyAsync(doTask(null), executor)
+                .thenCompose(s -> CompletableFuture.supplyAsync(doTask("Simulated error"), executor));
         }
         else {
-            return CompletableFuture.supplyAsync(doTask(null))
-                .thenCompose(s -> CompletableFuture.supplyAsync(doTask(null)));
+            return CompletableFuture.supplyAsync(doTask(null), executor)
+                .thenCompose(s -> CompletableFuture.supplyAsync(doTask(null), executor));
         }
     }
 
@@ -146,8 +151,8 @@ public class AsyncRetryClient {
         countInvocationsServE++;
 
         // always fail
-        return CompletableFuture.supplyAsync(doTask(null))
-            .thenCompose(s -> CompletableFuture.supplyAsync(doTask("Simulated error")));
+        return CompletableFuture.supplyAsync(doTask(null), executor)
+            .thenCompose(s -> CompletableFuture.supplyAsync(doTask("Simulated error"), executor));
     }
 
     /**
@@ -163,13 +168,13 @@ public class AsyncRetryClient {
 
         if (countInvocationsServF < 3) {
             // fail 2 first invocations
-            return CompletableFuture.supplyAsync(doTask(null))
-                .thenCombine(CompletableFuture.supplyAsync(doTask("Simulated error")),
+            return CompletableFuture.supplyAsync(doTask(null), executor)
+                .thenCombine(CompletableFuture.supplyAsync(doTask("Simulated error"), executor),
                     (s, s2) -> s + " then " + s2);
         }
         else {
-            return CompletableFuture.supplyAsync(doTask(null))
-                .thenCombine(CompletableFuture.supplyAsync(doTask(null)),
+            return CompletableFuture.supplyAsync(doTask(null), executor)
+                .thenCombine(CompletableFuture.supplyAsync(doTask(null), executor),
                     (s, s2) -> s + " then " + s2);
         }
 
@@ -187,8 +192,8 @@ public class AsyncRetryClient {
     public CompletionStage<String> serviceG() {
         countInvocationsServG++;
         // always fail
-        return CompletableFuture.supplyAsync(doTask(null))
-            .thenCombine(CompletableFuture.supplyAsync(doTask("Simulated error")),
+        return CompletableFuture.supplyAsync(doTask(null), executor)
+            .thenCombine(CompletableFuture.supplyAsync(doTask("Simulated error"), executor),
                 (s, s2) -> s + " then " + s2);
 
     }

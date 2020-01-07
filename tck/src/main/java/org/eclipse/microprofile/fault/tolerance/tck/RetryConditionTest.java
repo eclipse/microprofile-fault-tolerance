@@ -25,6 +25,8 @@ import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClas
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClassLevelClientRetryOn;
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClientAbortOn;
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClientRetryOn;
+import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncCaller;
+import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncCallerExecutor;
 import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.exceptions.RetryChildException;
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.exceptions.RetryParentException;
@@ -71,6 +73,8 @@ public class RetryConditionTest extends Arquillian {
                         .addClasses(RetryClientAbortOn.class, RetryClientRetryOn.class,
                                         RetryClassLevelClientRetryOn.class,
                                         RetryClassLevelClientAbortOn.class,
+                                        AsyncCallerExecutor.class,
+                                        AsyncCaller.class,
                                         AsyncRetryClient.class,
                                         CompletableFutureHelper.class,
                                         RetryChildException.class,
