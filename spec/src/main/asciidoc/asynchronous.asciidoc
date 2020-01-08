@@ -80,7 +80,17 @@ If the method returns `CompletionStage`, the other specified Fault Tolerance ann
 
 * If the method invocation throws an exception, this will trigger other specified Fault Tolerance policies to be applied.
 
-* If the method returns a `CompletionStage`, then the method call is considered to be successful only if the `CompletionStage` completes successfully. If an exceptionally completed `CompletionStage` is returned, or if an incomplete `CompletionStage` is returned which later completes exceptionally, then this will cause other specified Fault Tolerance policies to be applied.
+* If the method returns a `CompletionStage`, then the method call is not considered to have completed until the returned `CompletionStage` completes.
+  ** The method is considered to be successful only if the `CompletionStage` completes successfully.
+  ** If an exceptionally completed `CompletionStage` is returned, or if an incomplete `CompletionStage` is returned which later completes exceptionally, then this will cause other specified Fault Tolerance policies to be applied.
+
+[TIP]
+====
+As a consequence of these rules:
+
+* `@Timeout` does not consider the method to have completed until the returned `CompletionStage` completes
+* `@Bulkhead` considers the method to still be running until the returned `CompletionStage` completes.
+====
 
 In the following example, the `Retry` will be triggered as the returned `CompletionStage` completes exceptionally.
 
