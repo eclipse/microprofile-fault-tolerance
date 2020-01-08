@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2017-2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2017-2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -20,17 +20,24 @@
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead;
 
 import static org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils.log;
+import static org.eclipse.microprofile.fault.tolerance.tck.asynchronous.CompletableFutureHelper.toCompletableFuture;
 import static org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils.handleResults;
 import static org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.AbstractBulkheadTask.assertAllNotStarting;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
 
+import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.CompletableFutureHelper;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.AsyncBulkheadTask;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead10ClassAsynchronousBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead10MethodAsynchronousBean;
@@ -38,6 +45,7 @@ import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhe
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead3MethodAsynchronousBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadClassAsynchronousDefaultBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadClassAsynchronousQueueingBean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadCompletionStageBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadMethodAsynchronousDefaultBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadMethodAsynchronousQueueingBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadTestBackend;
@@ -56,7 +64,8 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expect;
-
+import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expectBulkheadException;
+import static org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig.getConfig;
 import static org.testng.Assert.fail;
 
 /**
@@ -91,6 +100,8 @@ public class BulkheadAsynchTest extends Arquillian {
     private BulkheadClassAsynchronousQueueingBean bhBeanClassAsynchronousQueueing;
     @Inject
     private BulkheadMethodAsynchronousQueueingBean bhBeanMethodAsynchronousQueueing;
+    @Inject
+    private BulkheadCompletionStageBean bhBeanCompletionStage;
 
     /**
      * This is the Arquillian deploy method that controls the contents of the
@@ -103,6 +114,7 @@ public class BulkheadAsynchTest extends Arquillian {
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftBulkheadAsynchTest.jar")
                 .addPackage(BulkheadClassAsynchronousDefaultBean.class.getPackage())
                 .addClass(Utils.class)
+                .addClass(CompletableFutureHelper.class)
                 .addPackage(Packages.UTILS)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                 .as(JavaArchive.class);
@@ -252,6 +264,44 @@ public class BulkheadAsynchTest extends Arquillian {
             for (AsyncBulkheadTask task : tasks) {
                 task.complete();
             }
+        }
+    }
+
+    /**
+     * Test that an asynchronous method which returns an incomplete CompletionStage still reserves a slot in the bulkhead
+     */
+    @Test
+    public void testBulkheadCompletionStage() throws InterruptedException, ExecutionException, TimeoutException {
+        CompletableFuture<Void> result = new CompletableFuture<>();
+        try {
+            Future<Void> future1 = toCompletableFuture(bhBeanCompletionStage.serviceCS(result));
+            Future<Void> future2 = toCompletableFuture(bhBeanCompletionStage.serviceCS(result));
+            Thread.sleep(getConfig().getTimeoutInMillis(200)); // Give tasks a chance to start and run
+            Future<Void> future3 = toCompletableFuture(bhBeanCompletionStage.serviceCS(result));
+            Future<Void> future4 = toCompletableFuture(bhBeanCompletionStage.serviceCS(result));
+            Thread.sleep(getConfig().getTimeoutInMillis(200)); // Give tasks a chance to start and run
+            Future<Void> future5 = toCompletableFuture(bhBeanCompletionStage.serviceCS(result));
+            
+            // Although futures 1 & 2 have had time to run, they shouldn't be finished because the completion stage returned is not complete
+            assertFalse(future1.isDone(), "Future1 reported done");
+            assertFalse(future2.isDone(), "Future2 reported done");
+            
+            // Because futures 1 & 2 are still not "complete" (even though the method call may have returned), future 5 should be rejected
+            expectBulkheadException(future5);
+            
+            // Complete the CompletionStage which was returned
+            result.complete(null);
+            
+            // After the CompletionStage completes, future 1 & 2 should complete
+            future1.get(getConfig().getTimeoutInMillis(1000), TimeUnit.MILLISECONDS);
+            future2.get(getConfig().getTimeoutInMillis(1000), TimeUnit.MILLISECONDS);
+            
+            // Tasks 3 & 4 should then be removed from the queue, started and complete almost immediately
+            future3.get(getConfig().getTimeoutInMillis(1000), TimeUnit.MILLISECONDS);
+            future4.get(getConfig().getTimeoutInMillis(1000), TimeUnit.MILLISECONDS);
+        }
+        finally {
+            result.complete(null);
         }
     }
 
