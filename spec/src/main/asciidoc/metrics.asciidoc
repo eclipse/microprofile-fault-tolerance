@@ -56,15 +56,15 @@ Implementations must ensure that if any of these annotations are present on a me
 
 |`ft.<name>.retry.callsSucceededNotRetried.total`
 | Counter | None
-| The number of times the method was called and succeeded without retrying
+| The number of method calls for which no retry was necessary
 
 |`ft.<name>.retry.callsSucceededRetried.total`
 | Counter | None
-| The number of times the method was called and succeeded after retrying at least once
+| The number of method calls for which at least one retry was necessary
 
 |`ft.<name>.retry.callsFailed.total`
 | Counter | None
-| The number of times the method was called and ultimately failed after retrying
+| The number of method calls for which all retries failed
 
 |`ft.<name>.retry.retries.total`
 | Counter | None
