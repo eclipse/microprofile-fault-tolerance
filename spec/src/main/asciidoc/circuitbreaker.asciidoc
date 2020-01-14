@@ -22,33 +22,38 @@
 [[circuitbreaker]]
 == Circuit Breaker
 
-A Circuit Breaker prevents repeated failures, so that dysfunctional services or APIs fail fast.
+A Circuit Breaker prevents repeated failures, so that dysfunctional services or APIs fail fast. If a service is failing frequently, the circuit breaker opens and no more calls to that service are attempted until a period of time has passed.
+
 There are three circuit states:
 
-* Closed: In normal operation, the circuit is closed. If a failure occurs, the Circuit Breaker records the event. In closed 
-state the requestVolumeThreshold and failureRatio parameters may be configured in order to specify the conditions under which the breaker
-will transition the circuit to open. If the failure conditions are met, the circuit will be opened.
+* *Closed*: In normal operation, the circuit breaker is closed. The circuit breaker records whether each call is a success or failure and
+keeps track of the most recent results in a rolling window. Once the rolling window is full, if the proportion of failures in the rolling window
+rises above the `failureRatio`, the circuit breaker will be opened.
 
-* Open: When the circuit is open, calls to the service operating under the circuit breaker will fail immediately. A delay may be configured
-for the Circuit Breaker. After the specified delay, the circuit transitions to half-open state.
+* *Open*: When the circuit breaker is open, calls to the service operating under the circuit breaker will fail immediately with a `CircuitBreakerOpenException`.
+After a configurable delay, the circuit breaker transitions to half-open state.
 
-* Half-open: In half-open state, trial executions of the service are allowed. By default one trial call to the service is permitted. If the call fails, 
-the circuit will return to open state. The successThreshold parameter allows the configuration of the number of trial executions that must
-succeed before the circuit can be closed. After the specified number of successful executions, the circuit will be closed. If a failure occurs
-before the successThreshold is reached the circuit will transition to open. 
+* *Half-open*: In half-open state, a configurable number of trial executions of the service are allowed. If any of them fail, the circuit breaker transitions
+back to open state. If all the trial executions succeed, the circuit breaker transitions to the closed state.
 
-Note that circuit state transitions will reset the Circuit Breaker's records. For example, when the circuit transitions to closed a new
+=== Circuit Breaker Usage
+
+A method or a class can be annotated with `@CircuitBreaker`, which means the method or the methods under the class will have CircuitBreaker policy applied.
+
+==== Configuring when the circuit opens and closes
+
+The following parameters control when the circuit breaker opens and closes.
+
+* `requestVolumeThreshold` controls the size of the rolling window used when the circuit breaker is closed
+* `failureRatio` controls the proportion of failures within the rolling window which will cause the circuit breaker to open
+* `successThreshold` controls the number of trial calls which are allowed when the circuit breaker is half-open
+* `delay` and `delayUnit` control how long the circuit breaker stays open
+
+Circuit breaker state transitions will reset the Circuit Breaker's records. For example, when the circuit breaker transitions to closed a new
 rolling failure window is created with the configured requestVolumeThreshold and failureRatio. The circuit state will only be assessed when the rolling window reaches the `requestVolumeThreshold`.
 
-When a method returns a result, the following rules are applied to determine whether the result is a success or a failure:
+The following example and scenarios demonstrate when the circuit opens.
 
-* If the method does not throw a `Throwable`, it is considered a success
-* Otherwise, if the thrown object is assignable to any value in the `skipOn` parameter, is is considered a success
-* Otherwise, if the thrown object is assignable to any value in the `failOn` parameter, it is considered a failure
-* Otherwise it is considered a success
-
-If a method throws a `Throwable` which is not a subclass of either `Error` or `Exception`, non-portable behavior results.
- 
 [source, java]
 ----
 @CircuitBreaker(successThreshold = 10, requestVolumeThreshold = 4, failureRatio=0.5, delay = 1000)
@@ -59,18 +64,8 @@ public Connection serviceA() {
    return conn;
 }
 ----
-Below are a couple scenarios to demonstrate when the circuit opens for the above code snippet.
 
 * Scenario 1
-** Request 1 - success
-** Request 2 - failure
-** Request 3 - failure
-** Request 4 - success
-** Request 5 - CircuitBreakerOpenException
-
-The Request 4 will trigger the circuit to open. The Request 5 will hit the exception.
-
-* Scenario 2
 ** Request 1 - success
 ** Request 2 - failure
 ** Request 3 - success
@@ -78,29 +73,44 @@ The Request 4 will trigger the circuit to open. The Request 5 will hit the excep
 ** Request 5 - failure
 ** Request 6 - CircuitBreakerOpenException 
 
-The Request 5 will trigger the circuit to open. The Request 6 will hit the exception.
+In this scenario, request 5 will trigger the circuit to open because out of the last four requests (the `requestVolumeThreshold`), two failed
+which reaches the `failureRatio` of `0.5`. Request 6 will therefore hit the `CircuitBreakerOpenException`.
 
-=== Circuit Breaker Usage
+* Scenario 2
+** Request 1 - success
+** Request 2 - failure
+** Request 3 - failure
+** Request 4 - success
+** Request 5 - CircuitBreakerOpenException
 
-A method or a class can be annotated with `@CircuitBreaker`, which means the method or the methods under the class will have CircuitBreaker policy applied.
+In this scenario, request 4 will cause the circuit to open. Request 5 will hit the `CircuitBreakerOpenException`.
+Note that request 3 does not cause the circuit to open because the rolling window has not yet reached the `requestVolumeThreshold`.
+
+==== Configuring which exceptions are considered a failure
+
+The `failOn` and `skipOn` parameters are used to define which exceptions are considered failures for the purpose of deciding whether the circuit breaker should open.
+
+When a method returns a result, the following rules are applied to determine whether the result is a success or a failure:
+
+* If the method does not throw a `Throwable`, it is considered a success
+* Otherwise, if the thrown object is assignable to any value in the `skipOn` parameter, is is considered a success
+* Otherwise, if the thrown object is assignable to any value in the `failOn` parameter, it is considered a failure
+* Otherwise it is considered a success
+
+If a method throws a `Throwable` which is not a subclass of either `Error` or `Exception`, non-portable behavior results.
+
+In the following example, all exceptions assignable to `ExceptionA` and `ExceptionB`, except the ones assignable to `ExeptionBSub` will be considered failures. `ExceptionBSub` and all other exceptions will not be considered failures for the purpose of deciding whether the circuit breaker should open.
 
 [source, java]
 ----
-@CircuitBreaker(successThreshold = 10, requestVolumeThreshold = 4, failureRatio=0.75, delay = 1000)
-public Connection serviceA() {
-   Connection conn = null;
-   counterForInvokingServiceA++;
-   conn = connectionService();
-   return conn;
+@CircuitBreaker(failOn = {ExceptionA.class, ExceptionB.class}, skipOn = ExceptionBSub.class)
+public void service() {
+    underlyingService();
 }
 ----
 
-The above code-snippet means the method serviceA applies the `CircuitBreaker` policy,
-which is to open the circuit once 3 (4x0.75) failures occur among the rolling window of 4 consecutive invocation.
-The circuit will stay open for 1000ms and then back to half open.
-After 10 consecutive successful invocations, the circuit will be back to close again.
+=== Interactions with other annotations
 
-When a circuit is open, A `CircuitBreakerOpenException` must be thrown.
 The `@CircuitBreaker` annotation can be used together with `@Timeout`, `@Fallback`, `@Asynchronous`, `@Bulkhead` and `@Retry`.
 
 If `@Fallback` is used with `@CircuitBreaker`, the fallback method or handler will be invoked if a `CircuitBreakerOpenException` is thrown.
