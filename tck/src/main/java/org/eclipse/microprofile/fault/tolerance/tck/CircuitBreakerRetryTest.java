@@ -66,7 +66,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
 
     @Deployment
     public static WebArchive deploy() {
-        
+
         ConfigAnnotationAsset config = new ConfigAnnotationAsset()
                 .autoscaleMethod(CircuitBreakerClientWithRetry.class, "serviceC")
                 .autoscaleMethod(CircuitBreakerClientWithRetry.class, "serviceWithRetryOnCbOpen")
@@ -76,14 +76,14 @@ public class CircuitBreakerRetryTest extends Arquillian {
                 .autoscaleMethod(CircuitBreakerClientWithRetryAsync.class, "serviceWithRetryOnCbOpen")
                 .autoscaleMethod(CircuitBreakerClientWithRetryAsync.class, "serviceWithRetryOnTimeout")
                 .autoscaleMethod(CircuitBreakerClientWithRetryAsync.class, "serviceWithRetryFailOnCbOpen");
-        
+
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftCircuitBreakerRetry.jar")
                         .addClasses(CircuitBreakerClientWithRetry.class,
                                     CircuitBreakerClassLevelClientWithRetry.class,
                                     CircuitBreakerClientWithRetryAsync.class)
                         .addPackage(Packages.UTILS)
                         .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
-                        .addAsResource(config, "META-INF/microprofile-config.properties")
+                        .addAsManifestResource(config, "microprofile-config.properties")
                         .as(JavaArchive.class);
 
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftCircuitBreakerRetry.war")
@@ -262,7 +262,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
 
         }
         catch (CircuitBreakerOpenException cboe) {
-            // Expected on iteration 4          
+            // Expected on iteration 4
             invokeCounter = clientForCBWithRetry.getCounterForInvokingServiceC();
             if (invokeCounter < 4) {
                 Assert.fail("serviceC should retry in testCircuitOpenWithMultiTimeouts on iteration "
@@ -481,7 +481,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
                                      executionException.getCause(),
                                      instanceOf(CircuitBreakerOpenException.class));
 
-            // Expected on iteration 4          
+            // Expected on iteration 4
             invokeCounter = clientForCBWithRetryAsync.getCounterForInvokingServiceC();
             if (invokeCounter < 4) {
                 Assert.fail("serviceC should retry in testCircuitOpenWithMultiTimeouts on iteration "
