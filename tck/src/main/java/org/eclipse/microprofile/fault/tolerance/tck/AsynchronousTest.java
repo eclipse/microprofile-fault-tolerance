@@ -24,13 +24,17 @@ import static org.awaitility.Awaitility.await;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
 
+import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.AsyncApplicationScopeClient;
 import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.AsyncClassLevelClient;
 import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.AsyncClient;
+import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.AsyncRequestScopeClient;
 import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.CompletableFutureHelper;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Connection;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -53,6 +57,9 @@ public class AsynchronousTest extends Arquillian {
 
     private @Inject
     AsyncClassLevelClient clientClass;
+    
+    private @Inject
+    AsyncApplicationScopeClient clientApplicationScope;
 
     private List<CompletableFuture<Void>> waitingFutures = new ArrayList<>();
 
@@ -60,7 +67,8 @@ public class AsynchronousTest extends Arquillian {
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
             .create(JavaArchive.class, "ftAsynchronous.jar")
-            .addClasses(AsyncClient.class, AsyncClassLevelClient.class, Connection.class, CompletableFutureHelper.class)
+            .addClasses(AsyncClient.class, AsyncClassLevelClient.class, AsyncApplicationScopeClient.class, 
+                   AsyncRequestScopeClient.class, Connection.class, CompletableFutureHelper.class)
             .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
             .as(JavaArchive.class);
 
@@ -111,6 +119,19 @@ public class AsynchronousTest extends Arquillian {
         waitingFuture.complete(null);
         await().atMost(30, TimeUnit.SECONDS)
             .untilAsserted(()-> Assert.assertTrue(future.isDone()));
+    }
+    
+    /**
+     * Test that the request context is active during execution for an asynchronous method that returns a Future
+     * @throws TimeoutException 
+     * @throws ExecutionException 
+     * @throws InterruptedException 
+     */
+    @Test
+    public void testAsyncRequestContext() throws InterruptedException, ExecutionException, TimeoutException {
+        Future<Connection> future = clientApplicationScope.service();
+        future.get(30, TimeUnit.SECONDS);
+
     }
 
     /**
