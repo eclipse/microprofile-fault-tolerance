@@ -28,7 +28,9 @@ import java.lang.annotation.Target;
 import javax.interceptor.InterceptorBinding;
 
 /**
- * Wrap the execution and invoke it asynchronously.
+ * Wrap the execution and invoke it asynchronously. Despite of the asychrounous execution, the context for 
+ * {@link javax.enterprise.context.RequestScoped} must be active during the method invocation, 
+ * which means the method with {@code @Asynchronous} annotation is allowed to use the beans with {@link javax.enterprise.context.RequestScoped}.
  * Any methods marked with this annotation must return one of:
  * <ul>
  * <li>{@link java.util.concurrent.Future}</li>

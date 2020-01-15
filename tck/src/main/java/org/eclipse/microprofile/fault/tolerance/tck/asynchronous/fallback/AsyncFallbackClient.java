@@ -89,6 +89,7 @@ public class AsyncFallbackClient {
     @Asynchronous
     @Fallback(fallbackMethod = "fallbackCS")
     public CompletionStage<String> serviceCS3() {
+        RequestScoped rs;
         return CompletableFutureHelper.failedFuture(new IOException("Simulated error"));
     }
 
