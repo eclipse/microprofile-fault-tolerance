@@ -1,6 +1,6 @@
 package org.eclipse.microprofile.fault.tolerance.tck.config;/*
  *******************************************************************************
- * Copyright (c) 2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2019, 2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -114,9 +114,37 @@ public class ConfigAnnotationAsset implements Asset {
         return this;
     }
 
+    /**
+     * Configure the {@code value} parameter on an annotation applied to a method
+     * 
+     * @param clazz the class which has the method
+     * @param method the method which has the annotation
+     * @param annotation the annotation type which has the parameter
+     * @param value the value to configure
+     * @return {@code this}
+     */
     public ConfigAnnotationAsset setValue(final Class<?> clazz, final String method,
                                           final Class<? extends Annotation> annotation, final String value) {
         props.put(keyFor(clazz, method, annotation, "value"), value);
+        return this;
+    }
+    
+    /**
+     * Configure a parameter on an annotation applied to a method
+     * 
+     * @param clazz the class which has the method
+     * @param method the name of the method which has the annotation
+     * @param annotation the annotation type which has the parameter
+     * @param parameter the parameter name
+     * @param value the value to configure
+     * @return {@code this}
+     */
+    public ConfigAnnotationAsset set(final Class<?> clazz,
+                                     final String method,
+                                     final Class<? extends Annotation> annotation,
+                                     final String parameter,
+                                     final String value) {
+        props.put(keyFor(clazz, method, annotation, parameter), value);
         return this;
     }
 
