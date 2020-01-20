@@ -20,23 +20,28 @@
 
 package org.eclipse.microprofile.fault.tolerance.tck.asynchronous;
 
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Future;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.eclipse.microprofile.fault.tolerance.tck.util.Connection;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 
 @ApplicationScoped
 public class AsyncApplicationScopeClient {
 
+    // AsyncRequestScopeClient is a @RequestScoped scope bean
     @Inject
     private AsyncRequestScopeClient requestScopeClient;
 
     @Asynchronous
-    public Future<Connection> service() {
-        // AsyncRequestScopeClient is a request scope bean
-        return CompletableFutureHelper.toCompletableFuture(requestScopeClient.sampleMethod());
+    public CompletionStage<String> serviceCallingCompletionStageMethod() {
+        return requestScopeClient.methodReturningCompletionStage();
+    }
+
+    @Asynchronous
+    public Future<String> serviceCallingFutureMethod() {
+        return requestScopeClient.methodReturningFuture();
     }
 }

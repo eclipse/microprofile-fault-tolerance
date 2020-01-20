@@ -24,6 +24,7 @@ import static org.awaitility.Awaitility.await;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -57,7 +58,8 @@ public class AsynchronousTest extends Arquillian {
 
     private @Inject
     AsyncClassLevelClient clientClass;
-    
+
+    // AsyncApplicationScopeClient is an @ApplicationScoped bean
     private @Inject
     AsyncApplicationScopeClient clientApplicationScope;
 
@@ -120,18 +122,39 @@ public class AsynchronousTest extends Arquillian {
         await().atMost(30, TimeUnit.SECONDS)
             .untilAsserted(()-> Assert.assertTrue(future.isDone()));
     }
-    
+
     /**
-     * Test that the request context is active during execution for an asynchronous method that returns a Future
+     * Test that the request context is active during execution for an asynchronous method that returns a CompletionStage
+     * 
+     * If the request scope is active, then an @ApplicationScoped bean should be able to asynchronously
+     * call an @Asynchronous method returning a CompletionStage on a @RequestScoped bean, and return the correct result
+     * 
      * @throws TimeoutException 
      * @throws ExecutionException 
      * @throws InterruptedException 
      */
     @Test
-    public void testAsyncRequestContext() throws InterruptedException, ExecutionException, TimeoutException {
-        Future<Connection> future = clientApplicationScope.service();
-        future.get(30, TimeUnit.SECONDS);
+    public void testAsyncRequestContextWithCompletionStage() throws InterruptedException, ExecutionException, TimeoutException {
+        CompletionStage<String> completionStage = clientApplicationScope.serviceCallingCompletionStageMethod();
+        String result = CompletableFutureHelper.toCompletableFuture(completionStage).get(30, TimeUnit.SECONDS);
+        Assert.assertEquals(result, "testCompletionStageString");
+    }
 
+    /**
+     * Test that the request context is active during execution for an asynchronous method that returns a Future
+     * 
+     * If the request scope is active, then an @ApplicationScoped bean should be able to asynchronously
+     * call an @Asynchronous method returning a Future on a @RequestScoped bean, and return the correct result
+     * 
+     * @throws TimeoutException 
+     * @throws ExecutionException 
+     * @throws InterruptedException 
+     */
+    @Test
+    public void testAsyncRequestContextWithFuture() throws InterruptedException, ExecutionException, TimeoutException {
+        Future<String> future = clientApplicationScope.serviceCallingFutureMethod();
+        String result = future.get(30, TimeUnit.SECONDS);
+        Assert.assertEquals(result, "testFutureString");
     }
 
     /**

@@ -22,15 +22,18 @@ package org.eclipse.microprofile.fault.tolerance.tck.asynchronous;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Future;
 
 import javax.enterprise.context.RequestScoped;
-
-import org.eclipse.microprofile.fault.tolerance.tck.util.Connection;
 
 @RequestScoped
 public class AsyncRequestScopeClient {
 
-    public CompletionStage<Connection> sampleMethod(){
-        return CompletableFuture.completedFuture(null);
+    public CompletionStage<String> methodReturningCompletionStage(){
+        return CompletableFuture.completedFuture("testCompletionStageString");
+    }
+    
+    public Future<String> methodReturningFuture(){
+        return CompletableFuture.completedFuture("testFutureString");
     }
 }
