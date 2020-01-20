@@ -147,6 +147,22 @@ public class ConfigAnnotationAsset implements Asset {
         props.put(keyFor(clazz, method, annotation, parameter), value);
         return this;
     }
+    
+    /**
+     * Configure the parameter of an annotation globally
+     * 
+     * @param annotation the annotation type which has the parameter
+     * @param parameter the parameter name
+     * @param value the value to configure
+     * @return {@code this}
+     */
+    public ConfigAnnotationAsset setGlobally(final Class<? extends Annotation> annotation,
+                                    final String parameter,
+                                    final String value) {
+        props.put(keyFor(null, null, annotation, parameter), value);
+        return this;
+    }
+
 
     /**
      * Build config key used to enable an annotation for a class and method
