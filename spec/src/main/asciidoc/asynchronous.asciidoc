@@ -29,7 +29,7 @@ This thread should have the correct security context or naming context associate
 
 === Asynchronous Usage
 
-A method or a class can be annotated with `@Asynchronous`, which means the method or the methods under the class will be invoked by a separate thread. The context for `RequestScoped` should be active during the asynchronous method invocation.
+A method or a class can be annotated with `@Asynchronous`, which means the method or the methods under the class will be invoked by a separate thread. The context for `RequestScoped` must be active during the asynchronous method invocation.
 The method annotated with `@Asynchronous` must return a `Future` or a `CompletionStage` from the `java.util.concurrent` package. Otherwise, a `FaultToleranceDefinitionException` occurs.
 
 When a method annotated with `@Asynchronous` is invoked, it immediately returns a `Future` or `CompletionStage`. The execution of the any remaining interceptors and the method body will then take place on a separate thread.
