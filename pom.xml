@@ -97,21 +97,13 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>jakarta.enterprise</groupId>
-                <artifactId>jakarta.enterprise.cdi-api</artifactId>
-                <version>2.0.2</version>
+                <groupId>javax.enterprise</groupId>
+                <artifactId>cdi-api</artifactId>
+                <version>1.2</version>
                 <exclusions>
                     <exclusion>
-                        <groupId>jakarta.annotation</groupId>
-                        <artifactId>jakarta.annotation-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>jakarta.ejb</groupId>
-                        <artifactId>jakarta.ejb-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>jakarta.el</groupId>
-                        <artifactId>jakarta.el-api</artifactId>
+                        <groupId>javax.el</groupId>
+                        <artifactId>javax.el-api</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
