@@ -52,6 +52,7 @@ import javax.interceptor.InterceptorBinding;
 public @interface Retry {
 
     /**
+     * The max number of the retries.
      * @return The max number of retries. -1 means retry forever. The value must be greater than or equal to -1.
      *
      */
@@ -66,7 +67,7 @@ public @interface Retry {
     long delay() default 0;
 
     /**
-     *
+     * The unit for {@link #delay}. Defaults to {@link java.time.temporal.ChronoUnit#MILLIS} if not set.
      * @return the delay unit
      */
     @Nonbinding
@@ -80,7 +81,7 @@ public @interface Retry {
     long maxDuration() default 180000;
 
     /**
-     *
+     * The duration unit for {@link #maxDuration}. Defaults to {@link java.time.temporal.ChronoUnit#MILLIS} if not set. 
      * @return the duration unit
      */
     @Nonbinding
@@ -101,7 +102,7 @@ public @interface Retry {
     long jitter() default 200;
 
     /**
-     *
+     * The delay unit for {@link #jitter}. Defaults to {@link java.time.temporal.ChronoUnit#MILLIS} if not set. 
      * @return the jitter delay unit.
      */
     @Nonbinding
@@ -109,7 +110,7 @@ public @interface Retry {
 
 
     /**
-     * The list of exception types which should trigger a retry.
+     * The list of exception types that should trigger a retry.
      * <p>
      * Note that if a method throws a {@link Throwable} which is not an {@link Error} or {@link Exception}, non-portable behavior results.
      *
@@ -119,7 +120,7 @@ public @interface Retry {
     Class<? extends Throwable>[] retryOn() default { Exception.class };
 
     /**
-     * The list of exception types which should <i>not</i> trigger a retry.
+     * The list of exception types that should <i>not</i> trigger a retry.
      * <p>
      * This list takes priority over the types listed in {@link #retryOn()}.
      * <p>

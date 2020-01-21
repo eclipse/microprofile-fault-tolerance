@@ -50,7 +50,7 @@ public @interface Timeout {
     long value() default 1000;
 
     /**
-     *
+     * The timeout unit. Defaults to {@link java.time.temporal.ChronoUnit#MILLIS}.
      * @return the timeout unit
      */
     @Nonbinding
