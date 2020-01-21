@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2016-2017 Contributors to the Eclipse Foundation
+// Copyright (c) 2016-2020 Contributors to the Eclipse Foundation
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information regarding copyright ownership.
@@ -80,7 +80,7 @@ A full list of changes may be found on the link:https://github.com/eclipse/micro
 === Other changes
 - Clarify failOn() on CircuitBreaker and Fallback (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/240[#240])
 - Circuit Breaker - clarify how requestVolumeThreshold() and rolling window work (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/342[#342])
-- other smaller fixes (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/341[#341]) (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/252[#252]) (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/306[#306])
+- Other smaller fixes (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/341[#341]) (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/252[#252]) (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/306[#306])
 
 [[release_notes_21]]
 == Release Notes for MicroProfile Fault Tolerance 2.1
@@ -109,7 +109,9 @@ A full list of changes may be found on the link:https://github.com/eclipse/micro
 
 - Specified the meaning of overlapping `Retry.retryOn` and `abortOn` (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/442[#442]).
 - Specified that throwing custom throwables is non-portable (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/441[#441]).
+- Specified that the CDI request context must be active during the execution of methods annotated with `Asynchronous` (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/274[#274])
 - Relaxed the requirements on `Future` and `CompletionStage` implementations (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/425[#425]).
+- Clarified that when when a method returning `CompletionStage` is annotated with both `Bulkhead` and `Asynchronous`, the bulkhead considers the method to be executing until the `CompletionStage` returned by the method completes. (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/484[#484])
 - Clarified the retry metrics specification (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/491[#491]).
 
 === Other changes
