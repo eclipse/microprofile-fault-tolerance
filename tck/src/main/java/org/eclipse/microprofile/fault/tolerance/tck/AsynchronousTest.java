@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2016-2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2016-2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -24,13 +24,18 @@ import static org.awaitility.Awaitility.await;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
 
+import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.AsyncApplicationScopeClient;
 import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.AsyncClassLevelClient;
 import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.AsyncClient;
+import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.AsyncRequestScopeClient;
 import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.CompletableFutureHelper;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Connection;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -54,13 +59,18 @@ public class AsynchronousTest extends Arquillian {
     private @Inject
     AsyncClassLevelClient clientClass;
 
+    // AsyncApplicationScopeClient is an @ApplicationScoped bean
+    private @Inject
+    AsyncApplicationScopeClient clientApplicationScope;
+
     private List<CompletableFuture<Void>> waitingFutures = new ArrayList<>();
 
     @Deployment
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
             .create(JavaArchive.class, "ftAsynchronous.jar")
-            .addClasses(AsyncClient.class, AsyncClassLevelClient.class, Connection.class, CompletableFutureHelper.class)
+            .addClasses(AsyncClient.class, AsyncClassLevelClient.class, AsyncApplicationScopeClient.class, 
+                   AsyncRequestScopeClient.class, Connection.class, CompletableFutureHelper.class)
             .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
             .as(JavaArchive.class);
 
@@ -111,6 +121,40 @@ public class AsynchronousTest extends Arquillian {
         waitingFuture.complete(null);
         await().atMost(30, TimeUnit.SECONDS)
             .untilAsserted(()-> Assert.assertTrue(future.isDone()));
+    }
+
+    /**
+     * Test that the request context is active during execution for an asynchronous method that returns a CompletionStage
+     * 
+     * If the request scope is active, then an @ApplicationScoped bean should be able to asynchronously
+     * call an @Asynchronous method returning a CompletionStage on a @RequestScoped bean, and return the correct result
+     * 
+     * @throws TimeoutException 
+     * @throws ExecutionException 
+     * @throws InterruptedException 
+     */
+    @Test
+    public void testAsyncRequestContextWithCompletionStage() throws InterruptedException, ExecutionException, TimeoutException {
+        CompletionStage<String> completionStage = clientApplicationScope.serviceCallingCompletionStageMethod();
+        String result = CompletableFutureHelper.toCompletableFuture(completionStage).get(30, TimeUnit.SECONDS);
+        Assert.assertEquals(result, "testCompletionStageString");
+    }
+
+    /**
+     * Test that the request context is active during execution for an asynchronous method that returns a Future
+     * 
+     * If the request scope is active, then an @ApplicationScoped bean should be able to asynchronously
+     * call an @Asynchronous method returning a Future on a @RequestScoped bean, and return the correct result
+     * 
+     * @throws TimeoutException 
+     * @throws ExecutionException 
+     * @throws InterruptedException 
+     */
+    @Test
+    public void testAsyncRequestContextWithFuture() throws InterruptedException, ExecutionException, TimeoutException {
+        Future<String> future = clientApplicationScope.serviceCallingFutureMethod();
+        String result = future.get(30, TimeUnit.SECONDS);
+        Assert.assertEquals(result, "testFutureString");
     }
 
     /**

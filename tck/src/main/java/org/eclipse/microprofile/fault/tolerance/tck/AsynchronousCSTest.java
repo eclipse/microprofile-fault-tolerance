@@ -46,7 +46,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 /**
- * Verify the asynchronous invocation with COmpletionStage
+ * Verify the asynchronous invocation with CompletionStage
  *
  * @author Ondro Mihalyi
  */
