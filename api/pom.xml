@@ -32,8 +32,8 @@
     <description>Fault Tolerance APIs for MicroProfile :: API</description>
     <dependencies>
         <dependency>
-            <groupId>jakarta.enterprise</groupId>
-            <artifactId>jakarta.enterprise.cdi-api</artifactId>
+            <groupId>javax.enterprise</groupId>
+            <artifactId>cdi-api</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -42,7 +42,7 @@
             <version>1.0.0</version>
         </dependency>
     </dependencies>
-
+    
     <build>
         <plugins>
             <plugin>
