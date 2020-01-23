@@ -240,18 +240,18 @@ public class CircuitBreakerExceptionHierarchyTest extends Arquillian {
         assertEquals(invoke(service::serviceC9, new Error()), CircuitState.CLOSED);
     }
 
-    private CircuitState invoke(ServiceInvocation invocation, Throwable exception) {
+    private CircuitState invoke(ServiceMethod method, Throwable exception) {
         try {
-            invocation.invoke(exception);
-            throw new AssertionError("Exception not thrown from serviceC");
+            method.invoke(exception);
+            throw new AssertionError("Exception not thrown from service method");
         }
         catch (Throwable ex) {
             assertEquals(ex, exception);
         }
         
         try {
-            invocation.invoke(exception);
-            throw new AssertionError("Exception not thrown from serviceC");
+            method.invoke(exception);
+            throw new AssertionError("Exception not thrown from service method");
         }
         catch (CircuitBreakerOpenException ex) {
             return CircuitState.OPEN;
@@ -263,7 +263,7 @@ public class CircuitBreakerExceptionHierarchyTest extends Arquillian {
     }
     
     @FunctionalInterface
-    private static interface ServiceInvocation {
+    private static interface ServiceMethod {
         void invoke(Throwable t) throws Throwable;
     }
     
