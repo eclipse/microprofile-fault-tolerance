@@ -22,11 +22,11 @@ package org.eclipse.microprofile.fault.tolerance.tck.config;
 
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 
-/**
- * 
- */
+import javax.enterprise.context.Dependent;
+
+@Dependent
 public class CircuitBreakerConfigBean {
-    
+
     /**
      * Method throws TestConfigExceptionA which will result in CircuitBreakerOpenException on the third call, unless skipOn is configured
      */

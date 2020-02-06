@@ -22,9 +22,12 @@ package org.eclipse.microprofile.fault.tolerance.tck.config;
 
 import org.eclipse.microprofile.faulttolerance.Fallback;
 
+import javax.enterprise.context.Dependent;
+
 /**
  * Bean with methods to help test configuration of parameters of {@link Fallback}
  */
+@Dependent
 public class FallbackConfigBean {
 
     /**
@@ -34,7 +37,7 @@ public class FallbackConfigBean {
     public String applyOnMethod() {
         throw new TestConfigExceptionA();
     }
-    
+
     /**
      * TestConfigExceptionA will cause fallback to run, unless skipOn is configured
      */
@@ -42,7 +45,7 @@ public class FallbackConfigBean {
     public String skipOnMethod() {
         throw new TestConfigExceptionA();
     }
-    
+
     public String theFallback() {
         return "FALLBACK";
     }

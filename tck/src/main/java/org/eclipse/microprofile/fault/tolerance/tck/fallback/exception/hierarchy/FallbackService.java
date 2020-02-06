@@ -24,7 +24,9 @@ import org.eclipse.microprofile.fault.tolerance.tck.exception.hierarchy.E1;
 import org.eclipse.microprofile.fault.tolerance.tck.exception.hierarchy.E2;
 import org.eclipse.microprofile.faulttolerance.Fallback;
 
+import javax.enterprise.context.Dependent;
 
+@Dependent
 public class FallbackService {
     private String fallbackValue = "Fallback result";
     @Fallback(applyOn = {E0.class, E2.class}, skipOn = E1.class, fallbackMethod = "myFallback")
@@ -50,5 +52,4 @@ public class FallbackService {
         return fallbackValue;
     }
 
-    
 }
