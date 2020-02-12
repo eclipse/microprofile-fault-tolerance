@@ -48,7 +48,8 @@ public class ConcurrentExecutionTracker {
     // The Atomicness is not important, this is just an integer holder
     private final AtomicInteger executionCount = new AtomicInteger(0);
     
-    private static final long WAIT_TIMEOUT = 3L * 1000 * 1_000_000;
+    // 3 seconds * baseMultiplier, in nanoseconds
+    private static final long WAIT_TIMEOUT = TCKConfig.getConfig().getTimeoutInMillis(3L * 1000) * 1_000_000;
 
     /**
      * Wait for the given number of method executions to be running
