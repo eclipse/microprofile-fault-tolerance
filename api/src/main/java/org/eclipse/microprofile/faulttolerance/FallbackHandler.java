@@ -23,7 +23,7 @@ package org.eclipse.microprofile.faulttolerance;
  * The type parameter of the handler instance must be assignable to the return type of the method, 
  * where the {@link Fallback} is specified. The container must ensure this type safety. 
  * Otherwise, {@link IllegalArgumentException} should be thrown. 
- * <h3>Usage</h3>
+ * <h2>Usage</h2>
  * <pre>
  * public class MyService {
  *  &#064;Inject OtherService otherService;
