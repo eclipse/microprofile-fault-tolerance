@@ -41,7 +41,7 @@ import org.eclipse.microprofile.metrics.MetricRegistry;
  * for retrieving metrics defined by the faulttolerance spec for a specific
  * class and method name.
  * 
- * <h3>Counters</h3>
+ * <h2>Counters</h2>
  * Helper methods for counter metrics follow a common pattern:
  * <ul>
  * <li>{@code getXxxxTotal()} (e.g. {@link #getRetryCallsSucceededNotRetriedTotal()}) gets the raw value of the counter</li>
