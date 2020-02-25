@@ -25,8 +25,11 @@ import java.util.concurrent.CompletionStage;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 
+import javax.enterprise.context.Dependent;
+
+@Dependent
 public class BulkheadCompletionStageBean {
-    
+
     /**
      * Returns {@code stage} as the result
      * <p>
@@ -34,7 +37,7 @@ public class BulkheadCompletionStageBean {
      * <p>
      * As this is an async method, it won't be considered "complete" by Fault Tolerance
      * until {@code stage} completes.
-     * 
+     *
      * @param stage the CompletionStage to return as the result
      * @return {@code stage}
      */
