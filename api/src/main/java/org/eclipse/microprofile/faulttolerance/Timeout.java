@@ -44,6 +44,7 @@ public @interface Timeout {
     /**
      * The timeout value. The value must be greater than or equal to 0. 0 means no timeout configured.
      * Otherwise, {@link org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException} occurs.
+     * 
      * @return the timeout value
      */
     @Nonbinding
@@ -51,6 +52,7 @@ public @interface Timeout {
 
     /**
      * The timeout unit. Defaults to {@link java.time.temporal.ChronoUnit#MILLIS}.
+     * 
      * @return the timeout unit
      */
     @Nonbinding

@@ -29,23 +29,22 @@ import java.lang.reflect.Method;
 public interface ExecutionContext {
 
      /**
-     * Returns the method being executed
+     * Returns the method being executed.
      * 
      * @return the method
      */
     public Method getMethod();
 
     /**
-     * Returns the parameter values being passed to the method 
+     * Returns the parameter values being passed to the method.
      * 
      * @return the parameter values, as an array
-     * 
-     * 
      */
     public Object[] getParameters();
     
     /**
-     * Returns the failure of the method execution
+     * Returns the failure of the method execution.
+     * 
      * @return the failure of the method execution
      */
     public Throwable getFailure();
