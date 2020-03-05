@@ -1,4 +1,4 @@
-package org.eclipse.microprofile.fault.tolerance.tck.util;/*
+/*
  *******************************************************************************
  * Copyright (c) 2019 Contributors to the Eclipse Foundation
  *
@@ -17,6 +17,7 @@ package org.eclipse.microprofile.fault.tolerance.tck.util;/*
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
+package org.eclipse.microprofile.fault.tolerance.tck.util;
 
 import static org.testng.Assert.fail;
 
