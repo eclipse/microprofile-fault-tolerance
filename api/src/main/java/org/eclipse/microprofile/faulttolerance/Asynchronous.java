@@ -58,9 +58,9 @@ import javax.interceptor.InterceptorBinding;
  * Once the execution on Thread B is complete, the Future or CompletionStage returned in Thread A behaves differently
  * depending on whether the execution in Thread B threw an exception:
  * <ul>
- * <li>If the execution threw an exception, the Future or CompletionStage will be completed with that exception</li>
+ * <li>If the execution threw an exception, the Future or CompletionStage will be completed with that exception.</li>
  * <li>If the execution returned normally, the Future or CompletionStage returned in Thread A will behave in the same
- * way as the Future or CompletionStage returned from the execution in Thread B, i.e. it can be
+ * way as the Future or CompletionStage returned from the execution in Thread B, i.e. it can be:
  * <ul>
  * <li>not complete yet</li>
  * <li>completed successfully with a return value</li>
@@ -83,7 +83,7 @@ import javax.interceptor.InterceptorBinding;
  * <ul>
  * <li>If the method declares {@link java.util.concurrent.Future} as the return type,
  * calling {@link java.util.concurrent.Future#get()} on the Future returned in Thread A will throw an
- * {@link java.util.concurrent.ExecutionException} wrapping the original exception</li>
+ * {@link java.util.concurrent.ExecutionException} wrapping the original exception.</li>
  * <li>If the method declares {@link java.util.concurrent.CompletionStage} as the return type,
  * the CompletionStage returned in Thread A is completed exceptionally with the exception.</li>
  * </ul>

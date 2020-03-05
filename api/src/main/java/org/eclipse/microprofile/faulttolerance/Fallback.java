@@ -30,19 +30,19 @@ import javax.interceptor.InterceptorBinding;
 
 /**
  * The fallback annotation to define the fallback handler class so that
- * a failure can be handled properly. Below is the criteria:
+ * a failure can be handled properly. The criteria are as follows:
  * <ol>
  * <li>If value is specified, use {@link FallbackHandler#handle(ExecutionContext)} on the specified handler to execute the fallback.</li>
  * <li>If fallbackMethod is specified, invoke the method specified by the fallbackMethod on the same class.</li>
  * <li>If both are specified, the {@link org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException} must be thrown.</li>
  * </ol>
  * <p>
- * When a method returns and the Fallback policy is present, the following rules are applied:
+ * When a method returns and the fallback policy is present, the following rules are applied:
  * <ol>
  * <li>If the method returns normally (doesn't throw), the result is simply returned.
  * <li>Otherwise, if the thrown object is assignable to any value in the {@link #skipOn()} parameter, the thrown object will be rethrown.
  * <li>Otherwise, if the thrown object is assignable to any value in the {@link #applyOn()} parameter, 
- * the Fallback policy, detailed above, will be applied.
+ * the fallback policy, detailed above, will be applied.
  * <li>Otherwise the thrown object will be rethrown.
  * </ol>
  * If a method throws a {@link Throwable} which is not an {@link Error} or {@link Exception}, non-portable behavior results.
@@ -68,7 +68,7 @@ public @interface Fallback {
         }
     }
     /**
-     * Specify the fallback class to be used. An new instance of the fallback class
+     * Specify the fallback class to be used. A new instance of the fallback class
      * is returned. The instance is unmanaged. The type parameter of the fallback class must be assignable to the
      * return type of the annotated method. 
      * Otherwise, {@link org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException} occurs.
@@ -79,9 +79,9 @@ public @interface Fallback {
     Class<? extends FallbackHandler<?>> value() default DEFAULT.class;
     
     /**
-    * Specify the method name to be fallbacked to. This method belongs
+    * Specify the method name to fallback to. This method belongs
     * to the same class as the method to fallback.
-    * The method must have the exactly same arguments as the method being annotated.
+    * The method must have the exact same arguments as the method being annotated.
     * The method return type must be assignable to the return type of the method the fallback is for. 
     * Otherwise, {@link org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException} must be thrown.
     * 

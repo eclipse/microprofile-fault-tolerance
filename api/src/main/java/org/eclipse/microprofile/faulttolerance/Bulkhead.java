@@ -56,6 +56,7 @@ public @interface Bulkhead {
     /**
      * Specify the maximum number of concurrent calls to an instance. The value must be greater than 0.
      * Otherwise, {@link org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException} occurs.
+     * 
      * @return the limit of the concurrent calls
      */
     @Nonbinding
@@ -64,6 +65,7 @@ public @interface Bulkhead {
      * Specify the waiting task queue. This setting only takes effect on asynchronous invocation, achieved by using {@code Asynchronous}.
      * The value must be greater than 0.
      * Otherwise, {@link org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException} occurs.
+     * 
      * @return the waiting queue size
      */
     @Nonbinding
