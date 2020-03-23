@@ -18,8 +18,10 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.eclipse.microprofile.fault.tolerance.tck.config;
+package org.eclipse.microprofile.fault.tolerance.tck.config.fallback;
 
+import org.eclipse.microprofile.fault.tolerance.tck.config.TestConfigExceptionA;
+import org.eclipse.microprofile.fault.tolerance.tck.config.TestConfigExceptionB;
 import org.eclipse.microprofile.faulttolerance.Fallback;
 
 import javax.enterprise.context.Dependent;

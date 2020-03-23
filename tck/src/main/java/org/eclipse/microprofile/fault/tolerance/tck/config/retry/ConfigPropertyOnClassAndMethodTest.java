@@ -17,10 +17,11 @@
  * limitations under the License.
  */
 
-package org.eclipse.microprofile.fault.tolerance.tck.config;
+package org.eclipse.microprofile.fault.tolerance.tck.config.retry;
 
 import javax.inject.Inject;
 
+import org.eclipse.microprofile.fault.tolerance.tck.config.retry.BeanWithRetry;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -42,8 +43,8 @@ public class ConfigPropertyOnClassAndMethodTest extends Arquillian {
             .create(JavaArchive.class, "ftConfig.jar")
             .addClasses(BeanWithRetry.class)
             .addAsManifestResource(new StringAsset(
-                                       "org.eclipse.microprofile.fault.tolerance.tck.config.BeanWithRetry/Retry/maxRetries=5" +
-                                           "\norg.eclipse.microprofile.fault.tolerance.tck.config.BeanWithRetry/triggerException/Retry/maxRetries=6"),
+                                       "org.eclipse.microprofile.fault.tolerance.tck.config.retry.BeanWithRetry/Retry/maxRetries=5" +
+                                           "\norg.eclipse.microprofile.fault.tolerance.tck.config.retry.BeanWithRetry/triggerException/Retry/maxRetries=6"),
                                    "microprofile-config.properties")
             .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
             .as(JavaArchive.class);

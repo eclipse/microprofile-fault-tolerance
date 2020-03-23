@@ -18,8 +18,9 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.eclipse.microprofile.fault.tolerance.tck.config;
+package org.eclipse.microprofile.fault.tolerance.tck.config.circuitbreaker;
 
+import org.eclipse.microprofile.fault.tolerance.tck.config.TestConfigExceptionA;
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 
 import javax.enterprise.context.Dependent;

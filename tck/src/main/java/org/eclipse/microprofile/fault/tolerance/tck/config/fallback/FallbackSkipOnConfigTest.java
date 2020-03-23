@@ -18,10 +18,12 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.eclipse.microprofile.fault.tolerance.tck.config;
+package org.eclipse.microprofile.fault.tolerance.tck.config.fallback;
 
 import javax.inject.Inject;
 
+import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
+import org.eclipse.microprofile.fault.tolerance.tck.config.TestConfigExceptionA;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.eclipse.microprofile.faulttolerance.Fallback;
@@ -42,23 +44,23 @@ public class FallbackSkipOnConfigTest extends Arquillian {
     public static WebArchive create() {
         ConfigAnnotationAsset config = new ConfigAnnotationAsset();
         config.setGlobally(Fallback.class, "skipOn", TestConfigExceptionA.class.getCanonicalName());
-        
+
         JavaArchive jar = ShrinkWrap
                 .create(JavaArchive.class, "ftFallbackSkipOnConfigTest.jar")
                 .addPackage(FallbackConfigTest.class.getPackage())
                 .addPackage(Packages.UTILS)
                 .addAsManifestResource(config, "microprofile-config.properties")
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
-        
+
         WebArchive war = ShrinkWrap
                 .create(WebArchive.class, "ftFallbackSkipOnConfigTest.war")
                 .addAsLibraries(jar);
         return war;
     }
-    
+
     @Inject
     private FallbackConfigBean bean;
-    
+
     @Test
     public void testSkipOn() {
         // skipOn is configured to include TestConfigExceptionA, so method should throw exception

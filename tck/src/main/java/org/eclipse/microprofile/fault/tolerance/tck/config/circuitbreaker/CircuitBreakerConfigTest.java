@@ -18,10 +18,12 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.eclipse.microprofile.fault.tolerance.tck.config;
+package org.eclipse.microprofile.fault.tolerance.tck.config.circuitbreaker;
 
 import javax.inject.Inject;
 
+import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
+import org.eclipse.microprofile.fault.tolerance.tck.config.TestConfigExceptionA;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
@@ -42,31 +44,31 @@ public class CircuitBreakerConfigTest extends Arquillian {
     public static WebArchive create() {
         ConfigAnnotationAsset config = new ConfigAnnotationAsset();
         config.set(CircuitBreakerConfigBean.class, "skipOnMethod", CircuitBreaker.class, "skipOn", TestConfigExceptionA.class.getCanonicalName());
-        
+
         JavaArchive jar = ShrinkWrap
                 .create(JavaArchive.class, "ftCircuitBreakerConfig.jar")
                 .addPackage(CircuitBreakerConfigTest.class.getPackage())
                 .addPackage(Packages.UTILS)
                 .addAsManifestResource(config, "microprofile-config.properties")
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
-        
+
         WebArchive war = ShrinkWrap
                 .create(WebArchive.class, "ftCircuitBreakerConfig.war")
                 .addAsLibraries(jar);
-        
+
         return war;
     }
-    
+
     @Inject
     private CircuitBreakerConfigBean bean;
-    
+
     @Test
     public void testConfigureSkipOn() {
         Exceptions.expect(TestConfigExceptionA.class, () -> bean.skipOnMethod());
         Exceptions.expect(TestConfigExceptionA.class, () -> bean.skipOnMethod());
-        
+
         // If skipOn is not configured to include TestConfigExceptionA, this would throw a CircuitBreakerOpenException
         Exceptions.expect(TestConfigExceptionA.class, () -> bean.skipOnMethod());
     }
-    
+
 }

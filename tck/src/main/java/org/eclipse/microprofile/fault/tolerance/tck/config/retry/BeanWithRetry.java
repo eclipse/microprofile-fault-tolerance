@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-package org.eclipse.microprofile.fault.tolerance.tck.config;
+package org.eclipse.microprofile.fault.tolerance.tck.config.retry;
 
 import javax.enterprise.context.Dependent;
 

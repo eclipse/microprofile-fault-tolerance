@@ -18,14 +18,15 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.eclipse.microprofile.fault.tolerance.tck.config;
-
-import static org.testng.Assert.assertEquals;
+package org.eclipse.microprofile.fault.tolerance.tck.config.circuitbreaker;
 
 import javax.inject.Inject;
 
+import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
+import org.eclipse.microprofile.fault.tolerance.tck.config.TestConfigExceptionA;
+import org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
-import org.eclipse.microprofile.faulttolerance.Fallback;
+import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -35,35 +36,39 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
 /**
- * Test configuring Fallback.applyOn globally
+ * Test configuring CircuitBreaker.skipOn globally
  */
-public class FallbackApplyOnConfigTest extends Arquillian {
-    
+public class CircuitBreakerSkipOnConfigTest extends Arquillian {
+
     @Deployment
     public static WebArchive create() {
         ConfigAnnotationAsset config = new ConfigAnnotationAsset();
-        config.setGlobally(Fallback.class, "applyOn", TestConfigExceptionA.class.getCanonicalName());
-        
+        config.setGlobally(CircuitBreaker.class, "skipOn", TestConfigExceptionA.class.getCanonicalName());
+
         JavaArchive jar = ShrinkWrap
-                .create(JavaArchive.class, "ftFallbackApplyOnConfigTest.jar")
-                .addPackage(FallbackConfigTest.class.getPackage())
+                .create(JavaArchive.class, "ftCircuitBreakerSkipOnConfig.jar")
+                .addPackage(CircuitBreakerConfigTest.class.getPackage())
                 .addPackage(Packages.UTILS)
                 .addAsManifestResource(config, "microprofile-config.properties")
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
-        
+
         WebArchive war = ShrinkWrap
-                .create(WebArchive.class, "ftFallbackApplyOnConfigTest.war")
+                .create(WebArchive.class, "ftCircuitBreakerSkipOnConfig.war")
                 .addAsLibraries(jar);
+
         return war;
     }
-    
+
     @Inject
-    private FallbackConfigBean bean;
-    
+    private CircuitBreakerConfigBean bean;
+
     @Test
-    public void testApplyOn() {
-        // applyOn is configured to include TestConfigExceptionA, so method should fall back
-        assertEquals("FALLBACK", bean.applyOnMethod());
+    public void testConfigureSkipOn() {
+        Exceptions.expect(TestConfigExceptionA.class, () -> bean.skipOnMethod());
+        Exceptions.expect(TestConfigExceptionA.class, () -> bean.skipOnMethod());
+
+        // If skipOn is not configured to include TestConfigExceptionA, this would throw a CircuitBreakerOpenException
+        Exceptions.expect(TestConfigExceptionA.class, () -> bean.skipOnMethod());
     }
-    
+
 }
