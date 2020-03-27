@@ -33,6 +33,7 @@ import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
+import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
@@ -48,13 +49,16 @@ public class AllMetricsTest extends Arquillian {
         ConfigAnnotationAsset allMetricsBeanConfig = new ConfigAnnotationAsset()
                 .autoscaleMethod(AllMetricsBean.class, "doWork");
 
-        WebArchive war = ShrinkWrap.create(WebArchive.class, "ftMetricAll.war")
+        JavaArchive jar = ShrinkWrap.create(JavaArchive.class, "ftMetricAll.jar")
                 .addClasses(AllMetricsBean.class)
                 .addPackage(Packages.UTILS)
                 .addPackage(Packages.METRIC_UTILS)
-                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                 .addAsManifestResource(allMetricsBeanConfig, "microprofile-config.properties");
-        
+
+        WebArchive war = ShrinkWrap.create(WebArchive.class, "ftMetricAll.war")
+                .addAsLibrary(jar);
+
         return war;
     }
     
