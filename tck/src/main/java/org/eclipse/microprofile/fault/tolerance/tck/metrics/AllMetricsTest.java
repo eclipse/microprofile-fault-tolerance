@@ -26,6 +26,7 @@ import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
 
+import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricGetter;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -42,11 +43,17 @@ public class AllMetricsTest extends Arquillian {
 
     @Deployment
     public static WebArchive deploy() {
+
+        // Scales the following method's annotation values by the TCKConfig baseMultiplier
+        ConfigAnnotationAsset allMetricsBeanConfig = new ConfigAnnotationAsset()
+                .autoscaleMethod(AllMetricsBean.class, "doWork");
+
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftMetricAll.war")
                 .addClasses(AllMetricsBean.class)
                 .addPackage(Packages.UTILS)
                 .addPackage(Packages.METRIC_UTILS)
-                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
+                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
+                .addAsManifestResource(allMetricsBeanConfig, "microprofile-config.properties");
         
         return war;
     }

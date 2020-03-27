@@ -37,7 +37,7 @@ public class AllMetricsBean {
     
     @Retry(maxRetries = 5)
     @Bulkhead(3)
-    @Timeout(value = 1000, unit = ChronoUnit.MILLIS)
+    @Timeout(value = 1, unit = ChronoUnit.MINUTES)
     @CircuitBreaker(failureRatio = 1.0, requestVolumeThreshold = 20)
     @Fallback(fallbackMethod = "doFallback")
     @Asynchronous
