@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Contributors to the Eclipse Foundation
+ * Copyright (c) 2017 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -16,36 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.eclipse.microprofile.fault.tolerance.tck.config.retry;
 
-import javax.enterprise.context.Dependent;
-
-import org.eclipse.microprofile.fault.tolerance.tck.config.TestConfigExceptionA;
-import org.eclipse.microprofile.faulttolerance.Retry;
-
-/**
- * @author Antoine Sabot-Durand
- */
-@Dependent
-@Retry
-public class BeanWithRetry {
-
-    private int retry = 0;
-
-    @Retry
-    public void triggerException() {
-        retry++;
-        throw new IllegalStateException("Exception");
-    }
-
-    @Retry(retryOn = TestConfigExceptionA.class)
-    public void doProcessWithCustomException() throws CustomRetryServiceException {
-        retry++;
-        throw new CustomRetryServiceException();
-    }
-
-    public int getRetry() {
-        return retry;
-    }
+public class CustomRetryServiceException extends Exception{
 }

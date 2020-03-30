@@ -21,7 +21,7 @@ package org.eclipse.microprofile.fault.tolerance.tck.config.retry;
 
 import javax.inject.Inject;
 
-import org.eclipse.microprofile.fault.tolerance.tck.config.retry.BeanWithRetry;
+import org.eclipse.microprofile.fault.tolerance.tck.config.TestConfigExceptionA;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -41,10 +41,11 @@ public class ConfigPropertyOnClassAndMethodTest extends Arquillian {
     public static WebArchive deployAnotherApp() {
         JavaArchive testJar = ShrinkWrap
             .create(JavaArchive.class, "ftConfig.jar")
-            .addClasses(BeanWithRetry.class)
+            .addClasses(BeanWithRetry.class, TestConfigExceptionA.class, CustomRetryServiceException.class)
             .addAsManifestResource(new StringAsset(
                                        "org.eclipse.microprofile.fault.tolerance.tck.config.retry.BeanWithRetry/Retry/maxRetries=5" +
-                                           "\norg.eclipse.microprofile.fault.tolerance.tck.config.retry.BeanWithRetry/triggerException/Retry/maxRetries=6"),
+                                           "\norg.eclipse.microprofile.fault.tolerance.tck.config.retry.BeanWithRetry/" +
+                                           "triggerException/Retry/maxRetries=6"),
                                    "microprofile-config.properties")
             .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
             .as(JavaArchive.class);

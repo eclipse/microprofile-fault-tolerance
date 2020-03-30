@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -21,12 +21,13 @@ package org.eclipse.microprofile.fault.tolerance.tck.config.retry;
 
 import javax.inject.Inject;
 
-import org.eclipse.microprofile.fault.tolerance.tck.config.retry.BeanWithRetry;
+import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
+import org.eclipse.microprofile.fault.tolerance.tck.config.TestConfigExceptionA;
+import org.eclipse.microprofile.faulttolerance.Retry;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
-import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.Assert;
@@ -41,11 +42,15 @@ public class ConfigPropertyGlobalVsClassVsMethodTest extends Arquillian {
     public static WebArchive deployAnotherApp() {
         JavaArchive testJar = ShrinkWrap
             .create(JavaArchive.class, "ftConfig.jar")
-            .addClasses(BeanWithRetry.class)
-            .addAsManifestResource(new StringAsset(
-                "org.eclipse.microprofile.fault.tolerance.tck.config.retry.BeanWithRetry/Retry/maxRetries=5" +
-                    "\norg.eclipse.microprofile.fault.tolerance.tck.config.retry.BeanWithRetry/triggerException/Retry/maxRetries=6" +
-                    "\nRetry/maxRetries=7"), "microprofile-config.properties")
+            .addClasses(BeanWithRetry.class, TestConfigExceptionA.class, CustomRetryServiceException.class)
+            .addAsManifestResource(
+                new ConfigAnnotationAsset()
+                    .setGlobally(Retry.class, "maxRetries", "5")
+                    .set(BeanWithRetry.class, "triggerException", Retry.class, "maxRetries", "6")
+                    .set(BeanWithRetry.class, "triggerException", Retry.class, "maxRetries", "7")
+                    .set(BeanWithRetry.class, "doProcessWithCustomException", Retry.class, "retryOn",
+                        CustomRetryServiceException.class.getName()),
+                "microprofile-config.properties")
             .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
             .as(JavaArchive.class);
 
@@ -66,7 +71,21 @@ public class ConfigPropertyGlobalVsClassVsMethodTest extends Arquillian {
         catch (IllegalStateException e) {
             e.printStackTrace();
         }
-        Assert.assertEquals(bean.getRetry(), 7);
+        Assert.assertEquals(bean.getRetry(), 8);
+    }
+
+    /**
+     * Test that config property on file has precedence over annotation config
+     */
+    @Test
+    void propertyRetryOnPriorityTest() {
+        try {
+            bean.doProcessWithCustomException();
+        }
+        catch (CustomRetryServiceException e) {
+            Assert.assertTrue(e instanceof Exception);
+        }
+        Assert.assertEquals(bean.getRetry(), 6);
     }
 
     @Inject
