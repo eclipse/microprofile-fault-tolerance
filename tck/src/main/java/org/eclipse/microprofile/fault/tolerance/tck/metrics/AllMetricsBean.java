@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018-2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -37,7 +37,7 @@ public class AllMetricsBean {
     
     @Retry(maxRetries = 5)
     @Bulkhead(3)
-    @Timeout(value = 1000, unit = ChronoUnit.MILLIS)
+    @Timeout(value = 1, unit = ChronoUnit.MINUTES)
     @CircuitBreaker(failureRatio = 1.0, requestVolumeThreshold = 20)
     @Fallback(fallbackMethod = "doFallback")
     @Asynchronous
