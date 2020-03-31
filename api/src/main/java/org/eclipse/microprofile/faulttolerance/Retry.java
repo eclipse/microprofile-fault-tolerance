@@ -41,6 +41,17 @@ import javax.interceptor.InterceptorBinding;
  * <li>Otherwise the thrown object is rethrown.
  * </ol>
  * If a method throws a {@link Throwable} which is not an {@link Error} or {@link Exception}, non-portable behavior results.
+ *
+ * @see #maxRetries()
+ * @see #delay()
+ * @see #delayUnit()
+ * @see #maxDuration()
+ * @see #durationUnit()
+ * @see #jitter()
+ * @see #jitterDelayUnit()
+ * @see #retryOn()
+ * @see #abortOn()
+ *
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  * @author John Ament
  */
@@ -53,7 +64,7 @@ public @interface Retry {
 
     /**
      * The max number of the retries.
-     * 
+     *
      * @return the max number of retries. -1 means retry forever. The value must be greater than or equal to -1.
      *
      */
@@ -62,7 +73,7 @@ public @interface Retry {
 
     /**
      * The delay between retries. Defaults to 0. The value must be greater than or equal to 0.
-     * 
+     *
      * @return the delay time
      */
     @Nonbinding
@@ -70,7 +81,7 @@ public @interface Retry {
 
     /**
      * The unit for {@link #delay}. Defaults to {@link java.time.temporal.ChronoUnit#MILLIS} if not set.
-     * 
+     *
      * @return the delay unit
      */
     @Nonbinding
@@ -78,15 +89,15 @@ public @interface Retry {
 
     /**
      * The max duration. The max duration must be greater than the delay duration if set. 0 means not set.
-     * 
+     *
      * @return the maximum duration to perform retries for
      */
     @Nonbinding
     long maxDuration() default 180000;
 
     /**
-     * The duration unit for {@link #maxDuration}. Defaults to {@link java.time.temporal.ChronoUnit#MILLIS} if not set. 
-     * 
+     * The duration unit for {@link #maxDuration}. Defaults to {@link java.time.temporal.ChronoUnit#MILLIS} if not set.
+     *
      * @return the duration unit
      */
     @Nonbinding
@@ -108,7 +119,7 @@ public @interface Retry {
 
     /**
      * The delay unit for {@link #jitter}. Defaults to {@link java.time.temporal.ChronoUnit#MILLIS} if not set.
-     * 
+     *
      * @return the jitter delay unit
      */
     @Nonbinding
