@@ -26,6 +26,7 @@ import javax.inject.Inject;
 
 import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
 import org.eclipse.microprofile.fault.tolerance.tck.config.TestConfigExceptionA;
+import org.eclipse.microprofile.fault.tolerance.tck.config.TestConfigExceptionB;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.eclipse.microprofile.faulttolerance.Fallback;
@@ -50,7 +51,7 @@ public class FallbackConfigTest extends Arquillian {
 
         JavaArchive jar = ShrinkWrap
                 .create(JavaArchive.class, "ftFallbackConfigTest.jar")
-                .addPackage(FallbackConfigTest.class.getPackage())
+                .addClasses(FallbackConfigBean.class, TestConfigExceptionA.class, TestConfigExceptionB.class)
                 .addPackage(Packages.UTILS)
                 .addAsManifestResource(config, "microprofile-config.properties")
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");

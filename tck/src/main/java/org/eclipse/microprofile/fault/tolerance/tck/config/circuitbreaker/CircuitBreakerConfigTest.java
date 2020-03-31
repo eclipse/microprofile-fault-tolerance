@@ -24,6 +24,7 @@ import javax.inject.Inject;
 
 import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
 import org.eclipse.microprofile.fault.tolerance.tck.config.TestConfigExceptionA;
+import org.eclipse.microprofile.fault.tolerance.tck.config.TestConfigExceptionB;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
@@ -47,7 +48,7 @@ public class CircuitBreakerConfigTest extends Arquillian {
 
         JavaArchive jar = ShrinkWrap
                 .create(JavaArchive.class, "ftCircuitBreakerConfig.jar")
-                .addPackage(CircuitBreakerConfigTest.class.getPackage())
+                .addClasses(CircuitBreakerConfigBean.class, TestConfigExceptionA.class, TestConfigExceptionB.class)
                 .addPackage(Packages.UTILS)
                 .addAsManifestResource(config, "microprofile-config.properties")
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
