@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018-2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -26,12 +26,14 @@ import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
 
+import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricGetter;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
+import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
@@ -42,11 +44,20 @@ public class AllMetricsTest extends Arquillian {
 
     @Deployment
     public static WebArchive deploy() {
-        WebArchive war = ShrinkWrap.create(WebArchive.class, "ftMetricAll.war")
+
+        // Scales the following method's annotation values by the TCKConfig baseMultiplier
+        ConfigAnnotationAsset allMetricsBeanConfig = new ConfigAnnotationAsset()
+                .autoscaleMethod(AllMetricsBean.class, "doWork");
+
+        JavaArchive jar = ShrinkWrap.create(JavaArchive.class, "ftMetricAll.jar")
                 .addClasses(AllMetricsBean.class)
                 .addPackage(Packages.UTILS)
                 .addPackage(Packages.METRIC_UTILS)
-                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
+                .addAsManifestResource(allMetricsBeanConfig, "microprofile-config.properties");
+
+        WebArchive war = ShrinkWrap.create(WebArchive.class, "ftMetricAll.war")
+                .addAsLibrary(jar);
         
         return war;
     }
