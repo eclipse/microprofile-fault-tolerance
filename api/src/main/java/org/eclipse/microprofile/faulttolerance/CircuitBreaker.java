@@ -68,6 +68,14 @@ import javax.interceptor.InterceptorBinding;
  * </ul>
  * If a method throws a {@link Throwable} which is not an {@link Error} or {@link Exception}, non-portable behavior results.
  *
+ * @see #failOn()
+ * @see #skipOn()
+ * @see #delay()
+ * @see #delayUnit()
+ * @see #requestVolumeThreshold()
+ * @see #failureRatio()
+ * @see #successThreshold()
+ *
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  */
 @Inherited
@@ -87,7 +95,7 @@ public @interface CircuitBreaker {
      */
     @Nonbinding
     Class<? extends Throwable>[] failOn() default {Throwable.class};
-    
+
     /**
      * The list of exception types which should not be considered failures.
      * <p>

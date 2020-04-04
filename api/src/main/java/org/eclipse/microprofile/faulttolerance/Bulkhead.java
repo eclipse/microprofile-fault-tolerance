@@ -33,8 +33,8 @@ import javax.interceptor.InterceptorBinding;
 /**
  * Define bulkhead policy to limit the number of the concurrent calls to an instance.
  * <p>
- * If this is used together with {@code Asynchronous}, it means thread isolation. 
- * 
+ * If this is used together with {@code Asynchronous}, it means thread isolation.
+ *
  * Otherwise, it means semaphore isolation.
  * <ul>
  * <li> Thread isolation - execution happens on a separate thread and the concurrent requests
@@ -42,7 +42,10 @@ import javax.interceptor.InterceptorBinding;
  * <li> Semaphore isolation - execution happens on the calling thread and the concurrent requests
  * are constrained by the semaphore count.</li>
  * </ul>
- * 
+ *
+ * @see #value()
+ * @see #waitingTaskQueue()
+ *
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  *
  */
@@ -56,16 +59,17 @@ public @interface Bulkhead {
     /**
      * Specify the maximum number of concurrent calls to an instance. The value must be greater than 0.
      * Otherwise, {@link org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException} occurs.
-     * 
+     *
      * @return the limit of the concurrent calls
      */
     @Nonbinding
     int value() default 10;
+
     /**
      * Specify the waiting task queue. This setting only takes effect on asynchronous invocation, achieved by using {@code Asynchronous}.
      * The value must be greater than 0.
      * Otherwise, {@link org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException} occurs.
-     * 
+     *
      * @return the waiting queue size
      */
     @Nonbinding
