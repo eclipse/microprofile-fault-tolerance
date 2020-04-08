@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018-2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -203,13 +203,14 @@ public class TimeoutUninterruptableTest extends Arquillian {
      * Test that the timeout timer is started when the execution is added to the queue
      * 
      * @throws InterruptedException if the test is interrupted
+     * @throws ExecutionException 
      */
     @Test
-    public void testTimeoutAsyncBulkheadQueueTimed() throws InterruptedException {
+    public void testTimeoutAsyncBulkheadQueueTimed() throws InterruptedException, ExecutionException {
         CompletableFuture<Void> waitingFutureA = newWaitingFuture();
         CompletableFuture<Void> waitingFutureB = newWaitingFuture();
         
-        client.serviceTimeoutAsyncBulkheadQueueTimed(waitingFutureA);
+        Future<Void> resultA = client.serviceTimeoutAsyncBulkheadQueueTimed(waitingFutureA);
         Thread.sleep(config.getTimeoutInMillis(100));
         
         long startTime = System.nanoTime();
@@ -219,6 +220,9 @@ public class TimeoutUninterruptableTest extends Arquillian {
         
         // Allow call A to finish, this should allow call B to start
         waitingFutureA.complete(null);
+        
+        // Assert there were no exceptions for call A
+        resultA.get();
         
         // Wait for call B to time out
         expect(TimeoutException.class, resultB);
