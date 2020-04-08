@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018-2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,7 +19,7 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.timeout.clientserver;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -32,6 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.enterprise.context.RequestScoped;
 
+import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 import org.eclipse.microprofile.faulttolerance.Fallback;
@@ -41,6 +42,9 @@ import org.testng.Assert;
 
 @RequestScoped
 public class UninterruptableTimeoutClient {
+
+    // 3 seconds * baseMultiplier, in milliseconds
+    private final long WAITING_FUTURE_DURATION = TCKConfig.getConfig().getTimeoutInMillis(3L * 1000);
     
     /**
      * Waits for at least {@code waitms}, then returns
@@ -83,7 +87,7 @@ public class UninterruptableTimeoutClient {
     public Future<Void> serviceTimeoutAsync(Future<?> waitingFuture, CompletableFuture<Void> completion) {
         while (true) {
             try {
-                waitingFuture.get(5, SECONDS);
+                waitingFuture.get(WAITING_FUTURE_DURATION, MILLISECONDS);
                 completion.complete(null);
                 return CompletableFuture.completedFuture(null);
             }
@@ -94,7 +98,7 @@ public class UninterruptableTimeoutClient {
                 Assert.fail("Waiting future threw exception", e);
             }
             catch (TimeoutException e) {
-                return CompletableFuture.completedFuture(null);
+                Assert.fail("Waiting future timed out", e);
             }
         }
     }
@@ -150,7 +154,7 @@ public class UninterruptableTimeoutClient {
         timeoutAsyncBulkheadCounter.incrementAndGet();
         while (true) {
             try {
-                waitingFuture.get(5, SECONDS);
+                waitingFuture.get(WAITING_FUTURE_DURATION, MILLISECONDS);
                 return CompletableFuture.completedFuture(null);
             }
             catch (InterruptedException e) {
@@ -160,7 +164,7 @@ public class UninterruptableTimeoutClient {
                 Assert.fail("Waiting future threw exception", e);
             }
             catch (TimeoutException e) {
-                return CompletableFuture.completedFuture(null);
+                Assert.fail("Waiting future timed out", e);
             }
         }
     }
@@ -191,7 +195,7 @@ public class UninterruptableTimeoutClient {
     public Future<Void> serviceTimeoutAsyncBulkheadQueueTimed(Future<?> waitingFuture) {
         while (true) {
             try {
-                waitingFuture.get(5, SECONDS);
+                waitingFuture.get(WAITING_FUTURE_DURATION, MILLISECONDS);
                 return CompletableFuture.completedFuture(null);
             }
             catch (InterruptedException e) {
@@ -201,7 +205,7 @@ public class UninterruptableTimeoutClient {
                 Assert.fail("Waiting future threw exception", e);
             }
             catch (TimeoutException e) {
-                return CompletableFuture.completedFuture(null);
+                Assert.fail("Waiting future timed out", e);
             }
         }
     }
@@ -229,7 +233,7 @@ public class UninterruptableTimeoutClient {
         timeoutAsyncRetryCounter.incrementAndGet();
         while (true) {
             try {
-                waitingFuture.get(5, SECONDS);
+                waitingFuture.get(WAITING_FUTURE_DURATION, MILLISECONDS);
                 return CompletableFuture.completedFuture(null);
             }
             catch (InterruptedException e) {
@@ -239,7 +243,7 @@ public class UninterruptableTimeoutClient {
                 Assert.fail("Waiting future threw exception", e);
             }
             catch (TimeoutException e) {
-                return CompletableFuture.completedFuture(null);
+                Assert.fail("Waiting future timed out", e);
             }
         }
     }
@@ -273,7 +277,7 @@ public class UninterruptableTimeoutClient {
     public Future<String> serviceTimeoutAsyncFallback(Future<?> waitingFuture) {
         while (true) {
             try {
-                waitingFuture.get(5, SECONDS);
+                waitingFuture.get(WAITING_FUTURE_DURATION, MILLISECONDS);
                 return CompletableFuture.completedFuture("OK");
             }
             catch (InterruptedException e) {
@@ -283,7 +287,7 @@ public class UninterruptableTimeoutClient {
                 Assert.fail("Waiting future threw exception", e);
             }
             catch (TimeoutException e) {
-                return CompletableFuture.completedFuture("TIMEDOUT");
+                Assert.fail("Waiting future timed out", e);
             }
         }
     }
