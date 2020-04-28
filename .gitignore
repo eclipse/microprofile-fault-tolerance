@@ -14,3 +14,4 @@ test-output
 *.iwl
 *.ipr
 .DS_Store
+.vscode/

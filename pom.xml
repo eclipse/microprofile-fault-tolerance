@@ -24,7 +24,7 @@
     <name>MicroProfile Fault Tolerance</name>
     <description>Eclipse MicroProfile Fault Tolerance Feature :: Parent POM</description>
 
-    <url>http://microprofile.io</url>
+    <url>https://microprofile.io</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -40,10 +40,10 @@
 
     <licenses>
         <license>
-            <name>Apache License, Version 2.0</name>
+            <name>Apache-2.0</name>
+            <comments>Apache License, Version 2.0</comments>
             <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
             <distribution>repo</distribution>
-            <comments>A business-friendly OSS license</comments>
         </license>
     </licenses>
 
