@@ -26,29 +26,41 @@ import static org.hamcrest.Matchers.is;
 
 import javax.inject.Inject;
 
+import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.CircuitBreakerMetricBean.Result;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricGetter;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
 import org.eclipse.microprofile.faulttolerance.exceptions.CircuitBreakerOpenException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
+import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 public class CircuitBreakerMetricTest extends Arquillian {
     
-    private static final long CB_CLOSE_TIMEOUT = 5L * 1000 * 1_000_000;
+    private static final long CB_CLOSE_TIMEOUT = TCKConfig.getConfig().getTimeoutInDuration(5000).toNanos();
 
     @Deployment
     public static WebArchive deploy() {
-        WebArchive war = ShrinkWrap.create(WebArchive.class, "ftMetricCircuitBreaker.war")
+        
+        ConfigAnnotationAsset config = new ConfigAnnotationAsset()
+                .autoscaleMethod(CircuitBreakerMetricBean.class, "doWork");
+        
+        JavaArchive jar = ShrinkWrap.create(JavaArchive.class, "ftMetricCircuitBreaker.jar")
                 .addClasses(CircuitBreakerMetricBean.class)
                 .addPackage(Packages.UTILS)
                 .addPackage(Packages.METRIC_UTILS)
-                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
+                .addAsManifestResource(config, "microprofile-config.properties");
+        
+        WebArchive war = ShrinkWrap.create(WebArchive.class, "ftMetricCircuitBreaker.war")
+                .addAsLibrary(jar);
+        
         return war;
     }
     
@@ -112,7 +124,7 @@ public class CircuitBreakerMetricTest extends Arquillian {
         assertThat("circuit breaker times opened", m.getCircuitBreakerOpenedDelta(), is(1L));
         
         // Wait a while for the circuit to be half-open
-        Thread.sleep(1500);
+        Thread.sleep(TCKConfig.getConfig().getTimeoutInMillis(1500));
         
         // Lots of successful work, causing the circuit to close again 
         for (int i = 0; i < 2; i++) {
