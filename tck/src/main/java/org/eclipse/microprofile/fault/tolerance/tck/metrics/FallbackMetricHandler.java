@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018-2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -23,6 +23,7 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.FallbackMetricBean.Action;
+import org.eclipse.microprofile.fault.tolerance.tck.metrics.FallbackMetricBean.NonFallbackException;
 import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.ExecutionContext;
 import org.eclipse.microprofile.faulttolerance.FallbackHandler;
@@ -37,8 +38,11 @@ public class FallbackMetricHandler implements FallbackHandler<Void> {
         if (fallbackBean.getFallbackAction() == Action.PASS) {
             return null;
         }
-        else {
+        else if (fallbackBean.getFallbackAction() == Action.FAIL){
             throw new TestException();
+        }
+        else {
+            throw new NonFallbackException();
         }
     }
     

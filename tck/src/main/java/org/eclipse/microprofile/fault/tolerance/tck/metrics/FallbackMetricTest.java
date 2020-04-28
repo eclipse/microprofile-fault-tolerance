@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018-2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -18,13 +18,18 @@
  */
 package org.eclipse.microprofile.fault.tolerance.tck.metrics;
 
+import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationResult.EXCEPTION_THROWN;
+import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationResult.VALUE_RETURNED;
 import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expectTestException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.testng.Assert.expectThrows;
 
 import javax.inject.Inject;
 
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.FallbackMetricBean.Action;
+import org.eclipse.microprofile.fault.tolerance.tck.metrics.FallbackMetricBean.NonFallbackException;
+import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationFallback;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricGetter;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -51,53 +56,75 @@ public class FallbackMetricTest extends Arquillian {
     @Test
     public void fallbackMetricMethodTest() {
         MetricGetter m = new MetricGetter(FallbackMetricBean.class, "doWork");
-        m.baselineCounters();
+        m.baselineMetrics();
         
         fallbackBean.setFallbackAction(Action.PASS);
         fallbackBean.doWork(Action.PASS);
         
-        assertThat("fallback calls", m.getFallbackCallsDelta(), is(0L));
-        assertThat("invocations", m.getInvocationsDelta(), is(1L));
-        assertThat("failed invocations", m.getInvocationsFailedDelta(), is(0L));
+        assertThat("successful without fallback", m.getInvocations(VALUE_RETURNED, InvocationFallback.NOT_APPLIED).delta(), is(1L));
+        assertThat("successful with fallback", m.getInvocations(VALUE_RETURNED, InvocationFallback.APPLIED).delta(), is(0L));
+        assertThat("failed without fallback", m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_APPLIED).delta(), is(0L));
+        assertThat("failed with fallback", m.getInvocations(EXCEPTION_THROWN, InvocationFallback.APPLIED).delta(), is(0L));
         
         fallbackBean.doWork(Action.FAIL);
         
-        assertThat("fallback calls", m.getFallbackCallsDelta(), is(1L));
-        assertThat("invocations", m.getInvocationsDelta(), is(2L));
-        assertThat("failed invocations", m.getInvocationsFailedDelta(), is(0L));
+        assertThat("successful without fallback", m.getInvocations(VALUE_RETURNED, InvocationFallback.NOT_APPLIED).delta(), is(1L));
+        assertThat("successful with fallback", m.getInvocations(VALUE_RETURNED, InvocationFallback.APPLIED).delta(), is(1L));
+        assertThat("failed without fallback", m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_APPLIED).delta(), is(0L));
+        assertThat("failed with fallback", m.getInvocations(EXCEPTION_THROWN, InvocationFallback.APPLIED).delta(), is(0L));
         
         fallbackBean.setFallbackAction(Action.FAIL);
         expectTestException(() -> fallbackBean.doWork(Action.FAIL));
         
-        assertThat("fallback calls", m.getFallbackCallsDelta(), is(2L));
-        assertThat("invocations", m.getInvocationsDelta(), is(3L));
-        assertThat("failed invocations", m.getInvocationsFailedDelta(), is(1L));
+        assertThat("successful without fallback", m.getInvocations(VALUE_RETURNED, InvocationFallback.NOT_APPLIED).delta(), is(1L));
+        assertThat("successful with fallback", m.getInvocations(VALUE_RETURNED, InvocationFallback.APPLIED).delta(), is(1L));
+        assertThat("failed without fallback", m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_APPLIED).delta(), is(0L));
+        assertThat("failed with fallback", m.getInvocations(EXCEPTION_THROWN, InvocationFallback.APPLIED).delta(), is(1L));
+        
+        fallbackBean.setFallbackAction(Action.PASS);
+        expectThrows(NonFallbackException.class, () -> fallbackBean.doWork(Action.NON_FALLBACK_EXCEPTION));
+        
+        assertThat("successful without fallback", m.getInvocations(VALUE_RETURNED, InvocationFallback.NOT_APPLIED).delta(), is(1L));
+        assertThat("successful with fallback", m.getInvocations(VALUE_RETURNED, InvocationFallback.APPLIED).delta(), is(1L));
+        assertThat("failed without fallback", m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_APPLIED).delta(), is(1L));
+        assertThat("failed with fallback", m.getInvocations(EXCEPTION_THROWN, InvocationFallback.APPLIED).delta(), is(1L));
     }
     
     @Test
     public void fallbackMetricHandlerTest() {
         MetricGetter m = new MetricGetter(FallbackMetricBean.class, "doWorkWithHandler");
-        m.baselineCounters();
+        m.baselineMetrics();
         
         fallbackBean.setFallbackAction(Action.PASS);
         fallbackBean.doWorkWithHandler(Action.PASS);
         
-        assertThat("fallback calls", m.getFallbackCallsDelta(), is(0L));
-        assertThat("invocations", m.getInvocationsDelta(), is(1L));
-        assertThat("failed invocations", m.getInvocationsFailedDelta(), is(0L));
+        assertThat("successful without fallback", m.getInvocations(VALUE_RETURNED, InvocationFallback.NOT_APPLIED).delta(), is(1L));
+        assertThat("successful with fallback", m.getInvocations(VALUE_RETURNED, InvocationFallback.APPLIED).delta(), is(0L));
+        assertThat("failed without fallback", m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_APPLIED).delta(), is(0L));
+        assertThat("failed with fallback", m.getInvocations(EXCEPTION_THROWN, InvocationFallback.APPLIED).delta(), is(0L));
         
         fallbackBean.doWorkWithHandler(Action.FAIL);
         
-        assertThat("fallback calls", m.getFallbackCallsDelta(), is(1L));
-        assertThat("invocations", m.getInvocationsDelta(), is(2L));
-        assertThat("failed invocations", m.getInvocationsFailedDelta(), is(0L));
+        assertThat("successful without fallback", m.getInvocations(VALUE_RETURNED, InvocationFallback.NOT_APPLIED).delta(), is(1L));
+        assertThat("successful with fallback", m.getInvocations(VALUE_RETURNED, InvocationFallback.APPLIED).delta(), is(1L));
+        assertThat("failed without fallback", m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_APPLIED).delta(), is(0L));
+        assertThat("failed with fallback", m.getInvocations(EXCEPTION_THROWN, InvocationFallback.APPLIED).delta(), is(0L));
         
         fallbackBean.setFallbackAction(Action.FAIL);
         expectTestException(() -> fallbackBean.doWorkWithHandler(Action.FAIL));
         
-        assertThat("fallback calls", m.getFallbackCallsDelta(), is(2L));
-        assertThat("invocations", m.getInvocationsDelta(), is(3L));
-        assertThat("failed invocations", m.getInvocationsFailedDelta(), is(1L));
+        assertThat("successful without fallback", m.getInvocations(VALUE_RETURNED, InvocationFallback.NOT_APPLIED).delta(), is(1L));
+        assertThat("successful with fallback", m.getInvocations(VALUE_RETURNED, InvocationFallback.APPLIED).delta(), is(1L));
+        assertThat("failed without fallback", m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_APPLIED).delta(), is(0L));
+        assertThat("failed with fallback", m.getInvocations(EXCEPTION_THROWN, InvocationFallback.APPLIED).delta(), is(1L));
+        
+        fallbackBean.setFallbackAction(Action.PASS);
+        expectThrows(NonFallbackException.class, () -> fallbackBean.doWorkWithHandler(Action.NON_FALLBACK_EXCEPTION));
+        
+        assertThat("successful without fallback", m.getInvocations(VALUE_RETURNED, InvocationFallback.NOT_APPLIED).delta(), is(1L));
+        assertThat("successful with fallback", m.getInvocations(VALUE_RETURNED, InvocationFallback.APPLIED).delta(), is(1L));
+        assertThat("failed without fallback", m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_APPLIED).delta(), is(1L));
+        assertThat("failed with fallback", m.getInvocations(EXCEPTION_THROWN, InvocationFallback.APPLIED).delta(), is(1L));
     }
 
 }

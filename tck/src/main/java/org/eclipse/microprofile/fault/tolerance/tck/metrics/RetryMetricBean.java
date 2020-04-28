@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018-2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,6 +19,8 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.metrics;
 
+import java.time.Duration;
+
 import javax.enterprise.context.RequestScoped;
 
 import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
@@ -27,14 +29,40 @@ import org.eclipse.microprofile.faulttolerance.Retry;
 @RequestScoped
 public class RetryMetricBean {
     
-    private int calls = 0;
-
     @Retry(maxRetries = 5)
-    public void failSeveralTimes(int timesToFail) {
-        calls++;
-        if (calls <= timesToFail) {
-            throw new TestException("call no. " + calls);
+    public void failSeveralTimes(int timesToFail, CallCounter counter) {
+        counter.calls++;
+        if (counter.calls <= timesToFail) {
+            throw new TestException("call no. " + counter.calls);
         }
+    }
+    
+    @Retry(maxRetries = -1, maxDuration = 1000, delay = 0, jitter = 0)
+    public void failAfterDelay(Duration delay) throws InterruptedException {
+        Thread.sleep(delay.toMillis());
+        throw new TestException("Exception after duration: " + delay);
+    }
+    
+    @Retry(maxRetries = 5, abortOn = NonRetryableException.class)
+    public void failSeveralTimesThenNonRetryable(int timesToFail, CallCounter counter) {
+        counter.calls++;
+        if (counter.calls <= timesToFail) {
+            throw new TestException("call no. " + counter.calls);
+        }
+        throw new NonRetryableException();
+    }
+    
+    @Retry(maxRetries = 0)
+    public void maxRetriesZero() {
+        throw new TestException("Test exception for maxRetriesZero");
+    }
+    
+    public static class CallCounter {
+        private int calls = 0;
+    }
+    
+    @SuppressWarnings("serial")
+    public static class NonRetryableException extends RuntimeException {
     }
     
 }
