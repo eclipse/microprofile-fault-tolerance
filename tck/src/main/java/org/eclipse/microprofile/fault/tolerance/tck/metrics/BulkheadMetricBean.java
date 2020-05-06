@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018-2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -22,6 +22,8 @@ package org.eclipse.microprofile.fault.tolerance.tck.metrics;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -71,13 +73,16 @@ public class BulkheadMetricBean {
     private void doWaitFor(Future<?> future) {
         try {
             tracker.executionStarted();
-            future.get();
+            future.get(1, TimeUnit.MINUTES);
         }
         catch (InterruptedException e) {
             throw new RuntimeException("Test was interrupted", e);
         }
         catch (ExecutionException e) {
             throw new RuntimeException("Passed Future threw an exception", e);
+        }
+        catch (TimeoutException e) {
+            throw new RuntimeException("Timed out waiting for passed future to complete", e);
         }
         finally {
             tracker.executionEnded();
