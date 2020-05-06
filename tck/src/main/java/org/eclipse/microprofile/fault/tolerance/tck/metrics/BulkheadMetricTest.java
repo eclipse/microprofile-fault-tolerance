@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018-2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -18,6 +18,7 @@
  */
 package org.eclipse.microprofile.fault.tolerance.tck.metrics;
 
+import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricComparator.approxMillis;
 import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricComparator.lessThanMillis;
@@ -32,6 +33,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
 
@@ -95,7 +97,7 @@ public class BulkheadMetricTest extends Arquillian {
     }
     
     @Test
-    public void bulkheadMetricTest() throws InterruptedException, ExecutionException {
+    public void bulkheadMetricTest() throws InterruptedException, ExecutionException, TimeoutException {
         MetricGetter m = new MetricGetter(BulkheadMetricBean.class, "waitFor");
         m.baselineCounters();
         
@@ -108,8 +110,8 @@ public class BulkheadMetricTest extends Arquillian {
         assertThat("concurrent executions", m.getBulkheadConcurrentExecutions().get(), is(2L));
         
         waitingFuture.complete(null);
-        f1.get();
-        f2.get();
+        f1.get(1, MINUTES);
+        f2.get(1, MINUTES);
         
         assertThat("concurrent executions", m.getBulkheadConcurrentExecutions().get(), is(0L));
         assertThat("accepted calls", m.getBulkheadCallsAcceptedDelta(), is(2L));
@@ -125,7 +127,7 @@ public class BulkheadMetricTest extends Arquillian {
     }
     
     @Test
-    public void bulkheadMetricRejectionTest() throws InterruptedException, ExecutionException {
+    public void bulkheadMetricRejectionTest() throws InterruptedException, ExecutionException, TimeoutException {
         MetricGetter m = new MetricGetter(BulkheadMetricBean.class, "waitFor");
         m.baselineCounters();
         
@@ -142,8 +144,8 @@ public class BulkheadMetricTest extends Arquillian {
         assertThat("concurrent executions", m.getBulkheadConcurrentExecutions().get(), is(2L));
         
         waitingFuture.complete(null);
-        f1.get();
-        f2.get();
+        f1.get(1, MINUTES);
+        f2.get(1, MINUTES);
         
         assertThat("concurrent executions", m.getBulkheadConcurrentExecutions().get(), is(0L));
         assertThat("accepted calls", m.getBulkheadCallsAcceptedDelta(), is(2L));
@@ -157,7 +159,7 @@ public class BulkheadMetricTest extends Arquillian {
     
     @Test
     @SuppressWarnings("unchecked")
-    public void bulkheadMetricHistogramTest() throws InterruptedException, ExecutionException {
+    public void bulkheadMetricHistogramTest() throws InterruptedException, ExecutionException, TimeoutException {
         MetricGetter m = new MetricGetter(BulkheadMetricBean.class, "waitForHistogram");
         m.baselineCounters();
         
@@ -173,8 +175,8 @@ public class BulkheadMetricTest extends Arquillian {
         Thread.sleep(config.getTimeoutInMillis(1000));
         
         waitingFuture.complete(null);
-        f1.get();
-        f2.get();
+        f1.get(1, MINUTES);
+        f2.get(1, MINUTES);
         
         Histogram executionTimes = m.getBulkheadExecutionDuration().get();
         Snapshot snap = executionTimes.getSnapshot();
@@ -199,7 +201,7 @@ public class BulkheadMetricTest extends Arquillian {
     
     @Test
     @SuppressWarnings("unchecked")
-    public void bulkheadMetricAsyncTest() throws InterruptedException, ExecutionException {
+    public void bulkheadMetricAsyncTest() throws InterruptedException, ExecutionException, TimeoutException {
         MetricGetter m = new MetricGetter(BulkheadMetricBean.class, "waitForAsync");
         m.baselineCounters();
         
@@ -225,10 +227,10 @@ public class BulkheadMetricTest extends Arquillian {
         durationms /= config.getBaseMultiplier(); // This value is used with approxMillis which always applies the baseMultiplier
                                                   // so preemptively divide it by the baseMultiplier here
         
-        f1.get();
-        f2.get();
-        f3.get();
-        f4.get();
+        f1.get(1, MINUTES);
+        f2.get(1, MINUTES);
+        f3.get(1, MINUTES);
+        f4.get(1, MINUTES);
 
         assertThat("concurrent executions", m.getBulkheadConcurrentExecutions().get(), is(0L));
         assertThat("accepted calls", m.getBulkheadCallsAcceptedDelta(), is(4L));
