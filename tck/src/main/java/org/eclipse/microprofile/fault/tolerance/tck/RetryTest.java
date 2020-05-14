@@ -21,6 +21,7 @@ package org.eclipse.microprofile.fault.tolerance.tck;
 
 import javax.inject.Inject;
 
+import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClassLevelClientForMaxRetries;
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClientForMaxRetries;
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClientWithDelay;
@@ -50,6 +51,10 @@ public class RetryTest extends Arquillian {
     
     @Deployment
     public static WebArchive deploy() {
+        
+        ConfigAnnotationAsset config = new ConfigAnnotationAsset()
+                .autoscaleMethod(RetryClientWithDelay.class, "serviceA");
+        
         JavaArchive testJar = ShrinkWrap
                 .create(JavaArchive.class, "ftRetry.jar")
                 .addClasses(RetryClientForMaxRetries.class,
@@ -57,7 +62,7 @@ public class RetryTest extends Arquillian {
                             RetryClassLevelClientForMaxRetries.class,
                             RetryClientWithNoDelayAndJitter.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
-                .as(JavaArchive.class);
+                .addAsManifestResource(config, "microprofile-config.properties");
 
         WebArchive war = ShrinkWrap
                 .create(WebArchive.class, "ftRetry.war")
@@ -129,7 +134,7 @@ public class RetryTest extends Arquillian {
 
         Assert.assertTrue(retryCountForConnectionService > 4,
             "The max number of execution should be greater than 4 but it was " + retryCountForConnectionService);
-        Assert.assertTrue(clientForDelay.isDelayInRange(), "The delay between each retry should be 0-800ms");
+        clientForDelay.assertDelayInRange();
     }
 
     /**
