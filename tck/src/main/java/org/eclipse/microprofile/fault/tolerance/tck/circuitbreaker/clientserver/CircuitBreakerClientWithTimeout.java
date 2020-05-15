@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018-2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -23,6 +23,7 @@ import static org.testng.Assert.fail;
 
 import javax.enterprise.context.RequestScoped;
 
+import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 import org.eclipse.microprofile.faulttolerance.Timeout;
 import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
@@ -38,10 +39,10 @@ public class CircuitBreakerClientWithTimeout {
      * @return should always throw TimeoutException, unless CircuitBreaker prevents execution
      */
     @CircuitBreaker(successThreshold = 2, requestVolumeThreshold = 2, failureRatio = 0.75, delay = 50000)
-    @Timeout(500)
+    @Timeout(500) // Adjusted by config
     public String serviceWithTimeout() {
         try {
-            Thread.sleep(1000);
+            Thread.sleep(TCKConfig.getConfig().getTimeoutInMillis(1000));
             fail("Thread not interrupted by timeout");
         }
         catch (InterruptedException e) {
@@ -60,10 +61,10 @@ public class CircuitBreakerClientWithTimeout {
      * @return should always throw TimeoutException
      */
     @CircuitBreaker(successThreshold = 2, requestVolumeThreshold = 2, failureRatio = 0.75, delay = 50000, failOn = BulkheadException.class)
-    @Timeout(500)
+    @Timeout(500) // Adjusted by config
     public String serviceWithTimeoutWithoutFailOn() {
         try {
-            Thread.sleep(1000);
+            Thread.sleep(TCKConfig.getConfig().getTimeoutInMillis(1000));
             fail("Thread not interrupted by timeout");
         }
         catch (InterruptedException e) {
