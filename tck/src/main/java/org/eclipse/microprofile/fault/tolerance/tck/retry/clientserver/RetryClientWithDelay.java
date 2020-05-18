@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2016-2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2016-2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,6 +19,10 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.everyItem;
+import static org.hamcrest.Matchers.lessThan;
+
 import java.sql.Connection;
 import java.time.Duration;
 import java.util.HashSet;
@@ -26,6 +30,7 @@ import java.util.Set;
 
 import javax.enterprise.context.RequestScoped;
 
+import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
 import org.eclipse.microprofile.faulttolerance.Retry;
 /**
  * A client to demonstrate the delay configurations
@@ -38,12 +43,12 @@ public class RetryClientWithDelay {
     private long timestampForConnectionService = 0;
     private Set<Duration> delayTimes = new HashSet<>();
     
-    // Expect delay between 0-800ms. Set limit to 900ms to allow a small buffer
-    private static final Duration MAX_DELAY = Duration.ofMillis(900);
+    // Expect delay between 0-800ms. Set limit to 1000ms to allow a small buffer
+    private static final Duration MAX_DELAY = TCKConfig.getConfig().getTimeoutInDuration(1000);
     
     //There should be 0-800ms (jitter is -400ms - 400ms) delays between each invocation
     //there should be at least 4 retries
-    @Retry(delay = 400, maxDuration= 3200, jitter= 400, maxRetries = 10)
+    @Retry(delay = 400, maxDuration = 3200, jitter = 400, maxRetries = 10) // Adjusted by config
     public Connection serviceA() {
         return connectionService();
     }
@@ -61,14 +66,8 @@ public class RetryClientWithDelay {
         throw new RuntimeException("Connection failed");
     }
     
-    public boolean isDelayInRange() {
-        boolean isDelayInRange = true;        
-        for (Duration delayTime : delayTimes) {
-            if (delayTime.compareTo(MAX_DELAY) > 0) {
-                return false;
-            }
-        }
-        return isDelayInRange;
+    public void assertDelayInRange() {
+        assertThat("Delay longer than expected", delayTimes, everyItem(lessThan(MAX_DELAY)));
     }
    
     public int getRetryCountForConnectionService() {
