@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018-2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -22,6 +22,7 @@ package org.eclipse.microprofile.fault.tolerance.tck;
 import javax.inject.Inject;
 
 import org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver.CircuitBreakerClientWithTimeout;
+import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -41,11 +42,15 @@ public class CircuitBreakerTimeoutTest extends Arquillian {
     
     @Deployment
     public static WebArchive deploy() {
+        ConfigAnnotationAsset config = new ConfigAnnotationAsset()
+                .autoscaleMethod(CircuitBreakerClientWithTimeout.class, "serviceWithTimeout")
+                .autoscaleMethod(CircuitBreakerClientWithTimeout.class, "serviceWithTimeoutWithoutFailOn");
+        
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftCircuitBreakerTimeout.jar")
                                         .addClasses(CircuitBreakerClientWithTimeout.class)
                                         .addPackage(Packages.UTILS)
                                         .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
-                                        .as(JavaArchive.class);
+                                        .addAsManifestResource(config, "microprofile-config.properties");
 
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftCircuitBreakerTimeout.war")
                                    .addAsLibrary(testJar);
