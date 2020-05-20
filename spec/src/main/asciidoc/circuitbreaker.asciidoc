@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2016-2019 Contributors to the Eclipse Foundation
+// Copyright (c) 2016-2020 Contributors to the Eclipse Foundation
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information regarding copyright ownership.
@@ -86,6 +86,7 @@ which reaches the `failureRatio` of `0.5`. Request 6 will therefore hit the `Cir
 In this scenario, request 4 will cause the circuit to open. Request 5 will hit the `CircuitBreakerOpenException`.
 Note that request 3 does not cause the circuit to open because the rolling window has not yet reached the `requestVolumeThreshold`.
 
+[#circuit-breaker-success-failure]
 ==== Configuring which exceptions are considered a failure
 
 The `failOn` and `skipOn` parameters are used to define which exceptions are considered failures for the purpose of deciding whether the circuit breaker should open.

@@ -30,10 +30,19 @@ public class CircuitBreakerMetricBean {
     public enum Result {
         PASS,
         PASS_EXCEPTION,
+        SKIPPED_EXCEPTION,
         FAIL
     }
 
-    @CircuitBreaker(requestVolumeThreshold = 2, failureRatio = 1.0D, delay = 1000, successThreshold = 2, failOn = {TestException.class})
+    @SuppressWarnings("serial")
+    public static class SkippedException extends TestException {
+        public SkippedException() {
+            super("skipped");
+        }
+    }
+
+    @CircuitBreaker(requestVolumeThreshold = 2, failureRatio = 1.0D, delay = 1000, successThreshold = 2, failOn = {TestException.class},
+            skipOn = SkippedException.class)
     public void doWork(Result result) {
         switch (result) {
         case PASS:
@@ -42,6 +51,8 @@ public class CircuitBreakerMetricBean {
                 throw new RuntimeException();
         case FAIL:
                 throw new TestException();
+        case SKIPPED_EXCEPTION:
+                throw new SkippedException();
         default:
                 throw new IllegalArgumentException("Unknown result requested");
         }

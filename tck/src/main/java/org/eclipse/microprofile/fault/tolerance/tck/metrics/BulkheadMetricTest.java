@@ -22,6 +22,10 @@ import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricComparator.approxMillis;
 import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricComparator.lessThanMillis;
+import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.BulkheadResult.ACCEPTED;
+import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.BulkheadResult.REJECTED;
+import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationResult.EXCEPTION_THROWN;
+import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationResult.VALUE_RETURNED;
 import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expectBulkheadException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -37,6 +41,7 @@ import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
 
+import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationFallback;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricGetter;
 import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncCaller;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
@@ -99,7 +104,7 @@ public class BulkheadMetricTest extends Arquillian {
     @Test
     public void bulkheadMetricTest() throws InterruptedException, ExecutionException, TimeoutException {
         MetricGetter m = new MetricGetter(BulkheadMetricBean.class, "waitFor");
-        m.baselineCounters();
+        m.baselineMetrics();
         
         CompletableFuture<Void> waitingFuture = newWaitingFuture();
         
@@ -107,29 +112,29 @@ public class BulkheadMetricTest extends Arquillian {
         Future<?> f2 = async.run(() -> bulkheadBean.waitFor(waitingFuture));
 
         bulkheadBean.waitForRunningExecutions(2);
-        assertThat("concurrent executions", m.getBulkheadConcurrentExecutions().get(), is(2L));
+        assertThat("executions running", m.getBulkheadExecutionsRunning().value(), is(2L));
         
         waitingFuture.complete(null);
         f1.get(1, MINUTES);
         f2.get(1, MINUTES);
         
-        assertThat("concurrent executions", m.getBulkheadConcurrentExecutions().get(), is(0L));
-        assertThat("accepted calls", m.getBulkheadCallsAcceptedDelta(), is(2L));
-        assertThat("rejected calls", m.getBulkheadCallsRejectedDelta(), is(0L));
+        assertThat("executions running", m.getBulkheadExecutionsRunning().value(), is(0L));
+        assertThat("accepted calls", m.getBulkheadCalls(ACCEPTED).delta(), is(2L));
+        assertThat("rejected calls", m.getBulkheadCalls(REJECTED).delta(), is(0L));
         
         // Async metrics should not be present
-        assertThat("bulkhead queue population present", m.getBulkheadQueuePopulation().isPresent(), is(false));
-        assertThat("bulkhead wait time histogram present", m.getBulkheadWaitTime().isPresent(), is(false));
+        assertThat("bulkhead executions waiting present", m.getBulkheadExecutionsWaiting().gauge().isPresent(), is(false));
+        assertThat("bulkhead waiting duration present", m.getBulkheadWaitingDuration().isPresent(), is(false));
         
         // General metrics should be updated
-        assertThat("invocations", m.getInvocationsDelta(), is(2L));
-        assertThat("failed invocations", m.getInvocationsFailedDelta(), is(0L));
+        assertThat("successful invocations", m.getInvocations(VALUE_RETURNED, InvocationFallback.NOT_DEFINED).delta(), is(2L));
+        assertThat("failed invocations", m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_DEFINED).delta(), is(0L));
     }
     
     @Test
     public void bulkheadMetricRejectionTest() throws InterruptedException, ExecutionException, TimeoutException {
         MetricGetter m = new MetricGetter(BulkheadMetricBean.class, "waitFor");
-        m.baselineCounters();
+        m.baselineMetrics();
         
         CompletableFuture<Void> waitingFuture = newWaitingFuture();
         
@@ -141,19 +146,19 @@ public class BulkheadMetricTest extends Arquillian {
         Future<?> f3 = async.run(() -> bulkheadBean.waitFor(waitingFuture));
         expectBulkheadException(f3);
         
-        assertThat("concurrent executions", m.getBulkheadConcurrentExecutions().get(), is(2L));
+        assertThat("executions running", m.getBulkheadExecutionsRunning().value(), is(2L));
         
         waitingFuture.complete(null);
         f1.get(1, MINUTES);
         f2.get(1, MINUTES);
         
-        assertThat("concurrent executions", m.getBulkheadConcurrentExecutions().get(), is(0L));
-        assertThat("accepted calls", m.getBulkheadCallsAcceptedDelta(), is(2L));
-        assertThat("rejected calls", m.getBulkheadCallsRejectedDelta(), is(1L));
+        assertThat("executions running", m.getBulkheadExecutionsRunning().value(), is(0L));
+        assertThat("accepted calls", m.getBulkheadCalls(ACCEPTED).delta(), is(2L));
+        assertThat("rejected calls", m.getBulkheadCalls(REJECTED).delta(), is(1L));
         
         // General metrics should be updated
-        assertThat("invocations", m.getInvocationsDelta(), is(3L));
-        assertThat("failed invocations", m.getInvocationsFailedDelta(), is(1L));
+        assertThat("successful invocations", m.getInvocations(VALUE_RETURNED, InvocationFallback.NOT_DEFINED).delta(), is(2L));
+        assertThat("failed invocations", m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_DEFINED).delta(), is(1L));
 
     }
     
@@ -161,7 +166,7 @@ public class BulkheadMetricTest extends Arquillian {
     @SuppressWarnings("unchecked")
     public void bulkheadMetricHistogramTest() throws InterruptedException, ExecutionException, TimeoutException {
         MetricGetter m = new MetricGetter(BulkheadMetricBean.class, "waitForHistogram");
-        m.baselineCounters();
+        m.baselineMetrics();
         
         CompletableFuture<Void> waitingFuture = newWaitingFuture();
         
@@ -178,7 +183,7 @@ public class BulkheadMetricTest extends Arquillian {
         f1.get(1, MINUTES);
         f2.get(1, MINUTES);
         
-        Histogram executionTimes = m.getBulkheadExecutionDuration().get();
+        Histogram executionTimes = m.getBulkheadRunningDuration().get();
         Snapshot snap = executionTimes.getSnapshot();
         
         assertThat("histogram count", executionTimes.getCount(), is(2L)); // Rejected executions not recorded in histogram
@@ -203,7 +208,7 @@ public class BulkheadMetricTest extends Arquillian {
     @SuppressWarnings("unchecked")
     public void bulkheadMetricAsyncTest() throws InterruptedException, ExecutionException, TimeoutException {
         MetricGetter m = new MetricGetter(BulkheadMetricBean.class, "waitForAsync");
-        m.baselineCounters();
+        m.baselineMetrics();
         
         CompletableFuture<Void> waitingFuture = newWaitingFuture();
         
@@ -218,8 +223,8 @@ public class BulkheadMetricTest extends Arquillian {
         
         expectBulkheadException(bulkheadBean.waitForAsync(waitingFuture));
 
-        assertThat("concurrent executions", m.getBulkheadConcurrentExecutions().get(), is(2L));
-        assertThat("queue population", m.getBulkheadQueuePopulation().get(), is(2L));
+        assertThat("executions running", m.getBulkheadExecutionsRunning().value(), is(2L));
+        assertThat("executions waiting", m.getBulkheadExecutionsWaiting().value(), is(2L));
         
         Thread.sleep(config.getTimeoutInMillis(1000));
         waitingFuture.complete(null);
@@ -232,24 +237,24 @@ public class BulkheadMetricTest extends Arquillian {
         f3.get(1, MINUTES);
         f4.get(1, MINUTES);
 
-        assertThat("concurrent executions", m.getBulkheadConcurrentExecutions().get(), is(0L));
-        assertThat("accepted calls", m.getBulkheadCallsAcceptedDelta(), is(4L));
-        assertThat("rejections", m.getBulkheadCallsRejectedDelta(), is(1L));
+        assertThat("executions running", m.getBulkheadExecutionsRunning().value(), is(0L));
+        assertThat("accepted calls", m.getBulkheadCalls(ACCEPTED).delta(), is(4L));
+        assertThat("rejections", m.getBulkheadCalls(REJECTED).delta(), is(1L));
         
-        Histogram queueWaits = m.getBulkheadWaitTime().get();
+        Histogram queueWaits = m.getBulkheadWaitingDuration().get();
         Snapshot snap = queueWaits.getSnapshot();
         List<Long> values = Arrays.stream(snap.getValues()).sorted().boxed().collect(toList());
         
         // Expect 2 * wait for 0ms, 2 * wait for durationms
-        assertThat("queue wait histogram counts", queueWaits.getCount(), is(4L));
-        assertThat("queue wait histogram values", values, contains(lessThanMillis(500),
-                                                                   lessThanMillis(500),
-                                                                   approxMillis(durationms),
-                                                                   approxMillis(durationms)));
+        assertThat("waiting duration histogram counts", queueWaits.getCount(), is(4L));
+        assertThat("waiting duration histogram values", values, contains(lessThanMillis(500),
+                                                                         lessThanMillis(500),
+                                                                         approxMillis(durationms),
+                                                                         approxMillis(durationms)));
         
         // General metrics should be updated
-        assertThat("invocations", m.getInvocationsDelta(), is(5L));
-        assertThat("failed invocations", m.getInvocationsFailedDelta(), is(1L));
+        assertThat("successful invocations", m.getInvocations(VALUE_RETURNED, InvocationFallback.NOT_DEFINED).delta(), is(4L));
+        assertThat("failed invocations", m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_DEFINED).delta(), is(1L));
     }
 
     private void waitForQueuePopulation(MetricGetter m,
@@ -257,7 +262,7 @@ public class BulkheadMetricTest extends Arquillian {
                                         long timeoutInMs) throws InterruptedException {
         long timeoutTime = System.currentTimeMillis() + timeoutInMs;
         while (System.currentTimeMillis() < timeoutTime) {
-            if (m.getBulkheadQueuePopulation().orElse(0L) == expectedQueuePopulation) {
+            if (m.getBulkheadExecutionsWaiting().value() == expectedQueuePopulation) {
                 return;
             }
             Thread.sleep(100L);

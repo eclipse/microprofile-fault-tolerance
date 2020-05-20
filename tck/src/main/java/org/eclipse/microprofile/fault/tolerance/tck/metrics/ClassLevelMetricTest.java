@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018-2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -18,12 +18,17 @@
  */
 package org.eclipse.microprofile.fault.tolerance.tck.metrics;
 
+import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationResult.EXCEPTION_THROWN;
+import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationResult.VALUE_RETURNED;
 import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expectTestException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 import javax.inject.Inject;
 
+import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationFallback;
+import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.RetryResult;
+import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.RetryRetried;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricGetter;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -56,54 +61,57 @@ public class ClassLevelMetricTest extends Arquillian {
     @Test
     public void testRetryMetricSuccessfulImmediately() {
         MetricGetter m = new MetricGetter(ClassLevelMetricBean.class, "failSeveralTimes");
-        m.baselineCounters();
+        m.baselineMetrics();
         
         classLevelRetryBean.failSeveralTimes(0); // Should succeed on first attempt
         
-        assertThat("calls succeeded without retry", m.getRetryCallsSucceededNotRetriedDelta(), is(1L));
-        assertThat("calls succeeded after retry", m.getRetryCallsSucceededRetriedDelta(), is(0L));
-        assertThat("calls failed", m.getRetryCallsFailedDelta(), is(0L));
-        assertThat("retries", m.getRetryRetriesDelta(), is(0L));
+        assertRetryCallsIncremented(m, RetryRetried.FALSE, RetryResult.VALUE_RETURNED, 1L);
+        assertThat("retries", m.getRetryRetries().delta(), is(0L));
         
-        // General metrics
-        assertThat("invocations", m.getInvocationsDelta(), is(1L));
-        assertThat("failed invocations", m.getInvocationsFailedDelta(), is(0L));
+        assertThat("invocations returning value", m.getInvocations(VALUE_RETURNED, InvocationFallback.NOT_DEFINED).delta(), is(1L));
+        assertThat("invocations throwing exception", m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_DEFINED).delta(), is(0L));
     }
     
     @Test
     public void testRetryMetricSuccessfulAfterRetry() {
         MetricGetter m = new MetricGetter(ClassLevelMetricBean.class, "failSeveralTimes");
-        m.baselineCounters();
+        m.baselineMetrics();
         
         classLevelRetryBean.failSeveralTimes(3); // Should retry 3 times, and eventually succeed
         
-        assertThat("calls succeeded without retry", m.getRetryCallsSucceededNotRetriedDelta(), is(0L));
-        assertThat("calls succeeded after retry", m.getRetryCallsSucceededRetriedDelta(), is(1L));
-        assertThat("calls failed", m.getRetryCallsFailedDelta(), is(0L));
-        assertThat("retries", m.getRetryRetriesDelta(), is(3L));
+        assertRetryCallsIncremented(m, RetryRetried.TRUE, RetryResult.VALUE_RETURNED, 1L);
+        assertThat("retries", m.getRetryRetries().delta(), is(3L));
         
-        // General metrics
-        assertThat("invocations", m.getInvocationsDelta(), is(1L));
-        assertThat("failed invocations", m.getInvocationsFailedDelta(), is(0L));
+        assertThat("invocations returning value", m.getInvocations(VALUE_RETURNED, InvocationFallback.NOT_DEFINED).delta(), is(1L));
+        assertThat("invocations throwing exception", m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_DEFINED).delta(), is(0L));
     }
     
     @Test
     public void testRetryMetricUnsuccessful() {
         MetricGetter m = new MetricGetter(ClassLevelMetricBean.class, "failSeveralTimes");
-        m.baselineCounters();
+        m.baselineMetrics();
         
         expectTestException(() -> classLevelRetryBean.failSeveralTimes(20)); // Should retry 5 times, then fail
         expectTestException(() -> classLevelRetryBean.failSeveralTimes(20)); // Should retry 5 times, then fail
         
-        assertThat("calls succeeded without retry", m.getRetryCallsSucceededNotRetriedDelta(), is(0L));
-        assertThat("calls succeeded after retry", m.getRetryCallsSucceededRetriedDelta(), is(0L));
-        assertThat("calls failed", m.getRetryCallsFailedDelta(), is(2L));
-        assertThat("retries", m.getRetryRetriesDelta(), is(10L));
+        assertRetryCallsIncremented(m, RetryRetried.TRUE, RetryResult.MAX_RETRIES_REACHED, 2L);
+        assertThat("retries", m.getRetryRetries().delta(), is(10L));
         
-        // General metrics
-        assertThat("invocations", m.getInvocationsDelta(), is(2L));
-        assertThat("failed invocations", m.getInvocationsFailedDelta(), is(2L));
-
+        assertThat("invocations returning value", m.getInvocations(VALUE_RETURNED, InvocationFallback.NOT_DEFINED).delta(), is(0L));
+        assertThat("invocations throwing exception", m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_DEFINED).delta(), is(2L));
+    }
+    
+    private void assertRetryCallsIncremented(MetricGetter m, RetryRetried retriedValue, RetryResult resultValue, Long expectedDelta) {
+        for (RetryRetried retried : RetryRetried.values()) {
+            for (RetryResult result : RetryResult.values()) {
+                if (retried == retriedValue && result == resultValue) {
+                    assertThat("Retry calls (" + retried + ", " + result + ")", m.getRetryCalls(retried, result).delta(), is(expectedDelta));
+                }
+                else {
+                    assertThat("Retry calls (" + retried + ", " + result + ")", m.getRetryCalls(retried, result).delta(), is(0L));
+                }
+            }
+        }
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018-2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -18,6 +18,7 @@
  */
 package org.eclipse.microprofile.fault.tolerance.tck.metrics;
 
+import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationResult.VALUE_RETURNED;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
@@ -26,6 +27,7 @@ import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
 
+import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationFallback;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricGetter;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
@@ -52,12 +54,12 @@ public class ClashingNameTest extends Arquillian {
     @Test
     public void testClashingName() throws InterruptedException, ExecutionException {
         MetricGetter m = new MetricGetter(ClashingNameBean.class, "doWork");
-        m.baselineCounters();
+        m.baselineMetrics();
         
         clashingNameBean.doWork().get();
         clashingNameBean.doWork("dummy").get();
         
-        assertThat("invocations", m.getInvocationsDelta(), is(greaterThan(0L)));
+        assertThat("invocations", m.getInvocations(VALUE_RETURNED, InvocationFallback.NOT_APPLIED).delta(), is(greaterThan(0L)));
     }
 
 }

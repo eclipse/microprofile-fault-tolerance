@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018-2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -18,6 +18,11 @@
  */
 package org.eclipse.microprofile.fault.tolerance.tck.metrics;
 
+import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.CircuitBreakerResult.CIRCUIT_BREAKER_OPEN;
+import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.CircuitBreakerResult.FAILURE;
+import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.CircuitBreakerResult.SUCCESS;
+import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationResult.EXCEPTION_THROWN;
+import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationResult.VALUE_RETURNED;
 import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expect;
 import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expectCbOpen;
 import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expectTestException;
@@ -28,6 +33,8 @@ import javax.inject.Inject;
 
 import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.CircuitBreakerMetricBean.Result;
+import org.eclipse.microprofile.fault.tolerance.tck.metrics.CircuitBreakerMetricBean.SkippedException;
+import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationFallback;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricGetter;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
@@ -97,31 +104,31 @@ public class CircuitBreakerMetricTest extends Arquillian {
     @Test
     public void testCircuitBreakerMetric() throws Exception {
         MetricGetter m = new MetricGetter(CircuitBreakerMetricBean.class, "doWork");
-        m.baselineCounters();
+        m.baselineMetrics();
         
         // First failure, circuit remains closed
         expectTestException(() -> cbBean.doWork(Result.FAIL));
         
-        assertThat("circuitbreaker calls succeeded", m.getCircuitBreakerCallsSucceededDelta(), is(0L));
-        assertThat("circuitbreaker calls failed", m.getCircuitBreakerCallsFailedDelta(), is(1L));
-        assertThat("circuitbreaker calls prevented", m.getCircuitBreakerCallsPreventedDelta(), is(0L));
-        assertThat("circuit breaker times opened", m.getCircuitBreakerOpenedDelta(), is(0L));
+        assertThat("circuitbreaker calls succeeded", m.getCircuitBreakerCalls(SUCCESS).delta(), is(0L));
+        assertThat("circuitbreaker calls failed", m.getCircuitBreakerCalls(FAILURE).delta(), is(1L));
+        assertThat("circuitbreaker calls prevented", m.getCircuitBreakerCalls(CIRCUIT_BREAKER_OPEN).delta(), is(0L));
+        assertThat("circuit breaker times opened", m.getCircuitBreakerOpened().delta(), is(0L));
 
         // Second failure, causes circuit to open
         expectTestException(() -> cbBean.doWork(Result.FAIL));
         
-        assertThat("circuitbreaker calls succeeded", m.getCircuitBreakerCallsSucceededDelta(), is(0L));
-        assertThat("circuitbreaker calls failed", m.getCircuitBreakerCallsFailedDelta(), is(2L));
-        assertThat("circuitbreaker calls prevented", m.getCircuitBreakerCallsPreventedDelta(), is(0L));
-        assertThat("circuit breaker times opened", m.getCircuitBreakerOpenedDelta(), is(1L));
+        assertThat("circuitbreaker calls succeeded", m.getCircuitBreakerCalls(SUCCESS).delta(), is(0L));
+        assertThat("circuitbreaker calls failed", m.getCircuitBreakerCalls(FAILURE).delta(), is(2L));
+        assertThat("circuitbreaker calls prevented", m.getCircuitBreakerCalls(CIRCUIT_BREAKER_OPEN).delta(), is(0L));
+        assertThat("circuit breaker times opened", m.getCircuitBreakerOpened().delta(), is(1L));
         
         // Circuit is open, causing failure
         expectCbOpen(() -> cbBean.doWork(Result.PASS));
         
-        assertThat("circuitbreaker calls succeeded", m.getCircuitBreakerCallsSucceededDelta(), is(0L));
-        assertThat("circuitbreaker calls failed", m.getCircuitBreakerCallsFailedDelta(), is(2L));
-        assertThat("circuitbreaker calls prevented", m.getCircuitBreakerCallsPreventedDelta(), is(1L));
-        assertThat("circuit breaker times opened", m.getCircuitBreakerOpenedDelta(), is(1L));
+        assertThat("circuitbreaker calls succeeded", m.getCircuitBreakerCalls(SUCCESS).delta(), is(0L));
+        assertThat("circuitbreaker calls failed", m.getCircuitBreakerCalls(FAILURE).delta(), is(2L));
+        assertThat("circuitbreaker calls prevented", m.getCircuitBreakerCalls(CIRCUIT_BREAKER_OPEN).delta(), is(1L));
+        assertThat("circuit breaker times opened", m.getCircuitBreakerOpened().delta(), is(1L));
         
         // Wait a while for the circuit to be half-open
         Thread.sleep(TCKConfig.getConfig().getTimeoutInMillis(1500));
@@ -131,21 +138,29 @@ public class CircuitBreakerMetricTest extends Arquillian {
             cbBean.doWork(Result.PASS);
         }
         
-        assertThat("circuitbreaker calls succeeded", m.getCircuitBreakerCallsSucceededDelta(), is(2L));
-        assertThat("circuitbreaker calls failed", m.getCircuitBreakerCallsFailedDelta(), is(2L));
-        assertThat("circuitbreaker calls prevented", m.getCircuitBreakerCallsPreventedDelta(), is(1L));
-        assertThat("circuit breaker times opened", m.getCircuitBreakerOpenedDelta(), is(1L));
+        assertThat("circuitbreaker calls succeeded", m.getCircuitBreakerCalls(SUCCESS).delta(), is(2L));
+        assertThat("circuitbreaker calls failed", m.getCircuitBreakerCalls(FAILURE).delta(), is(2L));
+        assertThat("circuitbreaker calls prevented", m.getCircuitBreakerCalls(CIRCUIT_BREAKER_OPEN).delta(), is(1L));
+        assertThat("circuit breaker times opened", m.getCircuitBreakerOpened().delta(), is(1L));
 
         // exception that is considered a success
         expect(RuntimeException.class, () -> cbBean.doWork(Result.PASS_EXCEPTION));
 
-        assertThat("circuitbreaker calls succeeded", m.getCircuitBreakerCallsSucceededDelta(), is(3L));
-        assertThat("circuitbreaker calls failed", m.getCircuitBreakerCallsFailedDelta(), is(2L));
-        assertThat("circuitbreaker calls prevented", m.getCircuitBreakerCallsPreventedDelta(), is(1L));
-        assertThat("circuit breaker times opened", m.getCircuitBreakerOpenedDelta(), is(1L));
+        assertThat("circuitbreaker calls succeeded", m.getCircuitBreakerCalls(SUCCESS).delta(), is(3L));
+        assertThat("circuitbreaker calls failed", m.getCircuitBreakerCalls(FAILURE).delta(), is(2L));
+        assertThat("circuitbreaker calls prevented", m.getCircuitBreakerCalls(CIRCUIT_BREAKER_OPEN).delta(), is(1L));
+        assertThat("circuit breaker times opened", m.getCircuitBreakerOpened().delta(), is(1L));
+
+        // skipped exception also considered a success
+        expect(SkippedException.class, () -> cbBean.doWork(Result.SKIPPED_EXCEPTION));
+
+        assertThat("circuitbreaker calls succeeded", m.getCircuitBreakerCalls(SUCCESS).delta(), is(4L));
+        assertThat("circuitbreaker calls failed", m.getCircuitBreakerCalls(FAILURE).delta(), is(2L));
+        assertThat("circuitbreaker calls prevented", m.getCircuitBreakerCalls(CIRCUIT_BREAKER_OPEN).delta(), is(1L));
+        assertThat("circuit breaker times opened", m.getCircuitBreakerOpened().delta(), is(1L));
 
         // General metrics should be updated
-        assertThat("invocations", m.getInvocationsDelta(), is(6L));
-        assertThat("failed invocations", m.getInvocationsFailedDelta(), is(4L));
+        assertThat("successful invocations", m.getInvocations(VALUE_RETURNED, InvocationFallback.NOT_DEFINED).delta(), is(2L));
+        assertThat("failed invocations", m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_DEFINED).delta(), is(5L));
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018-2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,6 +19,8 @@
 package org.eclipse.microprofile.fault.tolerance.tck.metrics;
 
 import static java.util.stream.Collectors.toList;
+import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationResult.EXCEPTION_THROWN;
+import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationResult.VALUE_RETURNED;
 import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expectTimeout;
 import static org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig.getConfig;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -32,6 +34,8 @@ import javax.inject.Inject;
 
 import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricComparator;
+import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationFallback;
+import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.TimeoutTimedOut;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricGetter;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.eclipse.microprofile.faulttolerance.Timeout;
@@ -71,17 +75,17 @@ public class TimeoutMetricTest extends Arquillian {
     @Test
     public void testTimeoutMetric() {
         MetricGetter m = new MetricGetter(TimeoutMetricBean.class, "counterTestWorkForMillis");
-        m.baselineCounters();
+        m.baselineMetrics();
 
         expectTimeout(() -> timeoutBean.counterTestWorkForMillis(getConfig().getTimeoutInMillis(2000))); // Should timeout
         expectTimeout(() -> timeoutBean.counterTestWorkForMillis(getConfig().getTimeoutInMillis(2000))); // Should timeout
         timeoutBean.counterTestWorkForMillis(getConfig().getTimeoutInMillis(100)); // Should not timeout
 
-        assertThat("calls timed out", m.getTimeoutCallsTimedOutDelta(), is(2L));
-        assertThat("calls not timed out", m.getTimeoutCallsNotTimedOutDelta(), is(1L));
+        assertThat("calls timed out", m.getTimeoutCalls(TimeoutTimedOut.TRUE).delta(), is(2L));
+        assertThat("calls not timed out", m.getTimeoutCalls(TimeoutTimedOut.FALSE).delta(), is(1L));
 
-        assertThat("invocations", m.getInvocationsDelta(), is(3L));
-        assertThat("failed invocations", m.getInvocationsFailedDelta(), is(2L));
+        assertThat("successful invocations", m.getInvocations(VALUE_RETURNED, InvocationFallback.NOT_DEFINED).delta(), is(1L));
+        assertThat("failed invocations", m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_DEFINED).delta(), is(2L));
     }
 
     @Test

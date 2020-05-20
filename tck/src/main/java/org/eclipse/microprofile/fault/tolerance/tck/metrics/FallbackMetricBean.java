@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018-2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -29,18 +29,22 @@ public class FallbackMetricBean {
 
     public enum Action {
         PASS,
-        FAIL
+        FAIL,
+        NON_FALLBACK_EXCEPTION
     }
     
     private Action fallbackAction = Action.PASS;
     
-    @Fallback(fallbackMethod = "doFallback")
+    @Fallback(fallbackMethod = "doFallback", skipOn = NonFallbackException.class)
     public void doWork(Action action) {
         if (action == Action.PASS) {
             return;
         }
-        else {
+        else if (action == Action.FAIL){
             throw new TestException();
+        }
+        else {
+            throw new NonFallbackException();
         }
     }
     
@@ -48,18 +52,24 @@ public class FallbackMetricBean {
         if (fallbackAction == Action.PASS) {
             return;
         }
-        else {
+        else if (fallbackAction == Action.FAIL){
             throw new TestException();
+        }
+        else {
+            throw new NonFallbackException();
         }
     }
     
-    @Fallback(FallbackMetricHandler.class)
+    @Fallback(value = FallbackMetricHandler.class, applyOn = TestException.class)
     public Void doWorkWithHandler(Action action) {
         if (action == Action.PASS) {
             return null;
         }
-        else {
+        else if (action == Action.FAIL){
             throw new TestException();
+        }
+        else {
+            throw new NonFallbackException();
         }
     }
     
@@ -79,5 +89,14 @@ public class FallbackMetricBean {
      */
     public Action getFallbackAction() {
         return fallbackAction;
+    }
+    
+    @SuppressWarnings("serial")
+    public static class NonFallbackException extends RuntimeException {
+
+        public NonFallbackException() {
+            super("Non-fallback exception");
+        }
+        
     }
 }
