@@ -72,7 +72,7 @@ a| * `method` - the fully qualified method name
 
 | Type | `Counter`
 | Unit | None
-| Description | The number of times the method was retried 
+| Description | The number of times the method was retried
 | Tags
 a| * `method` - the fully qualified method name
 |===
@@ -104,21 +104,19 @@ a| * `method` - the fully qualified method name
 
 === Metrics added for `@CircuitBreaker`
 
-ft.circuitbreaker.calls.total{method=<name>, circuitBreakerResult=[success|failure|circuitBreakerOpen]}
-
 [cols="1,5"]
 |===
 | Name | `ft.circuitbreaker.calls.total`
 
 | Type | `Counter`
 | Unit | None
-| Description | The number of times the timeout logic was run. This will usually be once per method call, but may be more than once if the method call is retried.
+| Description | The number of times the circuit breaker logic was run. This will usually be once per method call, but may be more than once if the method call is retried.
 | Tags
 a| * `method` - the fully qualified method name
  * `circuitBreakerResult` = `[success\|failure\|circuitBreakerOpen]` - the result of the method call, as considered by the circuit breaker according to the rules in <<circuitbreaker.asciidoc#circuit-breaker-success-failure,Configuring which exceptions are considered a failure>>
-   * `success` - the method ran and was successful
-   * `failure` - the method ran and failed
-   * `circuitBreakerOpen` - the method did not run because the circuit breaker was in open or half-open state
+ ** `success` - the method ran and was successful
+ ** `failure` - the method ran and failed
+ ** `circuitBreakerOpen` - the method did not run because the circuit breaker was in open or half-open state
 |===
 
 [cols="1,5"]
