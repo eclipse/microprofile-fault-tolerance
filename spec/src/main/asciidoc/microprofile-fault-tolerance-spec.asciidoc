@@ -64,5 +64,7 @@ include::metrics.asciidoc[]
 
 include::configuration.asciidoc[]
 
-include::release_notes.asciidoc[] 
+include::optional-container-integration.asciidoc[]
+
+include::release_notes.asciidoc[]
 
