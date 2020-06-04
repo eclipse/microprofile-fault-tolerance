@@ -24,6 +24,7 @@ import org.eclipse.microprofile.metrics.Counter;
 import org.eclipse.microprofile.metrics.Gauge;
 import org.eclipse.microprofile.metrics.Histogram;
 import org.eclipse.microprofile.metrics.Metric;
+import org.eclipse.microprofile.metrics.MetricUnits;
 import org.eclipse.microprofile.metrics.Tag;
 
 /**
@@ -48,26 +49,34 @@ public enum MetricDefinition {
     RETRY_CALLS("ft.retry.calls.total", Counter.class, RetryRetried.class, RetryResult.class),
     RETRY_RETRIES("ft.retry.retries.total", Counter.class),
     TIMEOUT_CALLS("ft.timeout.calls.total", Counter.class, TimeoutTimedOut.class),
-    TIMEOUT_EXECUTION_DURATION("ft.timeout.executionDuration", Histogram.class),
+    TIMEOUT_EXECUTION_DURATION("ft.timeout.executionDuration", Histogram.class, MetricUnits.NANOSECONDS),
     CIRCUITBREAKER_CALLS("ft.circuitbreaker.calls.total", Counter.class, CircuitBreakerResult.class),
-    CIRCUITBREAKER_STATE("ft.circuitbreaker.state.total", Gauge.class, CircuitBreakerState.class),
+    CIRCUITBREAKER_STATE("ft.circuitbreaker.state.total", Gauge.class, MetricUnits.NANOSECONDS, CircuitBreakerState.class),
     CIRCUITBREAKER_OPENED("ft.circuitbreaker.opened.total", Counter.class),
     BULKHEAD_CALLS("ft.bulkhead.calls.total", Counter.class, BulkheadResult.class),
     BULKHEAD_EXECUTIONS_RUNNING("ft.bulkhead.executionsRunning", Gauge.class),
     BULKHEAD_EXECUTIONS_WAITING("ft.bulkhead.executionsWaiting", Gauge.class),
-    BULKHEAD_RUNNING_DURATION("ft.bulkhead.runningDuration", Histogram.class),
-    BULKHEAD_WAITING_DURATION("ft.bulkhead.waitingDuration", Histogram.class);
+    BULKHEAD_RUNNING_DURATION("ft.bulkhead.runningDuration", Histogram.class, MetricUnits.NANOSECONDS),
+    BULKHEAD_WAITING_DURATION("ft.bulkhead.waitingDuration", Histogram.class, MetricUnits.NANOSECONDS);
     
     private String name;
+    private String unit;
     private Class<? extends Metric> metricClass;
     private Class<? extends TagValue>[] tagClasses;
     
     @SafeVarargs
-    private MetricDefinition(String name, Class<? extends Metric> metricClass, Class<? extends TagValue>... tagClasses) {
+    private MetricDefinition(String name, Class<? extends Metric> metricClass, String unit, Class<? extends TagValue>... tagClasses) {
         this.name = name;
+        this.unit = unit;
         this.metricClass = metricClass;
         this.tagClasses = tagClasses;
     }
+    
+    @SafeVarargs
+    private MetricDefinition(String name, Class<? extends Metric> metricClass, Class<? extends TagValue>... tagClasses) {
+        this(name, metricClass, MetricUnits.NONE, tagClasses);
+    }
+
 
     /**
      * The metric name
@@ -76,6 +85,15 @@ public enum MetricDefinition {
      */
     public String getName() {
         return name;
+    }
+    
+    /**
+     * The metric unit
+     * 
+     * @return the unit
+     */
+    public String getUnit() {
+        return unit;
     }
 
     /**
