@@ -31,6 +31,8 @@ import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDe
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import java.util.concurrent.ExecutionException;
 
@@ -41,8 +43,14 @@ import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinitio
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.RetryResult;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.RetryRetried;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.TimeoutTimedOut;
+import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricGetter;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
+import org.eclipse.microprofile.metrics.Metadata;
+import org.eclipse.microprofile.metrics.MetricRegistry;
+import org.eclipse.microprofile.metrics.MetricRegistry.Type;
+import org.eclipse.microprofile.metrics.MetricUnits;
+import org.eclipse.microprofile.metrics.annotation.RegistryType;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -78,6 +86,10 @@ public class AllMetricsTest extends Arquillian {
     
     @Inject
     private AllMetricsBean allMetricsBean;
+    
+    @Inject
+    @RegistryType(type = Type.BASE)
+    private MetricRegistry metricRegistry;
     
     @Test
     public void testAllMetrics() throws InterruptedException, ExecutionException {
@@ -126,6 +138,21 @@ public class AllMetricsTest extends Arquillian {
         assertThat("bulkhead executions waiting present", m.getBulkheadExecutionsWaiting().gauge().isPresent(), is(true));
         assertThat("bulkhead executions waiting value", m.getBulkheadExecutionsWaiting().value(), is(0L));
         assertThat("bulkhead queue wait time histogram present", m.getBulkheadWaitingDuration().isPresent(), is(true));
+    }
+    
+    @Test
+    public void testMetricUnits() throws InterruptedException, ExecutionException {
+        // Call the method to ensure that all metrics get registered
+        allMetricsBean.doWork().get();
+        
+        // Validate that each metric has metadata which declares the correct unit
+        for (MetricDefinition metric : MetricDefinition.values()) {
+            Metadata metadata = metricRegistry.getMetadata().get(metric.getName());
+            
+            assertNotNull(metadata, "Missing metadata for metric " + metric);
+            
+            assertEquals(metadata.getUnit().orElse(MetricUnits.NONE), metric.getUnit(), "Incorrect unit for metric " + metric);
+        }
     }
     
 }
