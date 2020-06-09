@@ -24,8 +24,6 @@
 == Asynchronous
 
 `Asynchronous` means the execution of the client request will be on a separate thread.
-This thread should have the correct security context or naming context associated with it.
-
 
 === Asynchronous Usage
 
