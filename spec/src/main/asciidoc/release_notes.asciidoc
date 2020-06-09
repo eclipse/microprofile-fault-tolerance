@@ -23,20 +23,20 @@
 
 The following changes occurred in the 1.1 release, compared to 1.0
 
-A full list of changes may be found on the link:https://github.com/eclipse/microprofile-fault-tolerance/milestone/3[MicroProfile Fault Tolerance 1.1 Milestone]
+A full list of changes can be found on the link:https://github.com/eclipse/microprofile-fault-tolerance/milestone/3[MicroProfile Fault Tolerance 1.1 Milestone]
 
-=== API/SPI Changes
+=== API/SPI changes
 
 - The `ExecutionContext` interface has been extended with a `getFailure` method that returns the execution failure(link:https://github.com/eclipse/microprofile-fault-tolerance/issues/224[#224]).
 
-=== Functional Changes
+=== Functional changes
 
 - Implementations must implement the new method of `ExecutionContext.getFailure()`(link:https://github.com/eclipse/microprofile-fault-tolerance/issues/224[#224]).
 - Added metrics status automatically for FT (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/234[#234])
 - Disable individual Fault Tolerance annotation using external config (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/109[#109])
 - Define priority when multiple properties declared (link: https://github.com/eclipse/microprofile-fault-tolerance/issues/278[#278])
 
-=== Specification Changes
+=== Specification changes
 
 - Implementations must implement the new method of `ExecutionContext.getFailure()`(link:https://github.com/eclipse/microprofile-fault-tolerance/issues/224[#224]).
 - Added metrics status automatically for FT (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/234[#234])
@@ -59,19 +59,19 @@ This release is a major release of Fault Tolerance. The reason for increasing th
 The following changes occurred in the 2.0 release, compared to 1.1.
 
 
-A full list of changes may be found on the link:https://github.com/eclipse/microprofile-fault-tolerance/milestone/5[MicroProfile Fault Tolerance 2.0 Milestone]
+A full list of changes can be found on the link:https://github.com/eclipse/microprofile-fault-tolerance/milestone/5[MicroProfile Fault Tolerance 2.0 Milestone]
 
-=== API/SPI Changes
+=== API/SPI changes
 
 - Add support of the CompletionStage return type when annotated with @Asynchronous (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/110[#110]).
 
-=== Functional Changes
+=== Functional changes
 
 - Specify the invocation sequence of MicroProfile Fault Tolerance annotations when used together (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/291[#291])
 - Clarify how the Fault Tolerance annotations interact with other application defined interceptors (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/313[#313])
 
 
-=== Specification Changes
+=== Specification changes
 
 - Clarify whether other Fault Tolerance functionalities will be triggered on an exceptional returned Future (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/246[#246]).
 - Specify the sequence of MicroProfile Fault Tolerance annotations when used together (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/291[#291])
@@ -89,15 +89,15 @@ This release is a minor release of Fault Tolerance.
 It includes a number of new features and clarifications, as well as TCK improvements.
 The following changes occurred in the 2.1 release, compared to 2.0.
 
-A full list of changes may be found on the link:https://github.com/eclipse/microprofile-fault-tolerance/milestone/8[MicroProfile Fault Tolerance 2.1 Milestone]
+A full list of changes can be found on the link:https://github.com/eclipse/microprofile-fault-tolerance/milestone/8[MicroProfile Fault Tolerance 2.1 Milestone]
 
-=== API/SPI Changes
+=== API/SPI changes
 
 - The `Retry.retryOn` and `abortOn` attributes no longer ignore `Throwable.class` (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/449[#449]).
 - Added `CircuitBreaker.skipOn` (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/418[#418]).
 - Added `Fallback.applyOn` and `skipOn` (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/417[#417]).
 
-=== Functional Changes
+=== Functional changes
 
 - The `Retry.retryOn` and `abortOn` attributes no longer ignore `Throwable.class` (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/449[#449]).
 - Added `CircuitBreaker.skipOn` (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/418[#418]).
@@ -105,7 +105,7 @@ A full list of changes may be found on the link:https://github.com/eclipse/micro
 - Specified the meaning of overlapping `Retry.retryOn` and `abortOn` (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/442[#442]).
 - Relaxed the requirements on `Future` and `CompletionStage` implementations (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/425[#425]).
 
-=== Specification Changes
+=== Specification changes
 
 - Specified the meaning of overlapping `Retry.retryOn` and `abortOn` (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/442[#442]).
 - Specified that throwing custom throwables is non-portable (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/441[#441]).
@@ -118,3 +118,40 @@ A full list of changes may be found on the link:https://github.com/eclipse/micro
 
 - Time values in TCK tests are now configurable (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/399[#399]).
 - Transitive dependency on `javax.el-api` has been excluded (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/439[#439]).
+
+[[release_notes_30]]
+== Release Notes for MicroProfile Fault Tolerance 3.0
+
+This release is a major release of Fault Tolerance which includes backward incompatible changes.
+
+A full list of changes can be found on the link:https://github.com/eclipse/microprofile-fault-tolerance/milestone/9[MicroProfile Fault Tolerance 3.0 Milestone]
+
+=== Backward incompatible changes
+
+==== Metric names and scopes changed
+
+The metrics added automatically by MicroProfile Fault Tolerance have been updated to take advantage of support for metric tags which was added to MicroProfile Metrics in version 2.0. As a result, some information which was previously contained in the metric name is now instead included in tags.
+
+In addition, metrics have moved from the `application:` scope to the `base:` scope for consistency with other MicroProfile specifications. Note that this means:
+
+* Metrics are now exported under `/metrics` and `/metrics/base`, instead of `/metrics` and `/metrics/application` as in previous versions.
+* In the JSON format, when metrics are retrieved from `/metrics` they appear in the `base` object rather than the `application` object.
+* In the OpenMetrics format, the names are prefixed with `base_` instead of `application_`.
+
+.Example
+Old metric:: `application:ft.<name>.timeout.callsTimedOut.total`
+New metric:: `base:ft.timeout.calls.total{method="<name>", timedOut="true"}`
+
+These changes mean that existing dashboards and queries which use metrics provided by MicroProfile Fault Tolerance will need to be updated to use the new metrics listed in <<Integration with MicroProfile Metrics>>.
+
+=== API/SPI changes
+
+=== Functional changes
+
+- Updated metrics to use tags (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/401[#401])
+- Moved metrics into the base scope (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/499[#499])
+
+=== Specification changes
+
+- Updated metrics to use tags (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/401[#401])
+- Moved metrics into the base scope (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/499[#499])

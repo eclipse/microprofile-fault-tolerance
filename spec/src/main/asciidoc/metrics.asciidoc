@@ -18,7 +18,7 @@
 // Contributors:
 // Andrew Rouse
 
-== Integration with Microprofile Metrics
+== Integration with MicroProfile Metrics
 
 When Microprofile Fault Tolerance and Microprofile Metrics are used together, metrics are automatically added for each of
 the methods annotated with a `@Retry`, `@Timeout`, `@CircuitBreaker`, `@Bulkhead` or `@Fallback` annotation.
