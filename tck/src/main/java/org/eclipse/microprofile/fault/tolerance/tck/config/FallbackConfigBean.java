@@ -46,7 +46,21 @@ public class FallbackConfigBean {
         throw new TestConfigExceptionA();
     }
 
+    @Fallback(fallbackMethod = "theFallback")
+    public String fallbackMethodConfig() {
+        throw new IllegalArgumentException();
+    }
+
+    @Fallback(FallbackHandlerA.class)
+    public String fallbackHandlerConfig() {
+        throw new IllegalArgumentException();
+    }
+
     public String theFallback() {
         return "FALLBACK";
+    }
+
+    public String anotherFallback() {
+        return "ANOTHER FALLBACK";
     }
 }

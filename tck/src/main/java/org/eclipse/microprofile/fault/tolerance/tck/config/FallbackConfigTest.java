@@ -45,6 +45,8 @@ public class FallbackConfigTest extends Arquillian {
         ConfigAnnotationAsset config = new ConfigAnnotationAsset();
         config.set(FallbackConfigBean.class, "applyOnMethod", Fallback.class, "applyOn", TestConfigExceptionA.class.getCanonicalName());
         config.set(FallbackConfigBean.class, "skipOnMethod", Fallback.class, "skipOn", TestConfigExceptionA.class.getCanonicalName());
+        config.set(FallbackConfigBean.class, "fallbackMethodConfig", Fallback.class, "fallbackMethod", "anotherFallback");
+        config.set(FallbackConfigBean.class, "fallbackMethodConfig", Fallback.class, "value", FallbackHandlerB.class.getName());
         
         JavaArchive jar = ShrinkWrap
                 .create(JavaArchive.class, "ftFallbackConfigTest.jar")
@@ -72,5 +74,15 @@ public class FallbackConfigTest extends Arquillian {
     public void testSkipOn() {
         // skipOn is configured to include TestConfigExceptionA, so method should throw exception
         Exceptions.expect(TestConfigExceptionA.class, () -> bean.skipOnMethod());
+    }
+
+    @Test
+    public void testFallbackMethod() {
+        assertEquals("ANOTHER FALLBACK", bean.fallbackMethodConfig());
+    }
+
+    @Test
+    public void testFallbackHandler() {
+        assertEquals("FallbackHandlerB", bean.fallbackHandlerConfig());
     }
 }
