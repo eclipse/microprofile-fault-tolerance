@@ -23,7 +23,7 @@
 
 This specification defines a set of annotations to be used by classes or methods.
 The annotations are interceptor bindings.
-Therefore, this specification depends on the Java Interceptors and Contexts and Dependency Injection specifications defined in Java EE platform.
+Therefore, this specification depends on the Jakarta Interceptors and Contexts and Dependency Injection specifications defined in Jakarta EE platform.
 
 
 === Relationship to Contexts and Dependency Injection
@@ -32,14 +32,14 @@ The Contexts and Dependency Injection (CDI) specification defines a powerful com
 This specification explores the rich SPI provided by CDI to register an interceptor so that the Fault Tolerance policies can be applied to the method invocation.
 
 
-=== Relationship to Java Interceptors
+=== Relationship to Jakarta Interceptors
 
-The Java Interceptors specification defines the basic programming model and semantics for interceptors.
+The Jakarta Interceptors specification defines the basic programming model and semantics for interceptors.
 This specification uses the typesafe interceptor bindings.
 The annotations `@Asynchronous`, `@Bulkhead`, `@CircuitBreaker`, `@Fallback`, `@Retry` and `@Timeout` are all interceptor bindings.
 
 These annotations may be bound at the class level or method level.
-The annotations adhere to the interceptor binding rules defined by Java Interceptors specification.
+The annotations adhere to the interceptor binding rules defined by Jakarta Interceptors specification.
 
 For instance, if the annotation is bound to the class level, it applies to all business methods of the class.
 If the component class declares or inherits a class level interceptor binding, it must not be declared final, or have any static, private, or final methods.
@@ -62,13 +62,9 @@ via other predefined config sources (e.g. environment variables, system properti
 the `maxRetries` parameter on the `@Retry` annotation is a configuration property. It can be configured externally.
 
 === Relationship to MicroProfile Metrics
-The MicroProfile Metrics specification provides a way to monitor microservice invocations. It is also important to find out how Fault Tolerance policies are operating, e.g. 
+The MicroProfile Metrics specification provides a way to monitor microservice invocations. It is also important to find out how Fault Tolerance policies are operating, e.g.
 
 * When `Retry` is used, it is useful to know how many times a method was called and succeeded after retrying at least once.
 * When `Timeout` is used, you would like to know how many times the method timed out.
 
-Because of this requirement, when Microprofile Fault Tolerance and Microprofile Metrics are used together, metrics are automatically added for each of the methods annotated with a `@Retry`, `@Timeout`, `@CircuitBreaker`, `@Bulkhead` or `@Fallback` annotation. 
-
-
-
-
+Because of this requirement, when MicroProfile Fault Tolerance and MicroProfile Metrics are used together, metrics are automatically added for each of the methods annotated with a `@Retry`, `@Timeout`, `@CircuitBreaker`, `@Bulkhead` or `@Fallback` annotation.

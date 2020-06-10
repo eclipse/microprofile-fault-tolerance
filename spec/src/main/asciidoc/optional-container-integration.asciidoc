@@ -22,7 +22,7 @@
 
 == Recommendations for Optional Container Integration
 
-This section describes the expected behaviors when the implementation runs in a Java EE container.
+This section describes the expected behaviors when the implementation runs in a Jakarta EE container.
 
 === `@Asynchronous`
 
