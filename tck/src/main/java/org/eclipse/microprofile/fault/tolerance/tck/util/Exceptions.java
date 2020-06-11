@@ -123,7 +123,21 @@ public class Exceptions {
             }
         }
     }
-    
+
+    /**
+     * Run an action and ensure that no exception is thrown
+     *
+     * @param action the action to run
+     */
+    public static void expectNoException(ExceptionThrowingAction action) {
+        try {
+            action.call();
+        }
+        catch (Exception e) {
+            fail("Unexpected exception thrown", e);
+        }
+    }
+
     @FunctionalInterface
     public static interface ExceptionThrowingAction {
         public void call() throws Exception;
