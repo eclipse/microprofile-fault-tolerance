@@ -18,12 +18,13 @@
 // Contributors:
 // Emily Jiang
 // Andrew Rouse
+// Ladislav Thon
 
 [[bulkhead]]
 == Bulkhead
 
 The `Bulkhead` pattern is to prevent faults in one part of the system from cascading to the entire system, which might bring down the whole system.
-The implementation is to limit the number of concurrent requests accessing to an instance. Therefore, `Bulkhead` pattern is only effective when applying `@Bulkhead` to a component that can be accessed from multiple contexts.
+The implementation is to limit the number of concurrent requests accessing an instance. Therefore, `Bulkhead` pattern is only effective when applying `@Bulkhead` to a component that can be accessed from multiple contexts.
 
 === Bulkhead Usage
 A method or class can be annotated with `@Bulkhead`, which means the method or the methods under the class will have Bulkhead policy applied correspondingly.
@@ -70,6 +71,17 @@ public Future<Connection> serviceA() {
 
 
 When using the thread pool approach, when a request cannot be added to the waiting queue, `BulkheadException` will be thrown.
+
+==== Lifecycle
+
+Bulkhead needs to maintain some state between invocations: the number of currently running executions, or the queue of waiting executions.
+This state is a singleton, irrespective of the lifecycle of the bean that uses the `@Bulkhead` annotation.
+
+More specifically, the bulkhead state is uniquely identified by the combination of the bean class (`java.lang.Class`) and the method object (`java.lang.reflect.Method`) representing the guarded method.
+
+For example, if there's a guarded method `doWork` on a bean which is `@RequestScoped`, each request will have its own instance of the bean, but all invocations of `doWork` will share the same bulkhead state.
+
+=== Interactions with other annotations
 
 The `@Bulkhead` annotation can be used together with `@Fallback`, `@CircuitBreaker`, `@Asynchronous`, `@Timeout` and `@Retry`.
 

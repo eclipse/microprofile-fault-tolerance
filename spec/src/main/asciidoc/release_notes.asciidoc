@@ -144,14 +144,24 @@ New metric:: `base:ft.timeout.calls.total{method="<name>", timedOut="true"}`
 
 These changes mean that existing dashboards and queries which use metrics provided by MicroProfile Fault Tolerance will need to be updated to use the new metrics listed in <<Integration with MicroProfile Metrics>>.
 
+==== Lifecycle of circuit breakers and bulkheads is now specified
+
+In previous versions of MicroProfile Fault Tolerance, the lifecycle of circuit breakers and bulkheads was not specified.
+These fault tolerance strategies hold state between invocations, so their lifecycle is important for correct functioning.
+
+The specification now requires that circuit breakers and bulkheads are singletons, identified by the bean class and the guarded method.
+For example, if a `@RequestScoped` bean has a `@CircuitBreaker` method, all invocations of that method will share the same circuit breaker state, even though each request has a different instance of the bean.
+
 === API/SPI changes
 
 === Functional changes
 
 - Updated metrics to use tags (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/401[#401])
 - Moved metrics into the base scope (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/499[#499])
+- Specified lifecycle of circuit breakers and bulkheads (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/479[#479]])
 
 === Specification changes
 
 - Updated metrics to use tags (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/401[#401])
 - Moved metrics into the base scope (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/499[#499])
+- Specified lifecycle of circuit breakers and bulkheads (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/479[#479]])

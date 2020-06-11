@@ -18,6 +18,7 @@
 // Contributors:
 // Emily Jiang
 // Andrew Rouse
+// Ladislav Thon
 
 [[circuitbreaker]]
 == Circuit Breaker
@@ -71,7 +72,7 @@ public Connection serviceA() {
 ** Request 3 - success
 ** Request 4 - success
 ** Request 5 - failure
-** Request 6 - CircuitBreakerOpenException 
+** Request 6 - CircuitBreakerOpenException
 
 In this scenario, request 5 will trigger the circuit to open because out of the last four requests (the `requestVolumeThreshold`), two failed
 which reaches the `failureRatio` of `0.5`. Request 6 will therefore hit the `CircuitBreakerOpenException`.
@@ -109,6 +110,15 @@ public void service() {
     underlyingService();
 }
 ----
+
+==== Lifecycle
+
+Circuit breaker needs to maintain some state between invocations: the number of recent successful and failed invocations, or how long has the circuit breaker been open.
+This state is a singleton, irrespective of the lifecycle of the bean that uses the `@CircuitBreaker` annotation.
+
+More specifically, the circuit breaker state is uniquely identified by the combination of the bean class (`java.lang.Class`) and the method object (`java.lang.reflect.Method`) representing the guarded method.
+
+For example, if there's a guarded method `doWork` on a bean which is `@RequestScoped`, each request will have its own instance of the bean, but all invocations of `doWork` will share the same circuit breaker state.
 
 === Interactions with other annotations
 
