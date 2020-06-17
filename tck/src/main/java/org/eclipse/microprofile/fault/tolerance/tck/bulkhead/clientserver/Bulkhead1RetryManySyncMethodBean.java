@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2017-2020 Contributors to the Eclipse Foundation
+ * Copyright (c) 2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -17,31 +17,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
+
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
-
-import javax.enterprise.context.ApplicationScoped;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
-import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
+import org.eclipse.microprofile.faulttolerance.Retry;
 
 /**
- * A simple class level Asynchronous @Bulkhead
- *
- * @author Gordon Hutchison
- * @author Andrew Rouse
+ * Tests to ensure that BulkheadExceptions are retried
+ * <p>
+ * Has a bulkhead size of 1
+ * <p>
+ * Retries on all exceptions for 3 seconds
  */
-@ApplicationScoped
-@Bulkhead
-@Asynchronous
-public class BulkheadClassAsynchronousDefaultBean {
-
-    public Future<?> test(Barrier barrier) {
+public class Bulkhead1RetryManySyncMethodBean {
+    
+    @Bulkhead(1)
+    @Retry(maxRetries = 99999, maxDuration = 3000, delay = 100, jitter = 0)
+    public void test(Barrier barrier) {
         barrier.await();
-        return CompletableFuture.completedFuture(null);
     }
 
-};
+}

@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2017-2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2017-2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,33 +19,23 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Future;
-
 import javax.inject.Inject;
 
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead3ClassSemaphoreBean;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadClassSemaphoreDefaultBean;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadTestBackend;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.ParrallelBulkheadTest;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.TestData;
-import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncCaller;
+import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
+import org.eclipse.microprofile.faulttolerance.Bulkhead;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
-import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.testng.ITestContext;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-
-import static org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils.handleResults;
 
 /**
  * @author Gordon Hutchison
+ * @author Andrew Rouse
  */
 public class BulkheadSynchConfigTest extends Arquillian {
 
@@ -57,19 +47,18 @@ public class BulkheadSynchConfigTest extends Arquillian {
      */
     @Deployment
     public static WebArchive deploy() {
-        JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftBulkheadSynchTest.jar")
-            .addPackage(BulkheadClassSemaphoreDefaultBean.class.getPackage())
-            .addClass(Utils.class)
+        
+        ConfigAnnotationAsset config = new ConfigAnnotationAsset()
+                .setGlobally(Bulkhead.class, "value", "5");
+        
+        JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftBulkheadSynchConfigTest.jar")
+            .addPackage(Bulkhead3ClassSemaphoreBean.class.getPackage())
+            .addClass(BulkheadSynchTest.class)
             .addPackage(Packages.UTILS)
-            .addAsManifestResource(new StringAsset(
-                "Bulkhead/value=5"), "microprofile-config.properties")
-            .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml").as(JavaArchive.class);
-        return ShrinkWrap.create(WebArchive.class, "ftBulkheadSynchTest.war").addAsLibrary(testJar);
-    }
-
-    @BeforeTest
-    public void beforeTest(final ITestContext testContext) {
-        Utils.log("Testmethod: " + testContext.getName());
+            .addAsManifestResource(config, "microprofile-config.properties")
+            .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
+        
+        return ShrinkWrap.create(WebArchive.class, "ftBulkheadSynchConfigTest.war").addAsLibrary(testJar);
     }
 
     /**
@@ -78,35 +67,8 @@ public class BulkheadSynchConfigTest extends Arquillian {
      */
     @Test()
     public void testBulkheadClassSemaphore3() {
-        TestData td = new TestData(new CountDownLatch(3));
-        threads(20, bhBeanClassSemaphore3, 5, td);
-        td.check();
+        BulkheadSynchTest.testBulkhead(5, bhBeanClassSemaphore3::test);
     }
-
-    /**
-     * Run a number of Callable's in parallel
-     * @param number expected instances
-     * @param test bulkhead component to test
-     * @param maxSimultaneousWorkers max number of simultaneous workers
-     */
-    private void threads(int number, BulkheadTestBackend test, int maxSimultaneousWorkers, TestData td) {
-        td.setExpectedMaxSimultaneousWorkers(maxSimultaneousWorkers);
-        td.setExpectedInstances(number);
-        Future[] results = new Future[number];
-        for (int i = 0; i < number; i++) {
-            Utils.log("Starting test " + i);
-            results[i] = xService.submit(new ParrallelBulkheadTest(test, td));
-        }
-
-        handleResults(number, results);
-    }
-
-    /*
-     * We use an AsyncCaller bean to simulate the parallelism of multiple
-     * simultaneous requests
-     */
-    @Inject
-    private AsyncCaller xService;
 
     /*
      * As the FaultTolerance annotation only work on business methods of

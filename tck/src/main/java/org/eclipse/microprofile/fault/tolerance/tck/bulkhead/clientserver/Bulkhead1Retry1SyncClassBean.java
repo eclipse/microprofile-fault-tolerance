@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2017-2020 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018-2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,29 +19,30 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
-
 import javax.enterprise.context.ApplicationScoped;
 
 import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
-import org.eclipse.microprofile.faulttolerance.Asynchronous;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
+import org.eclipse.microprofile.faulttolerance.Retry;
 
 /**
- * A simple class level Asynchronous @Bulkhead
- *
- * @author Gordon Hutchison
- * @author Andrew Rouse
+ * Test to ensure that the bulkhead slot is released when retrying.
+ * <p>
+ * Has a bulkhead of size 1
+ * <p>
+ * Retries 1 time on thrown TestException with 1 second delay
  */
+@Retry(maxRetries = 1, delay = 1000, jitter = 0, retryOn = TestException.class)
+@Bulkhead(1)
 @ApplicationScoped
-@Bulkhead
-@Asynchronous
-public class BulkheadClassAsynchronousDefaultBean {
-
-    public Future<?> test(Barrier barrier) {
+public class Bulkhead1Retry1SyncClassBean {
+    
+    public void test(Barrier barrier, RuntimeException ex) {
         barrier.await();
-        return CompletableFuture.completedFuture(null);
+        if (ex != null) {
+            throw ex;
+        }
     }
 
-};
+}

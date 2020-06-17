@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2017-2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,11 +19,12 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
 import javax.enterprise.context.ApplicationScoped;
 
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
+import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 
@@ -31,14 +32,14 @@ import org.eclipse.microprofile.faulttolerance.Bulkhead;
  * A simple class level Asychronous @Bulkhead(10)
  *
  * @author Gordon Hutchison
+ * @author Andrew Rouse
  */
 @Bulkhead(10) @Asynchronous @ApplicationScoped
-public class Bulkhead10ClassAsynchronousBean implements BulkheadTestBackend {
+public class Bulkhead10ClassAsynchronousBean {
 
-    @Override
-    public Future test(BackendTestDelegate action) throws InterruptedException {
-        Utils.log("in business method of bean " + this.getClass().getName() );
-        return action.perform();
+    public Future<?> test(Barrier barrier) {
+        barrier.await();
+        return CompletableFuture.completedFuture(null);
     }
 
 };

@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2017-2020 Contributors to the Eclipse Foundation
+ * Copyright (c) 2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -17,31 +17,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
+
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
-
-import javax.enterprise.context.ApplicationScoped;
 
 import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 
-/**
- * A simple class level Asynchronous @Bulkhead
- *
- * @author Gordon Hutchison
- * @author Andrew Rouse
- */
-@ApplicationScoped
-@Bulkhead
-@Asynchronous
-public class BulkheadClassAsynchronousDefaultBean {
-
-    public Future<?> test(Barrier barrier) {
+public class BulkheadFutureMethodBean {
+    
+    @Bulkhead
+    @Asynchronous
+    public Future<String> test(Future<String> result, Barrier barrier) {
         barrier.await();
-        return CompletableFuture.completedFuture(null);
+        return result;
     }
 
-};
+}
