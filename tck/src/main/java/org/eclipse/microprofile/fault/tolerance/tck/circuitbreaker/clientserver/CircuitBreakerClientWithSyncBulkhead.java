@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018-2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,12 +19,12 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
 import javax.enterprise.context.Dependent;
 
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BackendTestDelegate;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadTestBackend;
+import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 
@@ -34,9 +34,10 @@ import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 @CircuitBreaker(requestVolumeThreshold = 3, failureRatio = 1.0)
 @Bulkhead(value = 1, waitingTaskQueue = 1)
 @Dependent
-public class CircuitBreakerClientWithSyncBulkhead implements BulkheadTestBackend {
+public class CircuitBreakerClientWithSyncBulkhead {
 
-    public Future test(BackendTestDelegate action) throws InterruptedException {
-        return action.perform();
+    public Future<?> test(Barrier barrier) {
+        barrier.await();
+        return CompletableFuture.completedFuture(null);
     }
 }
