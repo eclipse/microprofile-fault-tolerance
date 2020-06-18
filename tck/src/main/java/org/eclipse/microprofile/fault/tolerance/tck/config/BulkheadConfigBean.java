@@ -21,14 +21,11 @@
 package org.eclipse.microprofile.fault.tolerance.tck.config;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.enterprise.context.ApplicationScoped;
 
+import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 
@@ -38,34 +35,16 @@ import org.eclipse.microprofile.faulttolerance.Bulkhead;
 @ApplicationScoped
 public class BulkheadConfigBean {
     
-    private AtomicInteger tasksRunning = new AtomicInteger();
-    
     @Bulkhead(value = 5)
-    public void serviceValue(Future<?> waitingFuture) throws InterruptedException, ExecutionException, TimeoutException {
-        tasksRunning.incrementAndGet();
-        try {
-            waitingFuture.get(1, TimeUnit.MINUTES);
-        }
-        finally {
-            tasksRunning.decrementAndGet();
-        }
-    }
-    
-    @Bulkhead(value = 1, waitingTaskQueue = 5)
-    @Asynchronous
-    public Future<Void> serviceWaitingTaskQueue(Future<?> waitingFuture) throws InterruptedException, ExecutionException, TimeoutException {
-        tasksRunning.incrementAndGet();
-        try {
-            waitingFuture.get(1, TimeUnit.MINUTES);
-            return CompletableFuture.completedFuture(null);
-        }
-        finally {
-            tasksRunning.decrementAndGet();
-        }
-    }
-    
-    public int getTasksRunning() {
-        return tasksRunning.get();
+    public void serviceValue(Barrier barrier) {
+        barrier.await();
     }
 
+    @Bulkhead(value = 1, waitingTaskQueue = 5)
+    @Asynchronous
+    public Future<Void> serviceWaitingTaskQueue(Barrier barrier) {
+        barrier.await();
+        return CompletableFuture.completedFuture(null);
+    }
+    
 }
