@@ -46,7 +46,7 @@ public class FallbackConfigTest extends Arquillian {
         config.set(FallbackConfigBean.class, "applyOnMethod", Fallback.class, "applyOn", TestConfigExceptionA.class.getCanonicalName());
         config.set(FallbackConfigBean.class, "skipOnMethod", Fallback.class, "skipOn", TestConfigExceptionA.class.getCanonicalName());
         config.set(FallbackConfigBean.class, "fallbackMethodConfig", Fallback.class, "fallbackMethod", "anotherFallback");
-        config.set(FallbackConfigBean.class, "fallbackMethodConfig", Fallback.class, "value", FallbackHandlerB.class.getName());
+        config.set(FallbackConfigBean.class, "fallbackHandlerConfig", Fallback.class, "value", FallbackHandlerB.class.getName());
         
         JavaArchive jar = ShrinkWrap
                 .create(JavaArchive.class, "ftFallbackConfigTest.jar")
@@ -66,23 +66,35 @@ public class FallbackConfigTest extends Arquillian {
     
     @Test
     public void testApplyOn() {
-        // applyOn is configured to include TestConfigExceptionA, so method should fall back
+        // In annotation: applyOn = TestConfigExceptionB
+        // In config:     applyOn = TestConfigExceptionA
+        
+        // applyOnMethod throws TestConfigExceptionA
         assertEquals("FALLBACK", bean.applyOnMethod());
     }
     
     @Test
     public void testSkipOn() {
-        // skipOn is configured to include TestConfigExceptionA, so method should throw exception
+        // In annotation: skipOn = {}
+        // In config:     skipOn = TestConfigExceptionA
+        
+        // skipOnMethod throws TestConfigExceptionA
         Exceptions.expect(TestConfigExceptionA.class, () -> bean.skipOnMethod());
     }
 
     @Test
     public void testFallbackMethod() {
+        // In annotation: fallbackMethod = "theFallback"
+        // In config:     fallbackMethod = "anotherFallback"
+        
         assertEquals("ANOTHER FALLBACK", bean.fallbackMethodConfig());
     }
 
     @Test
     public void testFallbackHandler() {
+        // In annotation: value = FallbackHandlerA
+        // In config:     value = FallbackHandlerB
+        
         assertEquals("FallbackHandlerB", bean.fallbackHandlerConfig());
     }
 }
