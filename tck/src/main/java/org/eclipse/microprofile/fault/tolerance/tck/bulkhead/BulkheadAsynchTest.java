@@ -19,6 +19,7 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead;
 
+import static org.awaitility.Awaitility.await;
 import static org.eclipse.microprofile.fault.tolerance.tck.asynchronous.CompletableFutureHelper.toCompletableFuture;
 import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expectBulkheadException;
 import static org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig.getConfig;
@@ -282,8 +283,10 @@ public class BulkheadAsynchTest extends Arquillian {
             releasedTask.openBarrier();
             releasedTask.assertSuccess();
             
-            // Check the first queued task now starts
-            queuedTasks.get(0).assertAwaits();
+            // Check that one of the queued tasks now starts
+            await().until(() -> queuedTasks.stream()
+                                           .filter(task -> task.isAwaiting())
+                                           .count() == 1);
             
             // Now check that another task can be submitted and queues
             BarrierTask<?> extraTask = taskManager.runAsyncBarrierTask(bulkheadMethod);

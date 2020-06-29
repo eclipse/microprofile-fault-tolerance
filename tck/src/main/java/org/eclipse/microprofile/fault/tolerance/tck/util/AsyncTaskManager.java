@@ -359,6 +359,17 @@ public class AsyncTaskManager implements AutoCloseable {
                 throw new AssertionError("Timed out while waiting for result", e);
             }
         }
+        
+        /**
+         * Whether this task is awaiting its barrier right now
+         * <p>
+         * This method returns immediately.
+         * 
+         * @return {@code true} if this task is currently waiting on its barrier, otherwise {@code false}
+         */
+        public boolean isAwaiting() {
+            return barrier.countWaiting() != 0;
+        }
 
     }
     
