@@ -28,6 +28,8 @@ import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 import org.eclipse.microprofile.faulttolerance.Retry;
 
+import javax.enterprise.context.ApplicationScoped;
+
 /**
  * Tests to ensure that BulkheadExceptions are retried
  * <p>
@@ -38,8 +40,9 @@ import org.eclipse.microprofile.faulttolerance.Retry;
 @Asynchronous
 @Bulkhead(value = 3, waitingTaskQueue = 3)
 @Retry(maxRetries = 99999, maxDuration = 3000, delay = 100, jitter = 0)
+@ApplicationScoped
 public class Bulkhead33RetryManyAsyncClassBean {
-    
+
     public Future<?> test(Barrier barrier) {
         barrier.await();
         return CompletableFuture.completedFuture(null);

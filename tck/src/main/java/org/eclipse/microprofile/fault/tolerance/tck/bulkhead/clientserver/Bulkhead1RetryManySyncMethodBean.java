@@ -24,6 +24,8 @@ import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 import org.eclipse.microprofile.faulttolerance.Retry;
 
+import javax.enterprise.context.ApplicationScoped;
+
 /**
  * Tests to ensure that BulkheadExceptions are retried
  * <p>
@@ -31,8 +33,9 @@ import org.eclipse.microprofile.faulttolerance.Retry;
  * <p>
  * Retries on all exceptions for 3 seconds
  */
+@ApplicationScoped
 public class Bulkhead1RetryManySyncMethodBean {
-    
+
     @Bulkhead(1)
     @Retry(maxRetries = 99999, maxDuration = 3000, delay = 100, jitter = 0)
     public void test(Barrier barrier) {

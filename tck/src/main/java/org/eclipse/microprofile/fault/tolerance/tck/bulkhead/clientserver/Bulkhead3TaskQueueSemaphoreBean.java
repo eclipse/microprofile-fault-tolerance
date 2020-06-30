@@ -23,11 +23,14 @@ package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 
+import javax.enterprise.context.ApplicationScoped;
+
 /**
  * Tests that the waitingTaskQueue parameter is ignored when {@code Asynchronous} is not used
  */
+@ApplicationScoped
 public class Bulkhead3TaskQueueSemaphoreBean {
-    
+
     @Bulkhead(value = 3, waitingTaskQueue = 5)
     public void test(Barrier barrier) {
         barrier.await();
