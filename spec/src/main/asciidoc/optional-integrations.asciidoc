@@ -1,0 +1,55 @@
+//
+// Copyright (c) 2020 Contributors to the Eclipse Foundation
+//
+// See the NOTICE file(s) distributed with this work for additional
+// information regarding copyright ownership.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// You may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// Contributors:
+// Ladislav Thon
+
+[[optional-integrations]]
+
+== Recommendations for Optional Integrations
+
+=== Jakarta EE
+
+This section describes the expected behaviors when the implementation runs in a Jakarta EE container.
+
+==== `@Asynchronous`
+
+Threads that are servicing `@Asynchronous` invocations should, for the duration of the invocation, have the correct security context and naming context associated.
+
+=== MicroProfile Context Propagation
+
+This section describes the expected behaviors when the implementation runs in an environment that provides implementation of MicroProfile Context Propagation.
+These behaviors are currently optional because the MicroProfile Context Propagation specification is not part of the MicroProfile Platform.
+
+==== `@Asynchronous`
+
+Implementations should use MicroProfile Context Propagation to propagate contexts to threads that are servicing `@Asynchronous` invocations.
+The decision which contexts are propagated and which are cleared is left to the MicroProfile Context Propagation implementation.
+
+[NOTE]
+====
+MicroProfile Context Propagation doesn't define which contexts are propagated and which are cleared by default.
+This is left to implementations.
+However, there are configuration properties that you can use for this purpose.
+
+This note is valid at least with MicroProfile Context Propagation version 1.0.2, latest at the time of writing.
+Future versions of MicroProfile Context Propagation might change.
+Such changes, however, won't affect this specification.
+MicroProfile Fault Tolerance shall continue recommending that context propagation is left to MicroProfile Context Propagation.
+====
+
+If the environment that provides MicroProfile Context Propagation is itself a Jakarta EE container, the _Jakarta EE_ section above doesn't apply and context propagation is left entirely to MicroProfile Context Propagation.
