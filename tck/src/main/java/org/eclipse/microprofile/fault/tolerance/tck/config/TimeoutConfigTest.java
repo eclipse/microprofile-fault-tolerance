@@ -63,8 +63,7 @@ public class TimeoutConfigTest extends Arquillian {
             .set(TimeoutConfigBean.class, "serviceBoth", Timeout.class, "unit", "MILLIS");
 
         JavaArchive jar = ShrinkWrap.create(JavaArchive.class, "ftTimeoutConfig.jar")
-            .addClasses(TimeoutConfigBean.class)
-            .addClasses(CompletableFutureHelper.class)
+            .addClasses(TimeoutConfigBean.class, CompletableFutureHelper.class)
             .addPackage(Packages.UTILS)
             .addAsManifestResource(config, "microprofile-config.properties")
             .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
