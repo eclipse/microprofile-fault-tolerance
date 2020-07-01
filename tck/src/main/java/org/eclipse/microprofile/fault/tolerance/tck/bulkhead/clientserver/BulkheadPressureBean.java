@@ -18,33 +18,63 @@
  * limitations under the License.
  *******************************************************************************/
 
-package org.eclipse.microprofile.fault.tolerance.tck.config;
+package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.enterprise.context.ApplicationScoped;
 
-import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 
 /**
- * A suite of test methods to test the parameters of bulkhead
+ * 
  */
 @ApplicationScoped
-public class BulkheadConfigBean {
+public class BulkheadPressureBean {
     
-    @Bulkhead(value = 5)
-    public void serviceValue(Barrier barrier) {
-        barrier.await();
+    private AtomicInteger inProgress = new AtomicInteger(0);
+    private AtomicInteger maxInProgress = new AtomicInteger(0);
+    
+    @Bulkhead(5)
+    public void servicePressure(long sleepTime) {
+        int currentInProgress = inProgress.incrementAndGet();
+        maxInProgress.getAndUpdate(v -> Math.max(v, currentInProgress));
+        try {
+            Thread.sleep(sleepTime);
+        }
+        catch (InterruptedException e) {
+            fail("Sleep interrupted", e);
+        }
+        finally {
+            inProgress.decrementAndGet();
+        }
     }
-
-    @Bulkhead(value = 1, waitingTaskQueue = 5)
+    
     @Asynchronous
-    public Future<Void> serviceWaitingTaskQueue(Barrier barrier) {
-        barrier.await();
+    @Bulkhead(value = 5, waitingTaskQueue = 5)
+    public Future<?> servicePressureAsync(long sleepTime) {
+        try {
+            Thread.sleep(sleepTime);
+        }
+        catch (InterruptedException e) {
+            fail("Sleep interrupted", e);
+        }
         return CompletableFuture.completedFuture(null);
     }
     
+    public int getMaxInProgress() {
+        return maxInProgress.get();
+    }
+    
+    public void reset() {
+        assertEquals(inProgress.get(), 0);
+        maxInProgress.set(0);
+    }
+
 }

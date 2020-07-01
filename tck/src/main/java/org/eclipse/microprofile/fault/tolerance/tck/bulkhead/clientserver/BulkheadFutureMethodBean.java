@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -17,31 +17,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
+
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 
 import java.util.concurrent.Future;
 
+import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
+import org.eclipse.microprofile.faulttolerance.Asynchronous;
+import org.eclipse.microprofile.faulttolerance.Bulkhead;
+
 import javax.enterprise.context.ApplicationScoped;
 
-import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
-import org.eclipse.microprofile.faulttolerance.Bulkhead;
-import org.eclipse.microprofile.faulttolerance.Retry;
-
-/**
- * Test to ensure that the bulkhead slot is released when retrying.
- * <p>
- * Has a bulkhead of size 1
- * <p>
- * Retries 1 time on thrown TestException with 1 second delay
- */
-@Retry(maxRetries = 1, delay = 1000, jitter = 0, retryOn = TestException.class)
-@Bulkhead(1)
 @ApplicationScoped
-public class BulkheadRetryDelaySyncBean implements BulkheadTestBackend {
-    
-    @Override
-    public Future test(BackendTestDelegate action) throws InterruptedException {
-        return action.perform();
+public class BulkheadFutureMethodBean {
+
+    @Bulkhead
+    @Asynchronous
+    public Future<String> test(Future<String> result, Barrier barrier) {
+        barrier.await();
+        return result;
     }
 
 }

@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2017-2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -20,35 +20,29 @@
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 
 import java.time.temporal.ChronoUnit;
-import java.util.concurrent.Future;
 
 import javax.enterprise.context.ApplicationScoped;
 
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
-import org.eclipse.microprofile.faulttolerance.Asynchronous;
+import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
 
 /**
- * This tests the class level annotations in Retry that will enable us to submit
- * a set of tasks that will blow the bulkhead and its queue but which will get
- * retried until they are done. Each backend sleeps for one second so we should
- * get done in about 5 seconds as we allow 2 at once.
- * 
+ * A method level synchronous @Bulkhead bean with Retry configured for no retries with a 1 second delay
+ *
  * @author Gordon Hutchison
+ * @author Andrew Rouse
  */
 @ApplicationScoped
-public class Bulkhead55MethodAsynchronousRetryBean implements BulkheadTestBackend {
+public class Bulkhead1Retry0MethodSyncBean {
 
-    @Override
-    @Bulkhead(waitingTaskQueue = 5, value = 5)
-    @Asynchronous
-    @Retry(retryOn =
-    { BulkheadException.class }, delay = 1, delayUnit = ChronoUnit.SECONDS, maxRetries = 10, maxDuration=999999)
-    public Future test(BackendTestDelegate action) throws InterruptedException {
-        Utils.log("in business method of bean " + this.getClass().getName());
-        return action.perform();
+    @Bulkhead(value = 1)
+    @Retry(retryOn = { BulkheadException.class },
+           delay = 1, delayUnit = ChronoUnit.SECONDS,
+           maxRetries = 0, maxDuration=999999 )
+    public void test(Barrier barrier) {
+        barrier.await();
     }
 
-};
+}

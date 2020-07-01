@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018-2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,10 +19,12 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
 import javax.enterprise.context.ApplicationScoped;
 
+import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 import org.eclipse.microprofile.faulttolerance.Retry;
@@ -39,11 +41,11 @@ import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
 @Bulkhead(value = 1, waitingTaskQueue = 1)
 @Asynchronous
 @ApplicationScoped
-public class BulkheadRetryAbortOnAsyncBean implements BulkheadTestBackend {
+public class BulkheadRetryAbortOnAsyncBean {
     
-    @Override
-    public Future test(BackendTestDelegate action) throws InterruptedException {
-        return action.perform();
+    public Future<?> test(Barrier barrier) {
+        barrier.await();
+        return CompletableFuture.completedFuture(null);
     }
 
 }

@@ -23,6 +23,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -65,6 +66,8 @@ public class ConfigAnnotationAsset implements Asset {
      * <li>Timeout.value</li>
      * <li>CircuitBreaker.delay</li>
      * </ul>
+     * 
+     * @return {@code this}
      */
     public ConfigAnnotationAsset autoscaleMethod(Class<?> clazz, final String method) {
         List<Method> methods = Arrays.stream(clazz.getMethods())
@@ -79,39 +82,80 @@ public class ConfigAnnotationAsset implements Asset {
             throw new RuntimeException("More than one method named " + method + " on class " + clazz.getName());
         }
         
-        TCKConfig config = TCKConfig.getConfig();
-        
-        Method m = methods.get(0);
-        Retry retry = m.getAnnotation(Retry.class);
-        if (retry != null) {
-            Duration maxDuration = Duration.of(retry.maxDuration(), retry.durationUnit());
-            props.put(keyFor(clazz, method, Retry.class, "maxDuration"), config.getTimeoutInStr(maxDuration.toMillis()));
-            props.put(keyFor(clazz, method, Retry.class, "maxDurationUnit"), ChronoUnit.MILLIS.name());
-            
-            Duration delay = Duration.of(retry.delay(), retry.delayUnit());
-            props.put(keyFor(clazz, method, Retry.class, "delay"), config.getTimeoutInStr(delay.toMillis()));
-            props.put(keyFor(clazz, method, Retry.class, "delayUnit"), ChronoUnit.MILLIS.name());
-            
-            Duration jitter = Duration.of(retry.jitter(), retry.jitterDelayUnit());
-            props.put(keyFor(clazz, method, Retry.class, "jitter"), config.getTimeoutInStr(jitter.toMillis()));
-            props.put(keyFor(clazz, method, Retry.class, "jitterDelayUnit"), ChronoUnit.MILLIS.name());
-        }
-        
-        Timeout timeout = m.getAnnotation(Timeout.class);
-        if (timeout != null) {
-            Duration maxDuration = Duration.of(timeout.value(), timeout.unit());
-            props.put(keyFor(clazz, method, Timeout.class, "value"), config.getTimeoutInStr(maxDuration.toMillis()));
-            props.put(keyFor(clazz, method, Timeout.class, "unit"), ChronoUnit.MILLIS.name());
-        }
-        
-        CircuitBreaker cb = m.getAnnotation(CircuitBreaker.class);
-        if (cb != null) {
-            Duration delay = Duration.of(cb.delay(), cb.delayUnit());
-            props.put(keyFor(clazz, method, CircuitBreaker.class, "delay"), config.getTimeoutInStr(delay.toMillis()));
-            props.put(keyFor(clazz, method, CircuitBreaker.class, "delayUnit"), ChronoUnit.MILLIS.name());
-        }
+        autoscaleElement(clazz, methods.get(0));
         
         return this;
+    }
+    
+    /**
+     * Generate config which scales the timeout values of all annotations on the class
+     * <p>
+     * Only annotations directly on the class are affected, config is not generated for any annotations on methods.
+     * Use {@link #autoscaleMethod(Class, String)} to generate config for methods.
+     * <p>
+     * The following values are scaled using the scale factor in TCKConfig:
+     * <ul>
+     * <li>Retry.maxDuration</li>
+     * <li>Retry.delay</li>
+     * <li>Retry.jitter</li>
+     * <li>Timeout.value</li>
+     * <li>CircuitBreaker.delay</li>
+     * </ul>
+     * 
+     * @return {@code this}
+     */
+    public ConfigAnnotationAsset autoscaleClass(Class<?> clazz) {
+        autoscaleElement(clazz, null);
+        return this;
+    }
+    
+    /**
+     * Generate config which scales the timeout values of all annotations on a class or method
+     * <p>
+     * If {@code method} is provided, then config will be generated for annotations on the method,
+     * otherwise config will be generated for annotations on the class.
+     * 
+     * @param clazz the class
+     * @param method the method, may be {@code null}
+     */
+    private void autoscaleElement(Class<?> clazz, Method method) {
+        AnnotatedElement element = clazz;
+        String methodName = null;
+        if (method != null) {
+            element = method;
+            methodName = method.getName();
+        }
+        
+        TCKConfig config = TCKConfig.getConfig();
+        
+        Retry retry = element.getAnnotation(Retry.class);
+        if (retry != null) {
+            Duration maxDuration = Duration.of(retry.maxDuration(), retry.durationUnit());
+            props.put(keyFor(clazz, methodName, Retry.class, "maxDuration"), config.getTimeoutInStr(maxDuration.toMillis()));
+            props.put(keyFor(clazz, methodName, Retry.class, "maxDurationUnit"), ChronoUnit.MILLIS.name());
+            
+            Duration delay = Duration.of(retry.delay(), retry.delayUnit());
+            props.put(keyFor(clazz, methodName, Retry.class, "delay"), config.getTimeoutInStr(delay.toMillis()));
+            props.put(keyFor(clazz, methodName, Retry.class, "delayUnit"), ChronoUnit.MILLIS.name());
+            
+            Duration jitter = Duration.of(retry.jitter(), retry.jitterDelayUnit());
+            props.put(keyFor(clazz, methodName, Retry.class, "jitter"), config.getTimeoutInStr(jitter.toMillis()));
+            props.put(keyFor(clazz, methodName, Retry.class, "jitterDelayUnit"), ChronoUnit.MILLIS.name());
+        }
+        
+        Timeout timeout = element.getAnnotation(Timeout.class);
+        if (timeout != null) {
+            Duration maxDuration = Duration.of(timeout.value(), timeout.unit());
+            props.put(keyFor(clazz, methodName, Timeout.class, "value"), config.getTimeoutInStr(maxDuration.toMillis()));
+            props.put(keyFor(clazz, methodName, Timeout.class, "unit"), ChronoUnit.MILLIS.name());
+        }
+        
+        CircuitBreaker cb = element.getAnnotation(CircuitBreaker.class);
+        if (cb != null) {
+            Duration delay = Duration.of(cb.delay(), cb.delayUnit());
+            props.put(keyFor(clazz, methodName, CircuitBreaker.class, "delay"), config.getTimeoutInStr(delay.toMillis()));
+            props.put(keyFor(clazz, methodName, CircuitBreaker.class, "delayUnit"), ChronoUnit.MILLIS.name());
+        }
     }
 
     /**
@@ -165,13 +209,14 @@ public class ConfigAnnotationAsset implements Asset {
 
 
     /**
-     * Build config key used to enable an annotation for a class and method
+     * Build config key used to configure a property of an annotation
      * <p>
-     * E.g. {@code com.example.MyClass/myMethod/Retry/enabled}
+     * E.g. {@code com.example.MyClass/myMethod/Retry/maxRetries}
      *
      * @param clazz      may be null
      * @param method     may be null
      * @param annotation required
+     * @param property   required
      * @return config key
      */
     private String keyFor(final Class<?> clazz, final String method, final Class<? extends Annotation> annotation,

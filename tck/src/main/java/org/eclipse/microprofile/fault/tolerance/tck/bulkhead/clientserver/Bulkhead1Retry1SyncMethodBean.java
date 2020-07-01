@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018-2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,32 +19,30 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 
-import java.time.temporal.ChronoUnit;
-import java.util.concurrent.Future;
-
 import javax.enterprise.context.ApplicationScoped;
 
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
-import org.eclipse.microprofile.faulttolerance.Asynchronous;
+import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 import org.eclipse.microprofile.faulttolerance.Retry;
-import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
 
 /**
- * A simple class level Asynchronous @Bulkhead bean that has a Retry option.
- *
- * @author Gordon Hutchison
+ * Test to ensure that the bulkhead slot is released when retrying.
+ * <p>
+ * Has a bulkhead of size 1
+ * <p>
+ * Retries 1 time on thrown TestException with 1 second delay
  */
 @ApplicationScoped
-@Bulkhead(waitingTaskQueue = 5, value = 5)
-@Asynchronous
-@Retry(retryOn =
-{ BulkheadException.class }, delay = 1, delayUnit = ChronoUnit.SECONDS, maxRetries = 10, maxDuration=999999)
-public class Bulkhead55ClassAsynchronousRetryBean implements BulkheadTestBackend {
-
-    public Future test(BackendTestDelegate action) throws InterruptedException {
-        Utils.log("in business method of bean " + this.getClass().getName());
-        return action.perform();
+public class Bulkhead1Retry1SyncMethodBean {
+    
+    @Retry(maxRetries = 1, delay = 1000, jitter = 0, retryOn = TestException.class)
+    @Bulkhead(1)
+    public void test(Barrier barrier, RuntimeException ex) {
+        barrier.await();
+        if (ex != null) {
+            throw ex;
+        }
     }
 
-};
+}

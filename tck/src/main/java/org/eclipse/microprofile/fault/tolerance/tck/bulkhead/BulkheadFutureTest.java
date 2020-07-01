@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2017-2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2017-2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,15 +19,22 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead;
 
+import static org.awaitility.Awaitility.await;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
 
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadClassAsynchronousDefaultBean;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadMethodAsynchronousDefaultBean;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Checker;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.FutureChecker;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadFutureClassBean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadFutureMethodBean;
+import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncTaskManager;
+import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
@@ -35,16 +42,7 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.testng.ITestContext;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.awaitility.Awaitility.await;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertEquals;
 
 /**
  * This set of tests will test correct operation on the relevant methods of the
@@ -53,29 +51,25 @@ import static org.testng.Assert.assertEquals;
  *
  * @author Gordon Hutchison
  * @author carlosdlr
+ * @author Andrew Rouse
  */
 public class BulkheadFutureTest extends Arquillian {
 
-    private static final int SHORT_TIME = 100;
     @Inject
-    private BulkheadMethodAsynchronousDefaultBean bhBeanMethodAsynchronousDefault;
+    private BulkheadFutureMethodBean bhFutureMethodBean;
+    
     @Inject
-    private BulkheadClassAsynchronousDefaultBean bhBeanClassAsynchronousDefault;
+    private BulkheadFutureClassBean bhFutureClassBean;
 
     @Deployment
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftBulkheadFutureTest.jar")
-                .addPackage(FutureChecker.class.getPackage())
-                .addClass(Utils.class)
-                .addPackage(Packages.UTILS)
-                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
-                .as(JavaArchive.class);
-        return ShrinkWrap.create(WebArchive.class, "ftBulkheadTest.war").addAsLibrary(testJar);
-    }
-
-    @BeforeTest
-    public void beforeTest(final ITestContext testContext) {
-        Utils.log("Testmethod: " + testContext.getName());
+                                        .addClasses(BulkheadFutureMethodBean.class, BulkheadFutureClassBean.class)
+                                        .addPackage(Packages.UTILS)
+                                        .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
+        
+        return ShrinkWrap.create(WebArchive.class, "ftBulkheadFutureTest.war")
+                         .addAsLibrary(testJar);
     }
 
     /**
@@ -83,26 +77,22 @@ public class BulkheadFutureTest extends Arquillian {
      * method can be queried for Done OK before and after a goodpath .get()
      */
     @Test
-    public void testBulkheadMethodAsynchFutureDoneAfterGet() {
-        Checker fc = new FutureChecker(SHORT_TIME);
-        Future<String> result = null;
-
-        try {
-            result = bhBeanMethodAsynchronousDefault.test(fc);
-        }
-        catch (InterruptedException e1) {
-            fail("Unexpected interruption", e1);
-        }
-
-        assertFalse(result.isDone(), "Future reporting Done when not");
-        try {
+    public void testBulkheadMethodAsynchFutureDoneAfterGet() throws InterruptedException, ExecutionException, TimeoutException {
+        
+        try (AsyncTaskManager taskManager = new AsyncTaskManager()) {
+            TestFuture testFuture = new TestFuture();
+            Barrier barrier = taskManager.newBarrier();
+            Future<String> result = bhFutureMethodBean.test(testFuture, barrier);
+            
+            assertFalse(result.isDone(), "Future reporting Done when not");
+            
+            barrier.open();
+            
+            assertEquals(result.get(10, TimeUnit.SECONDS), "RESULT");
             assertEquals(result.get(), "RESULT");
-            assertEquals(result.get(1, TimeUnit.SECONDS), "RESULT");
+            
+            assertTrue(result.isDone(), "Future done not reporting true");
         }
-        catch (Throwable t) {
-            fail("Unexpected exception", t);
-        }
-        assertTrue(result.isDone(), "Future done not reporting true");
     }
 
     /**
@@ -112,15 +102,20 @@ public class BulkheadFutureTest extends Arquillian {
      */
     @Test
     public void testBulkheadMethodAsynchFutureDoneWithoutGet() {
-        Checker fc = new FutureChecker(SHORT_TIME);
-        try {
-            final Future<String> result = bhBeanMethodAsynchronousDefault.test(fc);
+        
+        try (AsyncTaskManager taskManager = new AsyncTaskManager()) {
+            TestFuture testFuture = new TestFuture();
+            Barrier barrier = taskManager.newBarrier();
+            
+            Future<String> result = bhFutureMethodBean.test(testFuture, barrier);
+            
             assertFalse(result.isDone(), "Future reporting Done when not");
-            await().atMost(SHORT_TIME * 100, MILLISECONDS).untilAsserted(()-> assertTrue(result.isDone()));
+            
+            barrier.open();
+            
+            await("Future reports done").until(() -> result.isDone());
         }
-        catch (InterruptedException e1) {
-            fail("Unexpected interruption", e1);
-        }
+
     }
 
     /**
@@ -130,27 +125,21 @@ public class BulkheadFutureTest extends Arquillian {
      * Class level.
      */
     @Test
-    public void testBulkheadClassAsynchFutureDoneAfterGet() {
-        Checker fc = new FutureChecker(SHORT_TIME);
-        Future<String> result = null;
-
-        try {
-            result = bhBeanClassAsynchronousDefault.test(fc);
-        }
-        catch (InterruptedException e1) {
-            fail("Unexpected interruption", e1);
-        }
-
-        assertFalse(result.isDone(), "Future reporting Done when not");
-        try {
-            assertEquals(result.get(1, TimeUnit.SECONDS), "RESULT");
+    public void testBulkheadClassAsynchFutureDoneAfterGet() throws InterruptedException, ExecutionException, TimeoutException {
+        try (AsyncTaskManager taskManager = new AsyncTaskManager()) {
+            TestFuture testFuture = new TestFuture();
+            Barrier barrier = taskManager.newBarrier();
+            Future<String> result = bhFutureClassBean.test(testFuture, barrier);
+            
+            assertFalse(result.isDone(), "Future reporting Done when not");
+            
+            barrier.open();
+            
+            assertEquals(result.get(10, TimeUnit.SECONDS), "RESULT");
             assertEquals(result.get(), "RESULT");
-
+            
+            assertTrue(result.isDone(), "Future done not reporting true");
         }
-        catch (Throwable t) {
-            fail("Unexpected exception", t);
-        }
-        assertTrue(result.isDone(), "Future done not reporting true");
     }
 
     /**
@@ -160,14 +149,48 @@ public class BulkheadFutureTest extends Arquillian {
      */
     @Test
     public void testBulkheadClassAsynchFutureDoneWithoutGet() {
-        Checker fc = new FutureChecker(SHORT_TIME);
-        try {
-            final Future<String> result = bhBeanClassAsynchronousDefault.test(fc);
+        try (AsyncTaskManager taskManager = new AsyncTaskManager()) {
+            TestFuture testFuture = new TestFuture();
+            Barrier barrier = taskManager.newBarrier();
+            
+            Future<String> result = bhFutureClassBean.test(testFuture, barrier);
+            
             assertFalse(result.isDone(), "Future reporting Done when not");
-            await().atMost(SHORT_TIME * 100, MILLISECONDS).untilAsserted(()-> assertTrue(result.isDone()));
+            
+            barrier.open();
+            
+            await("Future reports done").until(() -> result.isDone());
         }
-        catch (InterruptedException e1) {
-            fail("Unexpected interruption", e1);
+    }
+    
+    public static final class TestFuture implements Future<String> {
+        private boolean isCancelled;
+
+        @Override
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            isCancelled = true;
+            return true;
         }
+
+        @Override
+        public boolean isCancelled() {
+            return isCancelled;
+        }
+
+        @Override
+        public boolean isDone() {
+            return true;
+        }
+
+        @Override
+        public String get() {
+            return "RESULT";
+        }
+
+        @Override
+        public String get(long timeout, TimeUnit unit) {
+            return "RESULT";
+        }
+
     }
 }

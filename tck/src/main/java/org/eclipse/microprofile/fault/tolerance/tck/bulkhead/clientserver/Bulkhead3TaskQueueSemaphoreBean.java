@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -17,31 +17,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
+
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 
-import java.time.temporal.ChronoUnit;
-import java.util.concurrent.Future;
+import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
+import org.eclipse.microprofile.faulttolerance.Bulkhead;
 
 import javax.enterprise.context.ApplicationScoped;
 
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
-import org.eclipse.microprofile.faulttolerance.Bulkhead;
-import org.eclipse.microprofile.faulttolerance.Retry;
-
 /**
- * A simple method level synchronous @Bulkhead bean that has a retry option.
- *
- * @author Gordon Hutchison
+ * Tests that the waitingTaskQueue parameter is ignored when {@code Asynchronous} is not used
  */
 @ApplicationScoped
-public class Bulkhead55RapidRetry10MethodSynchBean implements BulkheadTestBackend {
+public class Bulkhead3TaskQueueSemaphoreBean {
 
-    @Override
-    @Bulkhead(waitingTaskQueue = 5, value = 5)
-    @Retry(delay = 1, delayUnit = ChronoUnit.MILLIS, maxRetries = 10, maxDuration=999999)
-    public Future test(BackendTestDelegate action) throws InterruptedException {
-        Utils.log("in business method of bean " + this.getClass().getName());
-        return action.perform();
+    @Bulkhead(value = 3, waitingTaskQueue = 5)
+    public void test(Barrier barrier) {
+        barrier.await();
     }
 
-};
+}

@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018-2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -20,28 +20,30 @@
 
 package org.eclipse.microprofile.fault.tolerance.tck;
 
+import static org.awaitility.Awaitility.await;
+import static org.hamcrest.Matchers.is;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
 
 import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.AsyncCancellationClient;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.AsyncBulkheadTask;
+import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncTaskManager;
+import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 /**
@@ -62,7 +64,6 @@ public class AsyncCancellationTest extends Arquillian {
         JavaArchive testJar = ShrinkWrap
                 .create(JavaArchive.class, "ftAsyncCancellation.jar")
                 .addClasses(AsyncCancellationClient.class)
-                .addPackage(AsyncBulkheadTask.class.getPackage())
                 .addPackage(Packages.UTILS)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                 .as(JavaArchive.class);
@@ -76,122 +77,111 @@ public class AsyncCancellationTest extends Arquillian {
 
     @Inject private AsyncCancellationClient bean;
     
-    private static List<AsyncBulkheadTask> tasks = new ArrayList<>();
-    
-    @AfterMethod
-    public void cleanup() {
-        for (AsyncBulkheadTask task : tasks) {
-            task.complete();
-        }
-        tasks.clear();
-    }
-    
-    private static AsyncBulkheadTask newTask() {
-        AsyncBulkheadTask task = new AsyncBulkheadTask();
-        tasks.add(task);
-        return task;
-    }
-    
     @Test
     public void testCancel() throws InterruptedException {
-        AsyncBulkheadTask task = newTask();
-        
-        Future result = bean.serviceAsync(task);
-        
-        task.assertStarting(result);
-        
-        result.cancel(true);
-        
-        task.assertInterrupting();
-        
-        assertTrue(result.isCancelled(), "Task is not cancelled");
-        assertTrue(result.isDone(), "Task is not done");
-        Exceptions.expect(CancellationException.class, () -> result.get(2, TimeUnit.SECONDS));
-        Exceptions.expect(CancellationException.class, () -> result.get());
-        
-        task.complete();
-        
-        // Assert result still gives correct values after the task is allowed to complete
-        assertTrue(result.isCancelled(), "Task is not cancelled");
-        assertTrue(result.isDone(), "Task is not done");
-        Exceptions.expect(CancellationException.class, () -> result.get(2, TimeUnit.SECONDS));
-        Exceptions.expect(CancellationException.class, () -> result.get());
+        try (AsyncTaskManager taskManager = new AsyncTaskManager()) {
+            Barrier barrier = taskManager.newBarrier();
+            AtomicBoolean wasInterrupted = new AtomicBoolean(false);
+
+            Future<?> result = bean.serviceAsync(barrier, wasInterrupted);
+            barrier.assertAwaits();
+            
+            result.cancel(true);
+            
+            await("wasInterrupted").untilAtomic(wasInterrupted, is(true));
+            
+            assertTrue(result.isCancelled(), "Task is not cancelled");
+            assertTrue(result.isDone(), "Task is not done");
+            Exceptions.expect(CancellationException.class, () -> result.get(2, TimeUnit.SECONDS));
+            Exceptions.expect(CancellationException.class, () -> result.get());
+        }
     }
     
     @Test
     public void testCancelWithoutInterrupt() throws InterruptedException {
-        AsyncBulkheadTask task = newTask();
-        
-        Future result = bean.serviceAsync(task);
-        
-        task.assertStarting(result);
-        
-        result.cancel(false);
-        
-        task.assertNotInterrupting();
-        
-        assertTrue(result.isCancelled(), "Task is not cancelled");
-        assertTrue(result.isDone(), "Task is not done");
-        Exceptions.expect(CancellationException.class, () -> result.get(2, TimeUnit.SECONDS));
-        Exceptions.expect(CancellationException.class, () -> result.get());
-        
-        task.complete();
-        
-        // Assert result still gives correct values after the task is allowed to complete
-        assertTrue(result.isCancelled(), "Task is not cancelled");
-        assertTrue(result.isDone(), "Task is not done");
-        Exceptions.expect(CancellationException.class, () -> result.get(2, TimeUnit.SECONDS));
-        Exceptions.expect(CancellationException.class, () -> result.get());
+        try (AsyncTaskManager taskManager = new AsyncTaskManager()) {
+            Barrier barrier = taskManager.newBarrier();
+            AtomicBoolean wasInterrupted = new AtomicBoolean(false);
+
+            Future<?> result = bean.serviceAsync(barrier, wasInterrupted);
+            barrier.assertAwaits();
+            
+            result.cancel(false);
+            
+            await("wasInterrupted").during(TCKConfig.getConfig().getTimeoutInDuration(500))
+                                   .untilAtomic(wasInterrupted, is(false));
+            
+            assertTrue(result.isCancelled(), "Task is not cancelled");
+            assertTrue(result.isDone(), "Task is not done");
+            Exceptions.expect(CancellationException.class, () -> result.get(2, TimeUnit.SECONDS));
+            Exceptions.expect(CancellationException.class, () -> result.get());
+            
+            // Allow method to complete
+            barrier.open();
+
+            // Assert future still gives cancellation exception after task is allowed to complete
+            await("cancellationException").during(TCKConfig.getConfig().getTimeoutInDuration(500))
+                                          .untilAsserted(() -> Exceptions.expect(CancellationException.class, () -> result.get(2, TimeUnit.SECONDS)));
+            assertTrue(result.isCancelled(), "Task is not cancelled");
+            assertTrue(result.isDone(), "Task is not done");
+        }
     }
     
     @Test
     public void testCancelledButRemainsInBulkhead() throws InterruptedException {
-        AsyncBulkheadTask task1 = newTask();
-        Future result1 = bean.serviceAsyncBulkhead(task1);
-        task1.assertStarting();
-        
-        AsyncBulkheadTask task2 = newTask();
-        Future result2 = bean.serviceAsyncBulkhead(task2);
-        task2.assertNotStarting();
-        
-        result1.cancel(false);
-        
-        // Task 2 does not start because task 1 is still running (it was not interrupted)
-        task2.assertNotStarting();
-        
-        assertTrue(result1.isCancelled(), "Task is not cancelled");
-        assertTrue(result1.isDone(), "Task is not done");
-        Exceptions.expect(CancellationException.class, () -> result1.get(2, TimeUnit.SECONDS));
-        Exceptions.expect(CancellationException.class, () -> result1.get());
+        try (AsyncTaskManager taskManager = new AsyncTaskManager()) {
+            Barrier barrier1 = taskManager.newBarrier();
+            Future<?> result1 = bean.serviceAsyncBulkhead(barrier1);
+            barrier1.assertAwaits();
+            
+            Barrier barrier2 = taskManager.newBarrier();
+            Future<?> result2 = bean.serviceAsyncBulkhead(barrier2);
+            barrier2.assertNotAwaiting();
+
+            result1.cancel(false);
+            
+            // Task 2 does not start because task 1 is still running (it was not interrupted)
+            barrier2.assertNotAwaiting();
+            
+            assertTrue(result1.isCancelled(), "Task is not cancelled");
+            assertTrue(result1.isDone(), "Task is not done");
+            Exceptions.expect(CancellationException.class, () -> result1.get(2, TimeUnit.SECONDS));
+            Exceptions.expect(CancellationException.class, () -> result1.get());
+        }
     }
     
     @Test
     public void testCancelledWhileQueued() throws InterruptedException {
-        AsyncBulkheadTask task1 = newTask();
-        Future result1 = bean.serviceAsyncBulkhead(task1);
-        task1.assertStarting();
-        
-        AsyncBulkheadTask task2 = newTask();
-        Future result2 = bean.serviceAsyncBulkhead(task2);
-        task2.assertNotStarting();
-        
-        result2.cancel(false);
-        task1.complete();
-        
-        // Task 2 was cancelled while it was in the bulkhead queue, it should not start
-        task2.assertNotStarting();
+        try (AsyncTaskManager taskManager = new AsyncTaskManager()) {
+            Barrier barrier1 = taskManager.newBarrier();
+            Future<?> result1 = bean.serviceAsyncBulkhead(barrier1);
+            barrier1.assertAwaits();
+            
+            Barrier barrier2 = taskManager.newBarrier();
+            Future<?> result2 = bean.serviceAsyncBulkhead(barrier2);
+            barrier2.assertNotAwaiting();
+            
+            result2.cancel(false);
+            
+            barrier1.open();
+            
+            // Task 2 was cancelled while it was in the bulkhead queue, it should not start and await its barrier
+            barrier2.assertNotAwaiting();
+        }
     }
     
     @Test
     public void testCancelledDoesNotRetry() throws InterruptedException {
-        AsyncBulkheadTask task = newTask();
-        Future result = bean.serviceAsyncRetry(task);
-        task.assertStarting();
-        
-        result.cancel(true);
-        
-        Thread.sleep(500);
-        
-        assertEquals(bean.getServiceAsyncRetryAttempts(), 1, "Method should not have been retried - too many retry attempts");
+        try (AsyncTaskManager taskManager = new AsyncTaskManager()) {
+            Barrier barrier = taskManager.newBarrier();
+            Future<?> result = bean.serviceAsyncRetry(barrier);
+            barrier.assertAwaits();
+            
+            result.cancel(true);
+            
+            Thread.sleep(TCKConfig.getConfig().getTimeoutInMillis(500));
+            
+            assertEquals(bean.getServiceAsyncRetryAttempts(), 1, "Method should not have been retried - too many retry attempts");
+        }
     }
 }

@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2017-2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2017-2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,8 +19,9 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Future;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
@@ -28,15 +29,14 @@ import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhe
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead10MethodSemaphoreBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead3ClassSemaphoreBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead3MethodSemaphoreBean;
+import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead3TaskQueueSemaphoreBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadClassSemaphoreDefaultBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadMethodSemaphoreDefaultBean;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadTask;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadTaskManager;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadTestBackend;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.ParrallelBulkheadTest;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.TestData;
-import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncCaller;
+import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncTaskManager;
+import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
+import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncTaskManager.BarrierTask;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
+import org.eclipse.microprofile.faulttolerance.Bulkhead;
 import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
@@ -44,22 +44,13 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.testng.ITestContext;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-
-import static org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils.handleResults;
-import static org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils.log;
-import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expect;
 
 /**
  * @author Gordon Hutchison
  * @author Andrew Rouse
  */
 public class BulkheadSynchTest extends Arquillian {
-
-    @Inject
-    private AsyncCaller xService;
 
     /*
      * As the FaultTolerance annotation only work on business methods of
@@ -80,6 +71,8 @@ public class BulkheadSynchTest extends Arquillian {
     private Bulkhead10ClassSemaphoreBean bhBeanClassSemaphore10;
     @Inject
     private Bulkhead10MethodSemaphoreBean bhBeanMethodSemaphore10;
+    @Inject
+    private Bulkhead3TaskQueueSemaphoreBean bhBeanTaskQueueSemaphore3;
 
     /**
      * This is the Arquillian deploy method that controls the contents of the
@@ -90,16 +83,10 @@ public class BulkheadSynchTest extends Arquillian {
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftBulkheadSynchTest.jar")
                 .addPackage(BulkheadClassSemaphoreDefaultBean.class.getPackage())
-                .addClass(Utils.class)
                 .addPackage(Packages.UTILS)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                 .as(JavaArchive.class);
         return ShrinkWrap.create(WebArchive.class, "ftBulkheadSynchTest.war").addAsLibrary(testJar);
-    }
-
-    @BeforeTest
-    public void beforeTest(final ITestContext testContext) {
-        log("Testmethod: " + testContext.getName());
     }
 
     /**
@@ -109,9 +96,17 @@ public class BulkheadSynchTest extends Arquillian {
      */
     @Test
     public void testBulkheadClassSemaphore3() {
-        TestData td = new TestData(new CountDownLatch(3));
-        threads(20, bhBeanClassSemaphore3, 3, td);
-        td.check();
+        testBulkhead(3, bhBeanClassSemaphore3::test);
+    }
+
+    /**
+     * Tests the method synchronous Bulkhead3. This test will check that 3 and
+     * no more than 3 parallel synchronous calls are allowed into a method that
+     * has an individual Bulkhead(3) annotation
+     */
+    @Test
+    public void testBulkheadMethodSemaphore3() {
+        testBulkhead(3, bhBeanMethodSemaphore3::test);
     }
 
     /**
@@ -121,9 +116,7 @@ public class BulkheadSynchTest extends Arquillian {
      */
     @Test
     public void testBulkheadClassSemaphore10() {
-        TestData td = new TestData(new CountDownLatch(10));
-        threads(20, bhBeanClassSemaphore10, 10, td);
-        td.check();
+        testBulkhead(10, bhBeanClassSemaphore10::test);
     }
 
     /**
@@ -135,21 +128,7 @@ public class BulkheadSynchTest extends Arquillian {
      */
     @Test
     public void testBulkheadMethodSemaphore10() {
-        TestData td = new TestData(new CountDownLatch(10));
-        threads(20, bhBeanMethodSemaphore10, 10, td);
-        td.check();
-    }
-
-    /**
-     * Tests the method synchronous Bulkhead3. This test will check that 3 and
-     * no more than 3 parallel synchronous calls are allowed into a method that
-     * has an individual Bulkhead(3) annotation
-     */
-    @Test
-    public void testBulkheadMethodSemaphore3() {
-        TestData td = new TestData(new CountDownLatch(3));
-        threads(20, bhBeanMethodSemaphore3, 3, td);
-        td.check();
+        testBulkhead(10, bhBeanMethodSemaphore10::test);
     }
 
     /**
@@ -159,9 +138,7 @@ public class BulkheadSynchTest extends Arquillian {
      */
     @Test
     public void testBulkheadClassSemaphoreDefault() {
-        TestData td = new TestData(new CountDownLatch(10));
-        threads(20, bhBeanClassSemaphoreDefault, 10, td);
-        td.check();
+        testBulkhead(10, bhBeanClassSemaphoreDefault::test);
     }
 
     /**
@@ -171,51 +148,65 @@ public class BulkheadSynchTest extends Arquillian {
      */
     @Test
     public void testBulkheadMethodSemaphoreDefault() {
-        TestData td = new TestData(new CountDownLatch(10));
-        threads(20, bhBeanMethodSemaphoreDefault, 10, td);
-        td.check();
+        testBulkhead(10, bhBeanMethodSemaphoreDefault::test);
     }
 
     /**
-     * Test that when the bulkhead is full, a BulkheadException is thrown
-     * @throws InterruptedException if the test is interrupted
+     * Test that the {@code waitingTaskQueue} parameter is ignored when
+     * {@code Bulkhead} is used without {@code Asynchronous}.
      */
-    @Test
-    public void testBulkheadExceptionThrownWhenQueueFullSemaphore() throws InterruptedException {
-        BulkheadTaskManager manager = new BulkheadTaskManager();
-        try {
+    public void testSemaphoreWaitingTaskQueueIgnored() {
+        testBulkhead(3, bhBeanTaskQueueSemaphore3::test);
+    }
+
+    /**
+     * Conducts a standard test to ensure that a synchronous bulkhead with no
+     * other annotations works correctly. It asserts that the correct number of
+     * tasks are allowed to run and to queue and that when a task in the bulkhead
+     * completes a new task can be run.
+     * <p>
+     * The {@code bulkheadMethod} should be a reference to a method annotated with
+     * {@link Bulkhead} which accepts a {@code Barrier} and calls
+     * {@link Barrier#await()}.
+     * 
+     * @param maxRunning
+     *                           expected number of tasks permitted to run
+     * @param bulkheadMethod
+     *                           a reference to the annotated method
+     */
+    public static void testBulkhead(int maxRunning, Consumer<Barrier> bulkheadMethod) {
+        
+        try (AsyncTaskManager taskManager = new AsyncTaskManager()) {
+            
             // Fill the bulkhead
-            for (int i = 0; i < 10; i++) {
-                BulkheadTask task = manager.startTask(bhBeanMethodSemaphoreDefault);
-                task.assertStarting();
+            List<BarrierTask<?>> runningTasks = new ArrayList<>();
+            for (int i = 0; i < maxRunning; i++) {
+                BarrierTask<?> task = taskManager.runBarrierTask(bulkheadMethod);
+                runningTasks.add(task);
             }
-
-            // Try to run one more (should get a bulkhead exception)
-            BulkheadTask task = manager.startTask(bhBeanMethodSemaphoreDefault);
-            task.assertNotStarting();
-            expect(BulkheadException.class, task.getResultFuture());
-        }
-        finally {
-            manager.cleanup();
+            
+            // Check tasks start and await on the barrier
+            for (int i = 0; i < maxRunning; i++) {
+                runningTasks.get(i).assertAwaits();
+            }
+            
+            // Check next task is rejected
+            BarrierTask<?> overflowTask = taskManager.runBarrierTask(bulkheadMethod);
+            overflowTask.assertThrows(BulkheadException.class);
+            
+            // Release one running task
+            BarrierTask<?> releasedTask = runningTasks.get(7 % maxRunning); // Pick one out of the middle
+            releasedTask.openBarrier();
+            releasedTask.assertSuccess();
+            
+            // Now check that another task can be submitted and runs
+            BarrierTask<?> extraTask = taskManager.runBarrierTask(bulkheadMethod);
+            extraTask.assertAwaits();
+            
+            // Now check that next task is rejected
+            BarrierTask<?> overflowTask2 = taskManager.runBarrierTask(bulkheadMethod);
+            overflowTask2.assertThrows(BulkheadException.class);
         }
     }
 
-
-    /**
-     * Run a number of Callable's in parallel
-     * @param number expected instances
-     * @param test bulkhead component to test
-     * @param maxSimultaneousWorkers max number of simultaneous workers
-     */
-    private void threads(int number, BulkheadTestBackend test, int maxSimultaneousWorkers, TestData td) {
-        td.setExpectedMaxSimultaneousWorkers(maxSimultaneousWorkers);
-        td.setExpectedInstances(number);
-        Future[] results = new Future[number];
-        for (int i = 0; i < number; i++) {
-            log("Starting test " + i);
-            results[i] = xService.submit(new ParrallelBulkheadTest(test, td));
-        }
-
-        handleResults(number, results);
-    }
 }

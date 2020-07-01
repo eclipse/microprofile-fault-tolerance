@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2017-2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,25 +19,22 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 
-import java.util.concurrent.Future;
-
 import javax.enterprise.context.ApplicationScoped;
 
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
+import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 
 /**
  * A simple class level Semaphore @Bulkhead
  * 
  * @author Gordon Hutchison
+ * @author Andrew Rouse
  */
 @Bulkhead(3) @ApplicationScoped
-public class Bulkhead3ClassSemaphoreBean implements BulkheadTestBackend {
+public class Bulkhead3ClassSemaphoreBean {
 
-    @Override
-    public Future test(BackendTestDelegate action) throws InterruptedException {
-        Utils.log("in business method of bean " + this.getClass().getName() );
-        return action.perform();
+    public void test(Barrier barrier) {
+        barrier.await();
     }
 
 };

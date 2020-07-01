@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -17,30 +17,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
+
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 
-import java.time.temporal.ChronoUnit;
 import java.util.concurrent.Future;
+
+import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
+import org.eclipse.microprofile.faulttolerance.Asynchronous;
+import org.eclipse.microprofile.faulttolerance.Bulkhead;
 
 import javax.enterprise.context.ApplicationScoped;
 
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
-import org.eclipse.microprofile.faulttolerance.Bulkhead;
-import org.eclipse.microprofile.faulttolerance.Retry;
-
-/**
- * A simple class level synchronous @Bulkhead bean that has a retry option.
- *
- * @author Gordon Hutchison
- */
+@Bulkhead
+@Asynchronous
 @ApplicationScoped
-@Bulkhead(waitingTaskQueue = 5, value = 5)
-@Retry(delay = 1, delayUnit = ChronoUnit.MICROS, maxRetries = 10, maxDuration=999999)
-public class Bulkhead55RapidRetry10ClassSynchBean implements BulkheadTestBackend {
+public class BulkheadFutureClassBean {
 
-    public Future test(BackendTestDelegate action) throws InterruptedException {
-        Utils.log("in business method of bean " + this.getClass().getName());
-        return action.perform();
+    public Future<String> test(Future<String> result, Barrier barrier) {
+        barrier.await();
+        return result;
     }
 
-};
+}

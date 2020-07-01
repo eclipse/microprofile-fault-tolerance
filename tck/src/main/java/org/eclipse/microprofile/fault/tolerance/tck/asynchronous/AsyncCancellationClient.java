@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018-2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -20,12 +20,14 @@
 
 package org.eclipse.microprofile.fault.tolerance.tck.asynchronous;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.enterprise.context.RequestScoped;
 
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.AsyncBulkheadTask;
+import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 import org.eclipse.microprofile.faulttolerance.Retry;
@@ -35,17 +37,23 @@ public class AsyncCancellationClient {
     
     private AtomicInteger serviceAsyncRetryAttempts = new AtomicInteger(0);
     
-    
     @Asynchronous
-    public Future serviceAsync(AsyncBulkheadTask task) throws InterruptedException {
-        return task.perform();
+    public Future<?> serviceAsync(Barrier barrier, AtomicBoolean wasInterrupted) {
+        try {
+            barrier.awaitInterruptably();
+        }
+        catch (InterruptedException e) {
+            wasInterrupted.set(true);
+        }
+        return CompletableFuture.completedFuture(null);
     }
     
     @Asynchronous
-    @Retry(maxRetries = 5)
-    public Future serviceAsyncRetry(AsyncBulkheadTask task) throws InterruptedException {
+    @Retry(maxRetries = 5, delay = 0, jitter =  0)
+    public Future<?> serviceAsyncRetry(Barrier barrier) throws InterruptedException {
         serviceAsyncRetryAttempts.incrementAndGet();
-        return task.perform();
+        barrier.awaitInterruptably();
+        return CompletableFuture.completedFuture(null);
     }
     
     public int getServiceAsyncRetryAttempts() {
@@ -55,8 +63,9 @@ public class AsyncCancellationClient {
     
     @Asynchronous
     @Bulkhead(value = 1, waitingTaskQueue = 1)
-    public Future serviceAsyncBulkhead(AsyncBulkheadTask task) throws InterruptedException {
-        return task.perform();
+    public Future<?> serviceAsyncBulkhead(Barrier barrier) {
+        barrier.await();
+        return CompletableFuture.completedFuture(null);
     }
 
 }

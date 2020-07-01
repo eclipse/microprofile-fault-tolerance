@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018-2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,26 +19,16 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expect;
-import static org.testng.Assert.assertEquals;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
 
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.AsyncBulkheadTask;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadTask;
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadTaskManager;
 import org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver.CircuitBreakerClientWithAsyncBulkhead;
 import org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver.CircuitBreakerClientWithAsyncBulkheadNoFail;
 import org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver.CircuitBreakerClientWithSyncBulkhead;
+import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncTaskManager;
+import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncTaskManager.BarrierTask;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
 import org.eclipse.microprofile.faulttolerance.exceptions.CircuitBreakerOpenException;
@@ -59,7 +49,6 @@ public class CircuitBreakerBulkheadTest extends Arquillian {
                         .addClasses(CircuitBreakerClientWithAsyncBulkhead.class,
                                     CircuitBreakerClientWithSyncBulkhead.class,
                                     CircuitBreakerClientWithAsyncBulkheadNoFail.class)
-                        .addPackage(BulkheadTask.class.getPackage())
                         .addPackage(Packages.UTILS)
                         .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                         .as(JavaArchive.class);
@@ -104,36 +93,30 @@ public class CircuitBreakerBulkheadTest extends Arquillian {
      */
     @Test
     public void testCircuitBreakerAroundBulkheadAsync() throws InterruptedException, ExecutionException, TimeoutException {
-        AsyncBulkheadTask task1 = new AsyncBulkheadTask();
-        Future result1 = asyncBulkheadClient.test(task1);
-        task1.assertStarting(result1);
-        
-        AsyncBulkheadTask task2 = new AsyncBulkheadTask();
-        Future result2 = asyncBulkheadClient.test(task2);
-        task2.assertNotStarting();
-        
-        // While circuit closed, we get a BulkheadException
-        for (int i = 3; i < 6; i++) {
-            AsyncBulkheadTask taski = new AsyncBulkheadTask();
-            Future resulti = asyncBulkheadClient.test(taski);
-            expect(BulkheadException.class, resulti);
+        try (AsyncTaskManager taskManager = new AsyncTaskManager()) {
+            BarrierTask<?> task1 = taskManager.runAsyncBarrierTask(asyncBulkheadClient::test);
+            task1.assertAwaits();
+            
+            BarrierTask<?> task2 = taskManager.runAsyncBarrierTask(asyncBulkheadClient::test);
+            task2.assertNotAwaiting();
+            
+            // While circuit closed, we get a BulkheadException
+            for (int i = 3; i < 6; i++) {
+                BarrierTask<?> taski = taskManager.runAsyncBarrierTask(asyncBulkheadClient::test);
+                taski.assertThrows(BulkheadException.class);
+            }
+            
+            // While circuit closed, we get a BulkheadException
+            for (int i = 6; i < 8; i++) {
+                BarrierTask<?> taski = taskManager.runAsyncBarrierTask(asyncBulkheadClient::test);
+                taski.assertThrows(CircuitBreakerOpenException.class);
+            }
+            
+            task1.openBarrier();
+            task1.assertSuccess();
+            task2.openBarrier();
+            task2.assertSuccess();
         }
-        
-        // After circuit opens, we get CircuitBreakerOpenException
-        for (int i = 6; i < 8; i++) {
-            AsyncBulkheadTask taski = new AsyncBulkheadTask();
-            Future resulti = asyncBulkheadClient.test(taski);
-            expect(CircuitBreakerOpenException.class, resulti);
-        }
-        
-        // Tidy Up, complete task1 and 2, check task 2 starts
-        task1.complete(CompletableFuture.completedFuture("OK"));
-        task2.complete(CompletableFuture.completedFuture("OK"));
-        task2.assertStarting(result2);
-        
-        // Check both tasks return results
-        assertEquals(result1.get(2, SECONDS), "OK");
-        assertEquals(result2.get(2, SECONDS), "OK");
     }
     
     /**
@@ -161,33 +144,24 @@ public class CircuitBreakerBulkheadTest extends Arquillian {
      */
     @Test
     public void testCircuitBreakerAroundBulkheadSync() throws InterruptedException, ExecutionException, TimeoutException {
-        BulkheadTaskManager manager = new BulkheadTaskManager();
-        
-        try {
-            BulkheadTask task1 = manager.startTask(syncBulkheadClient);
-            task1.assertStarting();
+        try (AsyncTaskManager taskManager = new AsyncTaskManager()) {
+            BarrierTask<?> task1 = taskManager.runBarrierTask(syncBulkheadClient::test);
+            task1.assertAwaits();
             
             // While circuit closed, we get a BulkheadException
             for (int i = 2; i < 5; i++) {
-                BulkheadTask taski = manager.startTask(syncBulkheadClient);
-                taski.assertFinishing();
-                expect(BulkheadException.class, taski.getResultFuture());
+                BarrierTask<?> taski = taskManager.runBarrierTask(syncBulkheadClient::test);
+                taski.assertThrows(BulkheadException.class);
             }
             
             // After circuit opens, we get CircuitBreakerOpenException
             for (int i = 5; i < 7; i++) {
-                BulkheadTask taski = manager.startTask(syncBulkheadClient);
-                taski.assertFinishing();
-                expect(CircuitBreakerOpenException.class, taski.getResultFuture());
+                BarrierTask<?> taski = taskManager.runBarrierTask(syncBulkheadClient::test);
+                taski.assertThrows(CircuitBreakerOpenException.class);
             }
             
-            // Tidy up, complete task1 and check result
-            task1.complete(CompletableFuture.completedFuture("OK"));
-            task1.assertFinishing();
-            assertEquals(task1.getResult().get(2, TimeUnit.MINUTES), "OK");
-        }
-        finally {
-            manager.cleanup();
+            task1.openBarrier();
+            task1.assertSuccess();
         }
     }
     
@@ -216,40 +190,25 @@ public class CircuitBreakerBulkheadTest extends Arquillian {
      */
     @Test
     public void testCircuitBreaker() throws InterruptedException, ExecutionException, TimeoutException {
-        List<AsyncBulkheadTask> tasks = new ArrayList<>();
-        try {
-            AsyncBulkheadTask task1 = new AsyncBulkheadTask();
-            tasks.add(task1);
-            Future result1 = asyncBulkheadNoFailClient.test(task1);
-            task1.assertStarting(result1);
+        
+        try (AsyncTaskManager taskManager = new AsyncTaskManager()) {
+            BarrierTask<?> task1 = taskManager.runAsyncBarrierTask(asyncBulkheadNoFailClient::test);
+            task1.assertAwaits();
             
-            AsyncBulkheadTask task2 = new AsyncBulkheadTask();
-            tasks.add(task2);
-            Future result2 = asyncBulkheadNoFailClient.test(task2);
-            task2.assertNotStarting();
+            BarrierTask<?> task2 = taskManager.runAsyncBarrierTask(asyncBulkheadNoFailClient::test);
+            task2.assertNotAwaiting();
             
             // While circuit closed, we get a BulkheadException
             // Circuit should not open because failOn does not include BulkheadException
             for (int i = 3; i < 8; i++) {
-                AsyncBulkheadTask taski = new AsyncBulkheadTask();
-                tasks.add(taski);
-                Future resulti = asyncBulkheadNoFailClient.test(taski);
-                expect(BulkheadException.class, resulti);
+                BarrierTask<?> taski = taskManager.runAsyncBarrierTask(asyncBulkheadNoFailClient::test);
+                taski.assertThrows(BulkheadException.class);
             }
             
-            // Tidy Up, complete task1 and 2, check task 2 starts
-            task1.complete(CompletableFuture.completedFuture("OK"));
-            task2.complete(CompletableFuture.completedFuture("OK"));
-            task2.assertStarting(result2);
-            
-            // Check both tasks return results
-            assertEquals(result1.get(2, SECONDS), "OK");
-            assertEquals(result2.get(2, SECONDS), "OK");
-        }
-        finally {
-            for (AsyncBulkheadTask task : tasks) {
-                task.complete();
-            }
+            task1.openBarrier();
+            task1.assertSuccess();
+            task2.openBarrier();
+            task2.assertSuccess();
         }
     }
 

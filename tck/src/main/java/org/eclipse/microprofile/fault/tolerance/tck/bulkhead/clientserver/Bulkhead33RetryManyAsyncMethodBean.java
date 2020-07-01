@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -17,33 +17,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
+
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
-import javax.enterprise.context.ApplicationScoped;
-
-import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.Utils;
+import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 import org.eclipse.microprofile.faulttolerance.Retry;
-import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
+
+import javax.enterprise.context.ApplicationScoped;
 
 /**
- * A simple asynch bean that will retry all methods once. 
- * 
- * @author Gordon Hutchison
+ * Tests to ensure that BulkheadExceptions are retried
+ * <p>
+ * Has a bulkhead size of 3 and a queue size of 3
+ * <p>
+ * Retries on all exceptions for 3 seconds
  */
 @ApplicationScoped
-@Bulkhead(waitingTaskQueue = 5, value = 5)
-@Asynchronous
-@Retry(retryOn =
-{ BulkheadException.class, InterruptedException.class, RuntimeException.class }, maxRetries = 1, maxDuration=999999 )
-public class Bulkhead55ClassAsynchronousRetry1Bean implements BulkheadTestBackend {
+public class Bulkhead33RetryManyAsyncMethodBean {
 
-    public Future test(BackendTestDelegate action) throws InterruptedException {
-        Utils.log("in business method of bean " + this.getClass().getName());
-        return action.perform();
+    @Asynchronous
+    @Bulkhead(value = 3, waitingTaskQueue = 3)
+    @Retry(maxRetries = 99999, maxDuration = 3000, delay = 100, jitter = 0)
+    public Future<?> test(Barrier barrier) {
+        barrier.await();
+        return CompletableFuture.completedFuture(null);
     }
 
-};
+}
