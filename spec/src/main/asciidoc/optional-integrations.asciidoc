@@ -38,18 +38,13 @@ These behaviors are currently optional because the MicroProfile Context Propagat
 ==== `@Asynchronous`
 
 Implementations should use MicroProfile Context Propagation to propagate contexts to threads that are servicing `@Asynchronous` invocations.
-The decision which contexts are propagated and which are cleared is left to the MicroProfile Context Propagation implementation.
+Deciding which contexts are propagated and which are cleared is left to the MicroProfile Context Propagation implementation.
 
 [NOTE]
 ====
-MicroProfile Context Propagation doesn't define which contexts are propagated and which are cleared by default.
-This is left to implementations.
-However, there are configuration properties that you can use for this purpose.
+As of version 1.0.2, MicroProfile Context Propagation doesn't define which contexts are propagated and which are cleared by default, this is left to implementations.
 
-This note is valid at least with MicroProfile Context Propagation version 1.0.2, latest at the time of writing.
-Future versions of MicroProfile Context Propagation might change.
-Such changes, however, won't affect this specification.
-MicroProfile Fault Tolerance shall continue recommending that context propagation is left to MicroProfile Context Propagation.
+However, there are configuration properties that you can use to override the default setting.
 ====
 
 If the environment that provides MicroProfile Context Propagation is itself a Jakarta EE container, the _Jakarta EE_ section above doesn't apply and context propagation is left entirely to MicroProfile Context Propagation.
