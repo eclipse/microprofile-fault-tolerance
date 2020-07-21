@@ -16,22 +16,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 ---
 name: Specification Change Proposal
 about: Request or propose an implementation that solves one or more use cases.
 title: ''
-labels: 'impl. proposal :gear:'
+labels: 'spec. change :gear:'
 assignees: ''
 
 ---
 
 **Description**
 
-<!-- Describe the implementation proposal's functionality here -->
+<!-- Describe the proposed specification chang here -->
 
 
 **Use cases**
 
-<!-- Link at least one use case issue ID which would be solved by this implementation proposal -->
+<!-- Link at least one use case issue ID which would be solved by this specification change -->
 
 * Fixes #xxxx
+
+<!-- Indicate whether this is a backward incompatible change or not -->
+
+[ ] Backward incompatible change
