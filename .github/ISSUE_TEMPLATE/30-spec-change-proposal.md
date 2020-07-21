@@ -19,7 +19,7 @@
 
 ---
 name: Specification Change Proposal
-about: Request or propose an implementation that solves one or more use cases.
+about: Request or propose a specification change that solves one or more use cases.
 title: ''
 labels: 'spec. change :gear:'
 assignees: ''
@@ -28,7 +28,7 @@ assignees: ''
 
 **Description**
 
-<!-- Describe the proposed specification chang here -->
+<!-- Describe the proposed specification change here -->
 
 
 **Use cases**
