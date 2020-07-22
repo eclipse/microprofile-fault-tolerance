@@ -30,7 +30,7 @@ assignees: ''
 
 As a:
 
-- [ ] Application User (application developer)
+- [ ] API User (application developer)
 - [ ] Specification Implementer
 
 ...I need to be able to:

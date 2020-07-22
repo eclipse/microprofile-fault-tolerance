@@ -26,7 +26,7 @@ assignees: ''
 
 ---
 
-<!-- Please do not use this issue type to report a use case or an implementation idea; we have separate issue types for that! -->
+<!-- Please do not use this issue type to report a use case or a specification change; we have separate issue types for that! -->
 
 **Describe the bug**
 
