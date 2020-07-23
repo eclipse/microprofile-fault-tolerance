@@ -1,4 +1,4 @@
-/*
+<!--/*
  * Copyright (c) 2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -16,6 +16,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ -->
+ 
 ---
 name: Clarification request
 about: Request that some aspect of the specification be clarified.

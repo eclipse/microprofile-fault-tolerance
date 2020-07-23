@@ -1,4 +1,4 @@
-/*
+<!--/*
  * Copyright (c) 2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+-->
 ---
 name: Bug report
 about: Report a mistake or inconsistency in the specification code or documentation text or TCK.
