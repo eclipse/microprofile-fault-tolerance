@@ -48,3 +48,10 @@ However, there are configuration properties that you can use to override the def
 ====
 
 If the environment that provides MicroProfile Context Propagation is itself a Jakarta EE container, the _Jakarta EE_ section above doesn't apply and context propagation is left entirely to MicroProfile Context Propagation.
+
+[NOTE]
+====
+The _Asynchronous Usage_ chapter specifies that "context for `RequestScoped` must be active during the asynchronous method invocation".
+When MicroProfile Context Propagation is used, this still applies.
+The difference is that the request context will be not only active, but also propagated.
+====
