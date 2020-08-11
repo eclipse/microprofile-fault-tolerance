@@ -49,7 +49,6 @@ import org.eclipse.microprofile.metrics.Gauge;
 import org.eclipse.microprofile.metrics.Histogram;
 import org.eclipse.microprofile.metrics.Metric;
 import org.eclipse.microprofile.metrics.MetricID;
-import org.eclipse.microprofile.metrics.MetricRegistry;
 import org.eclipse.microprofile.metrics.Tag;
 
 /**
@@ -63,7 +62,7 @@ import org.eclipse.microprofile.metrics.Tag;
  */
 public class MetricGetter {
     
-    private MetricRegistry registry;
+    private MetricRegistryProxy registry;
     private final Tag methodTag;
     
     private Map<MetricID, CounterMetric> counterMetrics = new HashMap<>();
@@ -72,7 +71,7 @@ public class MetricGetter {
     public MetricGetter(Class<?> clazz, String methodName) {
         validateClassAndMethodName(clazz, methodName);
         methodTag = new Tag("method", clazz.getCanonicalName() + "." + methodName);
-        registry = CDI.current().select(MetricRegistry.class, RegistryTypeLiteral.BASE).get();
+        registry = CDI.current().select(MetricRegistryProxy.class, RegistryTypeLiteral.BASE).get();
     }
     
     public CounterMetric getInvocations(InvocationResult result, InvocationFallback fallbackUsed) {

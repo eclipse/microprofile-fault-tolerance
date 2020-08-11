@@ -39,15 +39,15 @@ import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
 
 import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
+import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationFallback;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.RetryResult;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.RetryRetried;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.TimeoutTimedOut;
-import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricGetter;
+import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricRegistryProxy;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.eclipse.microprofile.metrics.Metadata;
-import org.eclipse.microprofile.metrics.MetricRegistry;
 import org.eclipse.microprofile.metrics.MetricRegistry.Type;
 import org.eclipse.microprofile.metrics.MetricUnits;
 import org.eclipse.microprofile.metrics.annotation.RegistryType;
@@ -89,7 +89,7 @@ public class AllMetricsTest extends Arquillian {
     
     @Inject
     @RegistryType(type = Type.BASE)
-    private MetricRegistry metricRegistry;
+    private MetricRegistryProxy metricRegistry;
     
     @Test
     public void testAllMetrics() throws InterruptedException, ExecutionException {
