@@ -24,7 +24,6 @@ import java.util.Optional;
 
 import org.eclipse.microprofile.metrics.Counter;
 import org.eclipse.microprofile.metrics.MetricID;
-import org.eclipse.microprofile.metrics.MetricRegistry;
 
 /**
  * Allows tests to get the value of a counter and compare it with a baseline.
@@ -35,11 +34,11 @@ import org.eclipse.microprofile.metrics.MetricRegistry;
  */
 public class CounterMetric {
     
-    private MetricRegistry registry;
+    private MetricRegistryProxy registry;
     private MetricID metricId;
     private long baseline;
     
-    public CounterMetric(MetricRegistry registry, MetricID metricId) {
+    public CounterMetric(MetricRegistryProxy registry, MetricID metricId) {
         this.registry = registry;
         this.metricId = metricId;
         this.baseline = 0;
