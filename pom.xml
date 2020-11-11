@@ -210,6 +210,7 @@
                         <exclude>.factorypath</exclude>
                         <exclude>.editorconfig</exclude>
                         <exclude>**/META-INF/services/*</exclude>
+                        <exclude>**/*.md</exclude>
                     </excludes>
                 </configuration>
             </plugin>
