@@ -1,4 +1,3 @@
-
 ---
 name: Use case
 about: Describe a new use case for the specification.

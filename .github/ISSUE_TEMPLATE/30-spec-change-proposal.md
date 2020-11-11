@@ -1,4 +1,3 @@
-
 ---
 name: Specification Change Proposal
 about: Request or propose a specification change that solves one or more use cases.
