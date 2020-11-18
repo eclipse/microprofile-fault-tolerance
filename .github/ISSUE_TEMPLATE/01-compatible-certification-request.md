@@ -1,7 +1,7 @@
 ---
-name: Compatible Certification Request
+[Implementation Name]: Compatible Certification Request
 about: Start a request for a compatible certification 
-title: 'MicroProfiel Fault Tolerance [Version] Compatible Certification Request'
+title: 'MicroProfile Fault Tolerance [Version] Compatible Certification Request'
 labels: 'Certification :trophy:'
 assignees: ''
 
