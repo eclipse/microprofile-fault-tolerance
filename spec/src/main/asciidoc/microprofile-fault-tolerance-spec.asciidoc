@@ -38,7 +38,9 @@ ifdef::backend-pdf[]
 endif::[]
 
 
-include::license-alv2.asciidoc[]
+// == License
+:sectnums!:
+include::license-efsl.adoc[]
 
 include::architecture.asciidoc[]
 

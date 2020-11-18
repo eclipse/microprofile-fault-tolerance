@@ -36,6 +36,8 @@
         <autorelease>false</autorelease>
         <!-- keeping closed repos with failure - default is false because the errors are visible in the maven output, but true will leave the repo open for investigation in Sonatype Nexus -->
         <keepStagingReposOnFailure>false</keepStagingReposOnFailure>
+        <revremark>Draft</revremark>
+        <inceptionYear>2016</inceptionYear>
     </properties>
 
     <licenses>
@@ -211,8 +213,29 @@
                         <exclude>.editorconfig</exclude>
                         <exclude>**/META-INF/services/*</exclude>
                         <exclude>**/*.md</exclude>
+                        <exclude>**/*.html</exclude>
+                        <exclude>**/license-efsl.adoc</exclude>
+                        <exclude>**/*.asciidoc</exclude>
                     </excludes>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>1.12</version>
+                    <executions>
+                        <execution>
+                            <id>timestamp-property</id>
+                            <goals>
+                                <goal>timestamp-property</goal>
+                            </goals>
+                            <phase>validate</phase>
+                            <configuration>
+                                <name>currentYear</name>
+                                <pattern>yyyy</pattern>
+                            </configuration>
+                        </execution>
+                    </executions>
             </plugin>
 
         </plugins>
