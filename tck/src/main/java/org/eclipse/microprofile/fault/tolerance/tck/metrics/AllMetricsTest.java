@@ -51,8 +51,11 @@ import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricGetter;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricRegistryProxy;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.eclipse.microprofile.metrics.Metadata;
+import org.eclipse.microprofile.metrics.Metric;
+import org.eclipse.microprofile.metrics.MetricID;
 import org.eclipse.microprofile.metrics.MetricRegistry.Type;
 import org.eclipse.microprofile.metrics.MetricUnits;
+import org.eclipse.microprofile.metrics.Tag;
 import org.eclipse.microprofile.metrics.annotation.RegistryType;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
@@ -86,27 +89,27 @@ public class AllMetricsTest extends Arquillian {
 
         return war;
     }
-    
+
     @Inject
     private AllMetricsBean allMetricsBean;
-    
+
     @Inject
     @RegistryType(type = Type.BASE)
     private MetricRegistryProxy metricRegistry;
-    
+
     @Test
     public void testAllMetrics() throws InterruptedException, ExecutionException {
         MetricGetter m = new MetricGetter(AllMetricsBean.class, "doWork");
         m.baselineMetrics();
-        
+
         allMetricsBean.doWork().get(); // Should succeed on first attempt
-        
+
         // General metrics
         assertThat("successful without fallback", m.getInvocations(VALUE_RETURNED, InvocationFallback.NOT_APPLIED).delta(), is(1L));
         assertThat("successful with fallback", m.getInvocations(VALUE_RETURNED, InvocationFallback.APPLIED).delta(), is(0L));
         assertThat("failed without fallback", m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_APPLIED).delta(), is(0L));
         assertThat("failed with fallback", m.getInvocations(EXCEPTION_THROWN, InvocationFallback.APPLIED).delta(), is(0L));
-        
+
         // Retry metrics
         assertThat("value returned, no retry", m.getRetryCalls(RetryRetried.FALSE, RetryResult.VALUE_RETURNED).delta(), is(1L));
         assertThat("exception thrown, no retry", m.getRetryCalls(RetryRetried.FALSE, RetryResult.EXCEPTION_NOT_RETRYABLE).delta(), is(0L));
@@ -117,12 +120,12 @@ public class AllMetricsTest extends Arquillian {
         assertThat("max retries reached after retry", m.getRetryCalls(RetryRetried.TRUE, RetryResult.MAX_RETRIES_REACHED).delta(), is(0L));
         assertThat("max duration reached after retry", m.getRetryCalls(RetryRetried.TRUE, RetryResult.MAX_DURATION_REACHED).delta(), is(0L));
         assertThat("retries", m.getRetryRetries().delta(), is(0L));
-        
+
         // Timeout metrics
         assertThat("timeout execution duration histogram present", m.getTimeoutExecutionDuration().isPresent(), is(true));
         assertThat("timed out calls", m.getTimeoutCalls(TimeoutTimedOut.TRUE).delta(), is(0L));
         assertThat("non timed out calls", m.getTimeoutCalls(TimeoutTimedOut.FALSE).delta(), is(1L));
-        
+
         // CircuitBreaker metrics
         assertThat("circuitbreaker succeeded calls", m.getCircuitBreakerCalls(SUCCESS).delta(), is(1L));
         assertThat("circuitbreaker failed calls", m.getCircuitBreakerCalls(FAILURE).delta(), is(0L));
@@ -131,7 +134,7 @@ public class AllMetricsTest extends Arquillian {
         assertThat("circuitbreaker half open time", m.getCircuitBreakerState(HALF_OPEN).delta(), is(0L));
         assertThat("circuitbreaker open time", m.getCircuitBreakerState(OPEN).delta(), is(0L));
         assertThat("circuitbreaker times opened", m.getCircuitBreakerOpened().delta(), is(0L));
-        
+
         // Bulkhead metrics
         assertThat("bulkhead accepted calls", m.getBulkheadCalls(ACCEPTED).delta(), is(1L));
         assertThat("bulkhead rejected calls", m.getBulkheadCalls(REJECTED).delta(), is(0L));
@@ -142,25 +145,39 @@ public class AllMetricsTest extends Arquillian {
         assertThat("bulkhead executions waiting value", m.getBulkheadExecutionsWaiting().value(), is(0L));
         assertThat("bulkhead queue wait time histogram present", m.getBulkheadWaitingDuration().isPresent(), is(true));
     }
-    
+
     @Test
-    public void testMetricUnits() throws InterruptedException, ExecutionException {
+    public void testMetricsRegistration() throws InterruptedException, ExecutionException {
         // Call the method to ensure that all metrics get registered
         allMetricsBean.doWork().get();
-        
+
         // Validate that each metric has metadata which declares the correct unit
         for (MetricDefinition metric : MetricDefinition.values()) {
             Metadata metadata = metricRegistry.getMetadata().get(metric.getName());
-            
+
             assertNotNull(metadata, "Missing metadata for metric " + metric);
-            
+
             assertEquals(getUnit(metadata), metric.getUnit(), "Incorrect unit for metric " + metric);
+
+            // Validate that all combinations of each metric have been registered
+            Tag methodTag = new Tag("method", AllMetricsBean.class.getCanonicalName() + "." + "doWork");
+            for (MetricDefinition.TagValue[] tags : MetricGetter.getTagCombinations(metric.getTagClasses())) {
+                Tag[] tagValues = new Tag[tags.length + 1];
+                tagValues[0] = methodTag;
+                for (int i = 0; i < tags.length; i++) {
+                    tagValues[i + 1] = tags[i].getTag();
+                }
+
+                MetricID id = new MetricID(metric.getName(), tagValues);
+                Metric metricValue = metricRegistry.getMetrics().get(id);
+                assertNotNull(metricValue, "Missing metric " + id);
+            }
         }
     }
-    
+
     /**
      * Gets metric unit from metadata via reflection which works for Metrics 2.x and 3.x
-     * 
+     *
      * @param metadata the metadata
      * @return the unit or {@code MetricUnits.NONE} if the metadata has no unit
      */
@@ -179,11 +196,11 @@ public class AllMetricsTest extends Arquillian {
                 throw new RuntimeException(e1);
             }
         }
-        
+
         if (!getUnit.getReturnType().equals(Optional.class)) {
             throw new RuntimeException("Method found to get unit has wrong return type: " + getUnit);
         }
-        
+
         Optional<String> optional;
         try {
             optional = (Optional<String>) getUnit.invoke(metadata);
@@ -193,5 +210,5 @@ public class AllMetricsTest extends Arquillian {
         }
         return optional.orElse(MetricUnits.NONE);
     }
-    
+
 }
