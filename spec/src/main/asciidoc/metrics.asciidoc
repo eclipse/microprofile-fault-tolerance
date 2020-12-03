@@ -17,6 +17,7 @@
 // limitations under the License.
 // Contributors:
 // Andrew Rouse
+// Jan Bernitt
 
 == Integration with MicroProfile Metrics
 
@@ -33,6 +34,11 @@ is non-portable and may vary between implementations. For portable behavior, mon
 === Scope
 
 Metrics added by this specification will appear in the `base` MicroProfile Metrics scope.
+
+=== Registration
+
+All metrics added by this specification are registered either on startup or on first call of the annotated method. 
+Policies that have been disabled though configuration do not cause registration of the corresponding metrics.
 
 === Metrics added for `@Retry`, `@Timeout`, `@CircuitBreaker`, `@Bulkhead` and `@Fallback`
 
