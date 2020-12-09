@@ -38,6 +38,7 @@
         <keepStagingReposOnFailure>false</keepStagingReposOnFailure>
         <revremark>Draft</revremark>
         <inceptionYear>2016</inceptionYear>
+        <stagingProgressTimeoutMinutes>5</stagingProgressTimeoutMinutes>
     </properties>
 
     <licenses>
@@ -256,6 +257,7 @@
                             <serverId>ossrh</serverId>
                             <autoReleaseAfterClose>${autorelease}</autoReleaseAfterClose>
                             <keepStagingRepositoryOnCloseRuleFailure>${keepStagingReposOnFailure}</keepStagingRepositoryOnCloseRuleFailure>
+                            <stagingProgressTimeoutMinutes>${stagingProgressTimeoutMinutes}</stagingProgressTimeoutMinutes>
                         </configuration>
                     </plugin>
                     <plugin>
