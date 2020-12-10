@@ -18,7 +18,7 @@
 
     <groupId>org.eclipse.microprofile.fault-tolerance</groupId>
     <artifactId>microprofile-fault-tolerance-parent</artifactId>
-    <version>3.1-SNAPSHOT</version>
+    <version>3.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>MicroProfile Fault Tolerance</name>
@@ -38,7 +38,7 @@
         <keepStagingReposOnFailure>false</keepStagingReposOnFailure>
         <revremark>Draft</revremark>
         <inceptionYear>2016</inceptionYear>
-        <stagingProgressTimeoutMinutes>5</stagingProgressTimeoutMinutes>
+        <stagingProgressTimeoutMinutes>20</stagingProgressTimeoutMinutes>
     </properties>
 
     <licenses>
