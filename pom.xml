@@ -38,7 +38,7 @@
         <keepStagingReposOnFailure>false</keepStagingReposOnFailure>
         <revremark>Draft</revremark>
         <inceptionYear>2016</inceptionYear>
-        <stagingProgressTimeoutMinutes>5</stagingProgressTimeoutMinutes>
+        <stagingProgressTimeoutMinutes>20</stagingProgressTimeoutMinutes>
     </properties>
 
     <licenses>
