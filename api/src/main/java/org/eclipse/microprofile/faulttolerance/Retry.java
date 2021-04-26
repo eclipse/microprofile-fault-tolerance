@@ -45,6 +45,9 @@ import javax.interceptor.InterceptorBinding;
  * @see #maxRetries()
  * @see #delay()
  * @see #delayUnit()
+ * @see #delayFactor()
+ * @see #maxDelay()
+ * @see #maxDelayUnit()
  * @see #maxDuration()
  * @see #durationUnit()
  * @see #jitter()
@@ -86,6 +89,29 @@ public @interface Retry {
      */
     @Nonbinding
     ChronoUnit delayUnit() default ChronoUnit.MILLIS;
+
+    /**
+     * The delay factor for {@link #delay}, which exponentially backing off to the maxDelay and multiplying successive delays by the delayFactor. Defaults to 1 if not set.
+     *
+     * @return the delay unit
+     */
+    @Nonbinding
+    double delayFactor() default 1;
+
+    /**
+     * The max delay. Defaults to 60000.
+     * @return the max delay
+     */
+    @Nonbinding
+    long maxDelay() default 60000;
+
+      /**
+     * The maxDelay unit for {@link #maxDelay}. Defaults to {@link java.time.temporal.ChronoUnit#MILLIS} if not set.
+     *
+     * @return the duration unit
+     */
+    @Nonbinding
+    ChronoUnit maxDelayUnit() default ChronoUnit.MILLIS;
 
     /**
      * The max duration. The max duration must be greater than the delay duration if set. 0 means not set.
