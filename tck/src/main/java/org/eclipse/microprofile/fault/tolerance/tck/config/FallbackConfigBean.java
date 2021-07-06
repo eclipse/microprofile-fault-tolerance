@@ -22,7 +22,7 @@ package org.eclipse.microprofile.fault.tolerance.tck.config;
 
 import org.eclipse.microprofile.faulttolerance.Fallback;
 
-import javax.enterprise.context.Dependent;
+import jakarta.enterprise.context.Dependent;
 
 /**
  * Bean with methods to help test configuration of parameters of {@link Fallback}

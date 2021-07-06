@@ -19,28 +19,27 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.metrics;
 
-import javax.enterprise.context.RequestScoped;
-
 import org.eclipse.microprofile.faulttolerance.Timeout;
+
+import jakarta.enterprise.context.RequestScoped;
 
 @RequestScoped
 public class TimeoutMetricBean {
-    
+
     @Timeout(value = 500)
     public void counterTestWorkForMillis(long millis) {
         doWork(millis);
     }
-    
+
     @Timeout(value = 2000)
     public void histogramTestWorkForMillis(long millis) {
         doWork(millis);
     }
-    
+
     private void doWork(long millis) {
         try {
-            Thread.sleep(millis);//timeout config must be done in the caller.
-        }
-        catch (InterruptedException ex) {
+            Thread.sleep(millis);// timeout config must be done in the caller.
+        } catch (InterruptedException ex) {
             throw new RuntimeException("Test was interrupted", ex);
         }
     }

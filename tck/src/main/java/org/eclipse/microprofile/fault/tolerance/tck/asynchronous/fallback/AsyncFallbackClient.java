@@ -19,17 +19,18 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.asynchronous.fallback;
 
-import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.CompletableFutureHelper;
-import org.eclipse.microprofile.faulttolerance.Asynchronous;
-import org.eclipse.microprofile.faulttolerance.Fallback;
+import static java.util.concurrent.CompletableFuture.completedFuture;
 
-import javax.enterprise.context.RequestScoped;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Future;
 
-import static java.util.concurrent.CompletableFuture.completedFuture;
+import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.CompletableFutureHelper;
+import org.eclipse.microprofile.faulttolerance.Asynchronous;
+import org.eclipse.microprofile.faulttolerance.Fallback;
+
+import jakarta.enterprise.context.RequestScoped;
 
 @RequestScoped
 public class AsyncFallbackClient {
@@ -63,7 +64,6 @@ public class AsyncFallbackClient {
     public Future<String> fallback() {
         return completedFuture("Fallback");
     }
-
 
     /**
      * Returns a CompletionStage which always completes successfully, so should NOT fallback.

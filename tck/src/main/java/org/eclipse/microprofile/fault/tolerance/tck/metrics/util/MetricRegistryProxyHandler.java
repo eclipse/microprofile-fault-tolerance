@@ -28,22 +28,21 @@ import java.lang.reflect.Method;
  * Invocation handler which dynamically loads the MetricRegistry class and invokes its methods by reflection
  */
 public class MetricRegistryProxyHandler implements InvocationHandler {
-    
+
     private static final String METRIC_REGISTRY_CLASS_NAME = "org.eclipse.microprofile.metrics.MetricRegistry";
-    
+
     public static final Class<?> METRIC_REGISTRY_CLAZZ;
-    
+
     private final Object metricRegistryInstance;
-    
+
     static {
         try {
             METRIC_REGISTRY_CLAZZ = Class.forName(METRIC_REGISTRY_CLASS_NAME);
-        }
-        catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             throw new RuntimeException("Failed to find MetricRegistry class", e);
         }
     }
-    
+
     public MetricRegistryProxyHandler(Object metricRegistryInstance) {
         METRIC_REGISTRY_CLAZZ.cast(metricRegistryInstance); // Check instance is correct class
         this.metricRegistryInstance = metricRegistryInstance;
@@ -54,8 +53,7 @@ public class MetricRegistryProxyHandler implements InvocationHandler {
         Method realMethod = METRIC_REGISTRY_CLAZZ.getMethod(method.getName(), method.getParameterTypes());
         try {
             return realMethod.invoke(metricRegistryInstance, args);
-        }
-        catch (InvocationTargetException e) {
+        } catch (InvocationTargetException e) {
             throw e.getCause();
         }
     }

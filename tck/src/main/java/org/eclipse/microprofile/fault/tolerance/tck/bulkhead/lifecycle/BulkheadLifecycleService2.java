@@ -22,7 +22,7 @@ package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.lifecycle;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 
-import javax.enterprise.context.Dependent;
+import jakarta.enterprise.context.Dependent;
 
 @Dependent
 public class BulkheadLifecycleService2 {

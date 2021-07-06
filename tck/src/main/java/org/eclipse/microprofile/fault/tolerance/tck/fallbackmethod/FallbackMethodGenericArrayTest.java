@@ -22,8 +22,6 @@ package org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod;
 
 import static org.testng.Assert.assertEquals;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodGenericArrayBeanA;
 import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodGenericArrayBeanB;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -33,6 +31,8 @@ import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
+
+import jakarta.inject.Inject;
 
 /**
  * Test for a fallback method with a generic array parameter
@@ -44,18 +44,19 @@ public class FallbackMethodGenericArrayTest extends Arquillian {
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodGenericArray.jar")
                 .addClasses(FallbackMethodGenericArrayBeanA.class, FallbackMethodGenericArrayBeanB.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
-        
+
         WebArchive war = ShrinkWrap
                 .create(WebArchive.class, "ftFallbackMethodGenericArray.war")
                 .addAsLibrary(testJar);
         return war;
     }
-    
-    @Inject private FallbackMethodGenericArrayBeanA bean;
-    
+
+    @Inject
+    private FallbackMethodGenericArrayBeanA bean;
+
     @Test
     public void fallbackMethodGenericArray() {
         assertEquals(bean.method(new String[3][4]), "fallback");
     }
-    
+
 }

@@ -24,8 +24,6 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.Collections;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodGenericWildcardBeanA;
 import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodGenericWildcardBeanB;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -35,6 +33,8 @@ import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
+
+import jakarta.inject.Inject;
 
 /**
  * Test for a fallback method with a wildcard parameter with type variable limits
@@ -46,18 +46,19 @@ public class FallbackMethodGenericWildcardTest extends Arquillian {
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodGenericWildcard.jar")
                 .addClasses(FallbackMethodGenericWildcardBeanA.class, FallbackMethodGenericWildcardBeanB.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
-        
+
         WebArchive war = ShrinkWrap
                 .create(WebArchive.class, "ftFallbackMethodGenericWildcard.war")
                 .addAsLibrary(testJar);
         return war;
     }
-    
-    @Inject private FallbackMethodGenericWildcardBeanA bean;
-    
+
+    @Inject
+    private FallbackMethodGenericWildcardBeanA bean;
+
     @Test
     public void fallbackMethodGenericWildcard() {
         assertEquals(bean.method(Collections.singletonList("test")), "fallback");
     }
-    
+
 }

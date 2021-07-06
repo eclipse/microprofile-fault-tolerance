@@ -19,8 +19,6 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver.CircuitBreakerClientWithTimeout;
 import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions;
@@ -33,33 +31,35 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
+import jakarta.inject.Inject;
+
 /**
  * Test the combination of {@code @CircuitBreaker} and {@code @Timeout}
  * 
  * @author <a href="mailto:anrouse@uk.ibm.com">Andrew Rouse</a>
  */
 public class CircuitBreakerTimeoutTest extends Arquillian {
-    
+
     @Deployment
     public static WebArchive deploy() {
         ConfigAnnotationAsset config = new ConfigAnnotationAsset()
                 .autoscaleMethod(CircuitBreakerClientWithTimeout.class, "serviceWithTimeout")
                 .autoscaleMethod(CircuitBreakerClientWithTimeout.class, "serviceWithTimeoutWithoutFailOn");
-        
+
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftCircuitBreakerTimeout.jar")
-                                        .addClasses(CircuitBreakerClientWithTimeout.class)
-                                        .addPackage(Packages.UTILS)
-                                        .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
-                                        .addAsManifestResource(config, "microprofile-config.properties");
+                .addClasses(CircuitBreakerClientWithTimeout.class)
+                .addPackage(Packages.UTILS)
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
+                .addAsManifestResource(config, "microprofile-config.properties");
 
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftCircuitBreakerTimeout.war")
-                                   .addAsLibrary(testJar);
+                .addAsLibrary(testJar);
         return war;
     }
-    
+
     @Inject
     private CircuitBreakerClientWithTimeout timeoutClient;
-    
+
     /**
      * Test that timeouts cause the circuit to open
      */
@@ -69,11 +69,11 @@ public class CircuitBreakerTimeoutTest extends Arquillian {
         for (int i = 0; i < 2; i++) {
             Exceptions.expectTimeout(() -> timeoutClient.serviceWithTimeout());
         }
-        
-        //Circuit should now be open, next call should get CircuitBreakerOpenException
+
+        // Circuit should now be open, next call should get CircuitBreakerOpenException
         Exceptions.expectCbOpen(() -> timeoutClient.serviceWithTimeout());
     }
-    
+
     /**
      * Test that timeouts do not cause the circuit to open when failOn attribute does not include TimeoutException
      */
@@ -83,7 +83,7 @@ public class CircuitBreakerTimeoutTest extends Arquillian {
         for (int i = 0; i < 2; i++) {
             Exceptions.expectTimeout(() -> timeoutClient.serviceWithTimeoutWithoutFailOn());
         }
-        
+
         // CircuitBreaker has failOn = TestException so the timeouts should not cause the circuit to open
         // Therefore expect timeout exception, not circuit breaker open exception
         Exceptions.expectTimeout(() -> timeoutClient.serviceWithTimeoutWithoutFailOn());

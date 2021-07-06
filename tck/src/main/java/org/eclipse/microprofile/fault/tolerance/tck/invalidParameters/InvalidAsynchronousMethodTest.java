@@ -35,19 +35,18 @@ public class InvalidAsynchronousMethodTest extends Arquillian {
     @ShouldThrowException(value = FaultToleranceDefinitionException.class)
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
-            .create(JavaArchive.class, "ftInvalidAsnycMethod.jar")
-            .addClasses(AsynchronousClientForValidationMethod.class)
-            .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
-            .as(JavaArchive.class);
+                .create(JavaArchive.class, "ftInvalidAsnycMethod.jar")
+                .addClasses(AsynchronousClientForValidationMethod.class)
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
+                .as(JavaArchive.class);
 
         return ShrinkWrap
-            .create(WebArchive.class, "ftInvalidAsnycMethod.war")
-            .addAsLibrary(testJar);
+                .create(WebArchive.class, "ftInvalidAsnycMethod.war")
+                .addAsLibrary(testJar);
     }
-    
+
     /**
-     * Test that the deployment of an Asynchronous method which doesn't
-     * return Future or CompletionStage leads to a
+     * Test that the deployment of an Asynchronous method which doesn't return Future or CompletionStage leads to a
      * FaultToleranceDefinitionException.
      */
     @Test

@@ -19,6 +19,15 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.lifecycle;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertThrows;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.eclipse.microprofile.faulttolerance.exceptions.CircuitBreakerOpenException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
@@ -28,16 +37,8 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertThrows;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 
 /**
  * Test that circuit breaker is a singleton, even if the bean is not.
@@ -155,7 +156,8 @@ public class CircuitBreakerLifecycleTest extends Arquillian {
         invokeService(DerivedCircuitBreakerOnClassAndMethodNoRedefinition.class, 8);
     }
 
-    private <T extends CircuitBreakerLifecycleService> void invokeService(Class<T> clazz, int expectedCallsNotPrevented) {
+    private <T extends CircuitBreakerLifecycleService> void invokeService(Class<T> clazz,
+            int expectedCallsNotPrevented) {
         Instance<T> serviceProvider = beans.select(clazz);
         int servicesCount = expectedCallsNotPrevented / 2;
 
@@ -183,12 +185,12 @@ public class CircuitBreakerLifecycleTest extends Arquillian {
             // expectedCallsNotPrevented >= 100 means that _all_ calls are expected to be not prevented;
             // in other words, the method is not guarded by a circuit breaker
             Class<? extends Throwable> expectedException = expectedCallsNotPrevented < 100
-                ? CircuitBreakerOpenException.class : IOException.class;
+                    ? CircuitBreakerOpenException.class
+                    : IOException.class;
             for (CircuitBreakerLifecycleService service : services) {
                 assertThrows(expectedException, service::service);
             }
-        }
-        finally {
+        } finally {
             for (T service : services) {
                 serviceProvider.destroy(service);
             }
@@ -228,8 +230,7 @@ public class CircuitBreakerLifecycleTest extends Arquillian {
             assertThrows(CircuitBreakerOpenException.class, service2a::service);
             assertThrows(CircuitBreakerOpenException.class, service1b::service);
             assertThrows(CircuitBreakerOpenException.class, service2b::service);
-        }
-        finally {
+        } finally {
             service1.destroy(service1a);
             service1.destroy(service1b);
             service2.destroy(service2a);
@@ -254,8 +255,7 @@ public class CircuitBreakerLifecycleTest extends Arquillian {
             assertThrows(CircuitBreakerOpenException.class, multipleMethodsService1::service2);
             assertThrows(CircuitBreakerOpenException.class, multipleMethodsService2::service1);
             assertThrows(CircuitBreakerOpenException.class, multipleMethodsService2::service2);
-        }
-        finally {
+        } finally {
             multipleMethodsService.destroy(multipleMethodsService1);
             multipleMethodsService.destroy(multipleMethodsService2);
         }

@@ -20,10 +20,10 @@
 
 package org.eclipse.microprofile.fault.tolerance.tck.metrics.util;
 
-import javax.enterprise.util.AnnotationLiteral;
-
 import org.eclipse.microprofile.metrics.MetricRegistry.Type;
 import org.eclipse.microprofile.metrics.annotation.RegistryType;
+
+import jakarta.enterprise.util.AnnotationLiteral;
 
 /**
  * Literal for {@link RegistryType}
@@ -32,10 +32,10 @@ import org.eclipse.microprofile.metrics.annotation.RegistryType;
  */
 @SuppressWarnings("serial")
 public class RegistryTypeLiteral extends AnnotationLiteral<RegistryType> implements RegistryType {
-    
+
     public static final RegistryTypeLiteral BASE = new RegistryTypeLiteral(Type.BASE);
     public static final RegistryTypeLiteral VENDOR = new RegistryTypeLiteral(Type.VENDOR);
-    
+
     private Type type;
 
     private RegistryTypeLiteral(Type type) {

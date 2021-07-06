@@ -19,29 +19,27 @@
 package org.eclipse.microprofile.faulttolerance.exceptions;
 
 /**
- * The exception should be thrown when circuit breaker is open. 
- * <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
+ * The exception should be thrown when circuit breaker is open. <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  *
  */
 public class CircuitBreakerOpenException extends FaultToleranceException {
-    
+
     private static final long serialVersionUID = 958116453839967874L;
-    
+
     public CircuitBreakerOpenException() {
         super();
     }
-    
-    public CircuitBreakerOpenException(Throwable t){
-        super(t) ;
-    }
-    
-    public CircuitBreakerOpenException(String message){
-        super(message) ;
-    }
-    
-    public CircuitBreakerOpenException(String message, Throwable t) {
-        super (message, t);
+
+    public CircuitBreakerOpenException(Throwable t) {
+        super(t);
     }
 
+    public CircuitBreakerOpenException(String message) {
+        super(message);
+    }
+
+    public CircuitBreakerOpenException(String message, Throwable t) {
+        super(message, t);
+    }
 
 }

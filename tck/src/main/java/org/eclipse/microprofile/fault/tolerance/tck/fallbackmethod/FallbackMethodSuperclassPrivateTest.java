@@ -36,20 +36,20 @@ import org.testng.annotations.Test;
  * Test that a private fallback method defined in a superclass cannot be called
  */
 public class FallbackMethodSuperclassPrivateTest extends Arquillian {
-    
+
     @Deployment
     @ShouldThrowException(FaultToleranceDefinitionException.class)
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodSuperclassPrivate.jar")
                 .addClasses(FallbackMethodSuperclassPrivateBeanA.class, FallbackMethodSuperclassPrivateBeanB.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
-        
+
         WebArchive war = ShrinkWrap
                 .create(WebArchive.class, "ftFallbackMethodSuperclassPrivate.war")
                 .addAsLibrary(testJar);
         return war;
     }
-    
+
     @Test
     public void fallbackMethodSuperclassPrivate() {
         // Nothing to test, deployment should throw exception

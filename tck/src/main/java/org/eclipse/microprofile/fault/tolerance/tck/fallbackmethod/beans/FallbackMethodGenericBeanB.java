@@ -21,7 +21,7 @@
 package org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans;
 
 public class FallbackMethodGenericBeanB<T> {
-    
+
     public String fallback(int a, T b) {
         return "fallback";
     }

@@ -20,10 +20,11 @@
 
 package org.eclipse.microprofile.fault.tolerance.tck.config;
 
+import java.time.temporal.ChronoUnit;
+
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 
-import javax.enterprise.context.Dependent;
-import java.time.temporal.ChronoUnit;
+import jakarta.enterprise.context.Dependent;
 
 /**
  * Suite of methods for testing the various parameters of CircuitBreaker
@@ -32,8 +33,8 @@ import java.time.temporal.ChronoUnit;
 public class CircuitBreakerConfigBean {
 
     /**
-     * Method throws TestConfigExceptionA which will NOT result in CircuitBreakerOpenException on the third call,
-     * unless failOn is configured to TestConfigExceptionA.
+     * Method throws TestConfigExceptionA which will NOT result in CircuitBreakerOpenException on the third call, unless
+     * failOn is configured to TestConfigExceptionA.
      */
     @CircuitBreaker(requestVolumeThreshold = 2, failOn = TestConfigExceptionB.class)
     public void failOnMethod() {
@@ -41,8 +42,8 @@ public class CircuitBreakerConfigBean {
     }
 
     /**
-     * Method throws TestConfigExceptionA which will result in CircuitBreakerOpenException on the third call,
-     * unless skipOn is configured to TestConfigExceptionA.
+     * Method throws TestConfigExceptionA which will result in CircuitBreakerOpenException on the third call, unless
+     * skipOn is configured to TestConfigExceptionA.
      */
     @CircuitBreaker(requestVolumeThreshold = 2)
     public void skipOnMethod() {
@@ -50,8 +51,8 @@ public class CircuitBreakerConfigBean {
     }
 
     /**
-     * This method's circuit breaker moves from open to half-open after 10 micros,
-     * unless delay and delayUnit are configured differently.
+     * This method's circuit breaker moves from open to half-open after 10 micros, unless delay and delayUnit are
+     * configured differently.
      */
     @CircuitBreaker(requestVolumeThreshold = 2, delay = 20, delayUnit = ChronoUnit.MICROS)
     public void delayMethod(boolean fail) {
@@ -61,8 +62,8 @@ public class CircuitBreakerConfigBean {
     }
 
     /**
-     * Method throws TestConfigExceptionA which will result in CircuitBreakerOpenException on the third call,
-     * unless requestVolumeThreshold is configured to a greater number.
+     * Method throws TestConfigExceptionA which will result in CircuitBreakerOpenException on the third call, unless
+     * requestVolumeThreshold is configured to a greater number.
      */
     @CircuitBreaker(requestVolumeThreshold = 2)
     public void requestVolumeThresholdMethod() {
@@ -70,8 +71,8 @@ public class CircuitBreakerConfigBean {
     }
 
     /**
-     * This method's circuit breaker moves from closed to open after 10 consecutive failures,
-     * unless failureRatio is configured differently.
+     * This method's circuit breaker moves from closed to open after 10 consecutive failures, unless failureRatio is
+     * configured differently.
      */
     @CircuitBreaker(requestVolumeThreshold = 10, failureRatio = 1.0)
     public void failureRatioMethod(boolean fail) {
@@ -81,8 +82,8 @@ public class CircuitBreakerConfigBean {
     }
 
     /**
-     * This method's circuit breaker moves from half-open to closed after 4 consecutive successes,
-     * unless successThreshold is configured differently.
+     * This method's circuit breaker moves from half-open to closed after 4 consecutive successes, unless
+     * successThreshold is configured differently.
      */
     @CircuitBreaker(requestVolumeThreshold = 10, successThreshold = 4, delay = 1000)
     public void successThresholdMethod(boolean fail) {

@@ -25,22 +25,24 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.ConcurrentExecutionTracker;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+
 @ApplicationScoped
 public class BulkheadMetricBean {
-    
-    @Inject private ConcurrentExecutionTracker tracker;
+
+    @Inject
+    private ConcurrentExecutionTracker tracker;
 
     /**
      * Wait for {@code future} to be completed
      *
-     * @param future to complete
+     * @param future
+     *            to complete
      */
     @Bulkhead(2)
     public void waitFor(Future<?> future) {
@@ -50,7 +52,8 @@ public class BulkheadMetricBean {
     /**
      * Separate waitFor method for testing execution time histogram
      *
-     * @param future to complete
+     * @param future
+     *            to complete
      */
     @Bulkhead(2)
     public void waitForHistogram(Future<?> future) {
@@ -60,7 +63,8 @@ public class BulkheadMetricBean {
     /**
      * WaitFor method for testing async calls
      *
-     * @param future to complete
+     * @param future
+     *            to complete
      * @return a completed future set to null
      */
     @Asynchronous
@@ -69,32 +73,29 @@ public class BulkheadMetricBean {
         doWaitFor(future);
         return CompletableFuture.completedFuture(null);
     }
-    
+
     private void doWaitFor(Future<?> future) {
         try {
             tracker.executionStarted();
             future.get(1, TimeUnit.MINUTES);
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             throw new RuntimeException("Test was interrupted", e);
-        }
-        catch (ExecutionException e) {
+        } catch (ExecutionException e) {
             throw new RuntimeException("Passed Future threw an exception", e);
-        }
-        catch (TimeoutException e) {
+        } catch (TimeoutException e) {
             throw new RuntimeException("Timed out waiting for passed future to complete", e);
-        }
-        finally {
+        } finally {
             tracker.executionEnded();
         }
     }
-    
+
     /**
      * Wait for the given number of method executions to be running in this bean
      * <p>
      * This method will wait three seconds before returning an exception
      *
-     * @param executions number of executions
+     * @param executions
+     *            number of executions
      */
     public void waitForRunningExecutions(int executions) {
         tracker.waitForRunningExecutions(executions);

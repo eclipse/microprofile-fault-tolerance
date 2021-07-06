@@ -22,8 +22,6 @@ package org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod;
 
 import static org.testng.Assert.assertEquals;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodWildcardBean;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
@@ -32,6 +30,8 @@ import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
+
+import jakarta.inject.Inject;
 
 /**
  * Test for a fallback methods with a varargs parameter
@@ -43,18 +43,19 @@ public class FallbackMethodWildcardTest extends Arquillian {
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodWildcard.jar")
                 .addClasses(FallbackMethodWildcardBean.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
-        
+
         WebArchive war = ShrinkWrap
                 .create(WebArchive.class, "ftFallbackMethodWildcard.war")
                 .addAsLibrary(testJar);
         return war;
     }
-    
-    @Inject private FallbackMethodWildcardBean bean;
-    
+
+    @Inject
+    private FallbackMethodWildcardBean bean;
+
     @Test
     public void fallbackMethodWildcard() {
         assertEquals(bean.method(null), "fallback");
     }
-    
+
 }

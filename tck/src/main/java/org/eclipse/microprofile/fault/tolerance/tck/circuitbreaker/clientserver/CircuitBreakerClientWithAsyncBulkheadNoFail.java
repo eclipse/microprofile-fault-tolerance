@@ -22,13 +22,13 @@ package org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
-import javax.enterprise.context.RequestScoped;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
 import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
+
+import jakarta.enterprise.context.RequestScoped;
 
 /**
  * Client bean with CircuitBreaker, Bulkhead and Asynchronous

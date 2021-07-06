@@ -24,12 +24,13 @@ import static org.eclipse.microprofile.fault.tolerance.tck.Misc.Ints.contains;
 import java.io.Serializable;
 import java.sql.Connection;
 
-import javax.enterprise.context.RequestScoped;
-
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
+
+import jakarta.enterprise.context.RequestScoped;
+
 /**
- * A client to exercise Circuit Breaker thresholds, with a default SuccessThreshold of 1,
- * a requestVolumeThreshold of 4, failureRatio of 0.75 and a 1 second delay.
+ * A client to exercise Circuit Breaker thresholds, with a default SuccessThreshold of 1, a requestVolumeThreshold of 4,
+ * failureRatio of 0.75 and a 1 second delay.
  * 
  * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  *
@@ -37,31 +38,31 @@ import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 @RequestScoped
 public class CircuitBreakerClientDefaultSuccessThreshold implements Serializable {
     private int counterForInvokingServiceA = 0;
-        
+
     public int getCounterForInvokingServiceA() {
-                return counterForInvokingServiceA;
-        }
+        return counterForInvokingServiceA;
+    }
 
-        public void setCounterForInvokingServiceA(int count) {
-                this.counterForInvokingServiceA = count;
-        }
+    public void setCounterForInvokingServiceA(int count) {
+        this.counterForInvokingServiceA = count;
+    }
 
-        @CircuitBreaker(successThreshold = 1, requestVolumeThreshold = 4, failureRatio=0.75, delay = 1000)
-    public Connection serviceA(int [] successSet) {
+    @CircuitBreaker(successThreshold = 1, requestVolumeThreshold = 4, failureRatio = 0.75, delay = 1000)
+    public Connection serviceA(int[] successSet) {
         Connection conn = null;
         counterForInvokingServiceA++;
         conn = connectionService(successSet);
-        
+
         return conn;
     }
 
-    //simulate a backend service
-    private Connection connectionService(int [] successSet) {
+    // simulate a backend service
+    private Connection connectionService(int[] successSet) {
         // Determine if execution succeeds
         if (!contains(successSet, counterForInvokingServiceA)) {
-                throw new RuntimeException("Connection failed");
+            throw new RuntimeException("Connection failed");
         }
-                
+
         return null;
     }
 }

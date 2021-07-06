@@ -19,8 +19,6 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.timeout.clientserver.DefaultTimeoutClient;
 import org.eclipse.microprofile.fault.tolerance.tck.timeout.clientserver.ShorterTimeoutClient;
 import org.eclipse.microprofile.fault.tolerance.tck.timeout.clientserver.TimeoutClient;
@@ -33,6 +31,8 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import jakarta.inject.Inject;
 
 /**
  * Tests to exercise Fault Tolerance Timeouts.
@@ -58,9 +58,8 @@ public class TimeoutTest extends Arquillian {
     }
 
     /**
-     * A test to exercise the default timeout. The default Fault Tolerance
-     * timeout is 1 second but serviceA will attempt to sleep for 20 seconds, so
-     * should throw a TimeoutException.
+     * A test to exercise the default timeout. The default Fault Tolerance timeout is 1 second but serviceA will attempt
+     * to sleep for 20 seconds, so should throw a TimeoutException.
      * 
      */
     @Test
@@ -68,20 +67,17 @@ public class TimeoutTest extends Arquillian {
         try {
             clientForTimeout.serviceA(20000);
             Assert.fail("serviceA should throw a TimeoutException in testTimeout");
-        } 
-        catch (TimeoutException ex) {
+        } catch (TimeoutException ex) {
             // Expected
-        } 
-        catch (RuntimeException ex) {
+        } catch (RuntimeException ex) {
             // Not Expected
             Assert.fail("serviceA should throw a TimeoutException in testTimeout not a RuntimeException");
         }
     }
 
     /**
-     * A test that should not time out. The default Fault Tolerance timeout is 1
-     * second but serviceA will attempt to sleep for only 10 milliseconds before
-     * throwing a RuntimeException. There should be no Timeout.
+     * A test that should not time out. The default Fault Tolerance timeout is 1 second but serviceA will attempt to
+     * sleep for only 10 milliseconds before throwing a RuntimeException. There should be no Timeout.
      * 
      */
     @Test
@@ -89,40 +85,35 @@ public class TimeoutTest extends Arquillian {
         try {
             clientForTimeout.serviceA(10);
             Assert.fail("serviceB should throw a RuntimeException in testNoTimeout");
-        } 
-        catch (TimeoutException ex) {
+        } catch (TimeoutException ex) {
             // Not Expected
             Assert.fail("serviceB should throw a RuntimeException in testNoTimeout not a TimeoutException");
-        } 
-        catch (RuntimeException ex) {
+        } catch (RuntimeException ex) {
             // Expected
         }
     }
-    
+
     /**
-     * A test that should time out. The Fault Tolerance timeout is set to a (non-default) 2 seconds but serviceB 
-     * will attempt to sleep for 2.5 seconds - so longer than a  default timeout.
+     * A test that should time out. The Fault Tolerance timeout is set to a (non-default) 2 seconds but serviceB will
+     * attempt to sleep for 2.5 seconds - so longer than a default timeout.
      */
     @Test
     public void testGTDefaultTimeout() {
         try {
             clientForTimeout.serviceB(2500);
             Assert.fail("serviceB should throw a TimeoutException in testGTDefaultTimeout");
-        } 
-        catch (TimeoutException ex) {
+        } catch (TimeoutException ex) {
             // Expected
-        } 
-        catch (RuntimeException ex) {
+        } catch (RuntimeException ex) {
             // Not Expected
             Assert.fail("serviceB should throw a TimeoutException in testGTDefaultTimeout not a RuntimeException");
         }
     }
-    
+
     /**
-     * A test that should not time out. The Fault Tolerance timeout is set to 2
-     * seconds but serviceB will attempt to sleep for 1.5 seconds - so longer than a  default
-     * timeout but shorter than the timeout that has been configured, before throwing a 
-     * RuntimeException. There should be no Timeout.
+     * A test that should not time out. The Fault Tolerance timeout is set to 2 seconds but serviceB will attempt to
+     * sleep for 1.5 seconds - so longer than a default timeout but shorter than the timeout that has been configured,
+     * before throwing a RuntimeException. There should be no Timeout.
      * 
      */
     @Test
@@ -130,39 +121,34 @@ public class TimeoutTest extends Arquillian {
         try {
             clientForTimeout.serviceB(1500);
             Assert.fail("serviceB should throw a RuntimeException in testGTDefaultNoTimeout");
-        } 
-        catch (TimeoutException ex) {
+        } catch (TimeoutException ex) {
             // Not Expected
             Assert.fail("serviceB should throw a RuntimeException in testGTDefaultNoTimeout not a TimeoutException");
-        } 
-        catch (RuntimeException ex) {
+        } catch (RuntimeException ex) {
             // Expected
         }
     }
-    
+
     /**
-     * A test that should time out. The Fault Tolerance timeout is set to a (non-default) 0.5 seconds but serviceC 
-     * will attempt to sleep for 1 second - so longer than a  default timeout.
+     * A test that should time out. The Fault Tolerance timeout is set to a (non-default) 0.5 seconds but serviceC will
+     * attempt to sleep for 1 second - so longer than a default timeout.
      */
     @Test
     public void testLTDefaultTimeout() {
         try {
             clientForTimeout.serviceC(1000);
             Assert.fail("serviceC should throw a TimeoutException in testLTDefaultTimeout");
-        } 
-        catch (TimeoutException ex) {
+        } catch (TimeoutException ex) {
             // Expected
-        } 
-        catch (RuntimeException ex) {
+        } catch (RuntimeException ex) {
             // Not Expected
             Assert.fail("serviceC should throw a TimeoutException in testLTDefaultTimeout not a RuntimeException");
         }
     }
-    
+
     /**
-     * A test that should not time out. The Fault Tolerance timeout is set to a (non-default) 0.5
-     * seconds but serviceC will attempt to sleep for only 10 milliseconds before
-     * throwing a RuntimeException. There should be no Timeout.
+     * A test that should not time out. The Fault Tolerance timeout is set to a (non-default) 0.5 seconds but serviceC
+     * will attempt to sleep for only 10 milliseconds before throwing a RuntimeException. There should be no Timeout.
      * 
      */
     @Test
@@ -170,41 +156,36 @@ public class TimeoutTest extends Arquillian {
         try {
             clientForTimeout.serviceC(10);
             Assert.fail("serviceC should throw a RuntimeException in testLTDefaultNoTimeout");
-        } 
-        catch (TimeoutException ex) {
+        } catch (TimeoutException ex) {
             // Not Expected
             Assert.fail("serviceC should throw a RuntimeException in testLTDefaultNoTimeout not a TimeoutException");
-        } 
-        catch (RuntimeException ex) {
+        } catch (RuntimeException ex) {
             // Expected
         }
     }
-    
+
     /**
-     * A test that should time out. The Fault Tolerance timeout is set to a (non-default) 2 seconds but serviceD 
-     * will attempt to sleep for 2.5 seconds - so longer than a  default timeout. serviceD specifies its timeout
-     * in Seconds rather than milliseconds.
+     * A test that should time out. The Fault Tolerance timeout is set to a (non-default) 2 seconds but serviceD will
+     * attempt to sleep for 2.5 seconds - so longer than a default timeout. serviceD specifies its timeout in Seconds
+     * rather than milliseconds.
      */
     @Test
     public void testSecondsTimeout() {
         try {
             clientForTimeout.serviceD(2500);
             Assert.fail("serviceD should throw a TimeoutException in testSecondsTimeout");
-        } 
-        catch (TimeoutException ex) {
+        } catch (TimeoutException ex) {
             // Expected
-        } 
-        catch (RuntimeException ex) {
+        } catch (RuntimeException ex) {
             // Not Expected
             Assert.fail("serviceD should throw a TimeoutException in testSecondsTimeout not a RuntimeException");
         }
     }
-    
+
     /**
-     * A test that should not time out. The Fault Tolerance timeout is set to 2
-     * seconds but serviceD will attempt to sleep for 1.5 seconds - so longer than a  default
-     * timeout but shorter than the timeout that has been configured, before throwing a 
-     * RuntimeException. There should be no Timeout.
+     * A test that should not time out. The Fault Tolerance timeout is set to 2 seconds but serviceD will attempt to
+     * sleep for 1.5 seconds - so longer than a default timeout but shorter than the timeout that has been configured,
+     * before throwing a RuntimeException. There should be no Timeout.
      * 
      */
     @Test
@@ -212,20 +193,17 @@ public class TimeoutTest extends Arquillian {
         try {
             clientForTimeout.serviceD(1500);
             Assert.fail("serviceD should throw a RuntimeException in testSecondsNoTimeout");
-        } 
-        catch (TimeoutException ex) {
+        } catch (TimeoutException ex) {
             // Not Expected
             Assert.fail("serviceD should throw a RuntimeException in testSecondsNoTimeout not a TimeoutException");
-        } 
-        catch (RuntimeException ex) {
+        } catch (RuntimeException ex) {
             // Expected
         }
     }
-    
+
     /**
-     * A parallel test to testTimeout with class level annotation. The default Fault Tolerance
-     * timeout is 1 second but serviceA will attempt to sleep for 20 seconds, so
-     * should throw a TimeoutException.
+     * A parallel test to testTimeout with class level annotation. The default Fault Tolerance timeout is 1 second but
+     * serviceA will attempt to sleep for 20 seconds, so should throw a TimeoutException.
      * 
      */
     @Test
@@ -233,20 +211,18 @@ public class TimeoutTest extends Arquillian {
         try {
             clientForDefaultTimeout.serviceA(20000);
             Assert.fail("serviceA should throw a TimeoutException in testTimeout");
-        } 
-        catch (TimeoutException ex) {
+        } catch (TimeoutException ex) {
             // Expected
-        } 
-        catch (RuntimeException ex) {
+        } catch (RuntimeException ex) {
             // Not Expected
             Assert.fail("serviceA should throw a TimeoutException in testTimeout not a RuntimeException");
         }
     }
 
     /**
-     * A parallel test to testNoTimeout with class level annotation. The default Fault 
-     * Tolerance timeout is 1 second but serviceA will attempt to sleep for only 10 milliseconds 
-     * before throwing a RuntimeException. There should be no Timeout.
+     * A parallel test to testNoTimeout with class level annotation. The default Fault Tolerance timeout is 1 second but
+     * serviceA will attempt to sleep for only 10 milliseconds before throwing a RuntimeException. There should be no
+     * Timeout.
      * 
      */
     @Test
@@ -254,79 +230,72 @@ public class TimeoutTest extends Arquillian {
         try {
             clientForDefaultTimeout.serviceA(10);
             Assert.fail("serviceB should throw a RuntimeException in testNoTimeoutClassLevel");
-        } 
-        catch (TimeoutException ex) {
+        } catch (TimeoutException ex) {
             // Not Expected
             Assert.fail("serviceB should throw a RuntimeException in testNoTimeoutClassLevel not a TimeoutException");
-        } 
-        catch (RuntimeException ex) {
+        } catch (RuntimeException ex) {
             // Expected
         }
     }
-    
+
     /**
-     * A parallel test to testGTDefaultTimeout where the method level Timeout annotation overrides 
-     * the class level annotation. The Fault Tolerance timeout is set to a (non-default) 2 seconds but 
-     * serviceB will attempt to sleep for 2.5 seconds - so longer than a  default timeout.
+     * A parallel test to testGTDefaultTimeout where the method level Timeout annotation overrides the class level
+     * annotation. The Fault Tolerance timeout is set to a (non-default) 2 seconds but serviceB will attempt to sleep
+     * for 2.5 seconds - so longer than a default timeout.
      */
     @Test
     public void testGTDefaultTimeoutOverride() {
         try {
             clientForDefaultTimeout.serviceB(2500);
             Assert.fail("serviceB should throw a TimeoutException in testGTDefaultTimeout");
-        } 
-        catch (TimeoutException ex) {
+        } catch (TimeoutException ex) {
             // Expected
-        } 
-        catch (RuntimeException ex) {
+        } catch (RuntimeException ex) {
             // Not Expected
             Assert.fail("serviceB should throw a TimeoutException in testGTDefaultTimeout not a RuntimeException");
         }
     }
-    
+
     /**
-     * A parallel test to testGTDefaultNoTimeout where the method level Timeout annotation overrides 
-     * the class level annotation. The Fault Tolerance timeout is set to 2 seconds but serviceB will attempt 
-     * to sleep for 1.5 seconds - so longer than a  default timeout but shorter than the timeout that has been 
-     * configured, before throwing a RuntimeException. There should be no Timeout.
+     * A parallel test to testGTDefaultNoTimeout where the method level Timeout annotation overrides the class level
+     * annotation. The Fault Tolerance timeout is set to 2 seconds but serviceB will attempt to sleep for 1.5 seconds -
+     * so longer than a default timeout but shorter than the timeout that has been configured, before throwing a
+     * RuntimeException. There should be no Timeout.
      */
     @Test
     public void testGTDefaultNoTimeoutOverride() {
         try {
             clientForDefaultTimeout.serviceB(1500);
             Assert.fail("serviceB should throw a RuntimeException in testGTDefaultNoTimeout");
-        } 
-        catch (TimeoutException ex) {
+        } catch (TimeoutException ex) {
             // Not Expected
             Assert.fail("serviceB should throw a RuntimeException in testGTDefaultNoTimeout not a TimeoutException");
-        } 
-        catch (RuntimeException ex) {
+        } catch (RuntimeException ex) {
             // Expected
         }
     }
-    
+
     /**
-     * A parallel test to testLTDefaultTimeout with class level annotation. The Fault Tolerance timeout is set 
-     * to a (non-default) 0.5 seconds but serviceA will attempt to sleep for 1 second - so longer than a  default timeout.
+     * A parallel test to testLTDefaultTimeout with class level annotation. The Fault Tolerance timeout is set to a
+     * (non-default) 0.5 seconds but serviceA will attempt to sleep for 1 second - so longer than a default timeout.
      */
     @Test
     public void testLTDefaultTimeoutClassLevel() {
         try {
             clientForShorterTimeout.serviceA(1000);
             Assert.fail("serviceA should throw a TimeoutException in testLTDefaultTimeoutClassLevel");
-        } 
-        catch (TimeoutException ex) {
+        } catch (TimeoutException ex) {
             // Expected
-        } 
-        catch (RuntimeException ex) {
+        } catch (RuntimeException ex) {
             // Not Expected
-            Assert.fail("serviceA should throw a TimeoutException in testLTDefaultTimeoutClassLevel not a RuntimeException");
+            Assert.fail(
+                    "serviceA should throw a TimeoutException in testLTDefaultTimeoutClassLevel not a RuntimeException");
         }
     }
-    
+
     /**
-     * A parallel test to testLTDefaultNoTimeout with class level annotation. The Fault Tolerance timeout is set 
-     * to a (non-default) 0.5 seconds but serviceC will attempt to sleep for only 10 milliseconds before throwing a 
+     * A parallel test to testLTDefaultNoTimeout with class level annotation. The Fault Tolerance timeout is set to a
+     * (non-default) 0.5 seconds but serviceC will attempt to sleep for only 10 milliseconds before throwing a
      * RuntimeException. There should be no Timeout.
      */
     @Test
@@ -334,55 +303,52 @@ public class TimeoutTest extends Arquillian {
         try {
             clientForShorterTimeout.serviceA(10);
             Assert.fail("serviceA should throw a RuntimeException in testLTDefaultNoTimeoutClassLevel");
-        } 
-        catch (TimeoutException ex) {
+        } catch (TimeoutException ex) {
             // Not Expected
-            Assert.fail("serviceA should throw a RuntimeException in testLTDefaultNoTimeoutClassLevel not a TimeoutException");
-        } 
-        catch (RuntimeException ex) {
+            Assert.fail(
+                    "serviceA should throw a RuntimeException in testLTDefaultNoTimeoutClassLevel not a TimeoutException");
+        } catch (RuntimeException ex) {
             // Expected
         }
     }
 
     /**
-     * A parallel test to testGTDefaultTimeout where the method level Timeout annotation overrides 
-     * the class level annotation. The Fault Tolerance timeout is set to a (non-default) 2 seconds but 
-     * serviceB will attempt to sleep for 2.5 seconds - so longer than a  default timeout.
+     * A parallel test to testGTDefaultTimeout where the method level Timeout annotation overrides the class level
+     * annotation. The Fault Tolerance timeout is set to a (non-default) 2 seconds but serviceB will attempt to sleep
+     * for 2.5 seconds - so longer than a default timeout.
      */
     @Test
     public void testGTShorterTimeoutOverride() {
         try {
             clientForShorterTimeout.serviceB(2500);
             Assert.fail("serviceB should throw a TimeoutException in testGTShorterTimeoutOverride");
-        } 
-        catch (TimeoutException ex) {
+        } catch (TimeoutException ex) {
             // Expected
-        } 
-        catch (RuntimeException ex) {
+        } catch (RuntimeException ex) {
             // Not Expected
-            Assert.fail("serviceB should throw a TimeoutException in testGTShorterTimeoutOverride not a RuntimeException");
+            Assert.fail(
+                    "serviceB should throw a TimeoutException in testGTShorterTimeoutOverride not a RuntimeException");
         }
     }
-    
+
     /**
-     * A parallel test to testGTDefaultNoTimeout where the method level Timeout annotation overrides 
-     * the class level annotation. The Fault Tolerance timeout is set to 2 seconds but serviceB will attempt 
-     * to sleep for 1.5 seconds - so longer than a  default timeout but shorter than the timeout that has been 
-     * configured, before throwing a RuntimeException. There should be no Timeout.
+     * A parallel test to testGTDefaultNoTimeout where the method level Timeout annotation overrides the class level
+     * annotation. The Fault Tolerance timeout is set to 2 seconds but serviceB will attempt to sleep for 1.5 seconds -
+     * so longer than a default timeout but shorter than the timeout that has been configured, before throwing a
+     * RuntimeException. There should be no Timeout.
      */
     @Test
     public void testGTShorterNoTimeoutOverride() {
         try {
             clientForShorterTimeout.serviceB(1500);
             Assert.fail("serviceB should throw a RuntimeException in testGTShorterNoTimeoutOverride");
-        } 
-        catch (TimeoutException ex) {
+        } catch (TimeoutException ex) {
             // Not Expected
-            Assert.fail("serviceB should throw a RuntimeException in testGTShorterNoTimeoutOverride not a TimeoutException");
-        } 
-        catch (RuntimeException ex) {
+            Assert.fail(
+                    "serviceB should throw a RuntimeException in testGTShorterNoTimeoutOverride not a TimeoutException");
+        } catch (RuntimeException ex) {
             // Expected
         }
     }
-    
+
 }

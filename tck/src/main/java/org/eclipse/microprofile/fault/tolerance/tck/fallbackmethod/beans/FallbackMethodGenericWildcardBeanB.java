@@ -23,7 +23,7 @@ package org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans;
 import java.util.List;
 
 public class FallbackMethodGenericWildcardBeanB<T> {
-    
+
     public String fallback(List<? extends T> a) {
         return "fallback";
     }

@@ -21,13 +21,13 @@ package org.eclipse.microprofile.fault.tolerance.tck.util;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.enterprise.context.Dependent;
+import jakarta.enterprise.context.Dependent;
 
 /**
  * Utility bean to track the number of concurrent executions of a method
  * <p>
- * The method being tracked needs to call {@link #executionStarted()} when it
- * starts and {@link #executionEnded()} when it's about to end.
+ * The method being tracked needs to call {@link #executionStarted()} when it starts and {@link #executionEnded()} when
+ * it's about to end.
  * 
  * <pre>
  * try {
@@ -39,15 +39,15 @@ import javax.enterprise.context.Dependent;
  * }
  * </pre>
  * <p>
- * Another method can then call {@link #waitForRunningExecutions(int)} to wait
- * for the expected number of executions to start.
+ * Another method can then call {@link #waitForRunningExecutions(int)} to wait for the expected number of executions to
+ * start.
  */
 @Dependent
 public class ConcurrentExecutionTracker {
-    
+
     // The Atomicness is not important, this is just an integer holder
     private final AtomicInteger executionCount = new AtomicInteger(0);
-    
+
     // 3 seconds * baseMultiplier, in nanoseconds
     private static final long WAIT_TIMEOUT = TCKConfig.getConfig().getTimeoutInMillis(3L * 1000) * 1_000_000;
 
@@ -56,7 +56,8 @@ public class ConcurrentExecutionTracker {
      * <p>
      * This method will wait three seconds before returning an exception
      *
-     * @param executions number of executions
+     * @param executions
+     *            number of executions
      */
     public void waitForRunningExecutions(int executions) {
         synchronized (executionCount) {
@@ -65,25 +66,25 @@ public class ConcurrentExecutionTracker {
                 while (executionCount.get() != executions && (System.nanoTime() - startTime) < WAIT_TIMEOUT) {
                     executionCount.wait(500);
                 }
-            }
-            catch (InterruptedException e) {
+            } catch (InterruptedException e) {
                 // Stop waiting
             }
-            
+
             if (executionCount.get() != executions) {
                 // Timed out waiting
-                throw new RuntimeException("Timed out waiting for executions to start, expected " + executions + " but there were " + executionCount);
+                throw new RuntimeException("Timed out waiting for executions to start, expected " + executions
+                        + " but there were " + executionCount);
             }
         }
     }
-    
+
     public void executionStarted() {
         synchronized (executionCount) {
             executionCount.incrementAndGet();
             executionCount.notifyAll();
         }
     }
-    
+
     public void executionEnded() {
         synchronized (executionCount) {
             executionCount.decrementAndGet();

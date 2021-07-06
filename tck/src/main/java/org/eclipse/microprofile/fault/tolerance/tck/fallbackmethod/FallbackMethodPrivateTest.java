@@ -22,8 +22,6 @@ package org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod;
 
 import static org.testng.Assert.assertEquals;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodPrivateBean;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
@@ -33,25 +31,28 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
+import jakarta.inject.Inject;
+
 /**
  * Test for private fallback method in the same class
  */
 public class FallbackMethodPrivateTest extends Arquillian {
-    
+
     @Deployment
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodPrivate.jar")
                 .addClass(FallbackMethodPrivateBean.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
-        
+
         WebArchive war = ShrinkWrap
                 .create(WebArchive.class, "ftFallbackMethodPrivate.war")
                 .addAsLibrary(testJar);
         return war;
     }
-    
-    @Inject private FallbackMethodPrivateBean bean;
-    
+
+    @Inject
+    private FallbackMethodPrivateBean bean;
+
     @Test
     public void fallbackMethodPrivate() {
         assertEquals(bean.method(1, 2L), "fallback");

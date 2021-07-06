@@ -27,7 +27,6 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-
 import org.testng.annotations.Test;
 
 public class InvalidRetryMaxRetriesTest extends Arquillian {
@@ -36,16 +35,16 @@ public class InvalidRetryMaxRetriesTest extends Arquillian {
     @ShouldThrowException(value = FaultToleranceDefinitionException.class)
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
-            .create(JavaArchive.class, "ftInvalidRetry2.jar")
-            .addClasses(RetryClientForValidationMaxRetries.class)
-            .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
-            .as(JavaArchive.class);
+                .create(JavaArchive.class, "ftInvalidRetry2.jar")
+                .addClasses(RetryClientForValidationMaxRetries.class)
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
+                .as(JavaArchive.class);
 
         return ShrinkWrap
-            .create(WebArchive.class, "ftInvalidRetry2.war")
-            .addAsLibrary(testJar);
+                .create(WebArchive.class, "ftInvalidRetry2.war")
+                .addAsLibrary(testJar);
     }
-    
+
     /**
      * Test that the deployment of an invalid @Retry parameter leads to a DeploymentException.
      * 

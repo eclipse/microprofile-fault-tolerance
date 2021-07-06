@@ -19,10 +19,10 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.metrics;
 
-import javax.enterprise.context.RequestScoped;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.Retry;
+
+import jakarta.enterprise.context.RequestScoped;
 
 /**
  * This is similar to RetryMetricBean but has the {@code @Retry} annotation on the class
@@ -30,7 +30,7 @@ import org.eclipse.microprofile.faulttolerance.Retry;
 @RequestScoped
 @Retry(maxRetries = 5)
 public class ClassLevelMetricBean {
-    
+
     private int calls = 0;
 
     public void failSeveralTimes(int timesToFail) {

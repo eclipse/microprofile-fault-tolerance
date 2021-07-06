@@ -19,6 +19,14 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.testng.Assert.fail;
+
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+
 import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.CompletableFutureHelper;
 import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.fallback.AsyncFallbackClient;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -29,14 +37,7 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
-import javax.inject.Inject;
-import java.io.IOException;
-import java.util.concurrent.ExecutionException;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.testng.Assert.fail;
+import jakarta.inject.Inject;
 
 /**
  * Test the combination of the @Asynchronous and @Fallback annotations.
@@ -62,13 +63,13 @@ public class AsyncFallbackTest extends Arquillian {
     @Test
     public void testAsyncFallbackSuccess() throws ExecutionException, InterruptedException {
         assertThat("Future-returning method that returns successfully should not fallback",
-            client.service1().get(), equalTo("Success"));
+                client.service1().get(), equalTo("Success"));
     }
 
     @Test
     public void testAsyncFallbackMethodThrows() throws IOException, ExecutionException, InterruptedException {
         assertThat("Future-returning method that throws an exception should fallback",
-            client.service2().get(), equalTo("Fallback"));
+                client.service2().get(), equalTo("Fallback"));
     }
 
     @Test
@@ -76,28 +77,27 @@ public class AsyncFallbackTest extends Arquillian {
         try {
             client.service3().get();
             fail("ExecutionException not thrown");
-        }
-        catch (ExecutionException expected) {
+        } catch (ExecutionException expected) {
             assertThat("Future-returning method that returns failing future should not fallback",
-                expected.getCause(), instanceOf(IOException.class));
+                    expected.getCause(), instanceOf(IOException.class));
         }
     }
 
     @Test
     public void testAsyncCSFallbackSuccess() throws ExecutionException, InterruptedException {
         assertThat("CompletionStage-returning method that returns successfully should not fallback",
-            CompletableFutureHelper.toCompletableFuture(client.serviceCS1()).get(), equalTo("Success"));
+                CompletableFutureHelper.toCompletableFuture(client.serviceCS1()).get(), equalTo("Success"));
     }
 
     @Test
     public void testAsyncCSFallbackMethodThrows() throws IOException, ExecutionException, InterruptedException {
         assertThat("CompletionStage-returning method that throws an exception should fallback",
-            CompletableFutureHelper.toCompletableFuture(client.serviceCS2()).get(), equalTo("Fallback"));
+                CompletableFutureHelper.toCompletableFuture(client.serviceCS2()).get(), equalTo("Fallback"));
     }
 
     @Test
     public void testAsyncCSFallbackFutureCompletesExceptionally() throws InterruptedException, ExecutionException {
         assertThat("CompletionStage-returning method that returns failing CompletionStage should fallback",
-            CompletableFutureHelper.toCompletableFuture(client.serviceCS3()).get(), equalTo("Fallback"));
+                CompletableFutureHelper.toCompletableFuture(client.serviceCS3()).get(), equalTo("Fallback"));
     }
 }

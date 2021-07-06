@@ -20,8 +20,10 @@
 package org.eclipse.microprofile.fault.tolerance.tck.config.clientserver;
 
 import java.sql.Connection;
-import javax.enterprise.context.RequestScoped;
+
 import org.eclipse.microprofile.faulttolerance.Retry;
+
+import jakarta.enterprise.context.RequestScoped;
 
 /**
  * A client to support Fault Tolerance Configuration tests.
@@ -39,18 +41,17 @@ public class ConfigClient {
     public Connection serviceA() {
         return connectionService();
     }
-    
+
     /**
-     * Max retries is configured to 90 but the max duration is 3 seconds with a default 
-     * durationUnit of milliseconds.
-     *  
+     * Max retries is configured to 90 but the max duration is 3 seconds with a default durationUnit of milliseconds.
+     * 
      * Once the duration is reached, no more retries should be performed.
      */
-    @Retry(maxRetries = 90, maxDuration= 3000)
+    @Retry(maxRetries = 90, maxDuration = 3000)
     public void serviceC() {
         writingService();
     }
-    
+
     private Connection connectionService() {
         counterForInvokingConnenectionService++;
         throw new RuntimeException("Connection failed");
@@ -59,19 +60,18 @@ public class ConfigClient {
     public int getCounterForInvokingConnectionService() {
         return counterForInvokingConnenectionService;
     }
-    
+
     private void writingService() {
-        counterForInvokingWritingService ++;
-       try {
-           Thread.sleep(100);
-           throw new RuntimeException("WritingService failed");
-       } 
-       catch (InterruptedException e) {
-           e.printStackTrace();
-       }    
-   }
-    
-   public int getRetryCountForWritingService() {
-       return counterForInvokingWritingService;
-   }
+        counterForInvokingWritingService++;
+        try {
+            Thread.sleep(100);
+            throw new RuntimeException("WritingService failed");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public int getRetryCountForWritingService() {
+        return counterForInvokingWritingService;
+    }
 }

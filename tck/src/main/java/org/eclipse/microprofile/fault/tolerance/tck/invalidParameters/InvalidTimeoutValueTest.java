@@ -27,7 +27,6 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-
 import org.testng.annotations.Test;
 
 public class InvalidTimeoutValueTest extends Arquillian {
@@ -36,16 +35,16 @@ public class InvalidTimeoutValueTest extends Arquillian {
     @ShouldThrowException(value = FaultToleranceDefinitionException.class)
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
-            .create(JavaArchive.class, "ftInvalidTimeout.jar")
-            .addClasses(TimeoutClientForValidation.class)
-            .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
-            .as(JavaArchive.class);
+                .create(JavaArchive.class, "ftInvalidTimeout.jar")
+                .addClasses(TimeoutClientForValidation.class)
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
+                .as(JavaArchive.class);
 
         return ShrinkWrap
-            .create(WebArchive.class, "ftInvalidTimeout.war")
-            .addAsLibrary(testJar);
+                .create(WebArchive.class, "ftInvalidTimeout.war")
+                .addAsLibrary(testJar);
     }
-    
+
     /**
      * Test that the deployment of an invalid @Timeout parameter leads to a DeploymentException.
      * 

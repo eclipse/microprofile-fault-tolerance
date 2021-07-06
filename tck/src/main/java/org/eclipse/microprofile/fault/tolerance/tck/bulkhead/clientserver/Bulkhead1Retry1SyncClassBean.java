@@ -19,12 +19,12 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 
-import javax.enterprise.context.ApplicationScoped;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
 import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 import org.eclipse.microprofile.faulttolerance.Retry;
+
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * Test to ensure that the bulkhead slot is released when retrying.
@@ -37,7 +37,7 @@ import org.eclipse.microprofile.faulttolerance.Retry;
 @Bulkhead(1)
 @ApplicationScoped
 public class Bulkhead1Retry1SyncClassBean {
-    
+
     public void test(Barrier barrier, RuntimeException ex) {
         barrier.await();
         if (ex != null) {

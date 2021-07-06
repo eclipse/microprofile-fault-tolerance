@@ -22,8 +22,6 @@ package org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver
 import java.io.Serializable;
 import java.sql.Connection;
 
-import javax.enterprise.context.RequestScoped;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
 import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
@@ -31,6 +29,9 @@ import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.faulttolerance.Timeout;
 import org.eclipse.microprofile.faulttolerance.exceptions.CircuitBreakerOpenException;
 import org.eclipse.microprofile.faulttolerance.exceptions.TimeoutException;
+
+import jakarta.enterprise.context.RequestScoped;
+
 /**
  * A client to exercise Circuit Breaker thresholds using Retries.
  * 
@@ -46,7 +47,7 @@ public class CircuitBreakerClientWithRetry implements Serializable {
     public int getCounterForInvokingServiceA() {
         return counterForInvokingServiceA;
     }
-    
+
     public int getCounterForInvokingServiceB() {
         return counterForInvokingServiceB;
     }
@@ -54,7 +55,7 @@ public class CircuitBreakerClientWithRetry implements Serializable {
     public int getCounterForInvokingServiceC() {
         return counterForInvokingServiceC;
     }
-    
+
     @CircuitBreaker(successThreshold = 2, requestVolumeThreshold = 4, failureRatio = 0.75, delay = 50000)
     @Retry(retryOn = {RuntimeException.class}, maxRetries = 7)
     public Connection serviceA() {
@@ -72,7 +73,7 @@ public class CircuitBreakerClientWithRetry implements Serializable {
         conn = connectionService();
         return conn;
     }
-    
+
     /**
      * Configured to always time out and Retry until CircuitBreaker is triggered on 4th call.
      */
@@ -86,17 +87,17 @@ public class CircuitBreakerClientWithRetry implements Serializable {
         try {
             Thread.sleep(TCKConfig.getConfig().getTimeoutInMillis(5000));
             throw new RuntimeException("Timeout did not interrupt");
-        } 
-        catch (InterruptedException e) {
-            //expected
+        } catch (InterruptedException e) {
+            // expected
         }
         return conn;
     }
-    
+
     /**
      * Has a CircuitBreaker and Retries on CircuitBreakerOpenException
      * 
-     * @param throwException whether this method should throw a TestException to simulate an application failure
+     * @param throwException
+     *            whether this method should throw a TestException to simulate an application failure
      * @return string "OK"
      */
     @CircuitBreaker(requestVolumeThreshold = 4, failureRatio = 0.75, delay = 1000)
@@ -105,18 +106,18 @@ public class CircuitBreakerClientWithRetry implements Serializable {
     public String serviceWithRetryOnCbOpen(boolean throwException) {
         if (throwException) {
             throw new TestException();
-        }
-        else {
+        } else {
             return "OK";
         }
     }
-    
+
     /**
      * Has a CircuitBreaker and Retries on TimeoutException
      * <p>
      * The method should never throw a TimeoutException so the retry should have no effect
      * 
-     * @param throwException whether this method should throw a TestException to simulate an application failure
+     * @param throwException
+     *            whether this method should throw a TestException to simulate an application failure
      * @return string "OK"
      */
     @CircuitBreaker(requestVolumeThreshold = 4, failureRatio = 0.75, delay = 1000)
@@ -125,31 +126,30 @@ public class CircuitBreakerClientWithRetry implements Serializable {
     public String serviceWithRetryOnTimeout(boolean throwException) {
         if (throwException) {
             throw new TestException();
-        }
-        else {
+        } else {
             return "OK";
         }
     }
-    
+
     /**
      * Has a CircuitBreaker and Retries on all exceptions except TestException and CircuitBreakerOpenException
      * 
-     * @param throwException whether this method should throw a TestException to simulate an application failure
+     * @param throwException
+     *            whether this method should throw a TestException to simulate an application failure
      * @return string "OK"
      */
     @CircuitBreaker(requestVolumeThreshold = 4, failureRatio = 0.75, delay = 1000)
-    @Retry(abortOn = { TestException.class, CircuitBreakerOpenException.class }, maxRetries = 20, delay = 200)
+    @Retry(abortOn = {TestException.class, CircuitBreakerOpenException.class}, maxRetries = 20, delay = 200)
     // Scaled via config
     public String serviceWithRetryFailOnCbOpen(boolean throwException) {
         if (throwException) {
             throw new TestException();
-        }
-        else {
+        } else {
             return "OK";
         }
     }
-    
-    //simulate a backend service
+
+    // simulate a backend service
     private Connection connectionService() {
         throw new RuntimeException("Connection failed");
     }

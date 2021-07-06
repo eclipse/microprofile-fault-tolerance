@@ -38,37 +38,40 @@ public class DurationMatcher extends TypeSafeDiagnosingMatcher<Duration> {
     @Override
     public void describeTo(Description description) {
         description.appendText("Duration within ")
-                   .appendValue(margin)
-                   .appendText(" of ")
-                   .appendValue(target);
+                .appendValue(margin)
+                .appendText(" of ")
+                .appendValue(target);
     }
 
     @Override
     protected boolean matchesSafely(Duration item, Description mismatchDescription) {
         Duration difference = item.minus(target).abs();
         mismatchDescription.appendValue(item)
-                           .appendText(" which is ")
-                           .appendValue(difference)
-                           .appendText(" from ")
-                           .appendValue(target);
+                .appendText(" which is ")
+                .appendValue(difference)
+                .appendText(" from ")
+                .appendValue(target);
         return difference.compareTo(margin) <= 0; // difference <= margin
     }
-    
+
     /**
      * Matcher that asserts that a duration is within {@code margin} of {@code target}
      * 
-     * @param target the target duration
-     * @param margin the margin
+     * @param target
+     *            the target duration
+     * @param margin
+     *            the margin
      * @return the matcher
      */
     public static DurationMatcher closeTo(Duration target, Duration margin) {
         return new DurationMatcher(target, margin);
     }
-    
+
     /**
      * Matcher that asserts that a duration is within 100ms of {@code target}
      * 
-     * @param target the target duration
+     * @param target
+     *            the target duration
      * @return the matcher
      */
     public static DurationMatcher closeTo(Duration target) {

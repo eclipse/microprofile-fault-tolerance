@@ -22,8 +22,6 @@ package org.eclipse.microprofile.fault.tolerance.tck.config;
 
 import static org.testng.Assert.assertEquals;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.eclipse.microprofile.faulttolerance.Fallback;
@@ -35,49 +33,55 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
+import jakarta.inject.Inject;
+
 /**
  * Test configuration of parameters of {@link Fallback}
  */
 public class FallbackConfigTest extends Arquillian {
-    
+
     @Deployment
     public static WebArchive create() {
         ConfigAnnotationAsset config = new ConfigAnnotationAsset();
-        config.set(FallbackConfigBean.class, "applyOnMethod", Fallback.class, "applyOn", TestConfigExceptionA.class.getCanonicalName());
-        config.set(FallbackConfigBean.class, "skipOnMethod", Fallback.class, "skipOn", TestConfigExceptionA.class.getCanonicalName());
-        config.set(FallbackConfigBean.class, "fallbackMethodConfig", Fallback.class, "fallbackMethod", "anotherFallback");
-        config.set(FallbackConfigBean.class, "fallbackHandlerConfig", Fallback.class, "value", FallbackHandlerB.class.getName());
-        
+        config.set(FallbackConfigBean.class, "applyOnMethod", Fallback.class, "applyOn",
+                TestConfigExceptionA.class.getCanonicalName());
+        config.set(FallbackConfigBean.class, "skipOnMethod", Fallback.class, "skipOn",
+                TestConfigExceptionA.class.getCanonicalName());
+        config.set(FallbackConfigBean.class, "fallbackMethodConfig", Fallback.class, "fallbackMethod",
+                "anotherFallback");
+        config.set(FallbackConfigBean.class, "fallbackHandlerConfig", Fallback.class, "value",
+                FallbackHandlerB.class.getName());
+
         JavaArchive jar = ShrinkWrap
                 .create(JavaArchive.class, "ftFallbackConfigTest.jar")
                 .addPackage(FallbackConfigTest.class.getPackage())
                 .addPackage(Packages.UTILS)
                 .addAsManifestResource(config, "microprofile-config.properties")
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
-        
+
         WebArchive war = ShrinkWrap
                 .create(WebArchive.class, "ftFallbackConfigTest.war")
                 .addAsLibraries(jar);
         return war;
     }
-    
+
     @Inject
     private FallbackConfigBean bean;
-    
+
     @Test
     public void testApplyOn() {
         // In annotation: applyOn = TestConfigExceptionB
-        // In config:     applyOn = TestConfigExceptionA
-        
+        // In config: applyOn = TestConfigExceptionA
+
         // applyOnMethod throws TestConfigExceptionA
         assertEquals("FALLBACK", bean.applyOnMethod());
     }
-    
+
     @Test
     public void testSkipOn() {
         // In annotation: skipOn = {}
-        // In config:     skipOn = TestConfigExceptionA
-        
+        // In config: skipOn = TestConfigExceptionA
+
         // skipOnMethod throws TestConfigExceptionA
         Exceptions.expect(TestConfigExceptionA.class, () -> bean.skipOnMethod());
     }
@@ -85,16 +89,16 @@ public class FallbackConfigTest extends Arquillian {
     @Test
     public void testFallbackMethod() {
         // In annotation: fallbackMethod = "theFallback"
-        // In config:     fallbackMethod = "anotherFallback"
-        
+        // In config: fallbackMethod = "anotherFallback"
+
         assertEquals("ANOTHER FALLBACK", bean.fallbackMethodConfig());
     }
 
     @Test
     public void testFallbackHandler() {
         // In annotation: value = FallbackHandlerA
-        // In config:     value = FallbackHandlerB
-        
+        // In config: value = FallbackHandlerB
+
         assertEquals("FallbackHandlerB", bean.fallbackHandlerConfig());
     }
 }

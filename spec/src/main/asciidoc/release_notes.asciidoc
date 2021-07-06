@@ -117,7 +117,7 @@ A full list of changes can be found on the link:https://github.com/eclipse/micro
 === Other changes
 
 - Time values in TCK tests are now configurable (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/399[#399]).
-- Transitive dependency on `javax.el-api` has been excluded (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/439[#439]).
+- Transitive dependency on `jakarta.el-api` has been excluded (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/439[#439]).
 
 [[release_notes_30]]
 == Release Notes for MicroProfile Fault Tolerance 3.0

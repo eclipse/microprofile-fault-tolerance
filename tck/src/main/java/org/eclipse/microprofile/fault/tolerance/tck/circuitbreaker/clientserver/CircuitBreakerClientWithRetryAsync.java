@@ -24,8 +24,6 @@ import java.sql.Connection;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
-import javax.enterprise.context.RequestScoped;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
 import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
@@ -35,11 +33,12 @@ import org.eclipse.microprofile.faulttolerance.Timeout;
 import org.eclipse.microprofile.faulttolerance.exceptions.CircuitBreakerOpenException;
 import org.eclipse.microprofile.faulttolerance.exceptions.TimeoutException;
 
+import jakarta.enterprise.context.RequestScoped;
+
 /**
  * A client to exercise Circuit Breaker thresholds using Retries.
  * 
- * Analogous to {@link CircuitBreakerClientWithRetry} but methods are annotated
- * with {@link Asynchronous}
+ * Analogous to {@link CircuitBreakerClientWithRetry} but methods are annotated with {@link Asynchronous}
  * 
  * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  * @author <a href="mailto:anrouse@uk.ibm.com">Andrew Rouse</a>
@@ -53,7 +52,7 @@ public class CircuitBreakerClientWithRetryAsync implements Serializable {
     public int getCounterForInvokingServiceA() {
         return counterForInvokingServiceA;
     }
-    
+
     public int getCounterForInvokingServiceB() {
         return counterForInvokingServiceB;
     }
@@ -61,7 +60,7 @@ public class CircuitBreakerClientWithRetryAsync implements Serializable {
     public int getCounterForInvokingServiceC() {
         return counterForInvokingServiceC;
     }
-    
+
     @CircuitBreaker(successThreshold = 2, requestVolumeThreshold = 4, failureRatio = 0.75, delay = 50000)
     @Retry(retryOn = {TestException.class}, maxRetries = 7)
     @Asynchronous
@@ -81,7 +80,7 @@ public class CircuitBreakerClientWithRetryAsync implements Serializable {
         conn = connectionService();
         return CompletableFuture.completedFuture(conn);
     }
-    
+
     /**
      * Configured to always time out and Retry until CircuitBreaker is triggered on 4th call. Runs asynchronously.
      */
@@ -96,17 +95,17 @@ public class CircuitBreakerClientWithRetryAsync implements Serializable {
         try {
             Thread.sleep(TCKConfig.getConfig().getTimeoutInMillis(5000));
             throw new RuntimeException("Timeout did not interrupt");
-        } 
-        catch (InterruptedException e) {
-            //expected
+        } catch (InterruptedException e) {
+            // expected
         }
         return CompletableFuture.completedFuture(conn);
     }
-    
+
     /**
      * Has a CircuitBreaker and Retries on CircuitBreakerOpenException
      * 
-     * @param throwException whether this method should throw a runtime exception to simulate an application failure
+     * @param throwException
+     *            whether this method should throw a runtime exception to simulate an application failure
      * @return string "OK"
      */
     @CircuitBreaker(requestVolumeThreshold = 4, failureRatio = 0.75, delay = 1000)
@@ -116,18 +115,18 @@ public class CircuitBreakerClientWithRetryAsync implements Serializable {
     public Future<String> serviceWithRetryOnCbOpen(boolean throwException) {
         if (throwException) {
             throw new TestException("Test Exception");
-        }
-        else {
+        } else {
             return CompletableFuture.completedFuture("OK");
         }
     }
-    
+
     /**
      * Has a CircuitBreaker and Retries on TimeoutException
      * <p>
      * The method should never throw a TimeoutException so the retry should have no effect
      * 
-     * @param throwException whether this method should throw a TestException to simulate an application failure
+     * @param throwException
+     *            whether this method should throw a TestException to simulate an application failure
      * @return string "OK"
      */
     @CircuitBreaker(requestVolumeThreshold = 4, failureRatio = 0.75, delay = 1000)
@@ -137,32 +136,31 @@ public class CircuitBreakerClientWithRetryAsync implements Serializable {
     public Future<String> serviceWithRetryOnTimeout(boolean throwException) {
         if (throwException) {
             throw new TestException("Test Exception");
-        }
-        else {
+        } else {
             return CompletableFuture.completedFuture("OK");
         }
     }
-    
+
     /**
      * Has a CircuitBreaker and Retries on all exceptions except TestException and CircuitBreakerOpenException
      * 
-     * @param throwException whether this method should throw a TestException to simulate an application failure
+     * @param throwException
+     *            whether this method should throw a TestException to simulate an application failure
      * @return string "OK"
      */
     @CircuitBreaker(requestVolumeThreshold = 4, failureRatio = 0.75, delay = 1000)
-    @Retry(abortOn = { TestException.class, CircuitBreakerOpenException.class }, maxRetries = 20, delay = 200)
+    @Retry(abortOn = {TestException.class, CircuitBreakerOpenException.class}, maxRetries = 20, delay = 200)
     @Asynchronous
     // Delays scaled via config
     public Future<String> serviceWithRetryFailOnCbOpen(boolean throwException) {
         if (throwException) {
             throw new TestException("Test Exception");
-        }
-        else {
+        } else {
             return CompletableFuture.completedFuture("OK");
         }
     }
-    
-    //simulate a backend service
+
+    // simulate a backend service
     private Connection connectionService() {
         throw new TestException("Connection failed");
     }

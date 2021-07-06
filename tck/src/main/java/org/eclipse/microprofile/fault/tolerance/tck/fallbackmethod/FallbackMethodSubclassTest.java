@@ -36,20 +36,20 @@ import org.testng.annotations.Test;
  * Test that a fallback method defined in a subclass cannot be called
  */
 public class FallbackMethodSubclassTest extends Arquillian {
-    
+
     @Deployment
     @ShouldThrowException(FaultToleranceDefinitionException.class)
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodSubclass.jar")
                 .addClasses(FallbackMethodSubclassBeanA.class, FallbackMethodSubclassBeanB.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
-        
+
         WebArchive war = ShrinkWrap
                 .create(WebArchive.class, "ftFallbackMethodSubclass.war")
                 .addAsLibrary(testJar);
         return war;
     }
-    
+
     @Test
     public void fallbackMethodSubclass() {
         // Nothing to test, deployment should throw exception

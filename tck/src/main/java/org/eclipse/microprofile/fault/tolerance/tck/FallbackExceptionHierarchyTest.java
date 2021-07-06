@@ -22,9 +22,6 @@ package org.eclipse.microprofile.fault.tolerance.tck;
 
 import static org.testng.Assert.assertEquals;
 
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.exception.hierarchy.E0;
 import org.eclipse.microprofile.fault.tolerance.tck.exception.hierarchy.E0S;
 import org.eclipse.microprofile.fault.tolerance.tck.exception.hierarchy.E1;
@@ -32,49 +29,49 @@ import org.eclipse.microprofile.fault.tolerance.tck.exception.hierarchy.E1S;
 import org.eclipse.microprofile.fault.tolerance.tck.exception.hierarchy.E2;
 import org.eclipse.microprofile.fault.tolerance.tck.exception.hierarchy.E2S;
 import org.eclipse.microprofile.fault.tolerance.tck.fallback.exception.hierarchy.FallbackService;
-
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+
 /**
- * Test that {@code Fallback.applyOn()} and {@code Fallback.skipOn()}
- * handle exception subclasses correctly.
+ * Test that {@code Fallback.applyOn()} and {@code Fallback.skipOn()} handle exception subclasses correctly.
  */
 public class FallbackExceptionHierarchyTest extends Arquillian {
-    
+
     @Deployment
     public static WebArchive deploy() {
         JavaArchive jar = ShrinkWrap.create(JavaArchive.class, "ftFallbackExceptionHierarchy.jar")
-            .addPackage(E0.class.getPackage())
-            .addClass(FallbackService.class)
-            .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
-            .as(JavaArchive.class);
+                .addPackage(E0.class.getPackage())
+                .addClass(FallbackService.class)
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
+                .as(JavaArchive.class);
 
         return ShrinkWrap
-            .create(WebArchive.class, "ftFallbackExceptionHierarchy.war")
-            .addAsLibrary(jar);
+                .create(WebArchive.class, "ftFallbackExceptionHierarchy.war")
+                .addAsLibrary(jar);
     }
 
     @Inject
     private Instance<FallbackService> serviceInstance;
-    
+
     private FallbackService service;
-    
+
     @BeforeMethod
     public void setup() {
         if (serviceInstance != null) {
             service = serviceInstance.get();
         }
     }
-    
+
     @AfterMethod
     public void teardown() {
         if (serviceInstance != null) {
@@ -85,9 +82,9 @@ public class FallbackExceptionHierarchyTest extends Arquillian {
     // the <: symbol denotes the subtyping relation (Foo <: Bar means "Foo is a subtype of Bar")
     // note that subtyping is reflexive (Foo <: Foo)
 
-    // E0  <: Exception
-    // E1  <: E0
-    // E2  <: E1
+    // E0 <: Exception
+    // E1 <: E0
+    // E2 <: E1
     // E2S <: E2
     // E1S <: E1, but not E1S <: E2
     // E0S <: E0, but not E0S <: E1
@@ -153,17 +150,16 @@ public class FallbackExceptionHierarchyTest extends Arquillian {
             String result = service.serviceA(exception);
             if (service.getFallbackValue().equals(result)) {
                 return FallbackStatus.FALLBACK;
-            } 
-            else {
+            } else {
                 return FallbackStatus.NOFALLBACK;
             }
-        }
-        catch (Throwable ex) {
+        } catch (Throwable ex) {
             return FallbackStatus.NOFALLBACK;
         }
     }
 
-    // serviceB: @Fallback(applyOn = {Exception.class, E1.class}, skipOn = {E0.class, E2.class}, fallbackMethod = "myFallback")
+    // serviceB: @Fallback(applyOn = {Exception.class, E1.class}, skipOn = {E0.class, E2.class}, fallbackMethod =
+    // "myFallback")
 
     @Test
     public void serviceBthrowsException() {
@@ -224,12 +220,10 @@ public class FallbackExceptionHierarchyTest extends Arquillian {
             String result = service.serviceB(exception);
             if (service.getFallbackValue().equals(result)) {
                 return FallbackStatus.FALLBACK;
-            } 
-            else {
+            } else {
                 return FallbackStatus.NOFALLBACK;
             }
-        }
-        catch (Throwable ex) {
+        } catch (Throwable ex) {
             return FallbackStatus.NOFALLBACK;
         }
     }
@@ -295,18 +289,15 @@ public class FallbackExceptionHierarchyTest extends Arquillian {
             String result = service.serviceC(exception);
             if (service.getFallbackValue().equals(result)) {
                 return FallbackStatus.FALLBACK;
-            } 
-            else {
+            } else {
                 return FallbackStatus.NOFALLBACK;
             }
-        }
-        catch (Throwable ex) {
+        } catch (Throwable ex) {
             return FallbackStatus.NOFALLBACK;
         }
     }
-    
+
     private enum FallbackStatus {
-        FALLBACK,
-        NOFALLBACK
+        FALLBACK, NOFALLBACK
     }
 }

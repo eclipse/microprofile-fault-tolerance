@@ -26,8 +26,11 @@ public abstract class Misc {
     public abstract static class Ints {
         /**
          * Search for the existence of an int value in a given int array.
-         * @param data the int data to search into
-         * @param value the value to search
+         * 
+         * @param data
+         *            the int data to search into
+         * @param value
+         *            the value to search
          * @return true if the data array contains at least once the expected value, false otherwise
          */
         public static boolean contains(int[] data, int value) {

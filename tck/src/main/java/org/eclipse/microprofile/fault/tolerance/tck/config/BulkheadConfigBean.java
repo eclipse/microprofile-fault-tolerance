@@ -23,18 +23,18 @@ package org.eclipse.microprofile.fault.tolerance.tck.config;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
-import javax.enterprise.context.ApplicationScoped;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
+
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * A suite of test methods to test the parameters of bulkhead
  */
 @ApplicationScoped
 public class BulkheadConfigBean {
-    
+
     @Bulkhead(value = 5)
     public void serviceValue(Barrier barrier) {
         barrier.await();
@@ -46,5 +46,5 @@ public class BulkheadConfigBean {
         barrier.await();
         return CompletableFuture.completedFuture(null);
     }
-    
+
 }

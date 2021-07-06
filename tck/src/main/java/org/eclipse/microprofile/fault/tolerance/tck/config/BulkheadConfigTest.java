@@ -20,8 +20,6 @@
 
 package org.eclipse.microprofile.fault.tolerance.tck.config;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncTaskManager;
 import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncTaskManager.BarrierTask;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
@@ -35,6 +33,8 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
+import jakarta.inject.Inject;
+
 /**
  * Test that the parameters of Bulkhead can be configured
  */
@@ -45,49 +45,49 @@ public class BulkheadConfigTest extends Arquillian {
         ConfigAnnotationAsset config = new ConfigAnnotationAsset()
                 .set(BulkheadConfigBean.class, "serviceValue", Bulkhead.class, "value", "1")
                 .set(BulkheadConfigBean.class, "serviceWaitingTaskQueue", Bulkhead.class, "waitingTaskQueue", "1");
-        
+
         JavaArchive jar = ShrinkWrap.create(JavaArchive.class, "ftBulkheadConfig.jar")
-                                    .addClass(BulkheadConfigBean.class)
-                                    .addPackage(Packages.UTILS)
-                                    .addAsManifestResource(config, "microprofile-config.properties")
-                                    .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
+                .addClass(BulkheadConfigBean.class)
+                .addPackage(Packages.UTILS)
+                .addAsManifestResource(config, "microprofile-config.properties")
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
 
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftBulkheadConfig.war")
-                                   .addAsLibrary(jar);
-        
+                .addAsLibrary(jar);
+
         return war;
     }
-    
+
     @Inject
     private BulkheadConfigBean bean;
-    
+
     @Test
     public void testConfigValue() throws Exception {
         // In annotation: value = 5
-        // In config:     value = 1
-        
+        // In config: value = 1
+
         try (AsyncTaskManager taskManager = new AsyncTaskManager()) {
             BarrierTask<Void> taskA = taskManager.runBarrierTask(bean::serviceValue);
             taskA.assertAwaits();
-            
+
             BarrierTask<Void> taskB = taskManager.runBarrierTask(bean::serviceValue);
             taskB.assertThrows(BulkheadException.class);
         }
     }
-    
+
     @Test
     public void testWaitingTaskQueue() throws Exception {
         // In annotation: waitingTaskQueue = 5
-        //                value = 1
-        // In config:     waitingTaskQueue = 1
-        
+        // value = 1
+        // In config: waitingTaskQueue = 1
+
         try (AsyncTaskManager taskManager = new AsyncTaskManager()) {
             BarrierTask<Void> taskA = taskManager.runAsyncBarrierTask(bean::serviceWaitingTaskQueue);
             taskA.assertAwaits();
-            
+
             BarrierTask<Void> taskB = taskManager.runAsyncBarrierTask(bean::serviceWaitingTaskQueue);
             taskB.assertNotAwaiting();
-            
+
             BarrierTask<Void> taskC = taskManager.runAsyncBarrierTask(bean::serviceWaitingTaskQueue);
             taskC.assertThrows(BulkheadException.class);
         }

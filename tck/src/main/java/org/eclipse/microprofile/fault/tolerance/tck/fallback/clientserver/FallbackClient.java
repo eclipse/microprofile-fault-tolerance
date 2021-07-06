@@ -19,11 +19,11 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.fallback.clientserver;
 
-import javax.enterprise.context.RequestScoped;
-
 import org.eclipse.microprofile.faulttolerance.Fallback;
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.faulttolerance.Timeout;
+
+import jakarta.enterprise.context.RequestScoped;
 
 /**
  * A client to demonstrate the fallback after doing the maximum retries
@@ -59,7 +59,7 @@ public class FallbackClient {
     public int getCounterForInvokingServiceE() {
         return counterForInvokingServiceE;
     }
-    
+
     @Retry(maxRetries = 1)
     @Fallback(StringFallbackHandler.class)
     public String serviceA() {
@@ -82,9 +82,8 @@ public class FallbackClient {
             counterForInvokingServiceC++;
             Thread.sleep(timeToSleep);
             throw new RuntimeException("Timeout did not interrupt");
-        } 
-        catch (InterruptedException e) {
-            //expected
+        } catch (InterruptedException e) {
+            // expected
         }
         return null;
     }
@@ -110,7 +109,7 @@ public class FallbackClient {
     public String fallbackForServiceE(String name, Integer type) {
         return "fallback method for serviceE";
     }
-    
+
     private String nameService() {
         throw new RuntimeException("Connection failed");
     }

@@ -28,12 +28,14 @@ import java.time.Duration;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.enterprise.context.RequestScoped;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
 import org.eclipse.microprofile.faulttolerance.Retry;
+
+import jakarta.enterprise.context.RequestScoped;
+
 /**
  * A client to demonstrate the delay configurations
+ * 
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  *
  */
@@ -42,18 +44,18 @@ public class RetryClientWithDelay {
     private int counterForInvokingConnenectionService;
     private long timestampForConnectionService = 0;
     private Set<Duration> delayTimes = new HashSet<>();
-    
+
     // Expect delay between 0-800ms. Set limit to 1000ms to allow a small buffer
     private static final Duration MAX_DELAY = TCKConfig.getConfig().getTimeoutInDuration(1000);
-    
-    //There should be 0-800ms (jitter is -400ms - 400ms) delays between each invocation
-    //there should be at least 4 retries
+
+    // There should be 0-800ms (jitter is -400ms - 400ms) delays between each invocation
+    // there should be at least 4 retries
     @Retry(delay = 400, maxDuration = 3200, jitter = 400, maxRetries = 10) // Adjusted by config
     public Connection serviceA() {
         return connectionService();
     }
-    
-    //simulate a backend service
+
+    // simulate a backend service
     private Connection connectionService() {
         // record the time delay between each invocation (should be 0-800ms)
         long currentTime = System.nanoTime();
@@ -61,17 +63,17 @@ public class RetryClientWithDelay {
             delayTimes.add(Duration.ofNanos(currentTime - timestampForConnectionService));
         }
         timestampForConnectionService = currentTime;
-        
+
         counterForInvokingConnenectionService++;
         throw new RuntimeException("Connection failed");
     }
-    
+
     public void assertDelayInRange() {
         assertThat("Delay longer than expected", delayTimes, everyItem(lessThan(MAX_DELAY)));
     }
-   
+
     public int getRetryCountForConnectionService() {
         return counterForInvokingConnenectionService;
     }
-   
+
 }

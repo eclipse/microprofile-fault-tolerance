@@ -27,7 +27,6 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-
 import org.testng.annotations.Test;
 
 public class InvalidBulkheadValueTest extends Arquillian {
@@ -36,16 +35,16 @@ public class InvalidBulkheadValueTest extends Arquillian {
     @ShouldThrowException(value = FaultToleranceDefinitionException.class)
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
-            .create(JavaArchive.class, "ftInvalidBulkhead1.jar")
-            .addClasses(BulkheadClientForValidation.class)
-            .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
-            .as(JavaArchive.class);
+                .create(JavaArchive.class, "ftInvalidBulkhead1.jar")
+                .addClasses(BulkheadClientForValidation.class)
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
+                .as(JavaArchive.class);
 
         return ShrinkWrap
-            .create(WebArchive.class, "ftInvalidBulkhead1.war")
-            .addAsLibrary(testJar);
+                .create(WebArchive.class, "ftInvalidBulkhead1.war")
+                .addAsLibrary(testJar);
     }
-    
+
     /**
      * Test that the deployment of an invalid @Bulkhead parameter leads to a DeploymentException.
      * 

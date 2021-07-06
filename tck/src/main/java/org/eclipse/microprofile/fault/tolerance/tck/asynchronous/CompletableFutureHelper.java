@@ -32,11 +32,13 @@ public class CompletableFutureHelper {
     }
 
     /**
-     * Creates a future completed with a supplied exception.
-     * Equivalent to {@link CompletableFuture}{@code .failedFuture} available since Java 9 but not in Java 8.
+     * Creates a future completed with a supplied exception. Equivalent to
+     * {@link CompletableFuture}{@code .failedFuture} available since Java 9 but not in Java 8.
      * 
-     * @param <U> The type of the future result
-     * @param ex The exception to finish the result with
+     * @param <U>
+     *            The type of the future result
+     * @param ex
+     *            The exception to finish the result with
      * @return A future completed with the a supplied exception {@code ex}
      */
     public static <U> CompletableFuture<U> failedFuture(Throwable ex) {
@@ -46,13 +48,14 @@ public class CompletableFutureHelper {
     }
 
     /**
-     * Returns a future that is completed when the stage is completed and has the same value or exception
-     * as the completed stage. It's supposed to be equivalent to calling 
-     * {@link CompletionStage#toCompletableFuture()} but works with any CompletionStage
-     * and doesn't throw {@link java.lang.UnsupportedOperationException}.
+     * Returns a future that is completed when the stage is completed and has the same value or exception as the
+     * completed stage. It's supposed to be equivalent to calling {@link CompletionStage#toCompletableFuture()} but
+     * works with any CompletionStage and doesn't throw {@link java.lang.UnsupportedOperationException}.
      * 
-     * @param <U> The type of the future result
-     * @param stage Stage to convert to a future
+     * @param <U>
+     *            The type of the future result
+     * @param stage
+     *            Stage to convert to a future
      * @return Future converted from stage
      */
     public static <U> CompletableFuture<U> toCompletableFuture(CompletionStage<U> stage) {
@@ -60,8 +63,7 @@ public class CompletableFutureHelper {
         stage.whenComplete((v, e) -> {
             if (e != null) {
                 future.completeExceptionally(e);
-            }
-            else {
+            } else {
                 future.complete(v);
             }
         });

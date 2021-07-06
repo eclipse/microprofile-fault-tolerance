@@ -28,7 +28,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
-
 public class TCKConfig {
 
     private static final TCKConfig INSTANCE = new TCKConfig();
@@ -41,7 +40,7 @@ public class TCKConfig {
     private double baseMultiplier;
 
     private TCKConfig() {
-        
+
         try (InputStream s = TCKConfig.class.getResourceAsStream("/" + RESOURCE_NAME)) {
             if (s != null) {
                 // Expected path when in deployed application
@@ -49,14 +48,13 @@ public class TCKConfig {
                 String multiplier = reader.readLine();
                 baseMultiplier = Double.valueOf(multiplier);
                 System.out.println("Loaded timeout-multiplier from resource: " + baseMultiplier);
-            }
-            else {
+            } else {
                 // Expected path when running in client
-                baseMultiplier = Double.valueOf(System.getProperty("org.eclipse.microprofile.fault.tolerance.tck.timeout.multiplier", "1.0"));
+                baseMultiplier = Double.valueOf(
+                        System.getProperty("org.eclipse.microprofile.fault.tolerance.tck.timeout.multiplier", "1.0"));
                 System.out.println("Loaded timeout-multiplier from system property: " + baseMultiplier);
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             fail("Resource " + RESOURCE_NAME + " is present but could not be read", e);
         }
     }

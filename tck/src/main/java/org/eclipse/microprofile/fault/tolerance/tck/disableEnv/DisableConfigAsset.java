@@ -47,8 +47,7 @@ public class DisableConfigAsset implements Asset {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             props.store(os, null);
             return new ByteArrayInputStream(os.toByteArray());
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             // Shouldn't happen since we're only using in memory streams
             throw new RuntimeException("Unexpected error saving properties", e);
         }
@@ -65,9 +64,12 @@ public class DisableConfigAsset implements Asset {
     /**
      * Add config entry to disable an annotation on the given class and method
      *
-     * @param clazz the class
-     * @param method the method
-     * @param annotation the annotation
+     * @param clazz
+     *            the class
+     * @param method
+     *            the method
+     * @param annotation
+     *            the annotation
      * @return itself
      */
     public DisableConfigAsset disable(Class<?> clazz, String method, Class<? extends Annotation> annotation) {
@@ -78,8 +80,10 @@ public class DisableConfigAsset implements Asset {
     /**
      * Add config entry to disable an annotation on the given class
      *
-     * @param clazz the class
-     * @param annotation the annotation
+     * @param clazz
+     *            the class
+     * @param annotation
+     *            the annotation
      * @return itself
      */
     public DisableConfigAsset disable(Class<?> clazz, Class<? extends Annotation> annotation) {
@@ -90,7 +94,8 @@ public class DisableConfigAsset implements Asset {
     /**
      * Add config entry to disable an annotation globally
      *
-     * @param annotation the annotation
+     * @param annotation
+     *            the annotation
      * @return itself
      */
     public DisableConfigAsset disable(Class<? extends Annotation> annotation) {
@@ -101,9 +106,12 @@ public class DisableConfigAsset implements Asset {
     /**
      * Add config entry to enable an annotation on the given class and method
      *
-     * @param clazz the class
-     * @param method the method
-     * @param annotation the annotation
+     * @param clazz
+     *            the class
+     * @param method
+     *            the method
+     * @param annotation
+     *            the annotation
      * @return itself
      */
     public DisableConfigAsset enable(Class<?> clazz, String method, Class<? extends Annotation> annotation) {
@@ -114,8 +122,10 @@ public class DisableConfigAsset implements Asset {
     /**
      * Add config entry to enable an annotation on the given class
      *
-     * @param clazz the class
-     * @param annotation the annotation
+     * @param clazz
+     *            the class
+     * @param annotation
+     *            the annotation
      * @return itself
      */
     public DisableConfigAsset enable(Class<?> clazz, Class<? extends Annotation> annotation) {
@@ -126,7 +136,8 @@ public class DisableConfigAsset implements Asset {
     /**
      * Add config entry to enable an annotation globally
      *
-     * @param annotation the annotation
+     * @param annotation
+     *            the annotation
      * @return itself
      */
     public DisableConfigAsset enable(Class<? extends Annotation> annotation) {
@@ -134,15 +145,17 @@ public class DisableConfigAsset implements Asset {
         return this;
     }
 
-
     /**
      * Build config key used to enable an annotation for a class and method
      * <p>
      * E.g. {@code com.example.MyClass/myMethod/Retry/enabled}
      *
-     * @param clazz may be null
-     * @param method may be null
-     * @param annotation required
+     * @param clazz
+     *            may be null
+     * @param method
+     *            may be null
+     * @param annotation
+     *            required
      * @return config key
      */
     private String keyFor(Class<?> clazz, String method, Class<? extends Annotation> annotation) {

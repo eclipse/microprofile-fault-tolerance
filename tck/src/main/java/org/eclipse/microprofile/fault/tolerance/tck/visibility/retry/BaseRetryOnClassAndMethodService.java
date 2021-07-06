@@ -22,9 +22,9 @@ package org.eclipse.microprofile.fault.tolerance.tck.visibility.retry;
 import java.io.IOException;
 import java.sql.Connection;
 
-import javax.enterprise.context.RequestScoped;
-
 import org.eclipse.microprofile.faulttolerance.Retry;
+
+import jakarta.enterprise.context.RequestScoped;
 
 @RequestScoped
 @RS(RetryServiceType.BASE_ROCM)
