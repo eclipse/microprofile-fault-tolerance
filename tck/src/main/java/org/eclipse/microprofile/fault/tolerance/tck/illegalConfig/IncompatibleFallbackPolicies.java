@@ -19,8 +19,6 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.illegalConfig;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.ShouldThrowException;
@@ -31,23 +29,23 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
+import jakarta.inject.Inject;
+
 public class IncompatibleFallbackPolicies extends Arquillian {
-    private
-    @Inject
-    FallbackClientWithBothFallbacks fallbackClient;
+    private @Inject FallbackClientWithBothFallbacks fallbackClient;
 
     @Deployment
     @ShouldThrowException(value = FaultToleranceDefinitionException.class)
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
-            .create(JavaArchive.class, "ftInvalid.jar")
-            .addClasses(FallbackClientWithBothFallbacks.class, IncompatibleFallbackHandler.class)
-            .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
-            .as(JavaArchive.class);
+                .create(JavaArchive.class, "ftInvalid.jar")
+                .addClasses(FallbackClientWithBothFallbacks.class, IncompatibleFallbackHandler.class)
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
+                .as(JavaArchive.class);
 
         return ShrinkWrap
-            .create(WebArchive.class, "ftInvalidFallbackPolicy.war")
-            .addAsLibrary(testJar);
+                .create(WebArchive.class, "ftInvalidFallbackPolicy.war")
+                .addAsLibrary(testJar);
     }
 
     /**

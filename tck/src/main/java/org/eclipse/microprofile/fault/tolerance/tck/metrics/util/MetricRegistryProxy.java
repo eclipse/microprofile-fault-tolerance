@@ -32,17 +32,17 @@ import org.eclipse.microprofile.metrics.MetricID;
 /**
  * Interface which includes the methods we need to call on MetricRegistry
  * <p>
- * This allows us to proxy these calls so that this code can run against MP Metrics 2.3 and MP Metrics 3.0
- * where MetricRegistry was changed from an abstract class to an interface
+ * This allows us to proxy these calls so that this code can run against MP Metrics 2.3 and MP Metrics 3.0 where
+ * MetricRegistry was changed from an abstract class to an interface
  */
 public interface MetricRegistryProxy {
 
     Map<MetricID, Metric> getMetrics();
-    
+
     SortedMap<MetricID, Counter> getCounters();
-    
+
     @SuppressWarnings("rawtypes") // Must match MetricRegistry signature
     SortedMap<MetricID, Gauge> getGauges();
-    
+
     Map<String, Metadata> getMetadata();
 }

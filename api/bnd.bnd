@@ -1,7 +1,7 @@
 -exportcontents: \
     org.eclipse.microprofile.*
 Import-Package: \
-    javax.enterprise.util;version="[2.0,3)", \
+    jakarta.enterprise.util;version="[2.0,3)", \
     *
 Bundle-SymbolicName: org.eclipse.microprofile.fault.tolerance
 # For reproducible builds

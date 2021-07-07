@@ -22,8 +22,6 @@ package org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod;
 
 import static org.testng.Assert.assertEquals;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodInterfaceBeanA;
 import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodInterfaceBeanB;
 import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodInterfaceBeanC;
@@ -35,27 +33,30 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
+import jakarta.inject.Inject;
+
 /**
  * Test for a fallback method defined on an interface and implemented in a subclass
  */
 public class FallbackMethodInterfaceTest extends Arquillian {
-    
+
     @Deployment
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodInterface.jar")
                 .addClasses(FallbackMethodInterfaceBeanA.class,
-                            FallbackMethodInterfaceBeanB.class,
-                            FallbackMethodInterfaceBeanC.class)
+                        FallbackMethodInterfaceBeanB.class,
+                        FallbackMethodInterfaceBeanC.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
-        
+
         WebArchive war = ShrinkWrap
                 .create(WebArchive.class, "ftFallbackMethodInterface.war")
                 .addAsLibrary(testJar);
         return war;
     }
-    
-    @Inject private FallbackMethodInterfaceBeanB bean;
-    
+
+    @Inject
+    private FallbackMethodInterfaceBeanB bean;
+
     @Test
     public void fallbackMethodInterface() {
         assertEquals(bean.method(1, 2L), "fallback");

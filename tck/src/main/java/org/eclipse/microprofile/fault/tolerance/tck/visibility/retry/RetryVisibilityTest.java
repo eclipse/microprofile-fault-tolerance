@@ -21,8 +21,6 @@ package org.eclipse.microprofile.fault.tolerance.tck.visibility.retry;
 
 import java.io.IOException;
 
-import javax.inject.Inject;
-
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -32,25 +30,27 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import jakarta.inject.Inject;
+
 /**
  * Test for annotations discovering rules in the contexts of class inheritance, method override, etc.
  * 
- *  @author <a href="mailto:matthieu@brouillard.fr">Matthieu Brouillard</a>
+ * @author <a href="mailto:matthieu@brouillard.fr">Matthieu Brouillard</a>
  */
 public class RetryVisibilityTest extends Arquillian {
     @Deployment
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
                 .create(JavaArchive.class, "ftRetryVisibility.jar")
-//                .addClasses(
-//                        RS.class, 
-//                        RetryServiceType.class,
-//                        RetryService.class, 
-//                        BaseRetryOnClassService.class,
-//                        RetryOnClassServiceOverrideClassLevel.class,
-//                        RetryOnClassServiceOverrideMethodLevel.class,
-//                        RetryOnClassServiceNoAnnotationOnOveriddenMethod.class
-//                )
+                // .addClasses(
+                // RS.class,
+                // RetryServiceType.class,
+                // RetryService.class,
+                // BaseRetryOnClassService.class,
+                // RetryOnClassServiceOverrideClassLevel.class,
+                // RetryOnClassServiceOverrideMethodLevel.class,
+                // RetryOnClassServiceNoAnnotationOnOveriddenMethod.class
+                // )
                 .addPackage("org.eclipse.microprofile.fault.tolerance.tck.visibility.retry")
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                 .as(JavaArchive.class);
@@ -58,61 +58,78 @@ public class RetryVisibilityTest extends Arquillian {
         WebArchive war = ShrinkWrap
                 .create(WebArchive.class, "ftRetryVisibility.war")
                 .addAsLibrary(testJar);
-        
+
         return war;
     }
-    
-    @Inject @RS(RetryServiceType.BASE_ROC)
+
+    @Inject
+    @RS(RetryServiceType.BASE_ROC)
     private RetryService baseService;
-    
-    @Inject @RS(RetryServiceType.BASE_ROC_DERIVED_CLASS_NO_REDEFINITION)
+
+    @Inject
+    @RS(RetryServiceType.BASE_ROC_DERIVED_CLASS_NO_REDEFINITION)
     private RetryService serviceDerivedClassNoRedefinition;
-    
-    @Inject @RS(RetryServiceType.BASE_ROC_RETRY_REDEFINED_ON_CLASS)
+
+    @Inject
+    @RS(RetryServiceType.BASE_ROC_RETRY_REDEFINED_ON_CLASS)
     private RetryService serviceOverrideClassLevel;
 
-    @Inject @RS(RetryServiceType.BASE_ROC_RETRY_REDEFINED_ON_CLASS_METHOD_OVERRIDE)
+    @Inject
+    @RS(RetryServiceType.BASE_ROC_RETRY_REDEFINED_ON_CLASS_METHOD_OVERRIDE)
     private RetryService serviceOverrideClassLevelMethodOverride;
-    
-    @Inject @RS(RetryServiceType.BASE_ROC_RETRY_REDEFINED_ON_METHOD)
+
+    @Inject
+    @RS(RetryServiceType.BASE_ROC_RETRY_REDEFINED_ON_METHOD)
     private RetryService serviceOverrideMethodLevel;
 
-    @Inject @RS(RetryServiceType.BASE_ROC_RETRY_MISSING_ON_METHOD)
+    @Inject
+    @RS(RetryServiceType.BASE_ROC_RETRY_MISSING_ON_METHOD)
     private RetryService serviceSuppressMethodLevel;
 
-    @Inject @RS(RetryServiceType.BASE_ROM)
+    @Inject
+    @RS(RetryServiceType.BASE_ROM)
     private RetryService serviceBaseROM;
 
-    @Inject @RS(RetryServiceType.BASE_ROM_RETRY_MISSING_ON_METHOD)
+    @Inject
+    @RS(RetryServiceType.BASE_ROM_RETRY_MISSING_ON_METHOD)
     private RetryService serviceBaseROMRetryMissingOnMethod;
 
-    @Inject @RS(RetryServiceType.BASE_ROM_RETRY_REDEFINED_ON_CLASS)
+    @Inject
+    @RS(RetryServiceType.BASE_ROM_RETRY_REDEFINED_ON_CLASS)
     private RetryService serviceBaseROMOverridedClassLevelNoMethodOverride;
 
-    @Inject @RS(RetryServiceType.BASE_ROM_RETRY_REDEFINED_ON_CLASS_METHOD_OVERRIDE)
+    @Inject
+    @RS(RetryServiceType.BASE_ROM_RETRY_REDEFINED_ON_CLASS_METHOD_OVERRIDE)
     private RetryService serviceBaseROMOverridedClassLevelMethodOverride;
 
-    @Inject @RS(RetryServiceType.BASE_ROM_RETRY_REDEFINED_ON_METHOD)
+    @Inject
+    @RS(RetryServiceType.BASE_ROM_RETRY_REDEFINED_ON_METHOD)
     private RetryService serviceBaseROMOverridedMethodLevel;
 
-    @Inject @RS(RetryServiceType.BASE_ROM_DERIVED_CLASS_NO_REDEFINITION)
+    @Inject
+    @RS(RetryServiceType.BASE_ROM_DERIVED_CLASS_NO_REDEFINITION)
     private RetryService serviceBaseROMNoRedefinition;
 
-    @Inject @RS(RetryServiceType.BASE_ROCM)
+    @Inject
+    @RS(RetryServiceType.BASE_ROCM)
     private RetryService serviceBaseROCM;
 
-    @Inject @RS(RetryServiceType.BASE_ROCM_DERIVED_CLASS_NO_REDEFINITION)
+    @Inject
+    @RS(RetryServiceType.BASE_ROCM_DERIVED_CLASS_NO_REDEFINITION)
     private RetryService serviceBaseROCMNoRedefinition;
 
-    @Inject @RS(RetryServiceType.BASE_ROCM_RETRY_REDEFINED_ON_CLASS)
+    @Inject
+    @RS(RetryServiceType.BASE_ROCM_RETRY_REDEFINED_ON_CLASS)
     private RetryService serviceBaseROCMOverridedClassLevelNoMethodOverride;
 
-    @Inject @RS(RetryServiceType.BASE_ROCM_RETRY_REDEFINED_ON_CLASS_METHOD_OVERRIDE)
+    @Inject
+    @RS(RetryServiceType.BASE_ROCM_RETRY_REDEFINED_ON_CLASS_METHOD_OVERRIDE)
     private RetryService serviceBaseROCMOverridedClassLevelMethodOverride;
 
-    @Inject @RS(RetryServiceType.BASE_ROCM_RETRY_MISSING_ON_METHOD)
+    @Inject
+    @RS(RetryServiceType.BASE_ROCM_RETRY_MISSING_ON_METHOD)
     private RetryService serviceBaseROCMRetryMissingOnMethod;
-    
+
     @Test
     public void baseRetryServiceUsesDefaults() {
         int nbExpectedRetries = 3; // see BaseRetryOnClassService class annotation
@@ -122,39 +139,40 @@ public class RetryVisibilityTest extends Arquillian {
 
     @Test
     public void serviceDerivedClassNoRedefinition() {
-        int nbExpectedRetries = 3;  // see RetryOnClassServiceNoRedefinition class
+        int nbExpectedRetries = 3; // see RetryOnClassServiceNoRedefinition class
 
         checkServiceCall(nbExpectedRetries, serviceDerivedClassNoRedefinition, "serviceDerivedClassNoRedefinition");
     }
-    
+
     @Test
     public void serviceOverrideClassLevelUsesClassLevelAnnotation() {
-        int nbExpectedRetries = 4;  // see RetryOnClassServiceOverrideClassLevel class annotation
+        int nbExpectedRetries = 4; // see RetryOnClassServiceOverrideClassLevel class annotation
 
-        checkServiceCall(nbExpectedRetries, serviceOverrideClassLevel, "serviceOverrideClassLevelUsesClassLevelAnnotation");
+        checkServiceCall(nbExpectedRetries, serviceOverrideClassLevel,
+                "serviceOverrideClassLevelUsesClassLevelAnnotation");
     }
 
     @Test
     public void serviceOverrideClassLevelUsesClassLevelAnnotationWithMethodOverride() {
-        int nbExpectedRetries = 4;  // see RetryOnClassServiceOverrideClassLevelMethodOverride class annotation
+        int nbExpectedRetries = 4; // see RetryOnClassServiceOverrideClassLevelMethodOverride class annotation
 
         checkServiceCall(
-                nbExpectedRetries
-                , serviceOverrideClassLevelMethodOverride
-                , "serviceOverrideClassLevelUsesClassLevelAnnotationWithMethodOverride"
-        );
+                nbExpectedRetries, serviceOverrideClassLevelMethodOverride,
+                "serviceOverrideClassLevelUsesClassLevelAnnotationWithMethodOverride");
     }
 
     @Test
     public void serviceOverrideMethodLevelUsesMethodLevelAnnotation() {
-        int nbExpectedRetries = 4;   // see RetryOnClassServiceOverrideMethodLevel#service() method annotation
+        int nbExpectedRetries = 4; // see RetryOnClassServiceOverrideMethodLevel#service() method annotation
 
-        checkServiceCall(nbExpectedRetries, serviceOverrideMethodLevel, "serviceOverrideMethodLevelUsesMethodLevelAnnotation");
+        checkServiceCall(nbExpectedRetries, serviceOverrideMethodLevel,
+                "serviceOverrideMethodLevelUsesMethodLevelAnnotation");
     }
-    
+
     @Test
     public void serviceRetryRemovedAtMethodLevel() {
-        int nbExpectedRetries = 3;  // see RetryOnClassServiceNoAnnotationOnOveriddenMethod#service() method with no annotation
+        int nbExpectedRetries = 3; // see RetryOnClassServiceNoAnnotationOnOveriddenMethod#service() method with no
+                                   // annotation
 
         checkServiceCall(nbExpectedRetries, serviceSuppressMethodLevel, "serviceRetryRemovedAtMethodLevel");
     }
@@ -177,14 +195,16 @@ public class RetryVisibilityTest extends Arquillian {
     public void serviceBaseROMOverridedClassLevelNoMethodOverride() {
         int nbExpectedRetries = 4;
 
-        checkServiceCall(nbExpectedRetries, serviceBaseROMOverridedClassLevelNoMethodOverride, "serviceBaseROMOverridedClassLevelNoMethodOverride");
+        checkServiceCall(nbExpectedRetries, serviceBaseROMOverridedClassLevelNoMethodOverride,
+                "serviceBaseROMOverridedClassLevelNoMethodOverride");
     }
 
     @Test
     public void serviceBaseROMOverridedClassLevelMethodOverride() {
         int nbExpectedRetries = 3;
 
-        checkServiceCall(nbExpectedRetries, serviceBaseROMOverridedClassLevelMethodOverride, "serviceBaseROMOverridedClassLevelMethodOverride");
+        checkServiceCall(nbExpectedRetries, serviceBaseROMOverridedClassLevelMethodOverride,
+                "serviceBaseROMOverridedClassLevelMethodOverride");
     }
 
     @Test
@@ -219,14 +239,16 @@ public class RetryVisibilityTest extends Arquillian {
     public void serviceBaseROCMOverridedClassLevelNoMethodOverride() {
         int nbExpectedRetries = 4;
 
-        checkServiceCall(nbExpectedRetries, serviceBaseROCMOverridedClassLevelNoMethodOverride, "serviceBaseROCMOverridedClassLevelNoMethodOverride");
+        checkServiceCall(nbExpectedRetries, serviceBaseROCMOverridedClassLevelNoMethodOverride,
+                "serviceBaseROCMOverridedClassLevelNoMethodOverride");
     }
 
     @Test
     public void serviceBaseROCMOverridedClassLevelMethodOverride() {
         int nbExpectedRetries = 5;
 
-        checkServiceCall(nbExpectedRetries, serviceBaseROCMOverridedClassLevelMethodOverride, "serviceBaseROCMOverridedClassLevelMethodOverride");
+        checkServiceCall(nbExpectedRetries, serviceBaseROCMOverridedClassLevelMethodOverride,
+                "serviceBaseROCMOverridedClassLevelMethodOverride");
     }
 
     @Test
@@ -240,26 +262,21 @@ public class RetryVisibilityTest extends Arquillian {
         int expectedNbCalls = nbExpectedRetries + 1;
         try {
             service.service();
-            Assert.fail(String.format("in %s#%s service() should have failed", 
-                    RetryVisibilityTest.class.getSimpleName(), testName)
-            );
-        } 
-        catch (IOException re) {
+            Assert.fail(String.format("in %s#%s service() should have failed",
+                    RetryVisibilityTest.class.getSimpleName(), testName));
+        } catch (IOException re) {
             Assert.assertEquals(
-                service.getNumberOfServiceCalls(),
-                    expectedNbCalls, 
-                String.format("in %s#%s service() should have been called exactly %d times",
+                    service.getNumberOfServiceCalls(),
+                    expectedNbCalls,
+                    String.format("in %s#%s service() should have been called exactly %d times",
+                            RetryVisibilityTest.class.getSimpleName(),
+                            testName,
+                            expectedNbCalls));
+        } catch (RuntimeException ex) {
+            Assert.fail(String.format("no %s exception should have been thrown in %s#%s",
+                    ex.getClass().getName(),
                     RetryVisibilityTest.class.getSimpleName(),
-                        testName,
-                        expectedNbCalls)
-            );
-        } 
-        catch (RuntimeException ex) {
-            Assert.fail(String.format("no %s exception should have been thrown in %s#%s", 
-                    ex.getClass().getName(), 
-                    RetryVisibilityTest.class.getSimpleName(),
-                    testName)
-            );
+                    testName));
         }
     }
 }

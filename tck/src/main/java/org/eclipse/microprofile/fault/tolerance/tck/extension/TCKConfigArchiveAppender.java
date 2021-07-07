@@ -30,9 +30,8 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 /**
  * Transfers TCK config to all deployed apps
  * <p>
- * This appender adds a jar which contains one resource containing the
- * configured timeout multiplier. This resource will be picked up by TCKConfig
- * when run within a test application.
+ * This appender adds a jar which contains one resource containing the configured timeout multiplier. This resource will
+ * be picked up by TCKConfig when run within a test application.
  */
 public class TCKConfigArchiveAppender extends CachedAuxilliaryArchiveAppender {
 

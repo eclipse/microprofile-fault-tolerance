@@ -19,30 +19,28 @@
 package org.eclipse.microprofile.faulttolerance.exceptions;
 
 /**
- * The exception should be thrown when Bulkhead implementation throws an exception, 
- * e.g. Waiting Queue is full or no Semaphore permits are available. 
- * <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
+ * The exception should be thrown when Bulkhead implementation throws an exception, e.g. Waiting Queue is full or no
+ * Semaphore permits are available. <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  *
  */
 public class BulkheadException extends FaultToleranceException {
-    
+
     private static final long serialVersionUID = 3569768756115160625L;
 
     public BulkheadException() {
         super();
     }
-    
-    public BulkheadException(Throwable t){
-        super(t) ;
-    }
-    
-    public BulkheadException(String message){
-        super(message) ;
-    }
-    
-    public BulkheadException(String message, Throwable t) {
-        super (message, t);
+
+    public BulkheadException(Throwable t) {
+        super(t);
     }
 
+    public BulkheadException(String message) {
+        super(message);
+    }
+
+    public BulkheadException(String message, Throwable t) {
+        super(message, t);
+    }
 
 }

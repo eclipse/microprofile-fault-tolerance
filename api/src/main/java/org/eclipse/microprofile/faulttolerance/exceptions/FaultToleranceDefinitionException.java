@@ -19,8 +19,8 @@
 package org.eclipse.microprofile.faulttolerance.exceptions;
 
 /**
- * The exception should be thrown when the definition of any Fault Tolerance annotations is invalid.
- * The deployment should fail.
+ * The exception should be thrown when the definition of any Fault Tolerance annotations is invalid. The deployment
+ * should fail.
  * 
  * <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  *
@@ -32,18 +32,17 @@ public class FaultToleranceDefinitionException extends FaultToleranceException {
     public FaultToleranceDefinitionException() {
         super();
     }
-    
-    public FaultToleranceDefinitionException(Throwable t){
-        super(t) ;
-    }
-    
-    public FaultToleranceDefinitionException(String message){
-        super(message) ;
-    }
-    
-    public FaultToleranceDefinitionException(String message, Throwable t) {
-        super (message, t);
+
+    public FaultToleranceDefinitionException(Throwable t) {
+        super(t);
     }
 
+    public FaultToleranceDefinitionException(String message) {
+        super(message);
+    }
+
+    public FaultToleranceDefinitionException(String message, Throwable t) {
+        super(message, t);
+    }
 
 }

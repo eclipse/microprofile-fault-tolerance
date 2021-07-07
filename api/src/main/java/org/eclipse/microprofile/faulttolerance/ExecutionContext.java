@@ -28,7 +28,7 @@ import java.lang.reflect.Method;
 @org.osgi.annotation.versioning.ProviderType
 public interface ExecutionContext {
 
-     /**
+    /**
      * Returns the method being executed.
      * 
      * @return the method
@@ -41,7 +41,7 @@ public interface ExecutionContext {
      * @return the parameter values, as an array
      */
     public Object[] getParameters();
-    
+
     /**
      * Returns the failure of the method execution.
      * 

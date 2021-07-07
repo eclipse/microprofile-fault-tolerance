@@ -19,69 +19,62 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.metrics;
 
-import javax.enterprise.context.ApplicationScoped;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.Fallback;
+
+import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class FallbackMetricBean {
 
     public enum Action {
-        PASS,
-        FAIL,
-        NON_FALLBACK_EXCEPTION
+        PASS, FAIL, NON_FALLBACK_EXCEPTION
     }
-    
+
     private Action fallbackAction = Action.PASS;
-    
+
     @Fallback(fallbackMethod = "doFallback", skipOn = NonFallbackException.class)
     public void doWork(Action action) {
         if (action == Action.PASS) {
             return;
-        }
-        else if (action == Action.FAIL){
+        } else if (action == Action.FAIL) {
             throw new TestException();
-        }
-        else {
+        } else {
             throw new NonFallbackException();
         }
     }
-    
+
     public void doFallback(Action action) {
         if (fallbackAction == Action.PASS) {
             return;
-        }
-        else if (fallbackAction == Action.FAIL){
+        } else if (fallbackAction == Action.FAIL) {
             throw new TestException();
-        }
-        else {
+        } else {
             throw new NonFallbackException();
         }
     }
-    
+
     @Fallback(value = FallbackMetricHandler.class, applyOn = TestException.class)
     public Void doWorkWithHandler(Action action) {
         if (action == Action.PASS) {
             return null;
-        }
-        else if (action == Action.FAIL){
+        } else if (action == Action.FAIL) {
             throw new TestException();
-        }
-        else {
+        } else {
             throw new NonFallbackException();
         }
     }
-    
+
     /**
      * Set whether the fallback method and handler should pass or throw an exception
      *
-     * @param action set to {@link Action} PASS or FAIL
+     * @param action
+     *            set to {@link Action} PASS or FAIL
      */
     public void setFallbackAction(Action action) {
         this.fallbackAction = action;
     }
-    
+
     /**
      * Get whether the fallback method and handler should pass or throw an exception
      *
@@ -90,13 +83,13 @@ public class FallbackMetricBean {
     public Action getFallbackAction() {
         return fallbackAction;
     }
-    
+
     @SuppressWarnings("serial")
     public static class NonFallbackException extends RuntimeException {
 
         public NonFallbackException() {
             super("Non-fallback exception");
         }
-        
+
     }
 }

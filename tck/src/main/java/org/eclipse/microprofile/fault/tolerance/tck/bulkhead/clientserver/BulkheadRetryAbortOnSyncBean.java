@@ -19,12 +19,12 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 
-import javax.enterprise.context.ApplicationScoped;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
+
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * Test to ensure that retries do not occur if BulkheadException is included in abortOn attribute.
@@ -37,7 +37,7 @@ import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
 @Bulkhead(1)
 @ApplicationScoped
 public class BulkheadRetryAbortOnSyncBean {
-    
+
     public void test(Barrier barrier) {
         barrier.await();
     }

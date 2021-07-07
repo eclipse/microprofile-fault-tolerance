@@ -23,8 +23,6 @@ import static org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig.getCon
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
 import org.eclipse.microprofile.fault.tolerance.tck.retrytimeout.clientserver.RetryTimeoutClient;
 import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
@@ -38,6 +36,9 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import jakarta.inject.Inject;
+
 /**
  * Test the combination of the @Retry and @Timeout annotations.
  * 
@@ -48,16 +49,18 @@ import org.testng.annotations.Test;
 public class RetryTimeoutTest extends Arquillian {
 
     private @Inject RetryTimeoutClient clientForRetryTimeout;
-    
+
     private TCKConfig config = TCKConfig.getConfig();
-    
+
     @Deployment
     public static WebArchive deploy() {
 
         final ConfigAnnotationAsset config = new ConfigAnnotationAsset()
-            .setValue(RetryTimeoutClient.class,"serviceA", Timeout.class,getConfig().getTimeoutInStr(500))
-            .setValue(RetryTimeoutClient.class,"serviceWithoutRetryOn", Timeout.class,getConfig().getTimeoutInStr(500))
-            .setValue(RetryTimeoutClient.class,"serviceWithAbortOn", Timeout.class,getConfig().getTimeoutInStr(500));
+                .setValue(RetryTimeoutClient.class, "serviceA", Timeout.class, getConfig().getTimeoutInStr(500))
+                .setValue(RetryTimeoutClient.class, "serviceWithoutRetryOn", Timeout.class,
+                        getConfig().getTimeoutInStr(500))
+                .setValue(RetryTimeoutClient.class, "serviceWithAbortOn", Timeout.class,
+                        getConfig().getTimeoutInStr(500));
 
         JavaArchive testJar = ShrinkWrap
                 .create(JavaArchive.class, "ftRetryTimeout.jar")
@@ -71,7 +74,7 @@ public class RetryTimeoutTest extends Arquillian {
                 .addAsLibrary(testJar);
         return war;
     }
-   
+
     /**
      * Test that a Service is retried the expected number of times.
      * 
@@ -83,23 +86,22 @@ public class RetryTimeoutTest extends Arquillian {
     public void testRetryTimeout() {
         try {
             String result = clientForRetryTimeout.serviceA(config.getTimeoutInMillis(1000));
-        } 
-        catch (TimeoutException ex) {
+        } catch (TimeoutException ex) {
             // Expected
-        } 
-        catch (RuntimeException ex) {
+        } catch (RuntimeException ex) {
             // Not Expected
             Assert.fail("serviceA should not throw a RuntimeException in testRetryTimeout");
         }
-        
-        Assert.assertEquals(clientForRetryTimeout.getCounterForInvokingServiceA(), 2, "The execution count should be 2 (1 retry + 1)");
+
+        Assert.assertEquals(clientForRetryTimeout.getCounterForInvokingServiceA(), 2,
+                "The execution count should be 2 (1 retry + 1)");
     }
-    
+
     /**
      * Test that a Service is retried the expected number of times.
      * 
-     * A timeout is configured for serviceA but the service should fail before the timeout is reached
-     * and generate a RuntimeException.  
+     * A timeout is configured for serviceA but the service should fail before the timeout is reached and generate a
+     * RuntimeException.
      * 
      * The service should be retried.
      */
@@ -107,18 +109,17 @@ public class RetryTimeoutTest extends Arquillian {
     public void testRetryNoTimeout() {
         try {
             String result = clientForRetryTimeout.serviceA(config.getTimeoutInMillis(10));
-        } 
-        catch (TimeoutException ex) {
+        } catch (TimeoutException ex) {
             // Not Expected
             Assert.fail("serviceA should not throw a TimeoutException in testRetrytNoTimeout");
-        } 
-        catch (RuntimeException ex) {
+        } catch (RuntimeException ex) {
             // Expected
-        }        
+        }
 
-        Assert.assertEquals(clientForRetryTimeout.getCounterForInvokingServiceA(), 2, "The execution count should be 2 (1 retry + 1)");
+        Assert.assertEquals(clientForRetryTimeout.getCounterForInvokingServiceA(), 2,
+                "The execution count should be 2 (1 retry + 1)");
     }
-    
+
     /**
      * Test that a service is not retried if TimeoutException is not included in the retryOn attribute
      */
@@ -127,14 +128,14 @@ public class RetryTimeoutTest extends Arquillian {
         try {
             clientForRetryTimeout.serviceWithoutRetryOn();
             fail("Timeout exception not thrown");
-        }
-        catch (TimeoutException e) {
+        } catch (TimeoutException e) {
             // expected
         }
-        
-        assertEquals(clientForRetryTimeout.getCounterForInvokingServiceWithoutRetryOn(), 1, "The execution count should be 1 (no retries)");
+
+        assertEquals(clientForRetryTimeout.getCounterForInvokingServiceWithoutRetryOn(), 1,
+                "The execution count should be 1 (no retries)");
     }
-    
+
     /**
      * Test that a service is not retried if TimeoutException is included in the abortOn attribute
      */
@@ -143,12 +144,12 @@ public class RetryTimeoutTest extends Arquillian {
         try {
             clientForRetryTimeout.serviceWithAbortOn();
             fail("Timeout exception not thrown");
-        }
-        catch (TimeoutException e) {
+        } catch (TimeoutException e) {
             // expected
         }
-        
-        assertEquals(clientForRetryTimeout.getCounterForInvokingServiceWithAbortOn(), 1, "The execution count should be 1 (no retries)");
+
+        assertEquals(clientForRetryTimeout.getCounterForInvokingServiceWithAbortOn(), 1,
+                "The execution count should be 1 (no retries)");
     }
 
 }

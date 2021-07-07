@@ -21,9 +21,10 @@ package org.eclipse.microprofile.fault.tolerance.tck.timeout.clientserver;
 
 import java.sql.Connection;
 
-import javax.enterprise.context.RequestScoped;
-
 import org.eclipse.microprofile.faulttolerance.Timeout;
+
+import jakarta.enterprise.context.RequestScoped;
+
 /**
  * A client to test Timeouts
  * 
@@ -36,23 +37,26 @@ public class DefaultTimeoutClient {
 
     /**
      * serviceA uses the default Fault Tolerance timeout of 1 second.
-     * @param timeToSleep How long should the execution take in millis
+     * 
+     * @param timeToSleep
+     *            How long should the execution take in millis
      * @return null or exception is raised
-     */    
+     */
     public Connection serviceA(long timeToSleep) {
         try {
             Thread.sleep(timeToSleep);
             throw new RuntimeException("Timeout did not interrupt");
-        } 
-        catch (InterruptedException e) {
-            //expected
+        } catch (InterruptedException e) {
+            // expected
         }
         return null;
     }
-    
+
     /**
      * serviceB specifies a an overriding Timeout longer than the default, at 2 seconds
-     * @param timeToSleep How long should the execution take in millis
+     * 
+     * @param timeToSleep
+     *            How long should the execution take in millis
      * @return null or exception is raised
      */
     @Timeout(2000)
@@ -60,9 +64,8 @@ public class DefaultTimeoutClient {
         try {
             Thread.sleep(timeToSleep);
             throw new RuntimeException("Timeout did not interrupt");
-        } 
-        catch (InterruptedException e) {
-            //expected
+        } catch (InterruptedException e) {
+            // expected
         }
         return null;
     }

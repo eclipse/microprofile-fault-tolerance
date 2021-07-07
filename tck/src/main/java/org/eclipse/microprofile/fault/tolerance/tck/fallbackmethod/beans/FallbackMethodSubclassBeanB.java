@@ -22,7 +22,7 @@ package org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans;
 
 import org.eclipse.microprofile.faulttolerance.Fallback;
 
-import javax.enterprise.inject.Vetoed;
+import jakarta.enterprise.inject.Vetoed;
 
 // bean is vetoed to avoid accidentally picking it up and execution validation
 @Vetoed

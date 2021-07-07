@@ -20,7 +20,7 @@
 
 package org.eclipse.microprofile.fault.tolerance.tck.fallback.clientserver;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class MyBean {

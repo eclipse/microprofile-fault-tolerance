@@ -24,7 +24,7 @@ import org.eclipse.microprofile.fault.tolerance.tck.exception.hierarchy.E1;
 import org.eclipse.microprofile.fault.tolerance.tck.exception.hierarchy.E2;
 import org.eclipse.microprofile.faulttolerance.Retry;
 
-import javax.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.RequestScoped;
 
 @RequestScoped
 public class RetryService {
@@ -51,8 +51,7 @@ public class RetryService {
     private void stateTransition() {
         if (status == RetryStatus.NOT_YET_INVOKED) {
             status = RetryStatus.FIRST_INVOCATION;
-        }
-        else if (status == RetryStatus.FIRST_INVOCATION) {
+        } else if (status == RetryStatus.FIRST_INVOCATION) {
             status = RetryStatus.RETRIED_INVOCATION;
         }
     }

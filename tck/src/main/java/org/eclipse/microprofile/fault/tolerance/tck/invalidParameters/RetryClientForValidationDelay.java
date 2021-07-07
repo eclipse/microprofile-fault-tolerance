@@ -20,9 +20,10 @@
 package org.eclipse.microprofile.fault.tolerance.tck.invalidParameters;
 
 import java.sql.Connection;
-import javax.enterprise.context.RequestScoped;
 
 import org.eclipse.microprofile.faulttolerance.Retry;
+
+import jakarta.enterprise.context.RequestScoped;
 
 /**
  * A client to demonstrate the validation of the delay attribute on @Retry

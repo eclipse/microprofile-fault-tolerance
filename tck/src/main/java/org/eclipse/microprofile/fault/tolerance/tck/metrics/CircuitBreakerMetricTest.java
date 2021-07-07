@@ -29,8 +29,6 @@ import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expec
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.CircuitBreakerMetricBean.Result;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.CircuitBreakerMetricBean.SkippedException;
@@ -48,37 +46,40 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import jakarta.inject.Inject;
+
 public class CircuitBreakerMetricTest extends Arquillian {
-    
+
     private static final long CB_CLOSE_TIMEOUT = TCKConfig.getConfig().getTimeoutInDuration(5000).toNanos();
 
     @Deployment
     public static WebArchive deploy() {
-        
+
         ConfigAnnotationAsset config = new ConfigAnnotationAsset()
                 .autoscaleMethod(CircuitBreakerMetricBean.class, "doWork");
-        
+
         JavaArchive jar = ShrinkWrap.create(JavaArchive.class, "ftMetricCircuitBreaker.jar")
                 .addClasses(CircuitBreakerMetricBean.class)
                 .addPackage(Packages.UTILS)
                 .addPackage(Packages.METRIC_UTILS)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                 .addAsManifestResource(config, "microprofile-config.properties");
-        
+
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftMetricCircuitBreaker.war")
                 .addAsLibrary(jar);
-        
+
         return war;
     }
-    
-    @Inject private CircuitBreakerMetricBean cbBean;
-    
+
+    @Inject
+    private CircuitBreakerMetricBean cbBean;
+
     @BeforeTest
     public void closeTheCircuit() throws Exception {
 
         // Condition is needed because BeforeTest runs on both client and server
         if (cbBean != null) {
-            
+
             // Assume the circuit is open
             // Attempt to put successful work through it until it stops throwing CircuitBreakerOpenExceptions
             boolean circuitOpen = true;
@@ -89,26 +90,25 @@ public class CircuitBreakerMetricTest extends Arquillian {
                         cbBean.doWork(Result.PASS);
                     }
                     circuitOpen = false;
-                }
-                catch (CircuitBreakerOpenException e) {
+                } catch (CircuitBreakerOpenException e) {
                     Thread.sleep(100);
                 }
             }
-            
+
             if (circuitOpen) {
                 throw new RuntimeException("Timed out waiting for circuit breaker to close");
             }
         }
     }
-    
+
     @Test
     public void testCircuitBreakerMetric() throws Exception {
         MetricGetter m = new MetricGetter(CircuitBreakerMetricBean.class, "doWork");
         m.baselineMetrics();
-        
+
         // First failure, circuit remains closed
         expectTestException(() -> cbBean.doWork(Result.FAIL));
-        
+
         assertThat("circuitbreaker calls succeeded", m.getCircuitBreakerCalls(SUCCESS).delta(), is(0L));
         assertThat("circuitbreaker calls failed", m.getCircuitBreakerCalls(FAILURE).delta(), is(1L));
         assertThat("circuitbreaker calls prevented", m.getCircuitBreakerCalls(CIRCUIT_BREAKER_OPEN).delta(), is(0L));
@@ -116,28 +116,28 @@ public class CircuitBreakerMetricTest extends Arquillian {
 
         // Second failure, causes circuit to open
         expectTestException(() -> cbBean.doWork(Result.FAIL));
-        
+
         assertThat("circuitbreaker calls succeeded", m.getCircuitBreakerCalls(SUCCESS).delta(), is(0L));
         assertThat("circuitbreaker calls failed", m.getCircuitBreakerCalls(FAILURE).delta(), is(2L));
         assertThat("circuitbreaker calls prevented", m.getCircuitBreakerCalls(CIRCUIT_BREAKER_OPEN).delta(), is(0L));
         assertThat("circuit breaker times opened", m.getCircuitBreakerOpened().delta(), is(1L));
-        
+
         // Circuit is open, causing failure
         expectCbOpen(() -> cbBean.doWork(Result.PASS));
-        
+
         assertThat("circuitbreaker calls succeeded", m.getCircuitBreakerCalls(SUCCESS).delta(), is(0L));
         assertThat("circuitbreaker calls failed", m.getCircuitBreakerCalls(FAILURE).delta(), is(2L));
         assertThat("circuitbreaker calls prevented", m.getCircuitBreakerCalls(CIRCUIT_BREAKER_OPEN).delta(), is(1L));
         assertThat("circuit breaker times opened", m.getCircuitBreakerOpened().delta(), is(1L));
-        
+
         // Wait a while for the circuit to be half-open
         Thread.sleep(TCKConfig.getConfig().getTimeoutInMillis(1500));
-        
-        // Lots of successful work, causing the circuit to close again 
+
+        // Lots of successful work, causing the circuit to close again
         for (int i = 0; i < 2; i++) {
             cbBean.doWork(Result.PASS);
         }
-        
+
         assertThat("circuitbreaker calls succeeded", m.getCircuitBreakerCalls(SUCCESS).delta(), is(2L));
         assertThat("circuitbreaker calls failed", m.getCircuitBreakerCalls(FAILURE).delta(), is(2L));
         assertThat("circuitbreaker calls prevented", m.getCircuitBreakerCalls(CIRCUIT_BREAKER_OPEN).delta(), is(1L));
@@ -160,7 +160,9 @@ public class CircuitBreakerMetricTest extends Arquillian {
         assertThat("circuit breaker times opened", m.getCircuitBreakerOpened().delta(), is(1L));
 
         // General metrics should be updated
-        assertThat("successful invocations", m.getInvocations(VALUE_RETURNED, InvocationFallback.NOT_DEFINED).delta(), is(2L));
-        assertThat("failed invocations", m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_DEFINED).delta(), is(5L));
+        assertThat("successful invocations", m.getInvocations(VALUE_RETURNED, InvocationFallback.NOT_DEFINED).delta(),
+                is(2L));
+        assertThat("failed invocations", m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_DEFINED).delta(),
+                is(5L));
     }
 }

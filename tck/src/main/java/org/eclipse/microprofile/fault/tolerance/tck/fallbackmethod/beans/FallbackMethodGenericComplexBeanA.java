@@ -23,13 +23,13 @@ package org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans;
 import java.util.List;
 import java.util.Set;
 
-import javax.enterprise.context.ApplicationScoped;
-
 import org.eclipse.microprofile.faulttolerance.Fallback;
+
+import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class FallbackMethodGenericComplexBeanA extends FallbackMethodGenericComplexBeanB<String> {
-    
+
     @Fallback(fallbackMethod = "fallback")
     public String method(List<Set<String>> a) {
         throw new RuntimeException("test");

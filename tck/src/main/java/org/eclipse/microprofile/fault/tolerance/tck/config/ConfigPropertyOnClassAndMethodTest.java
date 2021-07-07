@@ -19,8 +19,6 @@
 
 package org.eclipse.microprofile.fault.tolerance.tck.config;
 
-import javax.inject.Inject;
-
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -31,6 +29,8 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import jakarta.inject.Inject;
+
 /**
  * @author Antoine Sabot-Durand
  */
@@ -39,18 +39,18 @@ public class ConfigPropertyOnClassAndMethodTest extends Arquillian {
     @Deployment
     public static WebArchive deployAnotherApp() {
         JavaArchive testJar = ShrinkWrap
-            .create(JavaArchive.class, "ftConfig.jar")
-            .addClasses(BeanWithRetry.class)
-            .addAsManifestResource(new StringAsset(
-                                       "org.eclipse.microprofile.fault.tolerance.tck.config.BeanWithRetry/Retry/maxRetries=5" +
-                                           "\norg.eclipse.microprofile.fault.tolerance.tck.config.BeanWithRetry/triggerException/Retry/maxRetries=6"),
-                                   "microprofile-config.properties")
-            .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
-            .as(JavaArchive.class);
+                .create(JavaArchive.class, "ftConfig.jar")
+                .addClasses(BeanWithRetry.class)
+                .addAsManifestResource(new StringAsset(
+                        "org.eclipse.microprofile.fault.tolerance.tck.config.BeanWithRetry/Retry/maxRetries=5" +
+                                "\norg.eclipse.microprofile.fault.tolerance.tck.config.BeanWithRetry/triggerException/Retry/maxRetries=6"),
+                        "microprofile-config.properties")
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
+                .as(JavaArchive.class);
 
         WebArchive war = ShrinkWrap
-            .create(WebArchive.class, "ftConfigTest.war")
-            .addAsLibrary(testJar);
+                .create(WebArchive.class, "ftConfigTest.war")
+                .addAsLibrary(testJar);
         return war;
     }
 
@@ -61,8 +61,7 @@ public class ConfigPropertyOnClassAndMethodTest extends Arquillian {
     void propertyPriorityTest() {
         try {
             bean.triggerException();
-        }
-        catch (IllegalStateException e) {
+        } catch (IllegalStateException e) {
             e.printStackTrace();
         }
         Assert.assertEquals(bean.getRetry(), 7);

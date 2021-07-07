@@ -21,10 +21,10 @@ package org.eclipse.microprofile.fault.tolerance.tck.invalidParameters;
 
 import java.sql.Connection;
 
-import javax.enterprise.context.RequestScoped;
-
-import org.eclipse.microprofile.faulttolerance.Bulkhead;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
+import org.eclipse.microprofile.faulttolerance.Bulkhead;
+
+import jakarta.enterprise.context.RequestScoped;
 
 /**
  * A client to demonstrate the validation of the waitingTaskQueue on @Bulkhead

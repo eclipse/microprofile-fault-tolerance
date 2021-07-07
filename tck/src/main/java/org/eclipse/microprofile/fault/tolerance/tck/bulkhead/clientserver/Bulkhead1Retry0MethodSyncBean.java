@@ -21,12 +21,12 @@ package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 
 import java.time.temporal.ChronoUnit;
 
-import javax.enterprise.context.ApplicationScoped;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
+
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * A method level synchronous @Bulkhead bean with Retry configured for no retries with a 1 second delay
@@ -38,9 +38,8 @@ import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
 public class Bulkhead1Retry0MethodSyncBean {
 
     @Bulkhead(value = 1)
-    @Retry(retryOn = { BulkheadException.class },
-           delay = 1, delayUnit = ChronoUnit.SECONDS,
-           maxRetries = 0, maxDuration=999999 )
+    @Retry(retryOn = {
+            BulkheadException.class}, delay = 1, delayUnit = ChronoUnit.SECONDS, maxRetries = 0, maxDuration = 999999)
     public void test(Barrier barrier) {
         barrier.await();
     }

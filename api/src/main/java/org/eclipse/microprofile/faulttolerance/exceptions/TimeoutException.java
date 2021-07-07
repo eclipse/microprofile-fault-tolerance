@@ -19,29 +19,27 @@
 package org.eclipse.microprofile.faulttolerance.exceptions;
 
 /**
- * The exception should be thrown when timeout is reached. 
- * <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
+ * The exception should be thrown when timeout is reached. <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  *
  */
 public class TimeoutException extends FaultToleranceException {
-    
+
     private static final long serialVersionUID = 958116453839967874L;
-    
+
     public TimeoutException() {
         super();
     }
-    
-    public TimeoutException(Throwable t){
-        super(t) ;
-    }
-    
-    public TimeoutException(String message){
-        super(message) ;
-    }
-    
-    public TimeoutException(String message, Throwable t) {
-        super (message, t);
+
+    public TimeoutException(Throwable t) {
+        super(t);
     }
 
+    public TimeoutException(String message) {
+        super(message);
+    }
+
+    public TimeoutException(String message, Throwable t) {
+        super(message, t);
+    }
 
 }

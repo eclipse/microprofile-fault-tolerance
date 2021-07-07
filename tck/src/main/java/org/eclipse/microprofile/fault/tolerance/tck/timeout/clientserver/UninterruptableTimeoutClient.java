@@ -30,8 +30,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.enterprise.context.RequestScoped;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
@@ -40,12 +38,14 @@ import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.faulttolerance.Timeout;
 import org.testng.Assert;
 
+import jakarta.enterprise.context.RequestScoped;
+
 @RequestScoped
 public class UninterruptableTimeoutClient {
 
     // 3 seconds * baseMultiplier, in milliseconds
     private final long WAITING_FUTURE_DURATION = TCKConfig.getConfig().getTimeoutInMillis(3L * 1000);
-    
+
     /**
      * Waits for at least {@code waitms}, then returns
      * <p>
@@ -55,20 +55,21 @@ public class UninterruptableTimeoutClient {
      * <p>
      * Uses a tight loop so the thread interrupted flag should be set when the method returns
      * 
-     * @param waitMs the time to wait
+     * @param waitMs
+     *            the time to wait
      */
     @Timeout(value = 500, unit = ChronoUnit.MILLIS)
     public void serviceTimeout(long waitMs) {
         long waitNs = Duration.ofMillis(waitMs).toNanos();
         long startTime = System.nanoTime();
-        
+
         while (true) {
             if (System.nanoTime() - startTime > waitNs) {
                 return;
             }
         }
     }
-    
+
     /**
      * Waits for waitingFuture to complete, then returns.
      * <p>
@@ -78,8 +79,10 @@ public class UninterruptableTimeoutClient {
      * <p>
      * Does not respect thread interruption.
      * 
-     * @param waitingFuture future to wait for
-     * @param completion future that this method will complete before returning
+     * @param waitingFuture
+     *            future to wait for
+     * @param completion
+     *            future that this method will complete before returning
      * @return a completed future
      */
     @Timeout(value = 500, unit = ChronoUnit.MILLIS)
@@ -90,19 +93,16 @@ public class UninterruptableTimeoutClient {
                 waitingFuture.get(WAITING_FUTURE_DURATION, MILLISECONDS);
                 completion.complete(null);
                 return CompletableFuture.completedFuture(null);
-            }
-            catch (InterruptedException e) {
+            } catch (InterruptedException e) {
                 // Ignore
-            }
-            catch (ExecutionException e) {
+            } catch (ExecutionException e) {
                 Assert.fail("Waiting future threw exception", e);
-            }
-            catch (TimeoutException e) {
+            } catch (TimeoutException e) {
                 Assert.fail("Waiting future timed out", e);
             }
         }
     }
-    
+
     /**
      * Waits for at least {@code waitMs}, then returns
      * <p>
@@ -114,7 +114,8 @@ public class UninterruptableTimeoutClient {
      * <p>
      * Uses a tight loop so the thread interrupted flag should be set when the method returns
      * 
-     * @param waitMs the time to wait
+     * @param waitMs
+     *            the time to wait
      * @return a completed CompletionStage
      */
     @Timeout(value = 500, unit = ChronoUnit.MILLIS)
@@ -122,15 +123,14 @@ public class UninterruptableTimeoutClient {
     public CompletionStage<Void> serviceTimeoutAsyncCS(long waitMs) {
         long waitNs = Duration.ofMillis(waitMs).toNanos();
         long startTime = System.nanoTime();
-        
+
         while (true) {
             if (System.nanoTime() - startTime > waitNs) {
                 return CompletableFuture.completedFuture(null);
             }
         }
     }
-    
-    
+
     /**
      * Waits for waitingFuture to complete, then returns.
      * <p>
@@ -144,7 +144,8 @@ public class UninterruptableTimeoutClient {
      * <p>
      * Increments timeoutAsyncBulkheadCounter.
      * 
-     * @param waitingFuture future to wait for
+     * @param waitingFuture
+     *            future to wait for
      * @return a completed future
      */
     @Timeout(value = 500, unit = ChronoUnit.MILLIS)
@@ -156,25 +157,22 @@ public class UninterruptableTimeoutClient {
             try {
                 waitingFuture.get(WAITING_FUTURE_DURATION, MILLISECONDS);
                 return CompletableFuture.completedFuture(null);
-            }
-            catch (InterruptedException e) {
+            } catch (InterruptedException e) {
                 // Ignore
-            }
-            catch (ExecutionException e) {
+            } catch (ExecutionException e) {
                 Assert.fail("Waiting future threw exception", e);
-            }
-            catch (TimeoutException e) {
+            } catch (TimeoutException e) {
                 Assert.fail("Waiting future timed out", e);
             }
         }
     }
-    
+
     private AtomicInteger timeoutAsyncBulkheadCounter = new AtomicInteger();
-    
+
     public int getTimeoutAsyncBulkheadCounter() {
         return timeoutAsyncBulkheadCounter.get();
     }
-    
+
     /**
      * Waits for waitingFuture to complete, then returns.
      * <p>
@@ -186,7 +184,8 @@ public class UninterruptableTimeoutClient {
      * <p>
      * Has a bulkhead with capacity of 1, queue size of 1.
      * 
-     * @param waitingFuture future to wait for
+     * @param waitingFuture
+     *            future to wait for
      * @return a completed Future
      */
     @Timeout(value = 500, unit = ChronoUnit.MILLIS)
@@ -197,19 +196,16 @@ public class UninterruptableTimeoutClient {
             try {
                 waitingFuture.get(WAITING_FUTURE_DURATION, MILLISECONDS);
                 return CompletableFuture.completedFuture(null);
-            }
-            catch (InterruptedException e) {
+            } catch (InterruptedException e) {
                 // Ignore
-            }
-            catch (ExecutionException e) {
+            } catch (ExecutionException e) {
                 Assert.fail("Waiting future threw exception", e);
-            }
-            catch (TimeoutException e) {
+            } catch (TimeoutException e) {
                 Assert.fail("Waiting future timed out", e);
             }
         }
     }
-    
+
     /**
      * Waits for waitingFuture to complete, then returns.
      * <p>
@@ -223,7 +219,8 @@ public class UninterruptableTimeoutClient {
      * <p>
      * Increments timeoutAsyncRetryCounter.
      * 
-     * @param waitingFuture future to wait for
+     * @param waitingFuture
+     *            future to wait for
      * @return a completed Future
      */
     @Timeout(value = 500, unit = ChronoUnit.MILLIS)
@@ -235,28 +232,25 @@ public class UninterruptableTimeoutClient {
             try {
                 waitingFuture.get(WAITING_FUTURE_DURATION, MILLISECONDS);
                 return CompletableFuture.completedFuture(null);
-            }
-            catch (InterruptedException e) {
+            } catch (InterruptedException e) {
                 // Ignore
-            }
-            catch (ExecutionException e) {
+            } catch (ExecutionException e) {
                 Assert.fail("Waiting future threw exception", e);
-            }
-            catch (TimeoutException e) {
+            } catch (TimeoutException e) {
                 Assert.fail("Waiting future timed out", e);
             }
         }
     }
-    
+
     private AtomicInteger timeoutAsyncRetryCounter = new AtomicInteger();
-    
+
     /**
      * @return value of timeoutAsyncRetryCounter
      */
     public int getTimeoutAsyncRetryCounter() {
         return timeoutAsyncRetryCounter.get();
     }
-    
+
     /**
      * Waits for waitingFuture to complete, then returns.
      * <p>
@@ -268,7 +262,8 @@ public class UninterruptableTimeoutClient {
      * <p>
      * Will run the fallback method on exception
      * 
-     * @param waitingFuture future to wait for
+     * @param waitingFuture
+     *            future to wait for
      * @return Future completed with "OK", or completed with "FALLBACK" if the fallback ran
      */
     @Timeout(value = 500, unit = ChronoUnit.MILLIS)
@@ -279,19 +274,16 @@ public class UninterruptableTimeoutClient {
             try {
                 waitingFuture.get(WAITING_FUTURE_DURATION, MILLISECONDS);
                 return CompletableFuture.completedFuture("OK");
-            }
-            catch (InterruptedException e) {
+            } catch (InterruptedException e) {
                 // Ignore
-            }
-            catch (ExecutionException e) {
+            } catch (ExecutionException e) {
                 Assert.fail("Waiting future threw exception", e);
-            }
-            catch (TimeoutException e) {
+            } catch (TimeoutException e) {
                 Assert.fail("Waiting future timed out", e);
             }
         }
     }
-    
+
     public Future<String> fallback(Future<?> waitingFuture) {
         return CompletableFuture.completedFuture("FALLBACK");
     }

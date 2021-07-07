@@ -19,6 +19,8 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck;
 
+import static org.testng.Assert.assertEquals;
+
 import org.eclipse.microprofile.fault.tolerance.tck.exception.hierarchy.E0;
 import org.eclipse.microprofile.fault.tolerance.tck.exception.hierarchy.E0S;
 import org.eclipse.microprofile.fault.tolerance.tck.exception.hierarchy.E1;
@@ -35,30 +37,28 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
-import javax.inject.Inject;
-
-import static org.testng.Assert.assertEquals;
+import jakarta.inject.Inject;
 
 /**
- * Verifies behavior of {@code @Retry} for various exceptions in an inheritance hierarchy.
- * The asserted logic is:
+ * Verifies behavior of {@code @Retry} for various exceptions in an inheritance hierarchy. The asserted logic is:
  * <ol>
- *     <li>Abort if the exception matches abortOn</li>
- *     <li>Otherwise retry if the exception matches retryOn</li>
- *     <li>Otherwise abort</li>
+ * <li>Abort if the exception matches abortOn</li>
+ * <li>Otherwise retry if the exception matches retryOn</li>
+ * <li>Otherwise abort</li>
  * </ol>
  */
 public class RetryExceptionHierarchyTest extends Arquillian {
     @Deployment
     public static WebArchive deploy() {
         JavaArchive jar = ShrinkWrap.create(JavaArchive.class, "ftRetryExceptionHierarchy.jar")
-            .addClasses(E0.class, E0S.class, E1.class, E1S.class, E2.class, E2S.class, RetryStatus.class, RetryService.class)
-            .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
-            .as(JavaArchive.class);
+                .addClasses(E0.class, E0S.class, E1.class, E1S.class, E2.class, E2S.class, RetryStatus.class,
+                        RetryService.class)
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
+                .as(JavaArchive.class);
 
         return ShrinkWrap
-            .create(WebArchive.class, "ftRetryExceptionHierarchy.war")
-            .addAsLibrary(jar);
+                .create(WebArchive.class, "ftRetryExceptionHierarchy.war")
+                .addAsLibrary(jar);
     }
 
     @Inject
@@ -67,9 +67,9 @@ public class RetryExceptionHierarchyTest extends Arquillian {
     // the <: symbol denotes the subtyping relation (Foo <: Bar means "Foo is a subtype of Bar")
     // note that subtyping is reflexive (Foo <: Foo)
 
-    // E0  <: Exception
-    // E1  <: E0
-    // E2  <: E1
+    // E0 <: Exception
+    // E1 <: E0
+    // E2 <: E1
     // E2S <: E2
     // E1S <: E1, but not E1S <: E2
     // E0S <: E0, but not E0S <: E1
@@ -133,8 +133,7 @@ public class RetryExceptionHierarchyTest extends Arquillian {
     private RetryStatus invokeServiceA(Throwable exception) {
         try {
             service.serviceA(exception);
-        }
-        catch (Throwable expected) {
+        } catch (Throwable expected) {
         }
         return service.getStatus();
     }
@@ -198,8 +197,7 @@ public class RetryExceptionHierarchyTest extends Arquillian {
     private RetryStatus invokeserviceB(Throwable exception) {
         try {
             service.serviceB(exception);
-        }
-        catch (Throwable expected) {
+        } catch (Throwable expected) {
         }
         return service.getStatus();
     }
@@ -263,8 +261,7 @@ public class RetryExceptionHierarchyTest extends Arquillian {
     private RetryStatus invokeServiceC(Throwable exception) {
         try {
             service.serviceC(exception);
-        }
-        catch (Throwable expected) {
+        } catch (Throwable expected) {
         }
         return service.getStatus();
     }

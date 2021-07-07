@@ -23,9 +23,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
-import javax.enterprise.context.ApplicationScoped;
-
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
+
+import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 @Asynchronous
@@ -34,26 +34,28 @@ public class AsyncCaller {
     /**
      * Run a runnable asynchronously
      *
-     * @param runnable task to execute
+     * @param runnable
+     *            task to execute
      * @return a completed future set to null
      */
     public Future<Void> run(Runnable runnable) {
         runnable.run();
         return CompletableFuture.completedFuture(null);
     }
-    
+
     /**
      * Run a callable asynchronously
      * 
-     * @param callable the callable to run
-     * @param <T> the type returned by {@code callable}
+     * @param callable
+     *            the callable to run
+     * @param <T>
+     *            the type returned by {@code callable}
      * @return a future which can be used to get the result of running {@code callable}
      */
     public <T> Future<T> submit(Callable<T> callable) {
         try {
             return CompletableFuture.completedFuture(callable.call());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             CompletableFuture<T> result = new CompletableFuture<T>();
             result.completeExceptionally(e);
             return result;

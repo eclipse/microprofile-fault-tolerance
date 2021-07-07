@@ -22,8 +22,6 @@ package org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod;
 
 import static org.testng.Assert.assertEquals;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodGenericDeepBeanA;
 import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodGenericDeepBeanB;
 import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodGenericDeepBeanC;
@@ -35,6 +33,8 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
+import jakarta.inject.Inject;
+
 /**
  * Test for a fallback method with a type variable parameter in a deeper class hierarchy
  */
@@ -44,21 +44,22 @@ public class FallbackMethodGenericDeepTest extends Arquillian {
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodGenericDeep.jar")
                 .addClasses(FallbackMethodGenericDeepBeanA.class,
-                            FallbackMethodGenericDeepBeanB.class,
-                            FallbackMethodGenericDeepBeanC.class)
+                        FallbackMethodGenericDeepBeanB.class,
+                        FallbackMethodGenericDeepBeanC.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
-        
+
         WebArchive war = ShrinkWrap
                 .create(WebArchive.class, "ftFallbackMethodGenericDeep.war")
                 .addAsLibrary(testJar);
         return war;
     }
-    
-    @Inject private FallbackMethodGenericDeepBeanA bean;
-    
+
+    @Inject
+    private FallbackMethodGenericDeepBeanA bean;
+
     @Test
     public void fallbackMethodGenericDeep() {
         assertEquals(bean.method(1, 2L), "fallback");
     }
-    
+
 }

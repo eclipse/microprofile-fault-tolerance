@@ -20,8 +20,10 @@
 package org.eclipse.microprofile.fault.tolerance.tck.config.clientserver;
 
 import java.sql.Connection;
-import javax.enterprise.context.RequestScoped;
+
 import org.eclipse.microprofile.faulttolerance.Retry;
+
+import jakarta.enterprise.context.RequestScoped;
 
 /**
  * A client to support Fault Tolerance Configuration tests.
@@ -32,14 +34,13 @@ import org.eclipse.microprofile.faulttolerance.Retry;
 @RequestScoped
 @Retry(maxRetries = 5)
 public class ConfigClassLevelClient {
- 
+
     private int counterForInvokingConnenectionService = 0;
-    
+
     public Connection serviceA() {
         try {
             Thread.sleep(100);
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
@@ -50,14 +51,13 @@ public class ConfigClassLevelClient {
     public Connection serviceB() {
         try {
             Thread.sleep(100);
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
         return connectionService();
     }
-          
+
     private Connection connectionService() {
         counterForInvokingConnenectionService++;
         throw new RuntimeException("Connection failed");

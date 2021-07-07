@@ -19,24 +19,25 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.interceptor;
 
-import org.eclipse.microprofile.fault.tolerance.tck.interceptor.EarlyFtInterceptor.InterceptEarly;
-
-import javax.annotation.Priority;
-import javax.inject.Inject;
-import javax.interceptor.AroundInvoke;
-import javax.interceptor.Interceptor;
-import javax.interceptor.InterceptorBinding;
-import javax.interceptor.InvocationContext;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+import org.eclipse.microprofile.fault.tolerance.tck.interceptor.EarlyFtInterceptor.InterceptEarly;
+
+import jakarta.annotation.Priority;
+import jakarta.inject.Inject;
+import jakarta.interceptor.AroundInvoke;
+import jakarta.interceptor.Interceptor;
+import jakarta.interceptor.InterceptorBinding;
+import jakarta.interceptor.InvocationContext;
+
 /**
- * An interceptor that is called before the FT interceptor
- * in the chain and count the invocation.
+ * An interceptor that is called before the FT interceptor in the chain and count the invocation.
+ * 
  * @author carlosdlr
  */
 @Interceptor
@@ -51,9 +52,10 @@ public class EarlyFtInterceptor {
      * Interceptor binding for {@link EarlyFtInterceptor}
      */
     @Retention(RUNTIME)
-    @Target({ TYPE, METHOD })
+    @Target({TYPE, METHOD})
     @InterceptorBinding
-    public @interface InterceptEarly {}
+    public @interface InterceptEarly {
+    }
 
     @AroundInvoke
     public Object intercept(InvocationContext ctx) throws Exception {

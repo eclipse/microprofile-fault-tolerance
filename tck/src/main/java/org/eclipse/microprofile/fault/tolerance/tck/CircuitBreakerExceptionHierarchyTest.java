@@ -22,8 +22,6 @@ package org.eclipse.microprofile.fault.tolerance.tck;
 
 import static org.testng.Assert.assertEquals;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.exception.hierarchy.CircuitBreakerService;
 import org.eclipse.microprofile.fault.tolerance.tck.exception.hierarchy.E0;
 import org.eclipse.microprofile.fault.tolerance.tck.exception.hierarchy.E0S;
@@ -40,34 +38,35 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
+import jakarta.inject.Inject;
+
 /**
- * Test that {@code CircuitBreaker.failOn()} and {@code CircuitBreaker.skipOn()}
- * handle exception subclasses correctly.
+ * Test that {@code CircuitBreaker.failOn()} and {@code CircuitBreaker.skipOn()} handle exception subclasses correctly.
  */
 public class CircuitBreakerExceptionHierarchyTest extends Arquillian {
-    
+
     @Deployment
     public static WebArchive deploy() {
         JavaArchive jar = ShrinkWrap.create(JavaArchive.class, "ftCircuitBreakerExceptionHierarchy.jar")
-            .addPackage(E0.class.getPackage())
-            .addClass(CircuitBreakerService.class)
-            .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
-            .as(JavaArchive.class);
+                .addPackage(E0.class.getPackage())
+                .addClass(CircuitBreakerService.class)
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
+                .as(JavaArchive.class);
 
         return ShrinkWrap
-            .create(WebArchive.class, "ftCircuitBreakerExceptionHierarchy.war")
-            .addAsLibrary(jar);
+                .create(WebArchive.class, "ftCircuitBreakerExceptionHierarchy.war")
+                .addAsLibrary(jar);
     }
 
     @Inject
     private CircuitBreakerService service;
-    
+
     // the <: symbol denotes the subtyping relation (Foo <: Bar means "Foo is a subtype of Bar")
     // note that subtyping is reflexive (Foo <: Foo)
 
-    // E0  <: Exception
-    // E1  <: E0
-    // E2  <: E1
+    // E0 <: Exception
+    // E1 <: E0
+    // E2 <: E1
     // E2S <: E2
     // E1S <: E1, but not E1S <: E2
     // E0S <: E0, but not E0S <: E1
@@ -244,31 +243,27 @@ public class CircuitBreakerExceptionHierarchyTest extends Arquillian {
         try {
             method.invoke(exception);
             throw new AssertionError("Exception not thrown from service method");
-        }
-        catch (Throwable ex) {
+        } catch (Throwable ex) {
             assertEquals(ex, exception);
         }
-        
+
         try {
             method.invoke(exception);
             throw new AssertionError("Exception not thrown from service method");
-        }
-        catch (CircuitBreakerOpenException ex) {
+        } catch (CircuitBreakerOpenException ex) {
             return CircuitState.OPEN;
-        }
-        catch (Throwable ex) {
+        } catch (Throwable ex) {
             assertEquals(ex, exception);
             return CircuitState.CLOSED;
         }
     }
-    
+
     @FunctionalInterface
     private static interface ServiceMethod {
         void invoke(Throwable t) throws Throwable;
     }
-    
+
     private enum CircuitState {
-        CLOSED,
-        OPEN
+        CLOSED, OPEN
     }
 }

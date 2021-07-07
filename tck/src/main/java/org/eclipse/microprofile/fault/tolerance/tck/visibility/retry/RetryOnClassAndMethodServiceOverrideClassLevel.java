@@ -19,9 +19,9 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.visibility.retry;
 
-import javax.enterprise.context.RequestScoped;
-
 import org.eclipse.microprofile.faulttolerance.Retry;
+
+import jakarta.enterprise.context.RequestScoped;
 
 @RequestScoped
 @RS(RetryServiceType.BASE_ROCM_RETRY_REDEFINED_ON_CLASS)

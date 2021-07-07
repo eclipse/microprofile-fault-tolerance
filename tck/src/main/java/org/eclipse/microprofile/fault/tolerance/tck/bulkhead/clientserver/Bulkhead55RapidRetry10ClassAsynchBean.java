@@ -23,12 +23,12 @@ import java.time.temporal.ChronoUnit;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
-import javax.enterprise.context.ApplicationScoped;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 import org.eclipse.microprofile.faulttolerance.Retry;
+
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * A simple method level Asynchronous @Bulkhead bean that has a retry option.
@@ -39,7 +39,7 @@ import org.eclipse.microprofile.faulttolerance.Retry;
 @ApplicationScoped
 @Bulkhead(waitingTaskQueue = 5, value = 5)
 @Asynchronous
-@Retry(delay = 1, delayUnit = ChronoUnit.MICROS, jitter = 0, maxRetries = 10, maxDuration=999999)
+@Retry(delay = 1, delayUnit = ChronoUnit.MICROS, jitter = 0, maxRetries = 10, maxDuration = 999999)
 public class Bulkhead55RapidRetry10ClassAsynchBean {
 
     public Future<?> test(Barrier barrier) {

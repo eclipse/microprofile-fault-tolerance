@@ -29,8 +29,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadFutureClassBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadFutureMethodBean;
 import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncTaskManager;
@@ -44,10 +42,11 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
+import jakarta.inject.Inject;
+
 /**
- * This set of tests will test correct operation on the relevant methods of the
- * Future object that is returned from the business method of a Asynchronous
- * Method or Class.
+ * This set of tests will test correct operation on the relevant methods of the Future object that is returned from the
+ * business method of a Asynchronous Method or Class.
  *
  * @author Gordon Hutchison
  * @author carlosdlr
@@ -57,112 +56,110 @@ public class BulkheadFutureTest extends Arquillian {
 
     @Inject
     private BulkheadFutureMethodBean bhFutureMethodBean;
-    
+
     @Inject
     private BulkheadFutureClassBean bhFutureClassBean;
 
     @Deployment
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftBulkheadFutureTest.jar")
-                                        .addClasses(BulkheadFutureMethodBean.class, BulkheadFutureClassBean.class)
-                                        .addPackage(Packages.UTILS)
-                                        .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
-        
+                .addClasses(BulkheadFutureMethodBean.class, BulkheadFutureClassBean.class)
+                .addPackage(Packages.UTILS)
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
+
         return ShrinkWrap.create(WebArchive.class, "ftBulkheadFutureTest.war")
-                         .addAsLibrary(testJar);
+                .addAsLibrary(testJar);
     }
 
     /**
-     * Tests that the Future that is returned from an asynchronous bulkhead
-     * method can be queried for Done OK before and after a goodpath .get()
+     * Tests that the Future that is returned from an asynchronous bulkhead method can be queried for Done OK before and
+     * after a goodpath .get()
      */
     @Test
-    public void testBulkheadMethodAsynchFutureDoneAfterGet() throws InterruptedException, ExecutionException, TimeoutException {
-        
+    public void testBulkheadMethodAsynchFutureDoneAfterGet()
+            throws InterruptedException, ExecutionException, TimeoutException {
+
         try (AsyncTaskManager taskManager = new AsyncTaskManager()) {
             TestFuture testFuture = new TestFuture();
             Barrier barrier = taskManager.newBarrier();
             Future<String> result = bhFutureMethodBean.test(testFuture, barrier);
-            
+
             assertFalse(result.isDone(), "Future reporting Done when not");
-            
+
             barrier.open();
-            
+
             assertEquals(result.get(10, TimeUnit.SECONDS), "RESULT");
             assertEquals(result.get(), "RESULT");
-            
+
             assertTrue(result.isDone(), "Future done not reporting true");
         }
     }
 
     /**
-     * Tests that the Future that is returned from a asynchronous bulkhead
-     * method can be queried for Done OK even if the user never calls get() to
-     * drive the backend (i.e. the method is called non-lazily)
+     * Tests that the Future that is returned from a asynchronous bulkhead method can be queried for Done OK even if the
+     * user never calls get() to drive the backend (i.e. the method is called non-lazily)
      */
     @Test
     public void testBulkheadMethodAsynchFutureDoneWithoutGet() {
-        
+
         try (AsyncTaskManager taskManager = new AsyncTaskManager()) {
             TestFuture testFuture = new TestFuture();
             Barrier barrier = taskManager.newBarrier();
-            
+
             Future<String> result = bhFutureMethodBean.test(testFuture, barrier);
-            
+
             assertFalse(result.isDone(), "Future reporting Done when not");
-            
+
             barrier.open();
-            
+
             await("Future reports done").until(() -> result.isDone());
         }
 
     }
 
     /**
-     * Tests that the Future that is returned from a asynchronous bulkhead can
-     * be queried for Done OK after a goodpath get with timeout and also
-     * multiple gets can be called ok. This test is for the annotation at a
-     * Class level.
+     * Tests that the Future that is returned from a asynchronous bulkhead can be queried for Done OK after a goodpath
+     * get with timeout and also multiple gets can be called ok. This test is for the annotation at a Class level.
      */
     @Test
-    public void testBulkheadClassAsynchFutureDoneAfterGet() throws InterruptedException, ExecutionException, TimeoutException {
+    public void testBulkheadClassAsynchFutureDoneAfterGet()
+            throws InterruptedException, ExecutionException, TimeoutException {
         try (AsyncTaskManager taskManager = new AsyncTaskManager()) {
             TestFuture testFuture = new TestFuture();
             Barrier barrier = taskManager.newBarrier();
             Future<String> result = bhFutureClassBean.test(testFuture, barrier);
-            
+
             assertFalse(result.isDone(), "Future reporting Done when not");
-            
+
             barrier.open();
-            
+
             assertEquals(result.get(10, TimeUnit.SECONDS), "RESULT");
             assertEquals(result.get(), "RESULT");
-            
+
             assertTrue(result.isDone(), "Future done not reporting true");
         }
     }
 
     /**
-     * Tests that the Future that is returned from a asynchronous bulkhead can
-     * be queried for Done OK when get() is not called. This test is for the
-     * annotation at a Class level.
+     * Tests that the Future that is returned from a asynchronous bulkhead can be queried for Done OK when get() is not
+     * called. This test is for the annotation at a Class level.
      */
     @Test
     public void testBulkheadClassAsynchFutureDoneWithoutGet() {
         try (AsyncTaskManager taskManager = new AsyncTaskManager()) {
             TestFuture testFuture = new TestFuture();
             Barrier barrier = taskManager.newBarrier();
-            
+
             Future<String> result = bhFutureClassBean.test(testFuture, barrier);
-            
+
             assertFalse(result.isDone(), "Future reporting Done when not");
-            
+
             barrier.open();
-            
+
             await("Future reports done").until(() -> result.isDone());
         }
     }
-    
+
     public static final class TestFuture implements Future<String> {
         private boolean isCancelled;
 

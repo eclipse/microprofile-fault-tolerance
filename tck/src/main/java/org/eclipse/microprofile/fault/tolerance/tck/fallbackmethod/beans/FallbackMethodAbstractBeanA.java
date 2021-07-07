@@ -20,7 +20,7 @@
 
 package org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class FallbackMethodAbstractBeanA extends FallbackMethodAbstractBeanB {

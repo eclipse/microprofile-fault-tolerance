@@ -19,20 +19,21 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.fallback.clientserver;
 
-import javax.enterprise.context.RequestScoped;
-
 import org.eclipse.microprofile.faulttolerance.Fallback;
 import org.eclipse.microprofile.faulttolerance.Retry;
 
+import jakarta.enterprise.context.RequestScoped;
+
 /**
  * A client to demonstrate the fallback after doing the maximum retries
+ * 
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  *
  */
 @RequestScoped
 @Retry(maxRetries = 1)
 public class FallbackClassLevelClient {
-    
+
     private int counterForInvokingServiceA = 0;
     private int counterForInvokingServiceB = 0;
 
@@ -46,18 +47,18 @@ public class FallbackClassLevelClient {
     @Fallback(StringFallbackHandler.class)
     public String serviceA() {
         counterForInvokingServiceA++;
-       return nameService();
+        return nameService();
     }
 
     @Retry(maxRetries = 2)
     @Fallback(SecondStringFallbackHandler.class)
     public String serviceB() {
         counterForInvokingServiceB++;
-       return nameService();
+        return nameService();
     }
-    
+
     private String nameService() {
         throw new RuntimeException("Connection failed");
     }
-    
+
 }

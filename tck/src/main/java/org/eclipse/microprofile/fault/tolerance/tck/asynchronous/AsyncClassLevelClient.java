@@ -26,10 +26,10 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import javax.enterprise.context.RequestScoped;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.Connection;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
+
+import jakarta.enterprise.context.RequestScoped;
 
 /**
  * A client to demonstrate Asynchronous behaviour when @Asynchronous is applied at class level
@@ -43,7 +43,9 @@ public class AsyncClassLevelClient {
 
     /**
      * Service an operation until waitCondition is completed or 1000 second timeout.
-     * @param waitCondition Execution of this method will delay until the condition is finished
+     * 
+     * @param waitCondition
+     *            Execution of this method will delay until the condition is finished
      * @return the result as a Future.
      */
     @Asynchronous
@@ -52,36 +54,35 @@ public class AsyncClassLevelClient {
     }
 
     /**
-     * Service an operation until waitCondition is completed or 1000 second timeout.
-     * NOTE: This 1000 second timeout is to ensure test timeout kicks in before the operation timeout for a better test error to be displayed.
-     * @param waitCondition Execution of this method will delay until the condition is finished
-     * @param throwException Whether the method should throw an exception (true) or return a stage completed with exception (false)
-     * @return the result as a CompletionStage. It may be completed with
-     * InterruptedException if the thread is interrupted
+     * Service an operation until waitCondition is completed or 1000 second timeout. NOTE: This 1000 second timeout is
+     * to ensure test timeout kicks in before the operation timeout for a better test error to be displayed.
+     * 
+     * @param waitCondition
+     *            Execution of this method will delay until the condition is finished
+     * @param throwException
+     *            Whether the method should throw an exception (true) or return a stage completed with exception (false)
+     * @return the result as a CompletionStage. It may be completed with InterruptedException if the thread is
+     *         interrupted
      */
     public CompletionStage<Connection> serviceCS(Future<?> waitCondition, boolean throwException) {
 
         Throwable exception = null;
         try {
             waitCondition.get(1000, TimeUnit.SECONDS);
-        }
-        catch (ExecutionException e) {
+        } catch (ExecutionException e) {
             exception = e.getCause();
-        }
-        catch (InterruptedException | TimeoutException e) {
+        } catch (InterruptedException | TimeoutException e) {
             exception = e;
         }
-        
+
         if (exception != null) {
             if (throwException) {
                 if (exception instanceof RuntimeException) {
                     throw (RuntimeException) exception;
-                }
-                else {
+                } else {
                     throw new RuntimeException(exception);
                 }
-            }
-            else {
+            } else {
                 return CompletableFutureHelper.failedFuture(exception);
             }
         }

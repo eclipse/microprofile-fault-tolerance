@@ -22,12 +22,12 @@ package org.eclipse.microprofile.fault.tolerance.tck.asynctimeout.clientserver;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
-import javax.enterprise.context.RequestScoped;
-
+import org.eclipse.microprofile.fault.tolerance.tck.util.Connection;
 import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Timeout;
-import org.eclipse.microprofile.fault.tolerance.tck.util.Connection;
+
+import jakarta.enterprise.context.RequestScoped;
 
 /**
  * A client to demonstrate the combination of the @Retry and @Timeout annotations.
@@ -38,12 +38,13 @@ import org.eclipse.microprofile.fault.tolerance.tck.util.Connection;
 @RequestScoped
 public class AsyncTimeoutClient {
 
-
     /**
-     * serviceA is a slow running service that will take 5 seconds in normal operation. Here it is
-     * configured to time out after 2 seconds.
+     * serviceA is a slow running service that will take 5 seconds in normal operation. Here it is configured to time
+     * out after 2 seconds.
+     * 
      * @return the result as a Future
-     * @throws InterruptedException the interrupted exception
+     * @throws InterruptedException
+     *             the interrupted exception
      */
     @Timeout(2000)
     @Asynchronous
@@ -53,7 +54,7 @@ public class AsyncTimeoutClient {
             {
                 Thread.sleep(TCKConfig.getConfig().getTimeoutInMillis(5000));
             }
-            
+
             @Override
             public String getData() {
                 return "serviceA DATA";
@@ -62,12 +63,14 @@ public class AsyncTimeoutClient {
 
         return CompletableFuture.completedFuture(conn);
     }
-    
+
     /**
-     * serviceB is a fast running service that will take 0.5 seconds in normal operation. That is considerably quicker than
-     * its configured time out of 2 seconds.
+     * serviceB is a fast running service that will take 0.5 seconds in normal operation. That is considerably quicker
+     * than its configured time out of 2 seconds.
+     * 
      * @return the result as a Future
-     * @throws InterruptedException the interrupted exception
+     * @throws InterruptedException
+     *             the interrupted exception
      */
     @Timeout(2000)
     @Asynchronous
@@ -77,7 +80,7 @@ public class AsyncTimeoutClient {
             {
                 Thread.sleep(TCKConfig.getConfig().getTimeoutInMillis(500));
             }
-            
+
             @Override
             public String getData() {
                 return "serviceB DATA";

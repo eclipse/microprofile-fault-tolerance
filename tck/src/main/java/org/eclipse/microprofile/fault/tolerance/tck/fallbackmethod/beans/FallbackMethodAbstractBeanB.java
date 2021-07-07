@@ -23,12 +23,12 @@ package org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans;
 import org.eclipse.microprofile.faulttolerance.Fallback;
 
 public abstract class FallbackMethodAbstractBeanB {
-    
+
     @Fallback(fallbackMethod = "fallback")
     public String method(int a, Long b) {
         throw new RuntimeException("test");
     }
-    
+
     abstract protected String fallback(int a, Long b);
-    
+
 }

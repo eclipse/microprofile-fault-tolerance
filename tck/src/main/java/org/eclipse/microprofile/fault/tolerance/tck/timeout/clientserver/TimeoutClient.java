@@ -22,9 +22,10 @@ package org.eclipse.microprofile.fault.tolerance.tck.timeout.clientserver;
 import java.sql.Connection;
 import java.time.temporal.ChronoUnit;
 
-import javax.enterprise.context.RequestScoped;
-
 import org.eclipse.microprofile.faulttolerance.Timeout;
+
+import jakarta.enterprise.context.RequestScoped;
+
 /**
  * A client to test Timeouts
  * 
@@ -36,24 +37,27 @@ public class TimeoutClient {
 
     /**
      * serviceA uses the default Fault Tolerance timeout of 1 second.
-     * @param timeToSleep How long should the execution take in millis
+     * 
+     * @param timeToSleep
+     *            How long should the execution take in millis
      * @return null or exception is raised
-     */    
+     */
     @Timeout
     public Connection serviceA(long timeToSleep) {
         try {
             Thread.sleep(timeToSleep);
             throw new RuntimeException("Timeout did not interrupt");
-        } 
-        catch (InterruptedException e) {
-            //expected
+        } catch (InterruptedException e) {
+            // expected
         }
         return null;
     }
 
     /**
      * serviceB specifies a Timeout longer than the default, at 2 seconds
-     * @param timeToSleep How long should the execution take in millis
+     * 
+     * @param timeToSleep
+     *            How long should the execution take in millis
      * @return null or exception is raised
      */
     @Timeout(2000)
@@ -61,16 +65,17 @@ public class TimeoutClient {
         try {
             Thread.sleep(timeToSleep);
             throw new RuntimeException("Timeout did not interrupt");
-        } 
-        catch (InterruptedException e) {
-            //expected
+        } catch (InterruptedException e) {
+            // expected
         }
         return null;
     }
 
     /**
      * serviceC specifies a Timeout shorter than the default, at .5 seconds
-     * @param timeToSleep How long should the execution take in millis
+     * 
+     * @param timeToSleep
+     *            How long should the execution take in millis
      * @return null or exception is raised
      */
     @Timeout(500)
@@ -78,18 +83,17 @@ public class TimeoutClient {
         try {
             Thread.sleep(timeToSleep);
             throw new RuntimeException("Timeout did not interrupt");
-        } 
-        catch (InterruptedException e) {
-            //expected
+        } catch (InterruptedException e) {
+            // expected
         }
         return null;
     }
-    
+
     /**
-     * serviceD specifies a Timeout longer than the default, at 2 
-     * seconds.
+     * serviceD specifies a Timeout longer than the default, at 2 seconds.
      * 
-     * @param timeToSleepInMillis  How long should the execution take in millis
+     * @param timeToSleepInMillis
+     *            How long should the execution take in millis
      * @return null or exception is raised
      */
     @Timeout(value = 2, unit = ChronoUnit.SECONDS)
@@ -97,9 +101,8 @@ public class TimeoutClient {
         try {
             Thread.sleep(timeToSleepInMillis);
             throw new RuntimeException("Timeout did not interrupt");
-        } 
-        catch (InterruptedException e) {
-            //expected
+        } catch (InterruptedException e) {
+            // expected
         }
         return null;
     }

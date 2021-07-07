@@ -20,13 +20,13 @@
 
 package org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans;
 
-import javax.enterprise.context.ApplicationScoped;
-
 import org.eclipse.microprofile.faulttolerance.Fallback;
+
+import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class FallbackMethodVarargsBean {
-    
+
     @Fallback(fallbackMethod = "fallback")
     public String method(int a, Long... b) {
         throw new RuntimeException("test");
@@ -37,4 +37,3 @@ public class FallbackMethodVarargsBean {
     }
 
 }
-

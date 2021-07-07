@@ -22,10 +22,11 @@ package org.eclipse.microprofile.fault.tolerance.tck.illegalConfig;
 import org.eclipse.microprofile.faulttolerance.Fallback;
 import org.eclipse.microprofile.faulttolerance.Retry;
 
-import javax.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.RequestScoped;
 
 /**
  * A client to demonstrate the fallback after doing the maximum retries
+ * 
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  * @author <a href="mailto:john.d.ament@gmail.com">John D. Ament</a>
  *
@@ -36,6 +37,7 @@ public class FallbackClient {
 
     /**
      * Retry 5 times and then fallback
+     * 
      * @return a dummy number
      */
     @Retry(maxRetries = 4)

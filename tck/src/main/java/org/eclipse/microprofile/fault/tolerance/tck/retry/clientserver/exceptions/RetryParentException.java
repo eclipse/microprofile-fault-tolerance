@@ -21,7 +21,7 @@ package org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.exceptio
 
 public class RetryParentException extends RuntimeException {
 
-    public RetryParentException (String message) {
+    public RetryParentException(String message) {
         super(message);
     }
 }

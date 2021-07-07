@@ -23,14 +23,14 @@ import java.time.temporal.ChronoUnit;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
-import javax.enterprise.context.ApplicationScoped;
-
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 import org.eclipse.microprofile.faulttolerance.Fallback;
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.faulttolerance.Timeout;
+
+import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class ClashingNameBean {
@@ -44,7 +44,7 @@ public class ClashingNameBean {
     public Future<Void> doWork() {
         return CompletableFuture.completedFuture(null);
     }
-    
+
     @Retry(maxRetries = 5)
     @Bulkhead(3)
     @Timeout(value = 1000, unit = ChronoUnit.MILLIS)
@@ -54,11 +54,11 @@ public class ClashingNameBean {
     public Future<Void> doWork(String dummy) {
         return CompletableFuture.completedFuture(null);
     }
-    
+
     public Future<Void> doFallback() {
         return CompletableFuture.completedFuture(null);
     }
-    
+
     public Future<Void> doFallback(String dummy) {
         return CompletableFuture.completedFuture(null);
     }

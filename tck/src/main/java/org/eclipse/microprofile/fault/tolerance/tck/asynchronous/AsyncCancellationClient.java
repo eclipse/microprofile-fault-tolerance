@@ -25,42 +25,40 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.enterprise.context.RequestScoped;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 import org.eclipse.microprofile.faulttolerance.Retry;
 
+import jakarta.enterprise.context.RequestScoped;
+
 @RequestScoped
 public class AsyncCancellationClient {
-    
+
     private AtomicInteger serviceAsyncRetryAttempts = new AtomicInteger(0);
-    
+
     @Asynchronous
     public Future<?> serviceAsync(Barrier barrier, AtomicBoolean wasInterrupted) {
         try {
             barrier.awaitInterruptably();
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             wasInterrupted.set(true);
         }
         return CompletableFuture.completedFuture(null);
     }
-    
+
     @Asynchronous
-    @Retry(maxRetries = 5, delay = 0, jitter =  0)
+    @Retry(maxRetries = 5, delay = 0, jitter = 0)
     public Future<?> serviceAsyncRetry(Barrier barrier) throws InterruptedException {
         serviceAsyncRetryAttempts.incrementAndGet();
         barrier.awaitInterruptably();
         return CompletableFuture.completedFuture(null);
     }
-    
+
     public int getServiceAsyncRetryAttempts() {
         return serviceAsyncRetryAttempts.get();
     }
-    
-    
+
     @Asynchronous
     @Bulkhead(value = 1, waitingTaskQueue = 1)
     public Future<?> serviceAsyncBulkhead(Barrier barrier) {

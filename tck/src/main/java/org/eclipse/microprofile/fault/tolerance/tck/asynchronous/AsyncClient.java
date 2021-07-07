@@ -26,10 +26,10 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import javax.enterprise.context.RequestScoped;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.Connection;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
+
+import jakarta.enterprise.context.RequestScoped;
 
 /**
  * A client to demonstrate Asynchronous behaviour
@@ -42,7 +42,9 @@ public class AsyncClient {
 
     /**
      * Service an operation until waitCondition is completed or 1000 second timeout.
-     * @param waitCondition Execution of this method will delay until the condition is finished
+     * 
+     * @param waitCondition
+     *            Execution of this method will delay until the condition is finished
      * @return the result as a Future.
      */
     @Asynchronous
@@ -52,10 +54,13 @@ public class AsyncClient {
 
     /**
      * Service an operation until waitCondition is completed or 1000 second timeout.
-     * @param waitCondition Execution of this method will delay until the condition is finished
-     * @param throwException Whether the method should throw an exception (true) or return a stage completed with exception (false)
-     * @return the result as a CompletionStage. It may be completed with
-     * InterruptedException if the thread is interrupted
+     * 
+     * @param waitCondition
+     *            Execution of this method will delay until the condition is finished
+     * @param throwException
+     *            Whether the method should throw an exception (true) or return a stage completed with exception (false)
+     * @return the result as a CompletionStage. It may be completed with InterruptedException if the thread is
+     *         interrupted
      */
     @Asynchronous
     public CompletionStage<Connection> serviceCS(Future<?> waitCondition, boolean throwException) {
@@ -66,48 +71,49 @@ public class AsyncClient {
     public CompletionStage<Connection> serviceCS(Future<?> waitCondition) {
         return serviceCS(waitCondition, false);
     }
-    
+
     @Asynchronous
-    public CompletionStage<Connection> serviceCS(Future<?> waitCondition, 
+    public CompletionStage<Connection> serviceCS(Future<?> waitCondition,
             CompletionStage<Connection> stageToReturn) {
         return serviceCS(waitCondition, false, stageToReturn);
     }
 
     /**
      * Helper method that allows to complete a future in an exceptional or a non exceptional way also simulates a
-     * service processing waiting time.
-     * NOTE: This 1000 second timeout is to ensure test timeout kicks in before the operation timeout for a better test error to be displayed.
-     * @param waitCondition Future that will simulate the services processing
-     * @param throwException True to complete in an exceptional way
-     * @param stageToReturn Completion stage
+     * service processing waiting time. NOTE: This 1000 second timeout is to ensure test timeout kicks in before the
+     * operation timeout for a better test error to be displayed.
+     * 
+     * @param waitCondition
+     *            Future that will simulate the services processing
+     * @param throwException
+     *            True to complete in an exceptional way
+     * @param stageToReturn
+     *            Completion stage
      * @return A completion stage base on the conditions passed to this method
      */
-    private CompletionStage<Connection> serviceCS(Future<?> waitCondition, boolean throwException, CompletionStage<Connection> stageToReturn) {
+    private CompletionStage<Connection> serviceCS(Future<?> waitCondition, boolean throwException,
+            CompletionStage<Connection> stageToReturn) {
 
         Throwable exception = null;
         try {
             waitCondition.get(1000, TimeUnit.SECONDS);
-        }
-        catch (ExecutionException e) {
+        } catch (ExecutionException e) {
             exception = e.getCause();
-        }
-        catch (InterruptedException | TimeoutException e) {
+        } catch (InterruptedException | TimeoutException e) {
             exception = e;
         }
-        
+
         if (exception != null) {
             if (throwException) {
                 throwAsRuntimeException(exception);
-            }
-            else {
+            } else {
                 return CompletableFutureHelper.failedFuture(exception);
             }
         }
 
         if (stageToReturn != null) {
             return stageToReturn;
-        }
-        else {
+        } else {
             return CompletableFuture.completedFuture(new Connection() {
                 @Override
                 public String getData() {
@@ -120,9 +126,8 @@ public class AsyncClient {
 
     private void throwAsRuntimeException(Throwable exception) throws RuntimeException {
         if (exception instanceof RuntimeException) {
-            throw (RuntimeException)exception;
-        }
-        else {
+            throw (RuntimeException) exception;
+        } else {
             throw new RuntimeException(exception);
         }
     }

@@ -21,12 +21,12 @@ package org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver
 
 import static org.testng.Assert.fail;
 
-import javax.enterprise.context.RequestScoped;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 import org.eclipse.microprofile.faulttolerance.Timeout;
 import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
+
+import jakarta.enterprise.context.RequestScoped;
 
 @RequestScoped
 public class CircuitBreakerClientWithTimeout {
@@ -44,13 +44,12 @@ public class CircuitBreakerClientWithTimeout {
         try {
             Thread.sleep(TCKConfig.getConfig().getTimeoutInMillis(1000));
             fail("Thread not interrupted by timeout");
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             // Expected
         }
         return "OK";
     }
-    
+
     /**
      * Sleeps for 1000ms, times out after 500ms
      * <p>
@@ -66,8 +65,7 @@ public class CircuitBreakerClientWithTimeout {
         try {
             Thread.sleep(TCKConfig.getConfig().getTimeoutInMillis(1000));
             fail("Thread not interrupted by timeout");
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             // Expected
         }
         return "OK";

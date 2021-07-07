@@ -22,14 +22,14 @@ package org.eclipse.microprofile.fault.tolerance.tck.invalidParameters;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
-import javax.enterprise.context.ApplicationScoped;
-
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
+
+import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 @Asynchronous
 public class AsynchronousClientForValidationClass {
-    
+
     /**
      * Valid
      * 
@@ -38,9 +38,10 @@ public class AsynchronousClientForValidationClass {
     public Future<String> getStringAsync() {
         return CompletableFuture.completedFuture("foo");
     }
-    
+
     /**
-     * Invalid because the class is annotated with {@link Asynchronous} but the method does not return Future or CompletionStage.
+     * Invalid because the class is annotated with {@link Asynchronous} but the method does not return Future or
+     * CompletionStage.
      * 
      * @return "foo"
      */

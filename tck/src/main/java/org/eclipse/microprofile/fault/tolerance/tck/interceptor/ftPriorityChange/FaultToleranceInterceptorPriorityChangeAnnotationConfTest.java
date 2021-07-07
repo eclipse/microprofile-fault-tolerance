@@ -19,6 +19,12 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.interceptor.ftPriorityChange;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+
 import org.eclipse.microprofile.fault.tolerance.tck.interceptor.OrderQueueProducer;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
@@ -30,15 +36,11 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
-import javax.inject.Inject;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.fail;
+import jakarta.inject.Inject;
 
 /**
  * A Client to demonstrate the interceptors ordering behavior of FT and CDI annotations
+ * 
  * @author carlosdlr
  */
 public class FaultToleranceInterceptorPriorityChangeAnnotationConfTest extends Arquillian {
@@ -52,29 +54,33 @@ public class FaultToleranceInterceptorPriorityChangeAnnotationConfTest extends A
     @Deployment
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
-            .create(JavaArchive.class, "interceptorChangeFtAnnotation.jar")
-            .addClasses(InterceptorComponent.class, EarlyFtInterceptor.class, LateFtInterceptor.class, OrderQueueProducer.class)
-            .addAsManifestResource(new StringAsset("mp.fault.tolerance.interceptor.priority=3850"), "microprofile-config.properties")
-            .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
-            .as(JavaArchive.class);
+                .create(JavaArchive.class, "interceptorChangeFtAnnotation.jar")
+                .addClasses(InterceptorComponent.class, EarlyFtInterceptor.class, LateFtInterceptor.class,
+                        OrderQueueProducer.class)
+                .addAsManifestResource(new StringAsset("mp.fault.tolerance.interceptor.priority=3850"),
+                        "microprofile-config.properties")
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
+                .as(JavaArchive.class);
 
         return ShrinkWrap.create(WebArchive.class, "interceptorChangeFtAnnotation.war")
-            .addAsLibrary(testJar);
+                .addAsLibrary(testJar);
     }
 
     /**
-     * This test validates the interceptors execution order after call a method
-     * annotated with Asynchronous FT annotation, using a queue type FIFO (first-in-first-out).
-     * The head of the queue is that element that has been on the queue the longest time.
-     * In this case is validating that the early interceptor is executed at first.
-     * @throws InterruptedException if the current thread was interrupted while waiting
-     * @throws ExecutionException if the computation threw an exception
+     * This test validates the interceptors execution order after call a method annotated with Asynchronous FT
+     * annotation, using a queue type FIFO (first-in-first-out). The head of the queue is that element that has been on
+     * the queue the longest time. In this case is validating that the early interceptor is executed at first.
+     * 
+     * @throws InterruptedException
+     *             if the current thread was interrupted while waiting
+     * @throws ExecutionException
+     *             if the computation threw an exception
      */
     @Test
     public void testAsync() throws InterruptedException, ExecutionException {
         Future<String> result = testInterceptor.asyncGetString();
         assertEquals(result.get(), "OK");
-        String [] expectedOrder = {"EarlyOrderFtInterceptor","LateOrderFtInterceptor","asyncGetString"};
+        String[] expectedOrder = {"EarlyOrderFtInterceptor", "LateOrderFtInterceptor", "asyncGetString"};
         assertEquals(orderFactory.getOrderQueue().toArray(), expectedOrder);
     }
 
@@ -83,19 +89,18 @@ public class FaultToleranceInterceptorPriorityChangeAnnotationConfTest extends A
         try {
             testInterceptor.serviceRetryA();
             fail("Exception not thrown");
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             assertEquals(e.getMessage().trim(), "retryGetString failed");
         }
 
-        String [] expectedOrder = {"EarlyOrderFtInterceptor","LateOrderFtInterceptor","serviceRetryA",
-            "LateOrderFtInterceptor","serviceRetryA"};
+        String[] expectedOrder = {"EarlyOrderFtInterceptor", "LateOrderFtInterceptor", "serviceRetryA",
+                "LateOrderFtInterceptor", "serviceRetryA"};
         assertEquals(orderFactory.getOrderQueue().toArray(), expectedOrder);
     }
 
     @AfterMethod
     public void clearResources() {
-        if (orderFactory != null) { //validate if not null because after the last test is called the context is cleared
+        if (orderFactory != null) { // validate if not null because after the last test is called the context is cleared
             orderFactory.getOrderQueue().clear();
         }
     }

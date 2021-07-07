@@ -27,51 +27,48 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.enterprise.context.ApplicationScoped;
-
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
+
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * 
  */
 @ApplicationScoped
 public class BulkheadPressureBean {
-    
+
     private AtomicInteger inProgress = new AtomicInteger(0);
     private AtomicInteger maxInProgress = new AtomicInteger(0);
-    
+
     @Bulkhead(5)
     public void servicePressure(long sleepTime) {
         int currentInProgress = inProgress.incrementAndGet();
         maxInProgress.getAndUpdate(v -> Math.max(v, currentInProgress));
         try {
             Thread.sleep(sleepTime);
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             fail("Sleep interrupted", e);
-        }
-        finally {
+        } finally {
             inProgress.decrementAndGet();
         }
     }
-    
+
     @Asynchronous
     @Bulkhead(value = 5, waitingTaskQueue = 5)
     public Future<?> servicePressureAsync(long sleepTime) {
         try {
             Thread.sleep(sleepTime);
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             fail("Sleep interrupted", e);
         }
         return CompletableFuture.completedFuture(null);
     }
-    
+
     public int getMaxInProgress() {
         return maxInProgress.get();
     }
-    
+
     public void reset() {
         assertEquals(inProgress.get(), 0);
         maxInProgress.set(0);

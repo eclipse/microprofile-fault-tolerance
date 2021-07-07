@@ -22,9 +22,10 @@ package org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver;
 import java.io.IOException;
 import java.sql.Connection;
 
-import javax.enterprise.context.RequestScoped;
-
 import org.eclipse.microprofile.faulttolerance.Retry;
+
+import jakarta.enterprise.context.RequestScoped;
+
 /**
  * A client to demonstrate the specification of abortOn conditions at the Class level.
  * 
@@ -45,11 +46,11 @@ public class RetryClassLevelClientAbortOn {
         counterForInvokingConnenectionService++;
         throw new RuntimeException("Connection failed");
     }
-    
+
     public int getRetryCountForConnectionService() {
         return counterForInvokingConnenectionService;
     }
-    
+
     /**
      * serviceB is configured to retry on a RuntimeException. The WritingService throws RuntimeExceptions.
      */
@@ -59,17 +60,16 @@ public class RetryClassLevelClientAbortOn {
     }
 
     private void writingService() {
-        counterForInvokingWritingService ++;
+        counterForInvokingWritingService++;
         try {
             Thread.sleep(100);
             throw new RuntimeException("WritingService failed");
-        } 
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        
+
     }
-    
+
     public int getRetryCountForWritingService() {
         return counterForInvokingWritingService;
     }

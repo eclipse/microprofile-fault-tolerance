@@ -19,8 +19,6 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.timeout.clientserver.TimeoutClient;
 import org.eclipse.microprofile.faulttolerance.exceptions.TimeoutException;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -33,6 +31,8 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import jakarta.inject.Inject;
+
 /**
  * Tests to exercise Fault Tolerance Timeouts.
  *
@@ -43,38 +43,33 @@ public class TimeoutGlobalConfigTest extends Arquillian {
     @Deployment
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
-            .create(JavaArchive.class, "ftTimeout.jar")
-            .addClasses(TimeoutClient.class)
-            .addAsManifestResource(new StringAsset(
-                "Timeout/value=200"), "microprofile-config.properties")
-            .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml").as(JavaArchive.class);
+                .create(JavaArchive.class, "ftTimeout.jar")
+                .addClasses(TimeoutClient.class)
+                .addAsManifestResource(new StringAsset(
+                        "Timeout/value=200"), "microprofile-config.properties")
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml").as(JavaArchive.class);
 
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftTimeout.war").addAsLibrary(testJar);
         return war;
     }
 
     /**
-     * A test to override timeout value by global config.
-     * Default timeout is 1 second. We override its value with global property config.
-     * The code below will timeout thanks to config
+     * A test to override timeout value by global config. Default timeout is 1 second. We override its value with global
+     * property config. The code below will timeout thanks to config
      */
     @Test
     public void testTimeout() {
         try {
             clientForTimeout.serviceA(500);
             Assert.fail("serviceA should throw a TimeoutException in testTimeout");
-        }
-        catch (TimeoutException ex) {
+        } catch (TimeoutException ex) {
             // Expected
-        }
-        catch (RuntimeException ex) {
+        } catch (RuntimeException ex) {
             // Not Expected
             Assert.fail("serviceA should throw a TimeoutException in testTimeout not a RuntimeException");
         }
     }
 
-    private @Inject
-    TimeoutClient clientForTimeout;
-
+    private @Inject TimeoutClient clientForTimeout;
 
 }

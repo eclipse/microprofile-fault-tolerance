@@ -30,13 +30,15 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
  */
 public class AwaitilityArchiveAppender extends CachedAuxilliaryArchiveAppender {
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.jboss.arquillian.container.test.spi.client.deployment.CachedAuxilliaryArchiveAppender#buildArchive()
      */
     @Override
     protected Archive<?> buildArchive() {
         return ShrinkWrap.create(JavaArchive.class, "awaitility.jar")
-            .addPackages(true, "org.awaitility");
+                .addPackages(true, "org.awaitility");
     }
 
 }

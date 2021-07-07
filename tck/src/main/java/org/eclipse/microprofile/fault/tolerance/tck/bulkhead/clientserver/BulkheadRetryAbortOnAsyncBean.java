@@ -22,13 +22,13 @@ package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
-import javax.enterprise.context.ApplicationScoped;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
+
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * Test to ensure that retries do not occur if BulkheadException is included in abortOn attribute.
@@ -42,7 +42,7 @@ import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
 @Asynchronous
 @ApplicationScoped
 public class BulkheadRetryAbortOnAsyncBean {
-    
+
     public Future<?> test(Barrier barrier) {
         barrier.await();
         return CompletableFuture.completedFuture(null);

@@ -22,28 +22,34 @@ package org.eclipse.microprofile.fault.tolerance.tck.visibility.retry;
 public enum RetryServiceType {
     // Services with inheritance from a super class defining retry at the top class level
     // ROC => Retry On Class
-    BASE_ROC,                                           // Retry defined at class level
-    BASE_ROC_RETRY_REDEFINED_ON_CLASS,                  // derived class with Retry redefined at class level, no service method overridden
-    BASE_ROC_RETRY_REDEFINED_ON_CLASS_METHOD_OVERRIDE,  // derived class with Retry redefined at class level, service method overridden
-    BASE_ROC_RETRY_REDEFINED_ON_METHOD,                 // derived class with Retry redefined on overridden service method
-    BASE_ROC_RETRY_MISSING_ON_METHOD,                   // derived class with no Retry annotation on overridden service method
-    BASE_ROC_DERIVED_CLASS_NO_REDEFINITION,             // derived class, no annotation at class level, no service method overridden
+    BASE_ROC, // Retry defined at class level
+    BASE_ROC_RETRY_REDEFINED_ON_CLASS, // derived class with Retry redefined at class level, no service method
+                                       // overridden
+    BASE_ROC_RETRY_REDEFINED_ON_CLASS_METHOD_OVERRIDE, // derived class with Retry redefined at class level, service
+                                                       // method overridden
+    BASE_ROC_RETRY_REDEFINED_ON_METHOD, // derived class with Retry redefined on overridden service method
+    BASE_ROC_RETRY_MISSING_ON_METHOD, // derived class with no Retry annotation on overridden service method
+    BASE_ROC_DERIVED_CLASS_NO_REDEFINITION, // derived class, no annotation at class level, no service method overridden
 
     // Services with inheritance from a super class defining retry at the method level
     // ROM => Retry On Method
-    BASE_ROM,                                           // class with Retry on service method
-    BASE_ROM_RETRY_REDEFINED_ON_CLASS,                  // derived class with Retry redefined at class level, no service method overridden
-    BASE_ROM_RETRY_REDEFINED_ON_CLASS_METHOD_OVERRIDE,  // derived class with Retry redefined at class level, service method overridden
-    BASE_ROM_RETRY_REDEFINED_ON_METHOD,                 // derived class with Retry redefined on overridden service method
-    BASE_ROM_RETRY_MISSING_ON_METHOD,                   // derived class with no Retry annotation on overridden service method
-    BASE_ROM_DERIVED_CLASS_NO_REDEFINITION,             // derived class, no annotation at class level, no service method overridden
+    BASE_ROM, // class with Retry on service method
+    BASE_ROM_RETRY_REDEFINED_ON_CLASS, // derived class with Retry redefined at class level, no service method
+                                       // overridden
+    BASE_ROM_RETRY_REDEFINED_ON_CLASS_METHOD_OVERRIDE, // derived class with Retry redefined at class level, service
+                                                       // method overridden
+    BASE_ROM_RETRY_REDEFINED_ON_METHOD, // derived class with Retry redefined on overridden service method
+    BASE_ROM_RETRY_MISSING_ON_METHOD, // derived class with no Retry annotation on overridden service method
+    BASE_ROM_DERIVED_CLASS_NO_REDEFINITION, // derived class, no annotation at class level, no service method overridden
 
     // ROCM => Retry On Class and Method
-    BASE_ROCM,                                          // class with Retry on class &and service method
-    BASE_ROCM_RETRY_REDEFINED_ON_CLASS,                 // derived class with Retry redefined at class level, no service method overridden
-    BASE_ROCM_RETRY_REDEFINED_ON_CLASS_METHOD_OVERRIDE, // derived class with Retry redefined at class level, service method overridden
-    BASE_ROCM_RETRY_REDEFINED_ON_METHOD,                // derived class with Retry redefined on overridden service method
-    BASE_ROCM_RETRY_MISSING_ON_METHOD,                  // derived class with no Retry annotation on overridden service method
-    BASE_ROCM_DERIVED_CLASS_NO_REDEFINITION,            // derived class, no annotation at class level, no method override
+    BASE_ROCM, // class with Retry on class &and service method
+    BASE_ROCM_RETRY_REDEFINED_ON_CLASS, // derived class with Retry redefined at class level, no service method
+                                        // overridden
+    BASE_ROCM_RETRY_REDEFINED_ON_CLASS_METHOD_OVERRIDE, // derived class with Retry redefined at class level, service
+                                                        // method overridden
+    BASE_ROCM_RETRY_REDEFINED_ON_METHOD, // derived class with Retry redefined on overridden service method
+    BASE_ROCM_RETRY_MISSING_ON_METHOD, // derived class with no Retry annotation on overridden service method
+    BASE_ROCM_DERIVED_CLASS_NO_REDEFINITION, // derived class, no annotation at class level, no method override
     ;
 }

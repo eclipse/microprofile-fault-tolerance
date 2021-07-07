@@ -20,8 +20,6 @@
 
 package org.eclipse.microprofile.fault.tolerance.tck.config;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
@@ -33,38 +31,40 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
+import jakarta.inject.Inject;
+
 /**
  * Test configuring CircuitBreaker.skipOn globally
  */
 public class CircuitBreakerSkipOnConfigTest extends Arquillian {
-    
+
     @Deployment
     public static WebArchive create() {
         ConfigAnnotationAsset config = new ConfigAnnotationAsset();
         config.setGlobally(CircuitBreaker.class, "skipOn", TestConfigExceptionA.class.getCanonicalName());
-        
+
         JavaArchive jar = ShrinkWrap
                 .create(JavaArchive.class, "ftCircuitBreakerSkipOnConfig.jar")
                 .addPackage(CircuitBreakerConfigTest.class.getPackage())
                 .addPackage(Packages.UTILS)
                 .addAsManifestResource(config, "microprofile-config.properties")
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
-        
+
         WebArchive war = ShrinkWrap
                 .create(WebArchive.class, "ftCircuitBreakerSkipOnConfig.war")
                 .addAsLibraries(jar);
-        
+
         return war;
     }
-    
+
     @Inject
     private CircuitBreakerConfigBean bean;
-    
+
     @Test
     public void testConfigureSkipOn() {
         Exceptions.expect(TestConfigExceptionA.class, () -> bean.skipOnMethod());
         Exceptions.expect(TestConfigExceptionA.class, () -> bean.skipOnMethod());
-        
+
         // If skipOn is not configured to include TestConfigExceptionA, this would throw a CircuitBreakerOpenException
         Exceptions.expect(TestConfigExceptionA.class, () -> bean.skipOnMethod());
     }

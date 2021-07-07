@@ -25,8 +25,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
@@ -48,6 +46,8 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import jakarta.inject.Inject;
+
 /**
  * Test that annotations can be disabled at the class level and then re-enabled at the method level.
  *
@@ -62,26 +62,26 @@ public class DisableFTEnableOnMethodTest extends Arquillian {
 
     @Deployment
     public static WebArchive deploy() {
-       Asset config = new DisableConfigAsset()
-               .enable(DisableAnnotationClient.class, "failAndRetryOnce", Retry.class)
-               .enable(DisableAnnotationClient.class, "failWithCircuitBreaker", CircuitBreaker.class)
-               .enable(DisableAnnotationClient.class, "failWithTimeout", Timeout.class)
-               .enable(DisableAnnotationClient.class, "asyncWaitThenReturn", Asynchronous.class)
-               .enable(DisableAnnotationClient.class, "failRetryOnceThenFallback", Fallback.class)
-               .enable(DisableAnnotationClient.class, "waitWithBulkhead", Bulkhead.class)
-               .disableGlobally();
+        Asset config = new DisableConfigAsset()
+                .enable(DisableAnnotationClient.class, "failAndRetryOnce", Retry.class)
+                .enable(DisableAnnotationClient.class, "failWithCircuitBreaker", CircuitBreaker.class)
+                .enable(DisableAnnotationClient.class, "failWithTimeout", Timeout.class)
+                .enable(DisableAnnotationClient.class, "asyncWaitThenReturn", Asynchronous.class)
+                .enable(DisableAnnotationClient.class, "failRetryOnceThenFallback", Fallback.class)
+                .enable(DisableAnnotationClient.class, "waitWithBulkhead", Bulkhead.class)
+                .disableGlobally();
 
         JavaArchive testJar = ShrinkWrap
-            .create(JavaArchive.class, "ftDisableGloballyEnableMethod.jar")
-            .addClasses(DisableAnnotationClient.class)
-            .addPackage(Packages.UTILS)
-            .addAsManifestResource(config, "microprofile-config.properties")
-            .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
-            .as(JavaArchive.class);
+                .create(JavaArchive.class, "ftDisableGloballyEnableMethod.jar")
+                .addClasses(DisableAnnotationClient.class)
+                .addPackage(Packages.UTILS)
+                .addAsManifestResource(config, "microprofile-config.properties")
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
+                .as(JavaArchive.class);
 
         WebArchive war = ShrinkWrap
-            .create(WebArchive.class, "ftDisableGloballyEnableMethod.war")
-            .addAsLibrary(testJar);
+                .create(WebArchive.class, "ftDisableGloballyEnableMethod.war")
+                .addAsLibrary(testJar);
         return war;
     }
 
@@ -119,16 +119,17 @@ public class DisableFTEnableOnMethodTest extends Arquillian {
     /**
      * A test to check that asynchronous is enabled
      *
-     * @throws InterruptedException interrupted
-     * @throws ExecutionException task was aborted
+     * @throws InterruptedException
+     *             interrupted
+     * @throws ExecutionException
+     *             task was aborted
      */
     @Test
     public void testAsync() throws InterruptedException, ExecutionException {
         Future<?> result = disableClient.asyncWaitThenReturn();
         try {
             Assert.assertFalse(result.isDone(), "Returned future.isDone() expected false because Async enabled");
-        }
-        finally {
+        } finally {
             result.get(); // Success or failure, don't leave the future lying around
         }
     }
@@ -136,8 +137,10 @@ public class DisableFTEnableOnMethodTest extends Arquillian {
     /**
      * Test whether Bulkhead is enabled on {@code waitWithBulkhead()}
      *
-     * @throws InterruptedException interrupted
-     * @throws ExecutionException task was aborted
+     * @throws InterruptedException
+     *             interrupted
+     * @throws ExecutionException
+     *             task was aborted
      */
     @Test
     public void testBulkhead() throws ExecutionException, InterruptedException {
@@ -153,9 +156,9 @@ public class DisableFTEnableOnMethodTest extends Arquillian {
 
             // Try to start a third execution. This would throw a BulkheadException if Bulkhead is enabled.
             // Bulkhead is enabled on the method, so expect exception
-            Assert.assertThrows(BulkheadException.class, () -> disableClient.waitWithBulkhead(CompletableFuture.completedFuture(null)));
-        }
-        finally {
+            Assert.assertThrows(BulkheadException.class,
+                    () -> disableClient.waitWithBulkhead(CompletableFuture.completedFuture(null)));
+        } finally {
             // Clean up executor and first two executions
             executor.shutdown();
 

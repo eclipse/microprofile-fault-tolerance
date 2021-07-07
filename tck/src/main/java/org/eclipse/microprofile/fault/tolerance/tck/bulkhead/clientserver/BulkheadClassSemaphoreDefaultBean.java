@@ -19,10 +19,10 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 
-import javax.enterprise.context.ApplicationScoped;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
+
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * A simple class level Semaphore @Bulkhead

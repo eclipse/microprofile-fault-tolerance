@@ -22,8 +22,6 @@ package org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod;
 
 import static org.testng.Assert.assertEquals;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodDefaultMethodA;
 import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodDefaultMethodB;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -34,26 +32,29 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
+import jakarta.inject.Inject;
+
 /**
  * Test for a fallback method defined as a default method on an interface
  */
 public class FallbackMethodDefaultMethodTest extends Arquillian {
-    
+
     @Deployment
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodDefaultMethod.jar")
                 .addClasses(FallbackMethodDefaultMethodA.class,
-                            FallbackMethodDefaultMethodB.class)
+                        FallbackMethodDefaultMethodB.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
-        
+
         WebArchive war = ShrinkWrap
                 .create(WebArchive.class, "ftFallbackMethodDefaultMethod.war")
                 .addAsLibrary(testJar);
         return war;
     }
-    
-    @Inject private FallbackMethodDefaultMethodA bean;
-    
+
+    @Inject
+    private FallbackMethodDefaultMethodA bean;
+
     @Test
     public void fallbackMethodDefaultMethod() {
         assertEquals(bean.method(1, 2L), "fallback");

@@ -23,5 +23,5 @@ package org.eclipse.microprofile.fault.tolerance.tck.util;
 *
 */
 public interface Connection {
-   public String getData();
+    public String getData();
 }

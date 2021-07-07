@@ -36,20 +36,20 @@ import org.testng.annotations.Test;
  * Test that a package scoped fallback method in a superclass from a different package cannot be called
  */
 public class FallbackMethodOutOfPackageTest extends Arquillian {
-    
+
     @Deployment
     @ShouldThrowException(FaultToleranceDefinitionException.class)
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodOutOfPackage.jar")
                 .addClasses(FallbackMethodOutOfPackageBeanA.class, FallbackMethodOutOfPackageBeanB.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
-        
+
         WebArchive war = ShrinkWrap
                 .create(WebArchive.class, "ftFallbackMethodOutOfPackage.war")
                 .addAsLibrary(testJar);
         return war;
     }
-    
+
     @Test
     public void fallbackMethodOutOfPackage() {
         // Nothing to test, deployment should throw exception

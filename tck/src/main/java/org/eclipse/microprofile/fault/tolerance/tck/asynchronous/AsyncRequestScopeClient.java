@@ -24,16 +24,16 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Future;
 
-import javax.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.RequestScoped;
 
 @RequestScoped
 public class AsyncRequestScopeClient {
 
-    public CompletionStage<String> methodReturningCompletionStage(){
+    public CompletionStage<String> methodReturningCompletionStage() {
         return CompletableFuture.completedFuture("testCompletionStageString");
     }
-    
-    public Future<String> methodReturningFuture(){
+
+    public Future<String> methodReturningFuture() {
         return CompletableFuture.completedFuture("testFutureString");
     }
 }

@@ -19,31 +19,30 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.metrics;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.FallbackMetricBean.Action;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.FallbackMetricBean.NonFallbackException;
 import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.ExecutionContext;
 import org.eclipse.microprofile.faulttolerance.FallbackHandler;
 
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
+
 @Dependent
 public class FallbackMetricHandler implements FallbackHandler<Void> {
-    
-    @Inject private FallbackMetricBean fallbackBean;
-    
+
+    @Inject
+    private FallbackMetricBean fallbackBean;
+
     @Override
     public Void handle(ExecutionContext context) {
         if (fallbackBean.getFallbackAction() == Action.PASS) {
             return null;
-        }
-        else if (fallbackBean.getFallbackAction() == Action.FAIL){
+        } else if (fallbackBean.getFallbackAction() == Action.FAIL) {
             throw new TestException();
-        }
-        else {
+        } else {
             throw new NonFallbackException();
         }
     }
-    
+
 }

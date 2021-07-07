@@ -19,6 +19,12 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.interceptor.xmlInterceptorEnabling;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+
 import org.eclipse.microprofile.fault.tolerance.tck.interceptor.OrderQueueProducer;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
@@ -31,15 +37,11 @@ import org.jboss.shrinkwrap.descriptor.api.beans10.BeansDescriptor;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
-import javax.inject.Inject;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.fail;
+import jakarta.inject.Inject;
 
 /**
  * A Client to demonstrate the interceptors ordering behavior of FT and CDI annotations
+ * 
  * @author carlosdlr
  */
 public class FaultToleranceInterceptorEnableByXmlTest extends Arquillian {
@@ -53,34 +55,39 @@ public class FaultToleranceInterceptorEnableByXmlTest extends Arquillian {
     @Deployment
     public static WebArchive deploy() {
         BeansDescriptor beans = Descriptors.create(BeansDescriptor.class)
-            .getOrCreateInterceptors()
-            .clazz("org.eclipse.microprofile.fault.tolerance.tck.interceptor.xmlInterceptorEnabling.EarlyFtInterceptor").up()
-            .getOrCreateInterceptors()
-            .clazz("org.eclipse.microprofile.fault.tolerance.tck.interceptor.xmlInterceptorEnabling.LateFtInterceptor").up();
+                .getOrCreateInterceptors()
+                .clazz("org.eclipse.microprofile.fault.tolerance.tck.interceptor.xmlInterceptorEnabling.EarlyFtInterceptor")
+                .up()
+                .getOrCreateInterceptors()
+                .clazz("org.eclipse.microprofile.fault.tolerance.tck.interceptor.xmlInterceptorEnabling.LateFtInterceptor")
+                .up();
 
         JavaArchive testJar = ShrinkWrap
-            .create(JavaArchive.class, "interceptorFtXml.jar")
-            .addClasses(InterceptorComponent.class, EarlyFtInterceptor.class, LateFtInterceptor.class, OrderQueueProducer.class)
-             .addAsManifestResource(new StringAsset(beans.exportAsString()), "beans.xml")
-            .as(JavaArchive.class);
+                .create(JavaArchive.class, "interceptorFtXml.jar")
+                .addClasses(InterceptorComponent.class, EarlyFtInterceptor.class, LateFtInterceptor.class,
+                        OrderQueueProducer.class)
+                .addAsManifestResource(new StringAsset(beans.exportAsString()), "beans.xml")
+                .as(JavaArchive.class);
 
         return ShrinkWrap.create(WebArchive.class, "interceptorFtXml.war")
-            .addAsLibrary(testJar);
+                .addAsLibrary(testJar);
     }
 
     /**
-     * This test validates the interceptors execution order after call a method
-     * annotated with Asynchronous FT annotation, using a queue type FIFO (first-in-first-out).
-     * The head of the queue is that element that has been on the queue the longest time.
-     * In this case is validating that the early interceptor is executed at first.
-     * @throws InterruptedException if the current thread was interrupted while waiting
-     * @throws ExecutionException if the computation threw an exception
+     * This test validates the interceptors execution order after call a method annotated with Asynchronous FT
+     * annotation, using a queue type FIFO (first-in-first-out). The head of the queue is that element that has been on
+     * the queue the longest time. In this case is validating that the early interceptor is executed at first.
+     * 
+     * @throws InterruptedException
+     *             if the current thread was interrupted while waiting
+     * @throws ExecutionException
+     *             if the computation threw an exception
      */
     @Test
     public void testAsync() throws InterruptedException, ExecutionException {
         Future<String> result = testInterceptor.asyncGetString();
         assertEquals(result.get(), "OK");
-        String [] expectedOrder = {"EarlyOrderFtInterceptor","LateOrderFtInterceptor","asyncGetString"};
+        String[] expectedOrder = {"EarlyOrderFtInterceptor", "LateOrderFtInterceptor", "asyncGetString"};
         assertEquals(orderFactory.getOrderQueue().toArray(), expectedOrder);
     }
 
@@ -89,22 +96,24 @@ public class FaultToleranceInterceptorEnableByXmlTest extends Arquillian {
         try {
             testInterceptor.serviceRetryA();
             fail("Exception not thrown");
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             assertEquals(e.getMessage().trim(), "retryGetString failed");
         }
 
-        String [] expectedOrder = {"EarlyOrderFtInterceptor","LateOrderFtInterceptor","serviceRetryA",
-            "EarlyOrderFtInterceptor","LateOrderFtInterceptor","serviceRetryA"};
-        /* Executes 1 more time the early and late interceptor and the bean method annotated with maxRetries = 1.*/
-        /* When the interceptors are enable by xml and the bean method is annotated with retry both interceptors are executed each retry
-           to difference of the interceptors enabled using @Priority that just the late interceptor is executed each retry */
+        String[] expectedOrder = {"EarlyOrderFtInterceptor", "LateOrderFtInterceptor", "serviceRetryA",
+                "EarlyOrderFtInterceptor", "LateOrderFtInterceptor", "serviceRetryA"};
+        /* Executes 1 more time the early and late interceptor and the bean method annotated with maxRetries = 1. */
+        /*
+         * When the interceptors are enable by xml and the bean method is annotated with retry both interceptors are
+         * executed each retry to difference of the interceptors enabled using @Priority that just the late interceptor
+         * is executed each retry
+         */
         assertEquals(orderFactory.getOrderQueue().toArray(), expectedOrder);
     }
 
     @AfterMethod
     public void clearResources() {
-        if (orderFactory != null) { //validate if not null because after the last test is called the context is cleared
+        if (orderFactory != null) { // validate if not null because after the last test is called the context is cleared
             orderFactory.getOrderQueue().clear();
         }
     }

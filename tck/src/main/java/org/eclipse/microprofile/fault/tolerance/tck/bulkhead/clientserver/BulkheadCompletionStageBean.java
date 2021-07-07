@@ -25,7 +25,7 @@ import java.util.concurrent.CompletionStage;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 
-import javax.enterprise.context.Dependent;
+import jakarta.enterprise.context.Dependent;
 
 @Dependent
 public class BulkheadCompletionStageBean {
@@ -35,10 +35,10 @@ public class BulkheadCompletionStageBean {
      * <p>
      * Allows two concurrent executions and two queued.
      * <p>
-     * As this is an async method, it won't be considered "complete" by Fault Tolerance
-     * until {@code stage} completes.
+     * As this is an async method, it won't be considered "complete" by Fault Tolerance until {@code stage} completes.
      *
-     * @param stage the CompletionStage to return as the result
+     * @param stage
+     *            the CompletionStage to return as the result
      * @return {@code stage}
      */
     @Asynchronous

@@ -27,7 +27,6 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-
 import org.testng.annotations.Test;
 
 public class InvalidRetryDelayDurationTest extends Arquillian {
@@ -36,16 +35,16 @@ public class InvalidRetryDelayDurationTest extends Arquillian {
     @ShouldThrowException(value = FaultToleranceDefinitionException.class)
     public static WebArchive deploy2() {
         JavaArchive testJar = ShrinkWrap
-            .create(JavaArchive.class, "ftInvalidRetry3.jar")
-            .addClasses(RetryClientForValidationDelayDuration.class)
-            .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
-            .as(JavaArchive.class);
+                .create(JavaArchive.class, "ftInvalidRetry3.jar")
+                .addClasses(RetryClientForValidationDelayDuration.class)
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
+                .as(JavaArchive.class);
 
         return ShrinkWrap
-            .create(WebArchive.class, "ftInvalidRetry3.war")
-            .addAsLibrary(testJar);
+                .create(WebArchive.class, "ftInvalidRetry3.war")
+                .addAsLibrary(testJar);
     }
-    
+
     /**
      * Test that the deployment of an invalid @Retry parameter leads to a DeploymentException.
      * 

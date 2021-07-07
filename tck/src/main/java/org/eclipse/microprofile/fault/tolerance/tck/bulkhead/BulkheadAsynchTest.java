@@ -34,8 +34,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.CompletableFutureHelper;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead10ClassAsynchronousBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead10MethodAsynchronousBean;
@@ -61,6 +59,8 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
+import jakarta.inject.Inject;
+
 /**
  * @author Gordon Hutchison
  * @author Andrew Rouse
@@ -70,11 +70,9 @@ import org.testng.annotations.Test;
 public class BulkheadAsynchTest extends Arquillian {
 
     /*
-     * As the FaultTolerance annotation only work on business methods of
-     * injected objects we need to inject a variety of these for use by the
-     * tests below. The naming convention indicates if the annotation is on a
-     * class or method, asynchronous or semaphore based, the size/value of
-     * the {@code @Bulkhead} and whether we have queueing or not.
+     * As the FaultTolerance annotation only work on business methods of injected objects we need to inject a variety of
+     * these for use by the tests below. The naming convention indicates if the annotation is on a class or method,
+     * asynchronous or semaphore based, the size/value of the {@code @Bulkhead} and whether we have queueing or not.
      */
 
     @Inject
@@ -97,8 +95,7 @@ public class BulkheadAsynchTest extends Arquillian {
     private BulkheadCompletionStageBean bhBeanCompletionStage;
 
     /**
-     * This is the Arquillian deploy method that controls the contents of the
-     * war that contains all the tests.
+     * This is the Arquillian deploy method that controls the contents of the war that contains all the tests.
      *
      * @return the test war "ftBulkheadAsynchTest.war"
      */
@@ -114,9 +111,8 @@ public class BulkheadAsynchTest extends Arquillian {
     }
 
     /**
-     * Tests the class asynchronous Bulkhead(10) This test will check that 10
-     * and no more than 10 asynchronous calls are allowed into a method that is
-     * a member of a {@code @Bulkhead(10)} Class.
+     * Tests the class asynchronous Bulkhead(10) This test will check that 10 and no more than 10 asynchronous calls are
+     * allowed into a method that is a member of a {@code @Bulkhead(10)} Class.
      */
     @Test
     public void testBulkheadClassAsynchronous10() {
@@ -124,9 +120,8 @@ public class BulkheadAsynchTest extends Arquillian {
     }
 
     /**
-     * Tests the method asynchronous Bulkhead(10). This test will check that 10
-     * and no more than 10 asynchronous calls are allowed into a method that has
-     * an individual {@code @Bulkhead(10)} annotation
+     * Tests the method asynchronous Bulkhead(10). This test will check that 10 and no more than 10 asynchronous calls
+     * are allowed into a method that has an individual {@code @Bulkhead(10)} annotation
      */
     @Test
     public void testBulkheadMethodAsynchronous10() {
@@ -134,9 +129,8 @@ public class BulkheadAsynchTest extends Arquillian {
     }
 
     /**
-     * Tests the class asynchronous Bulkhead(3) This test will check that 3 and
-     * no more than 3 asynchronous calls are allowed into a method that is a
-     * member of a {@code @Bulkhead(3)} Class.
+     * Tests the class asynchronous Bulkhead(3) This test will check that 3 and no more than 3 asynchronous calls are
+     * allowed into a method that is a member of a {@code @Bulkhead(3)} Class.
      */
     @Test
     public void testBulkheadClassAsynchronous3() {
@@ -144,9 +138,8 @@ public class BulkheadAsynchTest extends Arquillian {
     }
 
     /**
-     * Tests the method asynchronous Bulkhead(3). This test will check that 3
-     * and no more than 3 asynchronous calls are allowed into a method that has
-     * an individual Bulkhead(3) annotation
+     * Tests the method asynchronous Bulkhead(3). This test will check that 3 and no more than 3 asynchronous calls are
+     * allowed into a method that has an individual Bulkhead(3) annotation
      */
     @Test
     public void testBulkheadMethodAsynchronous3() {
@@ -154,9 +147,8 @@ public class BulkheadAsynchTest extends Arquillian {
     }
 
     /**
-     * Tests the basic class asynchronous Bulkhead with defaulting value
-     * parameter. This will check that exactly 10 calls can be in the bulkhead
-     * at once.
+     * Tests the basic class asynchronous Bulkhead with defaulting value parameter. This will check that exactly 10
+     * calls can be in the bulkhead at once.
      */
     @Test
     public void testBulkheadClassAsynchronousDefault() {
@@ -164,9 +156,8 @@ public class BulkheadAsynchTest extends Arquillian {
     }
 
     /**
-     * Tests the basic method asynchronous Bulkhead with defaulting value
-     * parameter. This will check that more than 1 but less than 10 calls get
-     * into the bulkhead at once.
+     * Tests the basic method asynchronous Bulkhead with defaulting value parameter. This will check that more than 1
+     * but less than 10 calls get into the bulkhead at once.
      */
     @Test
     public void testBulkheadMethodAsynchronousDefault() {
@@ -174,9 +165,8 @@ public class BulkheadAsynchTest extends Arquillian {
     }
 
     /**
-     * Tests the queueing class asynchronous Bulkhead with value parameter 10.
-     * This will check that more than 1 but less than 5 calls get into the
-     * bulkhead at once but that 5 threads can queue to get into the bulkhead
+     * Tests the queueing class asynchronous Bulkhead with value parameter 10. This will check that more than 1 but less
+     * than 5 calls get into the bulkhead at once but that 5 threads can queue to get into the bulkhead
      */
     @Test
     public void testBulkheadClassAsynchronousQueueing5() {
@@ -184,9 +174,8 @@ public class BulkheadAsynchTest extends Arquillian {
     }
 
     /**
-     * Tests the queueing method asynchronous Bulkhead with value parameter 10.
-     * This will check that more than 1 but less than 5 calls get into the
-     * bulkhead at once but that 5 threads can queue to get into the bulkhead
+     * Tests the queueing method asynchronous Bulkhead with value parameter 10. This will check that more than 1 but
+     * less than 5 calls get into the bulkhead at once but that 5 threads can queue to get into the bulkhead
      */
     @Test
     public void testBulkheadMethodAsynchronousQueueing5() {
@@ -194,7 +183,8 @@ public class BulkheadAsynchTest extends Arquillian {
     }
 
     /**
-     * Test that an asynchronous method which returns an incomplete CompletionStage still reserves a slot in the bulkhead
+     * Test that an asynchronous method which returns an incomplete CompletionStage still reserves a slot in the
+     * bulkhead
      */
     @Test
     public void testBulkheadCompletionStage() throws InterruptedException, ExecutionException, TimeoutException {
@@ -207,91 +197,90 @@ public class BulkheadAsynchTest extends Arquillian {
             Future<Void> future4 = toCompletableFuture(bhBeanCompletionStage.serviceCS(result));
             Thread.sleep(getConfig().getTimeoutInMillis(200)); // Give tasks a chance to start and run
             Future<Void> future5 = toCompletableFuture(bhBeanCompletionStage.serviceCS(result));
-            
-            // Although futures 1 & 2 have had time to run, they shouldn't be finished because the completion stage returned is not complete
+
+            // Although futures 1 & 2 have had time to run, they shouldn't be finished because the completion stage
+            // returned is not complete
             assertFalse(future1.isDone(), "Future1 reported done");
             assertFalse(future2.isDone(), "Future2 reported done");
-            
-            // Because futures 1 & 2 are still not "complete" (even though the method call may have returned), future 5 should be rejected
+
+            // Because futures 1 & 2 are still not "complete" (even though the method call may have returned), future 5
+            // should be rejected
             expectBulkheadException(future5);
-            
+
             // Complete the CompletionStage which was returned
             result.complete(null);
-            
+
             // After the CompletionStage completes, future 1 & 2 should complete
             future1.get(getConfig().getTimeoutInMillis(1000), TimeUnit.MILLISECONDS);
             future2.get(getConfig().getTimeoutInMillis(1000), TimeUnit.MILLISECONDS);
-            
+
             // Tasks 3 & 4 should then be removed from the queue, started and complete almost immediately
             future3.get(getConfig().getTimeoutInMillis(1000), TimeUnit.MILLISECONDS);
             future4.get(getConfig().getTimeoutInMillis(1000), TimeUnit.MILLISECONDS);
-        }
-        finally {
+        } finally {
             result.complete(null);
         }
     }
 
     /**
-     * Conducts a standard test to ensure that an asynchronous bulkhead with no
-     * other annotations works correctly. It asserts that the correct number of
-     * tasks are allowed to run and to queue and that when a task in the bulkhead
+     * Conducts a standard test to ensure that an asynchronous bulkhead with no other annotations works correctly. It
+     * asserts that the correct number of tasks are allowed to run and to queue and that when a task in the bulkhead
      * completes a new task can be run.
      * <p>
-     * The {@code bulkheadMethod} should be a reference to a method annotated with
-     * {@link Bulkhead} and {@link Asynchronous} which accepts a {@code Barrier} and
-     * calls {@link Barrier#await()}.
+     * The {@code bulkheadMethod} should be a reference to a method annotated with {@link Bulkhead} and
+     * {@link Asynchronous} which accepts a {@code Barrier} and calls {@link Barrier#await()}.
      * 
      * @param maxRunning
-     *                           expected number of tasks permitted to run
+     *            expected number of tasks permitted to run
      * @param maxQueued
-     *                           expected number of tasks permitted to queue
+     *            expected number of tasks permitted to queue
      * @param bulkheadMethod
-     *                           a reference to the annotated method
+     *            a reference to the annotated method
      */
     public static void testBulkhead(int maxRunning, int maxQueued, Function<Barrier, Future<?>> bulkheadMethod) {
-        
+
         try (AsyncTaskManager taskManager = new AsyncTaskManager()) {
-            
+
             // Fill the bulkhead
             List<BarrierTask<?>> runningTasks = new ArrayList<>();
             for (int i = 0; i < maxRunning; i++) {
                 BarrierTask<?> task = taskManager.runAsyncBarrierTask(bulkheadMethod);
                 runningTasks.add(task);
             }
-            
+
             // Check tasks start and await on the barrier
             for (int i = 0; i < maxRunning; i++) {
                 runningTasks.get(i).assertAwaits();
             }
-            
+
             // Fill the queue
             List<BarrierTask<?>> queuedTasks = new ArrayList<>();
             for (int i = 0; i < maxQueued; i++) {
                 BarrierTask<?> task = taskManager.runAsyncBarrierTask(bulkheadMethod);
                 queuedTasks.add(task);
             }
-            
+
             // Check queued tasks do not start and await on the barrier
             AsyncTaskManager.assertAllNotAwaiting(queuedTasks);
-            
+
             // Check next task is rejected
             BarrierTask<?> overflowTask = taskManager.runAsyncBarrierTask(bulkheadMethod);
             overflowTask.assertThrows(BulkheadException.class);
-            
+
             // Release one running task
             BarrierTask<?> releasedTask = runningTasks.get(7 % maxRunning); // Pick one out of the middle
             releasedTask.openBarrier();
             releasedTask.assertSuccess();
-            
+
             // Check that one of the queued tasks now starts
             await().until(() -> queuedTasks.stream()
-                                           .filter(task -> task.isAwaiting())
-                                           .count() == 1);
-            
+                    .filter(task -> task.isAwaiting())
+                    .count() == 1);
+
             // Now check that another task can be submitted and queues
             BarrierTask<?> extraTask = taskManager.runAsyncBarrierTask(bulkheadMethod);
             extraTask.assertNotAwaiting();
-            
+
             // Now check that next task is rejected
             BarrierTask<?> overflowTask2 = taskManager.runAsyncBarrierTask(bulkheadMethod);
             overflowTask2.assertThrows(BulkheadException.class);

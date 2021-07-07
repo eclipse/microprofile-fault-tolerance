@@ -26,8 +26,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.time.temporal.ChronoUnit;
 
-import javax.enterprise.util.Nonbinding;
-import javax.interceptor.InterceptorBinding;
+import jakarta.enterprise.util.Nonbinding;
+import jakarta.interceptor.InterceptorBinding;
 
 /**
  * The retry annotation to define the number of retries. Any invalid config value causes
@@ -36,11 +36,14 @@ import javax.interceptor.InterceptorBinding;
  * When a method returns and the retry policy is present, the following rules are applied:
  * <ol>
  * <li>If the method returns normally (doesn't throw), the result is simply returned.
- * <li>Otherwise, if the thrown object is assignable to any value in the {@link #abortOn()} parameter, the thrown object is rethrown.
- * <li>Otherwise, if the thrown object is assignable to any value in the {@link #retryOn()} parameter, the method call is retried.
+ * <li>Otherwise, if the thrown object is assignable to any value in the {@link #abortOn()} parameter, the thrown object
+ * is rethrown.
+ * <li>Otherwise, if the thrown object is assignable to any value in the {@link #retryOn()} parameter, the method call
+ * is retried.
  * <li>Otherwise the thrown object is rethrown.
  * </ol>
- * If a method throws a {@link Throwable} which is not an {@link Error} or {@link Exception}, non-portable behavior results.
+ * If a method throws a {@link Throwable} which is not an {@link Error} or {@link Exception}, non-portable behavior
+ * results.
  *
  * @see #maxRetries()
  * @see #delay()
@@ -58,7 +61,7 @@ import javax.interceptor.InterceptorBinding;
 @Inherited
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.METHOD, ElementType.TYPE})
+@Target({ElementType.METHOD, ElementType.TYPE})
 @InterceptorBinding
 public @interface Retry {
 
@@ -105,14 +108,13 @@ public @interface Retry {
 
     /**
      * <p>
-     * Set the jitter to randomly vary retry delays for. The value must be greater than or equals to 0.
-     * 0 means not set.
+     * Set the jitter to randomly vary retry delays for. The value must be greater than or equals to 0. 0 means not set.
      * </p>
-     * The effective delay will be [delay - jitter, delay + jitter] and always greater than or equal to 0.
-     * Negative effective delays will be 0.
+     * The effective delay will be [delay - jitter, delay + jitter] and always greater than or equal to 0. Negative
+     * effective delays will be 0.
      *
-     * @return the jitter that randomly vary retry delays by. e.g. a jitter of 200 milliseconds
-     * will randomly add between -200 and 200 milliseconds to each retry delay.
+     * @return the jitter that randomly vary retry delays by. e.g. a jitter of 200 milliseconds will randomly add
+     *         between -200 and 200 milliseconds to each retry delay.
      */
     @Nonbinding
     long jitter() default 200;
@@ -125,23 +127,24 @@ public @interface Retry {
     @Nonbinding
     ChronoUnit jitterDelayUnit() default ChronoUnit.MILLIS;
 
-
     /**
      * The list of exception types that should trigger a retry.
      * <p>
-     * Note that if a method throws a {@link Throwable} which is not an {@link Error} or {@link Exception}, non-portable behavior results.
+     * Note that if a method throws a {@link Throwable} which is not an {@link Error} or {@link Exception}, non-portable
+     * behavior results.
      *
      * @return the exception types on which to retry
      */
     @Nonbinding
-    Class<? extends Throwable>[] retryOn() default { Exception.class };
+    Class<? extends Throwable>[] retryOn() default {Exception.class};
 
     /**
      * The list of exception types that should <i>not</i> trigger a retry.
      * <p>
      * This list takes priority over the types listed in {@link #retryOn()}.
      * <p>
-     * Note that if a method throws a {@link Throwable} which is not an {@link Error} or {@link Exception}, non-portable behavior results.
+     * Note that if a method throws a {@link Throwable} which is not an {@link Error} or {@link Exception}, non-portable
+     * behavior results.
      *
      * @return the exception types on which to abort (not retry)
      */

@@ -23,8 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead10ClassSemaphoreBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead10MethodSemaphoreBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead3ClassSemaphoreBean;
@@ -33,8 +31,8 @@ import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhe
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadClassSemaphoreDefaultBean;
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadMethodSemaphoreDefaultBean;
 import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncTaskManager;
-import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
 import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncTaskManager.BarrierTask;
+import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
@@ -46,6 +44,8 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
+import jakarta.inject.Inject;
+
 /**
  * @author Gordon Hutchison
  * @author Andrew Rouse
@@ -53,11 +53,9 @@ import org.testng.annotations.Test;
 public class BulkheadSynchTest extends Arquillian {
 
     /*
-     * As the FaultTolerance annotation only work on business methods of
-     * injected objects we need to inject a variety of these for use by the
-     * tests below. The naming convention indicates if the annotation is on a
-     * class or method, asynchronous or semaphore based, the size/value of
-     * the {@code @Bulkhead} and whether we have queueing or not.
+     * As the FaultTolerance annotation only work on business methods of injected objects we need to inject a variety of
+     * these for use by the tests below. The naming convention indicates if the annotation is on a class or method,
+     * asynchronous or semaphore based, the size/value of the {@code @Bulkhead} and whether we have queueing or not.
      */
     @Inject
     private BulkheadClassSemaphoreDefaultBean bhBeanClassSemaphoreDefault;
@@ -75,8 +73,8 @@ public class BulkheadSynchTest extends Arquillian {
     private Bulkhead3TaskQueueSemaphoreBean bhBeanTaskQueueSemaphore3;
 
     /**
-     * This is the Arquillian deploy method that controls the contents of the
-     * war that contains all the tests.
+     * This is the Arquillian deploy method that controls the contents of the war that contains all the tests.
+     * 
      * @return the test war "ftBulkheadSynchTest.war"
      */
     @Deployment
@@ -90,9 +88,8 @@ public class BulkheadSynchTest extends Arquillian {
     }
 
     /**
-     * Tests the class synchronous Bulkhead3. This test will check that 3 and no
-     * more than 3 parallel synchronous calls are allowed into a method that is
-     * a member of a {@code @Bulkhead(3)} Class.
+     * Tests the class synchronous Bulkhead3. This test will check that 3 and no more than 3 parallel synchronous calls
+     * are allowed into a method that is a member of a {@code @Bulkhead(3)} Class.
      */
     @Test
     public void testBulkheadClassSemaphore3() {
@@ -100,9 +97,8 @@ public class BulkheadSynchTest extends Arquillian {
     }
 
     /**
-     * Tests the method synchronous Bulkhead3. This test will check that 3 and
-     * no more than 3 parallel synchronous calls are allowed into a method that
-     * has an individual Bulkhead(3) annotation
+     * Tests the method synchronous Bulkhead3. This test will check that 3 and no more than 3 parallel synchronous calls
+     * are allowed into a method that has an individual Bulkhead(3) annotation
      */
     @Test
     public void testBulkheadMethodSemaphore3() {
@@ -110,9 +106,8 @@ public class BulkheadSynchTest extends Arquillian {
     }
 
     /**
-     * Tests the class synchronous Bulkhead10. This test will check that 10 and
-     * no more than 10 parallel synchronous calls are allowed into a method that
-     * is a member of a {@code @Bulkhead(10)} Class.
+     * Tests the class synchronous Bulkhead10. This test will check that 10 and no more than 10 parallel synchronous
+     * calls are allowed into a method that is a member of a {@code @Bulkhead(10)} Class.
      */
     @Test
     public void testBulkheadClassSemaphore10() {
@@ -120,9 +115,8 @@ public class BulkheadSynchTest extends Arquillian {
     }
 
     /**
-     * Tests the method synchronous Bulkhead10. This test will check that 10 and
-     * no more than 10 parallel synchronous calls are allowed into a method that
-     * has an individual
+     * Tests the method synchronous Bulkhead10. This test will check that 10 and no more than 10 parallel synchronous
+     * calls are allowed into a method that has an individual
      *
      * {@code @Bulkhead(10)} annotation
      */
@@ -132,9 +126,8 @@ public class BulkheadSynchTest extends Arquillian {
     }
 
     /**
-     * Tests the basic class synchronous Bulkhead. This test will check that 10
-     * and no more than 10 parallel synchronous calls are allowed into a method
-     * that is a member of a {@code @Bulkhead(10)} Class.
+     * Tests the basic class synchronous Bulkhead. This test will check that 10 and no more than 10 parallel synchronous
+     * calls are allowed into a method that is a member of a {@code @Bulkhead(10)} Class.
      */
     @Test
     public void testBulkheadClassSemaphoreDefault() {
@@ -142,9 +135,8 @@ public class BulkheadSynchTest extends Arquillian {
     }
 
     /**
-     * Tests the basic method synchronous Bulkhead with defaulting value
-     * parameter. This will check that more than 1 but not more than 10 threads get
-     * into the bulkhead at once.
+     * Tests the basic method synchronous Bulkhead with defaulting value parameter. This will check that more than 1 but
+     * not more than 10 threads get into the bulkhead at once.
      */
     @Test
     public void testBulkheadMethodSemaphoreDefault() {
@@ -152,57 +144,55 @@ public class BulkheadSynchTest extends Arquillian {
     }
 
     /**
-     * Test that the {@code waitingTaskQueue} parameter is ignored when
-     * {@code Bulkhead} is used without {@code Asynchronous}.
+     * Test that the {@code waitingTaskQueue} parameter is ignored when {@code Bulkhead} is used without
+     * {@code Asynchronous}.
      */
     public void testSemaphoreWaitingTaskQueueIgnored() {
         testBulkhead(3, bhBeanTaskQueueSemaphore3::test);
     }
 
     /**
-     * Conducts a standard test to ensure that a synchronous bulkhead with no
-     * other annotations works correctly. It asserts that the correct number of
-     * tasks are allowed to run and to queue and that when a task in the bulkhead
+     * Conducts a standard test to ensure that a synchronous bulkhead with no other annotations works correctly. It
+     * asserts that the correct number of tasks are allowed to run and to queue and that when a task in the bulkhead
      * completes a new task can be run.
      * <p>
-     * The {@code bulkheadMethod} should be a reference to a method annotated with
-     * {@link Bulkhead} which accepts a {@code Barrier} and calls
-     * {@link Barrier#await()}.
+     * The {@code bulkheadMethod} should be a reference to a method annotated with {@link Bulkhead} which accepts a
+     * {@code Barrier} and calls {@link Barrier#await()}.
      * 
      * @param maxRunning
-     *                           expected number of tasks permitted to run
+     *            expected number of tasks permitted to run
      * @param bulkheadMethod
-     *                           a reference to the annotated method
+     *            a reference to the annotated method
      */
     public static void testBulkhead(int maxRunning, Consumer<Barrier> bulkheadMethod) {
-        
+
         try (AsyncTaskManager taskManager = new AsyncTaskManager()) {
-            
+
             // Fill the bulkhead
             List<BarrierTask<?>> runningTasks = new ArrayList<>();
             for (int i = 0; i < maxRunning; i++) {
                 BarrierTask<?> task = taskManager.runBarrierTask(bulkheadMethod);
                 runningTasks.add(task);
             }
-            
+
             // Check tasks start and await on the barrier
             for (int i = 0; i < maxRunning; i++) {
                 runningTasks.get(i).assertAwaits();
             }
-            
+
             // Check next task is rejected
             BarrierTask<?> overflowTask = taskManager.runBarrierTask(bulkheadMethod);
             overflowTask.assertThrows(BulkheadException.class);
-            
+
             // Release one running task
             BarrierTask<?> releasedTask = runningTasks.get(7 % maxRunning); // Pick one out of the middle
             releasedTask.openBarrier();
             releasedTask.assertSuccess();
-            
+
             // Now check that another task can be submitted and runs
             BarrierTask<?> extraTask = taskManager.runBarrierTask(bulkheadMethod);
             extraTask.assertAwaits();
-            
+
             // Now check that next task is rejected
             BarrierTask<?> overflowTask2 = taskManager.runBarrierTask(bulkheadMethod);
             overflowTask2.assertThrows(BulkheadException.class);

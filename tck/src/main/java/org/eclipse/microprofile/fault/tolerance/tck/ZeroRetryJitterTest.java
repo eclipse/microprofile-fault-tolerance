@@ -23,8 +23,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
 import static org.testng.Assert.assertEquals;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClientForZeroJitter;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
@@ -34,6 +32,7 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
+import jakarta.inject.Inject;
 
 public class ZeroRetryJitterTest extends Arquillian {
 
@@ -43,9 +42,9 @@ public class ZeroRetryJitterTest extends Arquillian {
     @Deployment
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftZeroTestJitter.jar")
-                                        .addClasses(RetryClientForZeroJitter.class)
-                                        .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
-                                        .as(JavaArchive.class);
+                .addClasses(RetryClientForZeroJitter.class)
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
+                .as(JavaArchive.class);
 
         return ShrinkWrap.create(WebArchive.class, "ftZeroTestJitter.war").addAsLibrary(testJar);
     }

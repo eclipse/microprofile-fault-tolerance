@@ -22,8 +22,6 @@ package org.eclipse.microprofile.fault.tolerance.tck.config;
 
 import static org.testng.Assert.assertEquals;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.eclipse.microprofile.faulttolerance.Fallback;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -34,36 +32,38 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
+import jakarta.inject.Inject;
+
 /**
  * Test configuring Fallback.applyOn globally
  */
 public class FallbackApplyOnConfigTest extends Arquillian {
-    
+
     @Deployment
     public static WebArchive create() {
         ConfigAnnotationAsset config = new ConfigAnnotationAsset();
         config.setGlobally(Fallback.class, "applyOn", TestConfigExceptionA.class.getCanonicalName());
-        
+
         JavaArchive jar = ShrinkWrap
                 .create(JavaArchive.class, "ftFallbackApplyOnConfigTest.jar")
                 .addPackage(FallbackConfigTest.class.getPackage())
                 .addPackage(Packages.UTILS)
                 .addAsManifestResource(config, "microprofile-config.properties")
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
-        
+
         WebArchive war = ShrinkWrap
                 .create(WebArchive.class, "ftFallbackApplyOnConfigTest.war")
                 .addAsLibraries(jar);
         return war;
     }
-    
+
     @Inject
     private FallbackConfigBean bean;
-    
+
     @Test
     public void testApplyOn() {
         // applyOn is configured to include TestConfigExceptionA, so method should fall back
         assertEquals("FALLBACK", bean.applyOnMethod());
     }
-    
+
 }

@@ -27,7 +27,6 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-
 import org.testng.annotations.Test;
 
 public class InvalidCircuitBreakerFailureRatioPosTest extends Arquillian {
@@ -36,14 +35,14 @@ public class InvalidCircuitBreakerFailureRatioPosTest extends Arquillian {
     @ShouldThrowException(value = FaultToleranceDefinitionException.class)
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
-            .create(JavaArchive.class, "ftInvalidCB2.jar")
-            .addClasses(CircuitBreakerClientForValidationFailureRatioPos.class)
-            .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
-            .as(JavaArchive.class);
+                .create(JavaArchive.class, "ftInvalidCB2.jar")
+                .addClasses(CircuitBreakerClientForValidationFailureRatioPos.class)
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
+                .as(JavaArchive.class);
 
         return ShrinkWrap
-            .create(WebArchive.class, "ftInvalidCB2.war")
-            .addAsLibrary(testJar);
+                .create(WebArchive.class, "ftInvalidCB2.war")
+                .addAsLibrary(testJar);
     }
     /**
      * Test that the deployment of an invalid @CircuitBreaker parameter leads to a DeploymentException.

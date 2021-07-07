@@ -27,8 +27,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import javax.enterprise.util.Nonbinding;
-import javax.interceptor.InterceptorBinding;
+import jakarta.enterprise.util.Nonbinding;
+import jakarta.interceptor.InterceptorBinding;
 
 /**
  * Define bulkhead policy to limit the number of the concurrent calls to an instance.
@@ -37,10 +37,10 @@ import javax.interceptor.InterceptorBinding;
  *
  * Otherwise, it means semaphore isolation.
  * <ul>
- * <li> Thread isolation - execution happens on a separate thread and the concurrent requests
- * are confined in a fixed number of a thread pool.</li>
- * <li> Semaphore isolation - execution happens on the calling thread and the concurrent requests
- * are constrained by the semaphore count.</li>
+ * <li>Thread isolation - execution happens on a separate thread and the concurrent requests are confined in a fixed
+ * number of a thread pool.</li>
+ * <li>Semaphore isolation - execution happens on the calling thread and the concurrent requests are constrained by the
+ * semaphore count.</li>
  * </ul>
  *
  * @see #value()
@@ -51,14 +51,14 @@ import javax.interceptor.InterceptorBinding;
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.METHOD, ElementType.TYPE })
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Inherited
 @InterceptorBinding
 public @interface Bulkhead {
 
     /**
-     * Specify the maximum number of concurrent calls to an instance. The value must be greater than 0.
-     * Otherwise, {@link org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException} occurs.
+     * Specify the maximum number of concurrent calls to an instance. The value must be greater than 0. Otherwise,
+     * {@link org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException} occurs.
      *
      * @return the limit of the concurrent calls
      */
@@ -66,9 +66,9 @@ public @interface Bulkhead {
     int value() default 10;
 
     /**
-     * Specify the waiting task queue. This setting only takes effect on asynchronous invocation, achieved by using {@code Asynchronous}.
-     * The value must be greater than 0.
-     * Otherwise, {@link org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException} occurs.
+     * Specify the waiting task queue. This setting only takes effect on asynchronous invocation, achieved by using
+     * {@code Asynchronous}. The value must be greater than 0. Otherwise,
+     * {@link org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException} occurs.
      *
      * @return the waiting queue size
      */

@@ -19,7 +19,7 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.lifecycle;
 
-import javax.enterprise.context.Dependent;
+import jakarta.enterprise.context.Dependent;
 
 @Dependent
 public class BulkheadLifecycleServiceSubclass2 extends BulkheadLifecycleServiceSuperclass {

@@ -25,5 +25,5 @@ public class FallbackMethodOutOfPackageBeanB {
     String fallback(int a, Long b) {
         return "fallback";
     }
-    
+
 }

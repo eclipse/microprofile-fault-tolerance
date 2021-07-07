@@ -20,15 +20,15 @@
 
 package org.eclipse.microprofile.fault.tolerance.tck.fallback.clientserver;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.faulttolerance.ExecutionContext;
 import org.eclipse.microprofile.faulttolerance.FallbackHandler;
 
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 
 /**
  * A fallback handler to recover and return a string object.
+ * 
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  *
  */

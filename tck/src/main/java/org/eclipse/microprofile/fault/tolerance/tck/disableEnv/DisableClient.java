@@ -21,13 +21,13 @@ package org.eclipse.microprofile.fault.tolerance.tck.disableEnv;
 
 import java.sql.Connection;
 
-import javax.enterprise.context.RequestScoped;
-
 import org.eclipse.microprofile.fault.tolerance.tck.fallback.clientserver.StringFallbackHandler;
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 import org.eclipse.microprofile.faulttolerance.Fallback;
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.faulttolerance.Timeout;
+
+import jakarta.enterprise.context.RequestScoped;
 
 /**
  * A client to determine the impact of the MP_Fault_Tolerance_NonFallback_Enabled environment variable
@@ -43,21 +43,22 @@ public class DisableClient {
 
     /**
      * Invokes connection service and increases the counter for invocations the connection service
+     * 
      * @return Always throws exception
      */
     @Retry(maxRetries = 1)
     public Connection serviceA() {
         try {
             Thread.sleep(100);
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
         return connectionService();
     }
-    
+
     /**
      * Invokes name service and increases the counter for invocations of serviceB
+     * 
      * @return Always throws exception
      */
     @Retry(maxRetries = 1)
@@ -66,9 +67,10 @@ public class DisableClient {
         counterForInvokingServiceB++;
         return nameService();
     }
-       
+
     /**
      * Invokes connection service and increases the counter for invocations of serviceC and connection service
+     * 
      * @return Always throws exception
      */
     @CircuitBreaker(successThreshold = 2, requestVolumeThreshold = 4, failureRatio = 0.75, delay = 50000)
@@ -79,41 +81,42 @@ public class DisableClient {
 
         return conn;
     }
-    
+
     /**
      * serviceD uses the default Fault Tolerance timeout of 1 second.
-     * @param timeToSleep How long should the execution take in millis
+     * 
+     * @param timeToSleep
+     *            How long should the execution take in millis
      * @return null or exception is raised
-     */    
+     */
     @Timeout
     public Connection serviceD(long timeToSleep) {
         try {
             Thread.sleep(timeToSleep);
             throw new RuntimeException("Timeout did not interrupt");
-        } 
-        catch (InterruptedException e) {
-            //expected
+        } catch (InterruptedException e) {
+            // expected
         }
         return null;
-    }   
-    
+    }
+
     private String nameService() {
         throw new RuntimeException("Connection failed");
     }
-    
+
     private Connection connectionService() {
         counterForInvokingConnenectionService++;
         throw new RuntimeException("Connection failed");
     }
-    
+
     public int getRetryCountForConnectionService() {
         return counterForInvokingConnenectionService;
     }
-    
+
     public int getCounterForInvokingServiceB() {
         return counterForInvokingServiceB;
     }
-    
+
     public int getCounterForInvokingServiceC() {
         return counterForInvokingServiceC;
     }

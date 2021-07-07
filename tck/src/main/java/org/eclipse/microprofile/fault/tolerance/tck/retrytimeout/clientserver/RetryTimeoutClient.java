@@ -21,13 +21,13 @@ package org.eclipse.microprofile.fault.tolerance.tck.retrytimeout.clientserver;
 
 import static org.testng.Assert.fail;
 
-import javax.enterprise.context.RequestScoped;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.faulttolerance.Timeout;
 import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
 import org.eclipse.microprofile.faulttolerance.exceptions.TimeoutException;
+
+import jakarta.enterprise.context.RequestScoped;
 
 /**
  * A client to demonstrate the combination of the @Retry and @Timeout annotations.
@@ -58,7 +58,8 @@ public class RetryTimeoutClient {
     /**
      * Times out after 500ms, retries once
      * 
-     * @param timeToSleep time this method should sleep for in ms 
+     * @param timeToSleep
+     *            time this method should sleep for in ms
      * @return {@code null}
      */
     @Timeout(500)
@@ -68,13 +69,12 @@ public class RetryTimeoutClient {
             counterForInvokingServiceA++;
             Thread.sleep(timeToSleep);
             throw new RuntimeException("Timeout did not interrupt");
-        } 
-        catch (InterruptedException e) {
-            //expected
+        } catch (InterruptedException e) {
+            // expected
         }
         return null;
     }
-    
+
     /**
      * Sleeps for 1000ms, times out after 500ms, retries once on BulkheadException
      * <p>
@@ -89,13 +89,12 @@ public class RetryTimeoutClient {
             counterForInvokingServiceWithoutRetryOn++;
             Thread.sleep(config.getTimeoutInMillis(1000));
             fail("Timeout did not interrupt");
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             // expected
         }
         return null;
     }
-    
+
     /**
      * Sleeps for 1000ms, times out after 500ms, retries once on anything but TimeoutException
      * 
@@ -108,8 +107,7 @@ public class RetryTimeoutClient {
             counterForInvokingServiceWithAbortOn++;
             Thread.sleep(config.getTimeoutInMillis(1000));
             fail("Timeout did not interrupt");
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             // expected
         }
         return null;

@@ -22,8 +22,6 @@ package org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod;
 
 import static org.testng.Assert.assertEquals;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodGenericAbstractBeanA;
 import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodGenericAbstractBeanB;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -33,6 +31,8 @@ import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
+
+import jakarta.inject.Inject;
 
 /**
  * Test for an abstract fallback method on a generic class
@@ -44,18 +44,19 @@ public class FallbackMethodGenericAbstractTest extends Arquillian {
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodGenericAbstract.jar")
                 .addClasses(FallbackMethodGenericAbstractBeanA.class, FallbackMethodGenericAbstractBeanB.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
-        
+
         WebArchive war = ShrinkWrap
                 .create(WebArchive.class, "ftFallbackMethodGenericAbstract.war")
                 .addAsLibrary(testJar);
         return war;
     }
-    
-    @Inject private FallbackMethodGenericAbstractBeanA bean;
-    
+
+    @Inject
+    private FallbackMethodGenericAbstractBeanA bean;
+
     @Test
     public void fallbackMethodGenericAbstract() {
         assertEquals(bean.method(1, 2L), "fallback");
     }
-    
+
 }

@@ -22,14 +22,14 @@ package org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver
 import java.io.Serializable;
 import java.sql.Connection;
 
-import javax.enterprise.context.RequestScoped;
-
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 
+import jakarta.enterprise.context.RequestScoped;
+
 /**
- * A client to exercise Circuit Breaker thresholds, with a SuccessThreshold of 2,
- * a requestVolumeThreshold of 4, failureRatio of 0.75 and a 50 second delay, so
- * that, once opened, the Circuit Breaker remains open for the duration of the test.
+ * A client to exercise Circuit Breaker thresholds, with a SuccessThreshold of 2, a requestVolumeThreshold of 4,
+ * failureRatio of 0.75 and a 50 second delay, so that, once opened, the Circuit Breaker remains open for the duration
+ * of the test.
  * 
  * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  *
@@ -85,7 +85,7 @@ public class CircuitBreakerClassLevelClientWithDelay implements Serializable {
         return conn;
     }
 
-    //simulate a backend service
+    // simulate a backend service
     private Connection connectionService() {
         if (counterForInvokingService < 5) {
             throw new RuntimeException("Connection failed");

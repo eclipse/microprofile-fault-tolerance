@@ -22,13 +22,15 @@ package org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver;
 import java.io.IOException;
 import java.sql.Connection;
 
-import javax.enterprise.context.RequestScoped;
-
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.exceptions.RetryChildException;
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.exceptions.RetryParentException;
 import org.eclipse.microprofile.faulttolerance.Retry;
+
+import jakarta.enterprise.context.RequestScoped;
+
 /**
  * A client to demonstrate the retryOn conditions
+ * 
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  *
  */
@@ -47,7 +49,9 @@ public class RetryClientRetryOn {
     }
 
     /**
-     * Service that throws a child custom exception but in the retry on list is configured child's parent custom exception
+     * Service that throws a child custom exception but in the retry on list is configured child's parent custom
+     * exception
+     * 
      * @return Connection
      */
     @Retry(retryOn = {RetryParentException.class})
@@ -57,8 +61,9 @@ public class RetryClientRetryOn {
     }
 
     /**
-     * Service that throws a child custom exception but in the retry on list is configured child's parent custom exception
-     * and is configured in the abort on list the child custom exception
+     * Service that throws a child custom exception but in the retry on list is configured child's parent custom
+     * exception and is configured in the abort on list the child custom exception
+     * 
      * @return Connection
      */
     @Retry(retryOn = {RetryParentException.class}, abortOn = {RetryChildException.class})
@@ -67,13 +72,12 @@ public class RetryClientRetryOn {
         throw new RetryChildException("Connection failed");
     }
 
-
     public int getRetryCountForConnectionService() {
         return counterForInvokingConnenectionService;
     }
     /**
-     * The configured the max retries is 90 but the max duration is 100ms. 
-     * Once the duration is reached, no more retries should be performed.
+     * The configured the max retries is 90 but the max duration is 100ms. Once the duration is reached, no more retries
+     * should be performed.
      */
     @Retry(retryOn = {IOException.class})
     public void serviceB() {
@@ -81,17 +85,16 @@ public class RetryClientRetryOn {
     }
 
     private void writingService() {
-        counterForInvokingWritingService ++;
+        counterForInvokingWritingService++;
         try {
             Thread.sleep(100);
             throw new RuntimeException("WritingService failed");
-        } 
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        
+
     }
-    
+
     public int getRetryCountForWritingService() {
         return counterForInvokingWritingService;
     }

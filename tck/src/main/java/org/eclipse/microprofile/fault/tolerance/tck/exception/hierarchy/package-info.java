@@ -36,4 +36,3 @@
  * </pre>
  */
 package org.eclipse.microprofile.fault.tolerance.tck.exception.hierarchy;
-

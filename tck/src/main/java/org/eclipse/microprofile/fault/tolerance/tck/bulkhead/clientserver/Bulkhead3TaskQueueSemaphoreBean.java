@@ -23,7 +23,7 @@ package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * Tests that the waitingTaskQueue parameter is ignored when {@code Asynchronous} is not used

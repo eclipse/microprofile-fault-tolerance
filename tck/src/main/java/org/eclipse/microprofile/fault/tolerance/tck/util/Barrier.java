@@ -30,12 +30,12 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Barrier {
-    
+
     /**
      * Time limit for tasks waiting on the barrier.
      */
     public static final long BARRIER_WAIT_TIME_MS = TCKConfig.getConfig().getTimeoutInMillis(30_000);
-    
+
     /**
      * Time to wait for something which is expected not to happen (e.g. assert that a task does not complete)
      */
@@ -46,7 +46,6 @@ public class Barrier {
      */
     public static final long WAIT_TIME_MS = TCKConfig.getConfig().getTimeoutInMillis(3000);
 
-
     private final CompletableFuture<Void> future = new CompletableFuture<>();
     private final AtomicInteger counter = new AtomicInteger(0);
     private final CompletableFuture<Void> isWaitingFuture = new CompletableFuture<>();
@@ -54,27 +53,23 @@ public class Barrier {
     public void await() {
         try {
             awaitInterruptably();
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             fail("Interrupted while awaiting barrier", e);
         }
     }
-    
+
     public void awaitInterruptably() throws InterruptedException {
         counter.incrementAndGet();
         isWaitingFuture.complete(null);
         try {
             future.get(BARRIER_WAIT_TIME_MS, MILLISECONDS);
-        }
-        catch (ExecutionException e) {
+        } catch (ExecutionException e) {
             fail("Unexpected exception while awaiting barrier", e);
-        }
-        catch (TimeoutException e) {
+        } catch (TimeoutException e) {
             fail("Timed out while awaiting barrier", e);
         }
     }
 
-    
     public void open() {
         future.complete(null);
         counter.set(0);
@@ -90,14 +85,11 @@ public class Barrier {
     public void assertAwaits() {
         try {
             isWaitingFuture.get(WAIT_TIME_MS, MILLISECONDS);
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             fail("Interrupted while checking task is awaiting");
-        }
-        catch (ExecutionException e) {
+        } catch (ExecutionException e) {
             fail("Unexpected exception while checking task is awaiting", e);
-        }
-        catch (TimeoutException e) {
+        } catch (TimeoutException e) {
             fail("Timed out while checking task is awaiting");
         }
     }
@@ -109,31 +101,28 @@ public class Barrier {
         try {
             isWaitingFuture.get(EXPECTED_FAIL_TIME_MS, MILLISECONDS);
             fail("Task is awaiting");
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             fail("Interrupted while checking task is not awaiting");
-        }
-        catch (ExecutionException e) {
+        } catch (ExecutionException e) {
             fail("Unexpected exception while checking task is awaiting", e);
-        }
-        catch (TimeoutException e) {
+        } catch (TimeoutException e) {
             // Expected
         }
     }
-    
+
     /**
      * Assert that no task waits on any of a set of barriers within EXPECTED_FAIL_TIME_MS
      * 
-     * @param barriers the barriers to check
+     * @param barriers
+     *            the barriers to check
      */
     public static void assertAllNotAwaiting(Collection<? extends Barrier> barriers) {
         try {
             Thread.sleep(EXPECTED_FAIL_TIME_MS);
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             fail("Interrupted while checking tasks are not awaiting", e);
         }
-        
+
         for (Barrier barrier : barriers) {
             assertFalse(barrier.isWaitingFuture.isDone(), "Task is waiting");
         }

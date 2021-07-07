@@ -19,19 +19,21 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.interceptor;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
+
 import org.eclipse.microprofile.fault.tolerance.tck.interceptor.EarlyFtInterceptor.InterceptEarly;
 import org.eclipse.microprofile.fault.tolerance.tck.interceptor.LateFtInterceptor.InterceptLate;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.testng.TestException;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 /**
  * Component to show the CDI interceptor ordering with FT annotations
+ * 
  * @author carlosdlr
  */
 @ApplicationScoped

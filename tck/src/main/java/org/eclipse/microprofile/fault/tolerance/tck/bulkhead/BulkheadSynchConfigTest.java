@@ -19,8 +19,6 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.Bulkhead3ClassSemaphoreBean;
 import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
@@ -33,6 +31,8 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
+import jakarta.inject.Inject;
+
 /**
  * @author Gordon Hutchison
  * @author Andrew Rouse
@@ -40,30 +40,29 @@ import org.testng.annotations.Test;
 public class BulkheadSynchConfigTest extends Arquillian {
 
     /**
-     * This is the Arquillian deploy method that controls the contents of the
-     * war that contains all the tests.
+     * This is the Arquillian deploy method that controls the contents of the war that contains all the tests.
      *
      * @return the test war "ftBulkheadSynchTest.war"
      */
     @Deployment
     public static WebArchive deploy() {
-        
+
         ConfigAnnotationAsset config = new ConfigAnnotationAsset()
                 .setGlobally(Bulkhead.class, "value", "5");
-        
+
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftBulkheadSynchConfigTest.jar")
-            .addPackage(Bulkhead3ClassSemaphoreBean.class.getPackage())
-            .addClass(BulkheadSynchTest.class)
-            .addPackage(Packages.UTILS)
-            .addAsManifestResource(config, "microprofile-config.properties")
-            .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
-        
+                .addPackage(Bulkhead3ClassSemaphoreBean.class.getPackage())
+                .addClass(BulkheadSynchTest.class)
+                .addPackage(Packages.UTILS)
+                .addAsManifestResource(config, "microprofile-config.properties")
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
+
         return ShrinkWrap.create(WebArchive.class, "ftBulkheadSynchConfigTest.war").addAsLibrary(testJar);
     }
 
     /**
-     * Tests taking Bulkhead3 waiting for 3 and no more workers and change its configuration by propoerty
-     * to switch to 5 workers. Test wouldn't pass without property config working
+     * Tests taking Bulkhead3 waiting for 3 and no more workers and change its configuration by propoerty to switch to 5
+     * workers. Test wouldn't pass without property config working
      */
     @Test()
     public void testBulkheadClassSemaphore3() {
@@ -71,11 +70,9 @@ public class BulkheadSynchConfigTest extends Arquillian {
     }
 
     /*
-     * As the FaultTolerance annotation only work on business methods of
-     * injected objects we need to inject a variety of these for use by the
-     * tests below. The naming convention indicates if the annotation is on a
-     * class or method, asynchronous or semaphore based, the size/value of
-     * the {@code @Bulkhead} and whether we have queueing or not.
+     * As the FaultTolerance annotation only work on business methods of injected objects we need to inject a variety of
+     * these for use by the tests below. The naming convention indicates if the annotation is on a class or method,
+     * asynchronous or semaphore based, the size/value of the {@code @Bulkhead} and whether we have queueing or not.
      */
     @Inject
     private Bulkhead3ClassSemaphoreBean bhBeanClassSemaphore3;

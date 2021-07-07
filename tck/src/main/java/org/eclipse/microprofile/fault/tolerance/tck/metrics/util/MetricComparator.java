@@ -29,35 +29,38 @@ import org.hamcrest.Matchers;
 public class MetricComparator {
 
     // Utility class, no public constructor
-    private MetricComparator() {}
-    
+    private MetricComparator() {
+    }
+
     /**
      * Check that a nanosecond time is within 20% of an expected time in milliseconds
      * <p>
-     * Note that this method applies any timeout scaling configured in TCKConfig, does the millseconds to nanoseconds conversion and creates a
-     * {@link Matcher} to do the check.
+     * Note that this method applies any timeout scaling configured in TCKConfig, does the millseconds to nanoseconds
+     * conversion and creates a {@link Matcher} to do the check.
      * <p>
      * Useful for checking the results from Histograms.
      * 
-     * @param originalMillis the expected time in milliseconds
+     * @param originalMillis
+     *            the expected time in milliseconds
      * @return a {@link Matcher} which matches against a time in nanoseconds
      */
     public static Matcher<Long> approxMillis(final long originalMillis) {
         long millis = TCKConfig.getConfig().getTimeoutInMillis(originalMillis);
         long nanos = millis * 1_000_000;
         long error = Math.round(nanos * 0.2);
-        return Matchers.allOf(greaterThan(nanos-error), lessThan(nanos+error));
+        return Matchers.allOf(greaterThan(nanos - error), lessThan(nanos + error));
     }
-    
+
     /**
      * Check that a nanosecond time is less than an expected time in milliseconds
      * <p>
-     * This method applies any timeout scaling configured in TCKConfig, does the millseconds to nanoseconds conversion and creates a
-     * {@link Matcher} to do the check.
+     * This method applies any timeout scaling configured in TCKConfig, does the millseconds to nanoseconds conversion
+     * and creates a {@link Matcher} to do the check.
      * <p>
      * Useful for checking the results from Histograms.
      * 
-     * @param originalMillis the expected time in milliseconds
+     * @param originalMillis
+     *            the expected time in milliseconds
      * @return a {@link Matcher} which matches against a time in nanoseconds
      */
     public static Matcher<Long> lessThanMillis(final long originalMillis) {
@@ -65,5 +68,5 @@ public class MetricComparator {
         long nanos = millis * 1_000_000;
         return lessThan(nanos);
     }
-    
+
 }

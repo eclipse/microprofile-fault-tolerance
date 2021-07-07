@@ -22,11 +22,13 @@ package org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver;
 import java.sql.Connection;
 import java.time.temporal.ChronoUnit;
 
-import javax.enterprise.context.RequestScoped;
-
 import org.eclipse.microprofile.faulttolerance.Retry;
+
+import jakarta.enterprise.context.RequestScoped;
+
 /**
  * A client to demonstrate the maxRetries and max duration configuration
+ * 
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  *
  */
@@ -38,9 +40,9 @@ public class RetryClassLevelClientForMaxRetries {
     private int counterForInvokingServiceA;
     private int counterForInvokingServiceB;
     private int counterForInvokingServiceC;
-    
+
     public Connection serviceA() {
-        counterForInvokingServiceA ++;
+        counterForInvokingServiceA++;
         return connectionService();
     }
 
@@ -48,55 +50,52 @@ public class RetryClassLevelClientForMaxRetries {
         counterForInvokingConnenectionService++;
         throw new RuntimeException("Connection failed");
     }
-    
+
     public int getRetryCountForConnectionService() {
         return counterForInvokingConnenectionService;
     }
-    
+
     /**
-     * Max retries is configured to 90 but the max duration is 1 second with a default 
-     * durationUnit of milliseconds.
-     *  
+     * Max retries is configured to 90 but the max duration is 1 second with a default durationUnit of milliseconds.
+     * 
      * Once the duration is reached, no more retries should be performed.
      */
-    @Retry(maxRetries = 90, maxDuration= 1000)
+    @Retry(maxRetries = 90, maxDuration = 1000)
     public void serviceB() {
-        counterForInvokingServiceB ++;
+        counterForInvokingServiceB++;
         writingService();
     }
 
     /**
-     * Max retries is configured to 90 but the max duration is 1 second with a durationUnit of seconds
-     * specified.
-     *  
+     * Max retries is configured to 90 but the max duration is 1 second with a durationUnit of seconds specified.
+     * 
      * Once the duration is reached, no more retries should be performed.
      */
-    @Retry(maxRetries = 90, maxDuration= 1, durationUnit = ChronoUnit.SECONDS)
+    @Retry(maxRetries = 90, maxDuration = 1, durationUnit = ChronoUnit.SECONDS)
     public void serviceC() {
-        counterForInvokingServiceC ++;
+        counterForInvokingServiceC++;
         writingService();
     }
-    
+
     private void writingService() {
-         counterForInvokingWritingService ++;
+        counterForInvokingWritingService++;
         try {
             Thread.sleep(100);
             throw new RuntimeException("WritingService failed");
-        } 
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        
+
     }
-    
+
     public int getRetryCountForWritingService() {
         return counterForInvokingWritingService;
     }
-    
+
     public int getRetryCounterForServiceA() {
         return counterForInvokingServiceA;
     }
-    
+
     public int getRetryCounterForServiceB() {
         return counterForInvokingServiceB;
     }

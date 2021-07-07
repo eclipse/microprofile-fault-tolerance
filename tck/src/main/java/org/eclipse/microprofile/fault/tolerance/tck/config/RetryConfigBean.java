@@ -24,10 +24,10 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.enterprise.context.ApplicationScoped;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.Retry;
+
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * Suite of methods for testing the various parameters of Retry
@@ -40,35 +40,32 @@ public class RetryConfigBean {
         counter.getAndIncrement();
         throw new TestException();
     }
-    
+
     @Retry(maxDuration = 10000, durationUnit = ChronoUnit.MILLIS, maxRetries = 10000, delay = 200, jitter = 0)
     public void serviceMaxDuration() {
         throw new TestException();
     }
-    
+
     @Retry(maxRetries = 5, delay = 2, delayUnit = ChronoUnit.SECONDS, jitter = 0)
     public void serviceDelay() {
         throw new TestException();
     }
-    
+
     @Retry(maxRetries = 1, delay = 0, jitter = 0)
     public void serviceRetryOn(RuntimeException e, AtomicInteger counter) {
         counter.getAndIncrement();
         throw e;
     }
-    
-    @Retry(retryOn = {TestConfigExceptionA.class, TestConfigExceptionB.class},
-            abortOn = RuntimeException.class,
-            maxRetries = 1,
-            delay = 0,
-            jitter = 0)
+
+    @Retry(retryOn = {TestConfigExceptionA.class,
+            TestConfigExceptionB.class}, abortOn = RuntimeException.class, maxRetries = 1, delay = 0, jitter = 0)
     public void serviceAbortOn(RuntimeException e, AtomicInteger counter) {
         counter.getAndIncrement();
         throw e;
     }
-    
+
     private long lastStartTime = 0;
-    
+
     /**
      * Method to detect whether jitter is enabled
      * <p>
@@ -78,11 +75,7 @@ public class RetryConfigBean {
      * <p>
      * Limited to 10 seconds or 1000 retries, but will stop as soon as a delay of &gt; 100ms is observed.
      */
-    @Retry(abortOn = TestConfigExceptionA.class,
-            delay = 0,
-            jitter = 0,
-            maxRetries = 1000,
-            maxDuration = 10, durationUnit = ChronoUnit.SECONDS)
+    @Retry(abortOn = TestConfigExceptionA.class, delay = 0, jitter = 0, maxRetries = 1000, maxDuration = 10, durationUnit = ChronoUnit.SECONDS)
     public void serviceJitter() {
         long startTime = System.nanoTime();
         if (lastStartTime != 0) {

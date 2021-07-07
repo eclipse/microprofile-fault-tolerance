@@ -23,12 +23,12 @@ package org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans;
 import org.eclipse.microprofile.faulttolerance.Fallback;
 
 public class FallbackMethodSubclassOverrideBeanB {
-    
+
     @Fallback(fallbackMethod = "fallback")
     public String method(int a, Long b) {
         throw new RuntimeException("test");
     }
-    
+
     protected String fallback(int a, Long b) {
         // This fallback method should not be called as it is overridden in subclass
         return "Not this fallback";

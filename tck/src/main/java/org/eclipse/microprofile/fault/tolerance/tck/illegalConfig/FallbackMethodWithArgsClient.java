@@ -19,11 +19,10 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.illegalConfig;
 
-
-import javax.enterprise.context.RequestScoped;
-
 import org.eclipse.microprofile.faulttolerance.Fallback;
 import org.eclipse.microprofile.faulttolerance.Retry;
+
+import jakarta.enterprise.context.RequestScoped;
 
 /**
  * A client to demonstrate the fallback after doing retries
@@ -36,8 +35,11 @@ public class FallbackMethodWithArgsClient {
 
     /**
      * Retry 5 times and then fallback
-     * @param name a string
-     * @param type an Integer
+     * 
+     * @param name
+     *            a string
+     * @param type
+     *            an Integer
      * @return a dummy number
      */
     @Retry(maxRetries = 4)
@@ -45,10 +47,12 @@ public class FallbackMethodWithArgsClient {
     public Integer serviceB(String name, Integer type) {
         return 42;
     }
-    
+
     /**
      * Fallback method with incompatible signature, only one parameter
-     * @param name a string
+     * 
+     * @param name
+     *            a string
      * @return a dummy number
      */
     public Integer fallbackForServiceB(String name) {

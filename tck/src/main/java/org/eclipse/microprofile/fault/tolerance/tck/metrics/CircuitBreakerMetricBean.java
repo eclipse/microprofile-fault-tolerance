@@ -19,19 +19,16 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.metrics;
 
-import javax.enterprise.context.RequestScoped;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
+
+import jakarta.enterprise.context.RequestScoped;
 
 @RequestScoped
 public class CircuitBreakerMetricBean {
 
     public enum Result {
-        PASS,
-        PASS_EXCEPTION,
-        SKIPPED_EXCEPTION,
-        FAIL
+        PASS, PASS_EXCEPTION, SKIPPED_EXCEPTION, FAIL
     }
 
     @SuppressWarnings("serial")
@@ -41,19 +38,19 @@ public class CircuitBreakerMetricBean {
         }
     }
 
-    @CircuitBreaker(requestVolumeThreshold = 2, failureRatio = 1.0D, delay = 1000, successThreshold = 2, failOn = {TestException.class},
-            skipOn = SkippedException.class)
+    @CircuitBreaker(requestVolumeThreshold = 2, failureRatio = 1.0D, delay = 1000, successThreshold = 2, failOn = {
+            TestException.class}, skipOn = SkippedException.class)
     public void doWork(Result result) {
         switch (result) {
-        case PASS:
+            case PASS :
                 return;
-        case PASS_EXCEPTION:
+            case PASS_EXCEPTION :
                 throw new RuntimeException();
-        case FAIL:
+            case FAIL :
                 throw new TestException();
-        case SKIPPED_EXCEPTION:
+            case SKIPPED_EXCEPTION :
                 throw new SkippedException();
-        default:
+            default :
                 throw new IllegalArgumentException("Unknown result requested");
         }
     }

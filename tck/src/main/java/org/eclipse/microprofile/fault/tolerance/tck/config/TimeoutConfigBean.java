@@ -20,14 +20,15 @@
 
 package org.eclipse.microprofile.fault.tolerance.tck.config;
 
-import org.eclipse.microprofile.faulttolerance.Asynchronous;
-import org.eclipse.microprofile.faulttolerance.Timeout;
-
-import javax.enterprise.context.ApplicationScoped;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
+
+import org.eclipse.microprofile.faulttolerance.Asynchronous;
+import org.eclipse.microprofile.faulttolerance.Timeout;
+
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * Suite of methods for testing the various parameters of Timeout
