@@ -18,106 +18,16 @@
 // Contributors:
 // Emily Jiang
 
-[[release_notes_11]]
-== Release Notes for MicroProfile Fault Tolerance 1.1
+[[release_notes_40]]
+== Release Notes for MicroProfile Fault Tolerance 4.0
 
-The following changes occurred in the 1.1 release, compared to 1.0
+A full list of changes delivered in the 4.0 release can be found at link:https://github.com/eclipse/microprofile-fault-tolerance/milestone/10[MicroProfile Fault Tolerance 4.0 Milestone].
 
-A full list of changes can be found on the link:https://github.com/eclipse/microprofile-fault-tolerance/milestone/3[MicroProfile Fault Tolerance 1.1 Milestone]
+==== Incompatible Changes
+This release aligns with Jakarta EE 9.1, so it won't work with earlier versions of Jakarta or Java EE.
 
-=== API/SPI changes
-
-- The `ExecutionContext` interface has been extended with a `getFailure` method that returns the execution failure(link:https://github.com/eclipse/microprofile-fault-tolerance/issues/224[#224]).
-
-=== Functional changes
-
-- Implementations must implement the new method of `ExecutionContext.getFailure()`(link:https://github.com/eclipse/microprofile-fault-tolerance/issues/224[#224]).
-- Added metrics status automatically for FT (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/234[#234])
-- Disable individual Fault Tolerance annotation using external config (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/109[#109])
-- Define priority when multiple properties declared (link: https://github.com/eclipse/microprofile-fault-tolerance/issues/278[#278])
-
-=== Specification changes
-
-- Implementations must implement the new method of `ExecutionContext.getFailure()`(link:https://github.com/eclipse/microprofile-fault-tolerance/issues/224[#224]).
-- Added metrics status automatically for FT (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/234[#234])
-- Disable individual Fault Tolerance annotation using external config (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/109[#109])
-- Define priority when multiple properties declared (link: https://github.com/eclipse/microprofile-fault-tolerance/issues/278[#278])
-- Clarify fallback (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/177[#177])
-
-=== Other changes
-- Bulkhead TCK changes (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/227[#227])
-- Add standalone async test (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/194[#194])
-- Add more configuration test (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/182[#182])
-- Circuit Breaker Rolling window behaviour test (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/197[#197])
-- Improve Bulkhead test (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/198[#198])
-
-[[release_notes_20]]
-== Release Notes for MicroProfile Fault Tolerance 2.0
-
-This release is a major release of Fault Tolerance. The reason for increasing the release version to 2.0 is that this release upgrades its CDI dependency from CDI 1.2 to CDI 2.0, in order to use the new features introduced by CDI 2.0. Therefore, this specification is not compatible with Java EE7 but is compatible with Java EE8. Other than this, there are no backward incompatible changes introduced in this specification.
-
-The following changes occurred in the 2.0 release, compared to 1.1.
-
-
-A full list of changes can be found on the link:https://github.com/eclipse/microprofile-fault-tolerance/milestone/5[MicroProfile Fault Tolerance 2.0 Milestone]
-
-=== API/SPI changes
-
-- Add support of the CompletionStage return type when annotated with @Asynchronous (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/110[#110]).
-
-=== Functional changes
-
-- Specify the invocation sequence of MicroProfile Fault Tolerance annotations when used together (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/291[#291])
-- Clarify how the Fault Tolerance annotations interact with other application defined interceptors (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/313[#313])
-
-
-=== Specification changes
-
-- Clarify whether other Fault Tolerance functionalities will be triggered on an exceptional returned Future (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/246[#246]).
-- Specify the sequence of MicroProfile Fault Tolerance annotations when used together (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/291[#291])
-- Clarify how the Fault Tolerance annotations interact with other application defined interceptors (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/313[#313])
-
-=== Other changes
-- Clarify failOn() on CircuitBreaker and Fallback (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/240[#240])
-- Circuit Breaker - clarify how requestVolumeThreshold() and rolling window work (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/342[#342])
-- Other smaller fixes (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/341[#341]) (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/252[#252]) (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/306[#306])
-
-[[release_notes_21]]
-== Release Notes for MicroProfile Fault Tolerance 2.1
-
-This release is a minor release of Fault Tolerance.
-It includes a number of new features and clarifications, as well as TCK improvements.
-The following changes occurred in the 2.1 release, compared to 2.0.
-
-A full list of changes can be found on the link:https://github.com/eclipse/microprofile-fault-tolerance/milestone/8[MicroProfile Fault Tolerance 2.1 Milestone]
-
-=== API/SPI changes
-
-- The `Retry.retryOn` and `abortOn` attributes no longer ignore `Throwable.class` (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/449[#449]).
-- Added `CircuitBreaker.skipOn` (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/418[#418]).
-- Added `Fallback.applyOn` and `skipOn` (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/417[#417]).
-
-=== Functional changes
-
-- The `Retry.retryOn` and `abortOn` attributes no longer ignore `Throwable.class` (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/449[#449]).
-- Added `CircuitBreaker.skipOn` (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/418[#418]).
-- Added `Fallback.applyOn` and `skipOn` (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/417[#417]).
-- Specified the meaning of overlapping `Retry.retryOn` and `abortOn` (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/442[#442]).
-- Relaxed the requirements on `Future` and `CompletionStage` implementations (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/425[#425]).
-
-=== Specification changes
-
-- Specified the meaning of overlapping `Retry.retryOn` and `abortOn` (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/442[#442]).
-- Specified that throwing custom throwables is non-portable (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/441[#441]).
-- Specified that the CDI request context must be active during the execution of methods annotated with `Asynchronous` (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/274[#274])
-- Relaxed the requirements on `Future` and `CompletionStage` implementations (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/425[#425]).
-- Clarified that when a method returning `CompletionStage` is annotated with both `Bulkhead` and `Asynchronous`, the bulkhead considers the method to be executing until the `CompletionStage` returned by the method completes. (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/484[#484])
-- Clarified the retry metrics specification (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/491[#491]).
-
-=== Other changes
-
-- Time values in TCK tests are now configurable (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/399[#399]).
-- Transitive dependency on `jakarta.el-api` has been excluded (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/439[#439]).
+==== API/SPI Changes
+There are no functional changes introduced in this release, except the dependency updating from javax to jakarta.
 
 [[release_notes_30]]
 == Release Notes for MicroProfile Fault Tolerance 3.0
@@ -165,3 +75,105 @@ For example, if a `@RequestScoped` bean has a `@CircuitBreaker` method, all invo
 - Updated metrics to use tags (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/401[#401])
 - Moved metrics into the base scope (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/499[#499])
 - Specified lifecycle of circuit breakers and bulkheads (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/479[#479]])
+
+[[release_notes_21]]
+== Release Notes for MicroProfile Fault Tolerance 2.1
+
+This release is a minor release of Fault Tolerance.
+It includes a number of new features and clarifications, as well as TCK improvements.
+The following changes occurred in the 2.1 release, compared to 2.0.
+
+A full list of changes can be found on the link:https://github.com/eclipse/microprofile-fault-tolerance/milestone/8[MicroProfile Fault Tolerance 2.1 Milestone]
+
+=== API/SPI changes
+
+- The `Retry.retryOn` and `abortOn` attributes no longer ignore `Throwable.class` (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/449[#449]).
+- Added `CircuitBreaker.skipOn` (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/418[#418]).
+- Added `Fallback.applyOn` and `skipOn` (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/417[#417]).
+
+=== Functional changes
+
+- The `Retry.retryOn` and `abortOn` attributes no longer ignore `Throwable.class` (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/449[#449]).
+- Added `CircuitBreaker.skipOn` (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/418[#418]).
+- Added `Fallback.applyOn` and `skipOn` (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/417[#417]).
+- Specified the meaning of overlapping `Retry.retryOn` and `abortOn` (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/442[#442]).
+- Relaxed the requirements on `Future` and `CompletionStage` implementations (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/425[#425]).
+
+=== Specification changes
+
+- Specified the meaning of overlapping `Retry.retryOn` and `abortOn` (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/442[#442]).
+- Specified that throwing custom throwables is non-portable (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/441[#441]).
+- Specified that the CDI request context must be active during the execution of methods annotated with `Asynchronous` (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/274[#274])
+- Relaxed the requirements on `Future` and `CompletionStage` implementations (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/425[#425]).
+- Clarified that when a method returning `CompletionStage` is annotated with both `Bulkhead` and `Asynchronous`, the bulkhead considers the method to be executing until the `CompletionStage` returned by the method completes. (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/484[#484])
+- Clarified the retry metrics specification (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/491[#491]).
+
+=== Other changes
+
+- Time values in TCK tests are now configurable (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/399[#399]).
+- Transitive dependency on `jakarta.el-api` has been excluded (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/439[#439]).
+
+[[release_notes_20]]
+== Release Notes for MicroProfile Fault Tolerance 2.0
+
+This release is a major release of Fault Tolerance. The reason for increasing the release version to 2.0 is that this release upgrades its CDI dependency from CDI 1.2 to CDI 2.0, in order to use the new features introduced by CDI 2.0. Therefore, this specification is not compatible with Java EE7 but is compatible with Java EE8. Other than this, there are no backward incompatible changes introduced in this specification.
+
+The following changes occurred in the 2.0 release, compared to 1.1.
+
+
+A full list of changes can be found on the link:https://github.com/eclipse/microprofile-fault-tolerance/milestone/5[MicroProfile Fault Tolerance 2.0 Milestone]
+
+=== API/SPI changes
+
+- Add support of the CompletionStage return type when annotated with @Asynchronous (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/110[#110]).
+
+=== Functional changes
+
+- Specify the invocation sequence of MicroProfile Fault Tolerance annotations when used together (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/291[#291])
+- Clarify how the Fault Tolerance annotations interact with other application defined interceptors (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/313[#313])
+
+
+=== Specification changes
+
+- Clarify whether other Fault Tolerance functionalities will be triggered on an exceptional returned Future (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/246[#246]).
+- Specify the sequence of MicroProfile Fault Tolerance annotations when used together (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/291[#291])
+- Clarify how the Fault Tolerance annotations interact with other application defined interceptors (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/313[#313])
+
+=== Other changes
+- Clarify failOn() on CircuitBreaker and Fallback (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/240[#240])
+- Circuit Breaker - clarify how requestVolumeThreshold() and rolling window work (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/342[#342])
+- Other smaller fixes (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/341[#341]) (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/252[#252]) (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/306[#306])
+
+
+[[release_notes_11]]
+== Release Notes for MicroProfile Fault Tolerance 1.1
+
+The following changes occurred in the 1.1 release, compared to 1.0
+
+A full list of changes can be found on the link:https://github.com/eclipse/microprofile-fault-tolerance/milestone/3[MicroProfile Fault Tolerance 1.1 Milestone]
+
+=== API/SPI changes
+
+- The `ExecutionContext` interface has been extended with a `getFailure` method that returns the execution failure(link:https://github.com/eclipse/microprofile-fault-tolerance/issues/224[#224]).
+
+=== Functional changes
+
+- Implementations must implement the new method of `ExecutionContext.getFailure()`(link:https://github.com/eclipse/microprofile-fault-tolerance/issues/224[#224]).
+- Added metrics status automatically for FT (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/234[#234])
+- Disable individual Fault Tolerance annotation using external config (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/109[#109])
+- Define priority when multiple properties declared (link: https://github.com/eclipse/microprofile-fault-tolerance/issues/278[#278])
+
+=== Specification changes
+
+- Implementations must implement the new method of `ExecutionContext.getFailure()`(link:https://github.com/eclipse/microprofile-fault-tolerance/issues/224[#224]).
+- Added metrics status automatically for FT (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/234[#234])
+- Disable individual Fault Tolerance annotation using external config (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/109[#109])
+- Define priority when multiple properties declared (link: https://github.com/eclipse/microprofile-fault-tolerance/issues/278[#278])
+- Clarify fallback (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/177[#177])
+
+=== Other changes
+- Bulkhead TCK changes (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/227[#227])
+- Add standalone async test (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/194[#194])
+- Add more configuration test (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/182[#182])
+- Circuit Breaker Rolling window behaviour test (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/197[#197])
+- Improve Bulkhead test (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/198[#198])
