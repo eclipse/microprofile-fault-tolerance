@@ -28,5 +28,5 @@ public abstract class FallbackMethodInterfaceBeanB implements FallbackMethodInte
     public String method(int a, Long b) {
         throw new RuntimeException("test");
     }
-    
+
 }

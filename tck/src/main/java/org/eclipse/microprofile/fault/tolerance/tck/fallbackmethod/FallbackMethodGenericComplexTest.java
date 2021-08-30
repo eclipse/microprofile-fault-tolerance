@@ -24,8 +24,6 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.Collections;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodGenericComplexBeanA;
 import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodGenericComplexBeanB;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -35,6 +33,8 @@ import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
+
+import jakarta.inject.Inject;
 
 /**
  * Test for a fallback method with a more complex type variable parameter
@@ -46,18 +46,19 @@ public class FallbackMethodGenericComplexTest extends Arquillian {
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodGenericComplex.jar")
                 .addClasses(FallbackMethodGenericComplexBeanA.class, FallbackMethodGenericComplexBeanB.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
-        
+
         WebArchive war = ShrinkWrap
                 .create(WebArchive.class, "ftFallbackMethodGenericComplex.war")
                 .addAsLibrary(testJar);
         return war;
     }
-    
-    @Inject private FallbackMethodGenericComplexBeanA bean;
-    
+
+    @Inject
+    private FallbackMethodGenericComplexBeanA bean;
+
     @Test
     public void fallbackMethodGenericComplex() {
         assertEquals(bean.method(Collections.singletonList(Collections.singleton("test"))), "fallback");
     }
-    
+
 }

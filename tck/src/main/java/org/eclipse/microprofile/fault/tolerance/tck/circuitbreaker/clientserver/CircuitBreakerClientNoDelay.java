@@ -22,40 +22,41 @@ package org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver
 import java.io.Serializable;
 import java.sql.Connection;
 
-import javax.enterprise.context.RequestScoped;
-
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
+
+import jakarta.enterprise.context.RequestScoped;
+
 /**
- * A client to exercise Circuit Breaker thresholds, with a SuccessThreshold of 2,
- * a requestVolumeThreshold of 4, failureRatio of 0.75 and a 1 millisecond delay
+ * A client to exercise Circuit Breaker thresholds, with a SuccessThreshold of 2, a requestVolumeThreshold of 4,
+ * failureRatio of 0.75 and a 1 millisecond delay
  *
  * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  */
 @RequestScoped
 public class CircuitBreakerClientNoDelay implements Serializable {
-        private int counterForInvokingServiceA = 0;
-        
+    private int counterForInvokingServiceA = 0;
+
     public int getCounterForInvokingServiceA() {
-                return counterForInvokingServiceA;
-        }
+        return counterForInvokingServiceA;
+    }
 
-        public void setCounterForInvokingServiceA(int count) {
-                this.counterForInvokingServiceA = count;
-        }
+    public void setCounterForInvokingServiceA(int count) {
+        this.counterForInvokingServiceA = count;
+    }
 
-        @CircuitBreaker(successThreshold = 2, requestVolumeThreshold = 4, failureRatio=0.75, delay = 1)
+    @CircuitBreaker(successThreshold = 2, requestVolumeThreshold = 4, failureRatio = 0.75, delay = 1)
     public Connection serviceA() {
         Connection conn = null;
         counterForInvokingServiceA++;
         conn = connectionService();
-        
+
         return conn;
     }
 
-    //simulate a backend service
+    // simulate a backend service
     private Connection connectionService() {
-        if(counterForInvokingServiceA < 5) {
-                throw new RuntimeException("Connection failed");
+        if (counterForInvokingServiceA < 5) {
+            throw new RuntimeException("Connection failed");
         }
         return null;
     }

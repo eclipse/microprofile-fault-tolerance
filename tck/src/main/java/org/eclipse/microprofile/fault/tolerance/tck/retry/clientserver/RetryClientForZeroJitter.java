@@ -19,9 +19,9 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver;
 
-import javax.enterprise.context.ApplicationScoped;
-
 import org.eclipse.microprofile.faulttolerance.Retry;
+
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * A client to check for proper processing of jitter = 0 on @Retry

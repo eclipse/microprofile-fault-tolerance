@@ -35,20 +35,20 @@ import org.testng.annotations.Test;
  * Test that a fallback method with a bounded wildcard parameter cannot be called if the bounds do not match
  */
 public class FallbackMethodWildcardNegativeTest extends Arquillian {
-    
+
     @Deployment
     @ShouldThrowException(FaultToleranceDefinitionException.class)
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodSuperclassPrivate.jar")
                 .addClass(FallbackMethodWildcardNegativeBean.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
-        
+
         WebArchive war = ShrinkWrap
                 .create(WebArchive.class, "ftFallbackMethodSuperclassPrivate.war")
                 .addAsLibrary(testJar);
         return war;
     }
-    
+
     @Test
     public void fallbackMethodWildcardNegative() {
         // Nothing to test, deployment should throw exception

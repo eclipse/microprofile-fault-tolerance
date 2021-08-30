@@ -22,17 +22,19 @@ package org.eclipse.microprofile.fault.tolerance.tck.util;
  * Contains constants for utilities packages which need to be included by lots of tests.
  */
 public class Packages {
-    
+
     // Utility class only, no public constructors
-    private Packages() {}
-    
+    private Packages() {
+    }
+
     /**
      * The {@code org.eclipse.microprofile.fault.tolerance.tck.util} package
      */
     public static final Package UTILS = org.eclipse.microprofile.fault.tolerance.tck.util.Packages.class.getPackage();
-    
+
     /**
      * The {@code org.eclipse.microprofile.fault.tolerance.tck.metrics.util} package
      */
-    public static final Package METRIC_UTILS = org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricComparator.class.getPackage();
+    public static final Package METRIC_UTILS =
+            org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricComparator.class.getPackage();
 }

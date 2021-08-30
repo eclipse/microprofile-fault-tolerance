@@ -19,8 +19,6 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.illegalConfig;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.ShouldThrowException;
@@ -31,30 +29,30 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
+import jakarta.inject.Inject;
+
 public class IncompatibleFallbackTest extends Arquillian {
-    private
-    @Inject
-    FallbackClient fallbackClient;
+    private @Inject FallbackClient fallbackClient;
 
     @Deployment
     @ShouldThrowException(value = FaultToleranceDefinitionException.class)
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
-            .create(JavaArchive.class, "ftInvalid.jar")
-            .addClasses(FallbackClient.class, IncompatibleFallbackHandler.class)
-            .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
-            .as(JavaArchive.class);
+                .create(JavaArchive.class, "ftInvalid.jar")
+                .addClasses(FallbackClient.class, IncompatibleFallbackHandler.class)
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
+                .as(JavaArchive.class);
 
         return ShrinkWrap
-            .create(WebArchive.class, "ftInvalidFallbackHandler.war")
-            .addAsLibrary(testJar);
+                .create(WebArchive.class, "ftInvalidFallbackHandler.war")
+                .addAsLibrary(testJar);
     }
 
     /**
      * Test that the deployment of an invalid FallbackHandler leads to a DeploymentException.
      * 
-     * A Service is annotated with the IncompatibleFallbackHandler. While the Service returns an
-     * Integer, the IncompatibleFallbackHandler returns a String.
+     * A Service is annotated with the IncompatibleFallbackHandler. While the Service returns an Integer, the
+     * IncompatibleFallbackHandler returns a String.
      */
     @Test
     public void test() {

@@ -28,8 +28,6 @@ import static org.testng.Assert.assertEquals;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.Retry;
@@ -41,11 +39,13 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
+import jakarta.inject.Inject;
+
 /**
  * Test that the various parameters of Retry can be configured
  */
 public class RetryConfigTest extends Arquillian {
-    
+
     @Deployment
     public static WebArchive create() {
         ConfigAnnotationAsset config = new ConfigAnnotationAsset()
@@ -55,134 +55,135 @@ public class RetryConfigTest extends Arquillian {
                 .set(RetryConfigBean.class, "serviceDelay", Retry.class, "delay", "2000")
                 .set(RetryConfigBean.class, "serviceDelay", Retry.class, "delayUnit", "MICROS")
                 .set(RetryConfigBean.class, "serviceRetryOn", Retry.class, "retryOn",
-                     TestConfigExceptionA.class.getName() + "," + TestConfigExceptionB.class.getName())
+                        TestConfigExceptionA.class.getName() + "," + TestConfigExceptionB.class.getName())
                 .set(RetryConfigBean.class, "serviceAbortOn", Retry.class, "abortOn",
-                     TestConfigExceptionA.class.getName() + "," + TestConfigExceptionB1.class.getName())
+                        TestConfigExceptionA.class.getName() + "," + TestConfigExceptionB1.class.getName())
                 .set(RetryConfigBean.class, "serviceJitter", Retry.class, "jitter", "1")
                 .set(RetryConfigBean.class, "serviceJitter", Retry.class, "jitterDelayUnit", "SECONDS");
-        
+
         JavaArchive jar = ShrinkWrap.create(JavaArchive.class, "ftRetryConfig.jar")
                 .addClasses(RetryConfigBean.class)
                 .addClasses(TestConfigExceptionA.class, TestConfigExceptionB.class, TestConfigExceptionB1.class)
                 .addPackage(Packages.UTILS)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                 .addAsManifestResource(config, "microprofile-config.properties");
-        
+
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftRetryConfig.war")
                 .addAsLibrary(jar);
-        
+
         return war;
     }
-    
+
     @Inject
     private RetryConfigBean bean;
-    
+
     @Test
     public void testConfigMaxRetries() {
         // In annotation: maxRetries not set (default 3)
-        // In config:     maxRetries = 10
+        // In config: maxRetries = 10
         AtomicInteger counter = new AtomicInteger();
         expect(TestException.class, () -> bean.serviceMaxRetries(counter));
-        
+
         assertEquals(counter.get(), 11);
     }
-    
+
     @Test
     public void testConfigMaxDuration() {
         // In annotation: maxDuration = 10000ms (10s)
-        //                maxRetries  = 10000
-        //                delay       = 200ms
-        // In config:     maxDuration = 1s
-        
+        // maxRetries = 10000
+        // delay = 200ms
+        // In config: maxDuration = 1s
+
         long startTime = System.nanoTime();
         expect(TestException.class, () -> bean.serviceMaxDuration());
         long endTime = System.nanoTime();
-        
+
         Duration duration = Duration.ofNanos(endTime - startTime);
-        
+
         // Expected time without config: 10s
         // Expected time with config: 1s
         assertThat(duration, lessThan(Duration.ofSeconds(8)));
     }
-    
+
     @Test
     public void testConfigDelay() {
-        // In annotation: delay = 2s     (2000ms)
-        // In config:     delay = 2000µs (2ms)
-        
+        // In annotation: delay = 2s (2000ms)
+        // In config: delay = 2000µs (2ms)
+
         long startTime = System.nanoTime();
         expect(TestException.class, () -> bean.serviceDelay());
         long endTime = System.nanoTime();
-        
+
         Duration duration = Duration.ofNanos(endTime - startTime);
-        
-        // Expected time without config: 2s  * 5 retries -> 10s
-        // Expected time with config:    2ms * 5 retries -> 10ms
+
+        // Expected time without config: 2s * 5 retries -> 10s
+        // Expected time with config: 2ms * 5 retries -> 10ms
         assertThat(duration, lessThan(Duration.ofSeconds(8)));
     }
-    
+
     @Test
     public void testConfigRetryOn() {
         // In annotation: retryOn not set (default Exception)
-        //                maxRetries = 1
-        // In config:     retryOn = TestConfigExceptionA, TestConfigExceptionB
-        
+        // maxRetries = 1
+        // In config: retryOn = TestConfigExceptionA, TestConfigExceptionB
+
         AtomicInteger counter = new AtomicInteger();
-        
+
         counter.set(0);
         expect(TestException.class, () -> bean.serviceRetryOn(new TestException(), counter));
         assertEquals(counter.get(), 1); // Not retried
-        
+
         counter.set(0);
         expect(TestConfigExceptionA.class, () -> bean.serviceRetryOn(new TestConfigExceptionA(), counter));
         assertEquals(counter.get(), 2); // Retried
-        
+
         counter.set(0);
         expect(TestConfigExceptionB.class, () -> bean.serviceRetryOn(new TestConfigExceptionB(), counter));
         assertEquals(counter.get(), 2); // Retried
-        
+
         counter.set(0);
         expect(TestConfigExceptionB1.class, () -> bean.serviceRetryOn(new TestConfigExceptionB1(), counter));
         assertEquals(counter.get(), 2); // Retried
     }
-    
+
     @Test
     public void testConfigAbortOn() {
         // In annotation: retryOn = TestConfigExceptionA, TestConfigExceptionB
-        //                abortOn = RuntimeException
-        //                maxRetries = 1
-        // In config:     abortOn = TestConfigExceptionA, TestConfigExceptionB1
-        
+        // abortOn = RuntimeException
+        // maxRetries = 1
+        // In config: abortOn = TestConfigExceptionA, TestConfigExceptionB1
+
         AtomicInteger counter = new AtomicInteger();
-        
+
         counter.set(0);
         expect(TestException.class, () -> bean.serviceAbortOn(new TestException(), counter));
         assertEquals(counter.get(), 1); // Not retried
-        
+
         counter.set(0);
         expect(TestConfigExceptionA.class, () -> bean.serviceAbortOn(new TestConfigExceptionA(), counter));
         assertEquals(counter.get(), 1); // Not retried
-        
+
         counter.set(0);
         expect(TestConfigExceptionB.class, () -> bean.serviceAbortOn(new TestConfigExceptionB(), counter));
         assertEquals(counter.get(), 2); // Retried
-        
+
         counter.set(0);
         expect(TestConfigExceptionB1.class, () -> bean.serviceAbortOn(new TestConfigExceptionB1(), counter));
         assertEquals(counter.get(), 1); // Not retried
     }
-    
+
     @Test
     public void testConfigJitter() {
         // In annotation: jitter = 0ms
-        //                delay = 0ms
-        // In config:     jitter = 1s
-        
+        // delay = 0ms
+        // In config: jitter = 1s
+
         // serviceJitter() will throw TestConfigExceptionA if a delay of > 100ms is observed
         expect(TestConfigExceptionA.class, () -> bean.serviceJitter());
-        
+
         // Note: it's possible for this test to pass incorrectly if an external factor causes a delay
-        // As jitter is random, it's technically possible but very unlikely for this test to fail for a correct implementation
+        // As jitter is random, it's technically possible but very unlikely for this test to fail for a correct
+        // implementation
     }
 
 }

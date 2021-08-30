@@ -19,9 +19,9 @@
  *******************************************************************************/
 
 /**
- * <p>Exceptions for Microprofile Fault Tolerance
+ * <p>
+ * Exceptions for Microprofile Fault Tolerance
  *
  */
 @org.osgi.annotation.versioning.Version("1.0")
 package org.eclipse.microprofile.faulttolerance.exceptions;
-

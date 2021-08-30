@@ -20,6 +20,17 @@
 
 package org.eclipse.microprofile.fault.tolerance.tck.config;
 
+import static org.awaitility.Awaitility.await;
+import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expect;
+import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expectCbOpen;
+import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expectNoException;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.lessThan;
+
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
+
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
@@ -31,17 +42,7 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
-import javax.inject.Inject;
-import java.time.Duration;
-import java.util.concurrent.TimeUnit;
-
-import static org.awaitility.Awaitility.await;
-import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expect;
-import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expectCbOpen;
-import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expectNoException;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.lessThan;
+import jakarta.inject.Inject;
 
 /**
  * Test configuration of parameters of {@link CircuitBreaker}
@@ -51,23 +52,23 @@ public class CircuitBreakerConfigTest extends Arquillian {
     @Deployment
     public static WebArchive create() {
         ConfigAnnotationAsset config = new ConfigAnnotationAsset()
-            .set(CircuitBreakerConfigBean.class, "skipOnMethod", CircuitBreaker.class,
-                "skipOn", TestConfigExceptionA.class.getName())
-            .set(CircuitBreakerConfigBean.class, "failOnMethod", CircuitBreaker.class,
-                "failOn", TestConfigExceptionA.class.getName())
-            .set(CircuitBreakerConfigBean.class, "delayMethod", CircuitBreaker.class,
-                "delay", TCKConfig.getConfig().getTimeoutInStr(1000))
-            .set(CircuitBreakerConfigBean.class, "delayMethod", CircuitBreaker.class,
-                "delayUnit", "MILLIS")
-            .set(CircuitBreakerConfigBean.class, "requestVolumeThresholdMethod", CircuitBreaker.class,
-                "requestVolumeThreshold", "4")
-            .set(CircuitBreakerConfigBean.class, "failureRatioMethod", CircuitBreaker.class,
-                "failureRatio","0.8")
-            .set(CircuitBreakerConfigBean.class, "successThresholdMethod", CircuitBreaker.class,
-                "successThreshold", "2")
-            // only changing value here to scale the original, not for the purpose of this test
-            .set(CircuitBreakerConfigBean.class, "successThresholdMethod", CircuitBreaker.class,
-                "delay", TCKConfig.getConfig().getTimeoutInStr(1000));
+                .set(CircuitBreakerConfigBean.class, "skipOnMethod", CircuitBreaker.class,
+                        "skipOn", TestConfigExceptionA.class.getName())
+                .set(CircuitBreakerConfigBean.class, "failOnMethod", CircuitBreaker.class,
+                        "failOn", TestConfigExceptionA.class.getName())
+                .set(CircuitBreakerConfigBean.class, "delayMethod", CircuitBreaker.class,
+                        "delay", TCKConfig.getConfig().getTimeoutInStr(1000))
+                .set(CircuitBreakerConfigBean.class, "delayMethod", CircuitBreaker.class,
+                        "delayUnit", "MILLIS")
+                .set(CircuitBreakerConfigBean.class, "requestVolumeThresholdMethod", CircuitBreaker.class,
+                        "requestVolumeThreshold", "4")
+                .set(CircuitBreakerConfigBean.class, "failureRatioMethod", CircuitBreaker.class,
+                        "failureRatio", "0.8")
+                .set(CircuitBreakerConfigBean.class, "successThresholdMethod", CircuitBreaker.class,
+                        "successThreshold", "2")
+                // only changing value here to scale the original, not for the purpose of this test
+                .set(CircuitBreakerConfigBean.class, "successThresholdMethod", CircuitBreaker.class,
+                        "delay", TCKConfig.getConfig().getTimeoutInStr(1000));
 
         JavaArchive jar = ShrinkWrap
                 .create(JavaArchive.class, "ftCircuitBreakerConfig.jar")
@@ -87,9 +88,9 @@ public class CircuitBreakerConfigTest extends Arquillian {
     @Test
     public void testConfigureFailOn() {
         // In annotation: requestVolumeThreshold = 2
-        //                skipOn = {}
-        //                failOn = {TestConfigExceptionB.class}
-        // In config:     failOn = {TestConfigExceptionA.class}
+        // skipOn = {}
+        // failOn = {TestConfigExceptionB.class}
+        // In config: failOn = {TestConfigExceptionA.class}
 
         expect(TestConfigExceptionA.class, () -> bean.failOnMethod());
         expect(TestConfigExceptionA.class, () -> bean.failOnMethod());
@@ -101,9 +102,9 @@ public class CircuitBreakerConfigTest extends Arquillian {
     @Test
     public void testConfigureSkipOn() {
         // In annotation: requestVolumeThreshold = 2
-        //                failOn = {Throwable.class}
-        //                skipOn = {}
-        // In config:     skipOn = {TestConfigExceptionA.class}
+        // failOn = {Throwable.class}
+        // skipOn = {}
+        // In config: skipOn = {TestConfigExceptionA.class}
 
         expect(TestConfigExceptionA.class, () -> bean.skipOnMethod());
         expect(TestConfigExceptionA.class, () -> bean.skipOnMethod());
@@ -115,10 +116,10 @@ public class CircuitBreakerConfigTest extends Arquillian {
     @Test
     public void testConfigureDelay() {
         // In annotation: requestVolumeThreshold = 2
-        //                delay = 20
-        //                delayUnit = MICROS
-        // In config:     delay = 1000
-        //                delayUnit = MILLIS
+        // delay = 20
+        // delayUnit = MICROS
+        // In config: delay = 1000
+        // delayUnit = MILLIS
 
         expect(TestConfigExceptionA.class, () -> bean.delayMethod(true));
         expect(TestConfigExceptionA.class, () -> bean.delayMethod(true));
@@ -140,7 +141,7 @@ public class CircuitBreakerConfigTest extends Arquillian {
     @Test
     public void testConfigureRequestVolumeThreshold() {
         // In annotation: requestVolumeThreshold = 2
-        // In config:     requestVolumeThreshold = 4
+        // In config: requestVolumeThreshold = 4
 
         expect(TestConfigExceptionA.class, () -> bean.requestVolumeThresholdMethod());
         expect(TestConfigExceptionA.class, () -> bean.requestVolumeThresholdMethod());
@@ -156,8 +157,8 @@ public class CircuitBreakerConfigTest extends Arquillian {
     @Test
     public void testConfigureFailureRatio() {
         // In annotation: requestVolumeThreshold = 10
-        //                failureRatio = 1.0
-        // In config:     failureRatio = 0.8
+        // failureRatio = 1.0
+        // In config: failureRatio = 0.8
 
         expect(TestConfigExceptionA.class, () -> bean.failureRatioMethod(true));
         expect(TestConfigExceptionA.class, () -> bean.failureRatioMethod(true));
@@ -179,9 +180,9 @@ public class CircuitBreakerConfigTest extends Arquillian {
     @Test
     public void testConfigureSuccessThreshold() {
         // In annotation: delay = 1000
-        //                requestVolumeThreshold = 10
-        //                successThreshold = 4
-        // In config:     successThreshold = 2
+        // requestVolumeThreshold = 10
+        // successThreshold = 4
+        // In config: successThreshold = 2
 
         for (int i = 0; i < 10; i++) {
             expect(TestConfigExceptionA.class, () -> bean.successThresholdMethod(true));

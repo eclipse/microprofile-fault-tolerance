@@ -20,6 +20,15 @@
 
 package org.eclipse.microprofile.fault.tolerance.tck.config;
 
+import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expect;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.lessThan;
+
+import java.time.Duration;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+
 import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.CompletableFutureHelper;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.ExceptionThrowingAction;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
@@ -34,15 +43,7 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
-import javax.inject.Inject;
-import java.time.Duration;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-
-import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expect;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.lessThan;
+import jakarta.inject.Inject;
 
 /**
  * Test that the various parameters of Timeout can be configured
@@ -52,24 +53,24 @@ public class TimeoutConfigTest extends Arquillian {
     @Deployment
     public static WebArchive create() {
         ConfigAnnotationAsset config = new ConfigAnnotationAsset()
-            .set(TimeoutConfigBean.class, "serviceValue", Timeout.class, "value",
-                TCKConfig.getConfig().getTimeoutInStr(1000))
-            // only changing value here to scale the original, not for the purpose of this test
-            .set(TimeoutConfigBean.class, "serviceUnit", Timeout.class, "value",
-                TCKConfig.getConfig().getTimeoutInStr(1000))
-            .set(TimeoutConfigBean.class, "serviceUnit", Timeout.class, "unit", "MILLIS")
-            .set(TimeoutConfigBean.class, "serviceBoth", Timeout.class, "value",
-                TCKConfig.getConfig().getTimeoutInStr(1000))
-            .set(TimeoutConfigBean.class, "serviceBoth", Timeout.class, "unit", "MILLIS");
+                .set(TimeoutConfigBean.class, "serviceValue", Timeout.class, "value",
+                        TCKConfig.getConfig().getTimeoutInStr(1000))
+                // only changing value here to scale the original, not for the purpose of this test
+                .set(TimeoutConfigBean.class, "serviceUnit", Timeout.class, "value",
+                        TCKConfig.getConfig().getTimeoutInStr(1000))
+                .set(TimeoutConfigBean.class, "serviceUnit", Timeout.class, "unit", "MILLIS")
+                .set(TimeoutConfigBean.class, "serviceBoth", Timeout.class, "value",
+                        TCKConfig.getConfig().getTimeoutInStr(1000))
+                .set(TimeoutConfigBean.class, "serviceBoth", Timeout.class, "unit", "MILLIS");
 
         JavaArchive jar = ShrinkWrap.create(JavaArchive.class, "ftTimeoutConfig.jar")
-            .addClasses(TimeoutConfigBean.class, CompletableFutureHelper.class)
-            .addPackage(Packages.UTILS)
-            .addAsManifestResource(config, "microprofile-config.properties")
-            .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
+                .addClasses(TimeoutConfigBean.class, CompletableFutureHelper.class)
+                .addPackage(Packages.UTILS)
+                .addAsManifestResource(config, "microprofile-config.properties")
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
 
         return ShrinkWrap.create(WebArchive.class, "ftTimeoutConfig.war")
-            .addAsLibrary(jar);
+                .addAsLibrary(jar);
     }
 
     @Inject
@@ -78,30 +79,29 @@ public class TimeoutConfigTest extends Arquillian {
     @Test
     public void testConfigValue() {
         // In annotation: value = 1
-        //                unit = MILLIS
-        // In config:     value = 1000
+        // unit = MILLIS
+        // In config: value = 1000
         doTest(() -> bean.serviceValue());
     }
 
     @Test
     public void testConfigUnit() {
         // In annotation: value = 1000
-        //                unit = MICROS
-        // In config:     unit = MILLIS
+        // unit = MICROS
+        // In config: unit = MILLIS
         doTest(() -> bean.serviceUnit());
     }
 
     @Test
     public void testConfigBoth() {
         // In annotation: value = 10
-        //                unit = MICROS
-        // In config:     value = 1000
-        //                unit = MILLIS
+        // unit = MICROS
+        // In config: value = 1000
+        // unit = MILLIS
         doTest(() -> {
             try {
                 CompletableFutureHelper.toCompletableFuture(bean.serviceBoth()).get(1, TimeUnit.MINUTES);
-            }
-            catch (ExecutionException e) {
+            } catch (ExecutionException e) {
                 if (e.getCause() instanceof Exception) {
                     throw (Exception) e.getCause();
                 }

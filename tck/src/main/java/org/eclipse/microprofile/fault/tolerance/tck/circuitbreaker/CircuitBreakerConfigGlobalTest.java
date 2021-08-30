@@ -19,7 +19,7 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker;
 
-import javax.inject.Inject;
+import static org.eclipse.microprofile.fault.tolerance.tck.Misc.Ints.contains;
 
 import org.eclipse.microprofile.fault.tolerance.tck.Misc;
 import org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver.CircuitBreakerClientDefaultSuccessThreshold;
@@ -34,7 +34,7 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import static org.eclipse.microprofile.fault.tolerance.tck.Misc.Ints.contains;
+import jakarta.inject.Inject;
 
 /**
  * Test CircuitBreaker Thresholds and delays.
@@ -44,25 +44,25 @@ import static org.eclipse.microprofile.fault.tolerance.tck.Misc.Ints.contains;
 
 public class CircuitBreakerConfigGlobalTest extends Arquillian {
 
-
     @Deployment
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftCircuitBreaker.jar")
-            .addClasses(CircuitBreakerClientDefaultSuccessThreshold.class,
+                .addClasses(CircuitBreakerClientDefaultSuccessThreshold.class,
                         Misc.class)
-            .addAsManifestResource(new StringAsset(
-                "CircuitBreaker/delay=200"), "microprofile-config.properties")
-            .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
-            .as(JavaArchive.class);
+                .addAsManifestResource(new StringAsset(
+                        "CircuitBreaker/delay=200"), "microprofile-config.properties")
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
+                .as(JavaArchive.class);
 
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftCircuitBreaker.war")
-            .addAsLibrary(testJar);
+                .addAsLibrary(testJar);
         return war;
     }
 
     /**
-     * this test is a copy of {@link org.eclipse.microprofile.fault.tolerance.tck.CircuitBreakerTest#testCircuitDefaultSuccessThreshold()} except that
-     * the waiting time to let the Circuit Breaker is 500 ms. Without Property config the test can't pass
+     * this test is a copy of
+     * {@link org.eclipse.microprofile.fault.tolerance.tck.CircuitBreakerTest#testCircuitDefaultSuccessThreshold()}
+     * except that the waiting time to let the Circuit Breaker is 500 ms. Without Property config the test can't pass
      */
     @Test
     public void testCircuitDefaultSuccessThreshold() {
@@ -72,34 +72,31 @@ public class CircuitBreakerConfigGlobalTest extends Arquillian {
                 clientForCBDefaultSuccess.serviceA(successSet);
 
                 if (i != 6) {
-                    Assert.fail("serviceA should throw an Exception in testCircuitDefaultSuccessThreshold on iteration " + i);
+                    Assert.fail("serviceA should throw an Exception in testCircuitDefaultSuccessThreshold on iteration "
+                            + i);
                 }
-            }
-            catch (CircuitBreakerOpenException cboe) {
+            } catch (CircuitBreakerOpenException cboe) {
                 // Expected on execution 5 & 11
                 if (!contains(new int[]{5, 11}, i)) {
                     Assert.fail("in serviceA no CircuitBreakerOpenException should be fired on iteration " + i);
-                }
-                else if (i == 5) {
+                } else if (i == 5) {
                     // Pause to allow the circuit breaker to half-open
                     try {
                         Thread.sleep(500); // sleep to short to let cb to close with its annotation config.
                         // Will only pass thanks to property config
-                    }
-                    catch (InterruptedException e) {
+                    } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
-            }
-            catch (RuntimeException ex) {
+            } catch (RuntimeException ex) {
                 // Expected
                 if (!contains(new int[]{1, 2, 3, 4, 7, 8, 9, 10}, i)) {
                     Assert.fail("serviceA should not throw a RuntimeException on iteration " + i);
                 }
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 // Not Expected
-                Assert.fail("serviceA should throw a RuntimeException or CircuitBreakerOpenException in testCircuitDefaultSuccessThreshold "
+                Assert.fail(
+                        "serviceA should throw a RuntimeException or CircuitBreakerOpenException in testCircuitDefaultSuccessThreshold "
                                 + "on iteration " + i);
             }
         }
@@ -108,8 +105,6 @@ public class CircuitBreakerConfigGlobalTest extends Arquillian {
         Assert.assertEquals(serviceAExecutions, 9, "The number of serviceA executions should be 9");
     }
 
-    private @Inject
-    CircuitBreakerClientDefaultSuccessThreshold clientForCBDefaultSuccess;
-
+    private @Inject CircuitBreakerClientDefaultSuccessThreshold clientForCBDefaultSuccess;
 
 }

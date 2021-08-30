@@ -19,9 +19,9 @@
 
 package org.eclipse.microprofile.fault.tolerance.tck.config;
 
-import javax.enterprise.context.Dependent;
-
 import org.eclipse.microprofile.faulttolerance.Retry;
+
+import jakarta.enterprise.context.Dependent;
 
 /**
  * @author Antoine Sabot-Durand

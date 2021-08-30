@@ -30,8 +30,6 @@ import static org.hamcrest.Matchers.is;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricComparator;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationFallback;
@@ -49,23 +47,27 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
+import jakarta.inject.Inject;
+
 public class TimeoutMetricTest extends Arquillian {
 
     @Deployment
     public static WebArchive deploy() {
         final ConfigAnnotationAsset config = new ConfigAnnotationAsset()
-            .setValue(TimeoutMetricBean.class,"counterTestWorkForMillis", Timeout.class,getConfig().getTimeoutInStr(500))
-            .setValue(TimeoutMetricBean.class,"histogramTestWorkForMillis", Timeout.class,getConfig().getTimeoutInStr(2000));
+                .setValue(TimeoutMetricBean.class, "counterTestWorkForMillis", Timeout.class,
+                        getConfig().getTimeoutInStr(500))
+                .setValue(TimeoutMetricBean.class, "histogramTestWorkForMillis", Timeout.class,
+                        getConfig().getTimeoutInStr(2000));
 
         JavaArchive jar = ShrinkWrap.create(JavaArchive.class, "ftMetricTimeout.jar")
-            .addClasses(TimeoutMetricBean.class)
-            .addPackage(Packages.UTILS)
-            .addPackage(Packages.METRIC_UTILS)
-            .addAsManifestResource(config, "microprofile-config.properties")
-            .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
+                .addClasses(TimeoutMetricBean.class)
+                .addPackage(Packages.UTILS)
+                .addPackage(Packages.METRIC_UTILS)
+                .addAsManifestResource(config, "microprofile-config.properties")
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
 
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftMetricTimeout.war")
-            .addAsLibrary(jar);
+                .addAsLibrary(jar);
         return war;
     }
 
@@ -77,15 +79,19 @@ public class TimeoutMetricTest extends Arquillian {
         MetricGetter m = new MetricGetter(TimeoutMetricBean.class, "counterTestWorkForMillis");
         m.baselineMetrics();
 
-        expectTimeout(() -> timeoutBean.counterTestWorkForMillis(getConfig().getTimeoutInMillis(2000))); // Should timeout
-        expectTimeout(() -> timeoutBean.counterTestWorkForMillis(getConfig().getTimeoutInMillis(2000))); // Should timeout
+        expectTimeout(() -> timeoutBean.counterTestWorkForMillis(getConfig().getTimeoutInMillis(2000))); // Should
+                                                                                                         // timeout
+        expectTimeout(() -> timeoutBean.counterTestWorkForMillis(getConfig().getTimeoutInMillis(2000))); // Should
+                                                                                                         // timeout
         timeoutBean.counterTestWorkForMillis(getConfig().getTimeoutInMillis(100)); // Should not timeout
 
         assertThat("calls timed out", m.getTimeoutCalls(TimeoutTimedOut.TRUE).delta(), is(2L));
         assertThat("calls not timed out", m.getTimeoutCalls(TimeoutTimedOut.FALSE).delta(), is(1L));
 
-        assertThat("successful invocations", m.getInvocations(VALUE_RETURNED, InvocationFallback.NOT_DEFINED).delta(), is(1L));
-        assertThat("failed invocations", m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_DEFINED).delta(), is(2L));
+        assertThat("successful invocations", m.getInvocations(VALUE_RETURNED, InvocationFallback.NOT_DEFINED).delta(),
+                is(1L));
+        assertThat("failed invocations", m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_DEFINED).delta(),
+                is(2L));
     }
 
     @Test
@@ -94,7 +100,9 @@ public class TimeoutMetricTest extends Arquillian {
         MetricGetter m = new MetricGetter(TimeoutMetricBean.class, "histogramTestWorkForMillis");
 
         timeoutBean.histogramTestWorkForMillis(getConfig().getTimeoutInMillis(300));
-        expectTimeout(() -> timeoutBean.histogramTestWorkForMillis(getConfig().getTimeoutInMillis(5000))); // Will timeout after 2000
+        expectTimeout(() -> timeoutBean.histogramTestWorkForMillis(getConfig().getTimeoutInMillis(5000))); // Will
+                                                                                                           // timeout
+                                                                                                           // after 2000
 
         Histogram histogram = m.getTimeoutExecutionDuration().get();
         Snapshot snapshot = histogram.getSnapshot();
@@ -102,7 +110,7 @@ public class TimeoutMetricTest extends Arquillian {
 
         assertThat("Histogram count", histogram.getCount(), is(2L));
         assertThat("SnapshotValues", values, contains(MetricComparator.approxMillis(300),
-                                                      MetricComparator.approxMillis(2000)));
+                MetricComparator.approxMillis(2000)));
     }
 
 }

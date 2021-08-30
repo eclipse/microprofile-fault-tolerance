@@ -19,8 +19,6 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.illegalConfig;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.ShouldThrowException;
@@ -31,10 +29,10 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
+import jakarta.inject.Inject;
+
 public class IncompatibleFallbackMethodTest extends Arquillian {
-    private
-    @Inject
-    FallbackMethodClient fallbackMethodClient;
+    private @Inject FallbackMethodClient fallbackMethodClient;
 
     @Deployment
     @ShouldThrowException(value = FaultToleranceDefinitionException.class)
@@ -54,11 +52,11 @@ public class IncompatibleFallbackMethodTest extends Arquillian {
     /**
      * Test that the deployment of a FallbackHandler with an invalid Fallback Method leads to a DeploymentException.
      * 
-     * A Service is annotated with the IncompatibleFallbackMethodHandler. While the Service returns an
-     * Integer, the IncompatibleFallbackMethodHandler's Fallback Method returns a String.
+     * A Service is annotated with the IncompatibleFallbackMethodHandler. While the Service returns an Integer, the
+     * IncompatibleFallbackMethodHandler's Fallback Method returns a String.
      */
     @Test
     public void test() {
-       
+
     }
 }

@@ -19,10 +19,11 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.lifecycle;
 
+import java.io.IOException;
+
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 
-import javax.enterprise.context.Dependent;
-import java.io.IOException;
+import jakarta.enterprise.context.Dependent;
 
 @Dependent
 public class CircuitBreakerLifecycleService1 {

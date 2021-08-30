@@ -19,10 +19,10 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.lifecycle;
 
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Typed;
-
 import java.io.IOException;
+
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Typed;
 
 @Dependent
 @Typed(DerivedCircuitBreakerOnClassNoAnnotationOnOverriddenMethod.class)

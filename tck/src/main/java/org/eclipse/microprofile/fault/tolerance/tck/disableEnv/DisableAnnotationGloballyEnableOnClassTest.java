@@ -25,8 +25,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
@@ -48,6 +46,8 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import jakarta.inject.Inject;
+
 /**
  * Test that annotations can be disabled globally and then re-enabled at the class level
  * 
@@ -62,31 +62,31 @@ public class DisableAnnotationGloballyEnableOnClassTest extends Arquillian {
 
     @Deployment
     public static WebArchive deploy() {
-       Asset config = new DisableConfigAsset()
-               .disable(Retry.class)
-               .disable(CircuitBreaker.class)
-               .disable(Timeout.class)
-               .disable(Asynchronous.class)
-               .disable(Fallback.class)
-               .disable(Bulkhead.class)
-               .enable(DisableAnnotationClient.class, Retry.class)
-               .enable(DisableAnnotationClient.class, CircuitBreaker.class)
-               .enable(DisableAnnotationClient.class, Timeout.class)
-               .enable(DisableAnnotationClient.class, Asynchronous.class)
-               .enable(DisableAnnotationClient.class, Fallback.class)
-               .enable(DisableAnnotationClient.class, Bulkhead.class);
-        
+        Asset config = new DisableConfigAsset()
+                .disable(Retry.class)
+                .disable(CircuitBreaker.class)
+                .disable(Timeout.class)
+                .disable(Asynchronous.class)
+                .disable(Fallback.class)
+                .disable(Bulkhead.class)
+                .enable(DisableAnnotationClient.class, Retry.class)
+                .enable(DisableAnnotationClient.class, CircuitBreaker.class)
+                .enable(DisableAnnotationClient.class, Timeout.class)
+                .enable(DisableAnnotationClient.class, Asynchronous.class)
+                .enable(DisableAnnotationClient.class, Fallback.class)
+                .enable(DisableAnnotationClient.class, Bulkhead.class);
+
         JavaArchive testJar = ShrinkWrap
-            .create(JavaArchive.class, "ftDisableGlobalEnableClass.jar")
-            .addClasses(DisableAnnotationClient.class)
-            .addPackage(Packages.UTILS)
-            .addAsManifestResource(config, "microprofile-config.properties")
-            .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
-            .as(JavaArchive.class);
+                .create(JavaArchive.class, "ftDisableGlobalEnableClass.jar")
+                .addClasses(DisableAnnotationClient.class)
+                .addPackage(Packages.UTILS)
+                .addAsManifestResource(config, "microprofile-config.properties")
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
+                .as(JavaArchive.class);
 
         WebArchive war = ShrinkWrap
-            .create(WebArchive.class, "ftDisableGlobalEnableClass.war")
-            .addAsLibrary(testJar);
+                .create(WebArchive.class, "ftDisableGlobalEnableClass.war")
+                .addAsLibrary(testJar);
         return war;
     }
 
@@ -111,7 +111,8 @@ public class DisableAnnotationGloballyEnableOnClassTest extends Arquillian {
         // Expect no exception because fallback is enabled
         disableClient.failRetryOnceThenFallback();
         // Two executions because Retry is enabled
-        Assert.assertEquals(disableClient.getFailRetryOnceThenFallbackCounter(), 2, "Retry enabled - should be 2 executions");
+        Assert.assertEquals(disableClient.getFailRetryOnceThenFallbackCounter(), 2,
+                "Retry enabled - should be 2 executions");
     }
 
     /**
@@ -137,46 +138,49 @@ public class DisableAnnotationGloballyEnableOnClassTest extends Arquillian {
     /**
      * A test to check that asynchronous is enabled
      *
-     * @throws InterruptedException interrupted
-     * @throws ExecutionException task was aborted
+     * @throws InterruptedException
+     *             interrupted
+     * @throws ExecutionException
+     *             task was aborted
      */
     @Test
     public void testAsync() throws InterruptedException, ExecutionException {
         Future<?> result = disableClient.asyncWaitThenReturn();
         try {
             Assert.assertFalse(result.isDone(), "Returned future.isDone() expected false because Async enabled");
-        }
-        finally {
+        } finally {
             result.get(); // Success or failure, don't leave the future lying around
         }
     }
-    
+
     /**
      * Test whether Bulkhead is enabled on {@code waitWithBulkhead()}
      *
-     * @throws InterruptedException interrupted
-     * @throws ExecutionException task was aborted
+     * @throws InterruptedException
+     *             interrupted
+     * @throws ExecutionException
+     *             task was aborted
      */
     @Test
     public void testBulkhead() throws ExecutionException, InterruptedException {
         ExecutorService executor = Executors.newFixedThreadPool(10);
-        
+
         // Start two executions at once
         CompletableFuture<Void> waitingFuture = new CompletableFuture<>();
         Future<?> result1 = executor.submit(() -> disableClient.waitWithBulkhead(waitingFuture));
         Future<?> result2 = executor.submit(() -> disableClient.waitWithBulkhead(waitingFuture));
-        
+
         try {
             disableClient.waitForBulkheadExecutions(2);
-            
+
             // Try to start a third execution. This would throw a BulkheadException if Bulkhead is enabled.
             // Bulkhead is enabled on the class, so expect exception
-            Assert.assertThrows(BulkheadException.class, () -> disableClient.waitWithBulkhead(CompletableFuture.completedFuture(null)));
-        }
-        finally {
+            Assert.assertThrows(BulkheadException.class,
+                    () -> disableClient.waitWithBulkhead(CompletableFuture.completedFuture(null)));
+        } finally {
             // Clean up executor and first two executions
             executor.shutdown();
-            
+
             waitingFuture.complete(null);
             result1.get();
             result2.get();

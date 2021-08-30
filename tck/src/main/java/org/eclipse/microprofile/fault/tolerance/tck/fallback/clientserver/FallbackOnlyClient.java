@@ -21,7 +21,7 @@ package org.eclipse.microprofile.fault.tolerance.tck.fallback.clientserver;
 
 import org.eclipse.microprofile.faulttolerance.Fallback;
 
-import javax.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.RequestScoped;
 
 /**
  * A client to demonstrate the fallback after doing the maximum retries

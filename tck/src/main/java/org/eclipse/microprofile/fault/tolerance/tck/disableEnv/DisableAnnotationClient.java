@@ -23,9 +23,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.ConcurrentExecutionTracker;
 import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
 import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
@@ -35,6 +32,9 @@ import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 import org.eclipse.microprofile.faulttolerance.Fallback;
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.faulttolerance.Timeout;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 /**
  * A client to determine the impact of disabling annotations via config
@@ -49,8 +49,9 @@ public class DisableAnnotationClient {
 
     private int failAndRetryOnceCounter = 0;
     private int failRetryOnceThenFallbackCounter = 0;
-    
-    @Inject private ConcurrentExecutionTracker tracker;
+
+    @Inject
+    private ConcurrentExecutionTracker tracker;
 
     /**
      * Always throws {@link TestException}, should increment counter by two if Retry is enabled, or one if it is not
@@ -60,7 +61,7 @@ public class DisableAnnotationClient {
         failAndRetryOnceCounter++;
         throw new TestException();
     }
-    
+
     /**
      * Returns the number of times that {@link #failAndRetryOnce()} has been executed
      *
@@ -69,7 +70,7 @@ public class DisableAnnotationClient {
     public int getFailAndRetryOnceCounter() {
         return failAndRetryOnceCounter;
     }
-    
+
     /**
      * Should return normally if Fallback is enabled or throw TestException if not
      * <p>
@@ -83,7 +84,7 @@ public class DisableAnnotationClient {
         failRetryOnceThenFallbackCounter++;
         throw new TestException();
     }
-    
+
     /**
      * Returns the number of times that {@link #failRetryOnceThenFallback()} has been executed
      *
@@ -92,14 +93,15 @@ public class DisableAnnotationClient {
     public int getFailRetryOnceThenFallbackCounter() {
         return failRetryOnceThenFallbackCounter;
     }
-    
+
     public String fallback() {
         return "OK";
     }
-    
+
     /**
-     * Always throws TestException on first invocation, throws {@link org.eclipse.microprofile.faulttolerance.exceptions.CircuitBreakerOpenException}
-     * on second if CircuitBreaker is enabled
+     * Always throws TestException on first invocation, throws
+     * {@link org.eclipse.microprofile.faulttolerance.exceptions.CircuitBreakerOpenException} on second if
+     * CircuitBreaker is enabled
      * <p>
      * Throw test exception on second invocation if CircuitBreaker is disabled
      */
@@ -107,21 +109,21 @@ public class DisableAnnotationClient {
     public void failWithCircuitBreaker() {
         throw new TestException();
     }
-    
+
     /**
-     * Throws {@link org.eclipse.microprofile.faulttolerance.exceptions.TimeoutException} if Timeout is enabled or TestException otherwise
+     * Throws {@link org.eclipse.microprofile.faulttolerance.exceptions.TimeoutException} if Timeout is enabled or
+     * TestException otherwise
      */
     @Timeout(500)
     public void failWithTimeout() {
         try {
             Thread.sleep(TCKConfig.getConfig().getTimeoutInMillis(2000));
             throw new TestException();
-        }
-        catch (InterruptedException e) {
-            //expected
+        } catch (InterruptedException e) {
+            // expected
         }
     }
-    
+
     /**
      * Blocks waiting for {@code waitingFuture} to complete
      * <p>
@@ -129,34 +131,34 @@ public class DisableAnnotationClient {
      * <p>
      * Should permit two simultaneous calls if bulkhead enabled, or more if bulkhead disabled.
      * 
-     * @param waitingFuture the future to wait for
+     * @param waitingFuture
+     *            the future to wait for
      */
     @Bulkhead(2)
     public void waitWithBulkhead(Future<?> waitingFuture) {
         try {
             tracker.executionStarted();
             waitingFuture.get();
-        }
-        catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
-        }
-        finally {
+        } finally {
             tracker.executionEnded();
         }
     }
-    
+
     /**
      * Wait for {@code count} executions of {@link #waitWithBulkhead(Future)} to be in progress.
      *
-     * @param count execution count
+     * @param count
+     *            execution count
      */
     public void waitForBulkheadExecutions(int count) {
         tracker.waitForRunningExecutions(count);
     }
-    
+
     /**
-     * Returns a future which will be complete on method return if Asynchronous is disabled,
-     * or incomplete if Asynchronous is enabled.
+     * Returns a future which will be complete on method return if Asynchronous is disabled, or incomplete if
+     * Asynchronous is enabled.
      *
      * @return Completed future
      */
@@ -165,8 +167,7 @@ public class DisableAnnotationClient {
         try {
             Thread.sleep(2000);
             return CompletableFuture.completedFuture("OK");
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
     }

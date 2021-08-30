@@ -22,13 +22,13 @@ package org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans;
 
 import java.util.List;
 
-import javax.enterprise.context.ApplicationScoped;
-
 import org.eclipse.microprofile.faulttolerance.Fallback;
+
+import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class FallbackMethodWildcardBean {
-    
+
     @Fallback(fallbackMethod = "fallback")
     public String method(List<?> a) {
         throw new RuntimeException("test");
@@ -39,4 +39,3 @@ public class FallbackMethodWildcardBean {
     }
 
 }
-

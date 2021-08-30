@@ -22,7 +22,8 @@ package org.eclipse.microprofile.fault.tolerance.tck.util;
 /**
  * An identifiable exception thrown by tests which test handling of exceptions thrown by user code.
  * <p>
- * It's basically a just runtime exception which isn't a {@link org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceException}.
+ * It's basically a just runtime exception which isn't a
+ * {@link org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceException}.
  */
 public class TestException extends RuntimeException {
 
@@ -31,7 +32,7 @@ public class TestException extends RuntimeException {
     public TestException() {
         super("Test Exception");
     }
-    
+
     public TestException(String message) {
         super("Test Exception - " + message);
     }

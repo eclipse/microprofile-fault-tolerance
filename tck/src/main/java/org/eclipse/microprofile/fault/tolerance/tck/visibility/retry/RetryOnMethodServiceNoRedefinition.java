@@ -19,7 +19,7 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.visibility.retry;
 
-import javax.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.RequestScoped;
 
 @RequestScoped
 @RS(RetryServiceType.BASE_ROM_DERIVED_CLASS_NO_REDEFINITION)

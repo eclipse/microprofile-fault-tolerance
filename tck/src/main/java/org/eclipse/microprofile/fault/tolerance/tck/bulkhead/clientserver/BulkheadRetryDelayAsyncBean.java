@@ -22,13 +22,13 @@ package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
-import javax.enterprise.context.ApplicationScoped;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
 import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 import org.eclipse.microprofile.faulttolerance.Retry;
+
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * Test to ensure that the bulkhead slot is released when retrying.
@@ -42,7 +42,7 @@ import org.eclipse.microprofile.faulttolerance.Retry;
 @Asynchronous
 @ApplicationScoped
 public class BulkheadRetryDelayAsyncBean {
-    
+
     public Future<?> test(Barrier barrier, RuntimeException e) {
         barrier.await();
         if (e != null) {

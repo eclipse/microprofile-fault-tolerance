@@ -32,16 +32,17 @@ import org.eclipse.microprofile.metrics.MetricID;
 /**
  * Allows tests to get the value of a {@code Gauge<Long>} and compare it with a baseline.
  * <p>
- * Most methods on this class will treat a non-existent gauge as having a value of zero to allow implementations to lazily create metrics.
+ * Most methods on this class will treat a non-existent gauge as having a value of zero to allow implementations to
+ * lazily create metrics.
  * <p>
  * Most tests should use {@link MetricGetter} to create instances of this class.
  */
 public class GaugeMetric {
-    
+
     private MetricRegistryProxy registry;
     private MetricID metricId;
     private long baseline;
-    
+
     public GaugeMetric(MetricRegistryProxy registry, MetricID metricId) {
         this.registry = registry;
         this.metricId = metricId;
@@ -58,7 +59,7 @@ public class GaugeMetric {
     public long value() {
         return gauge().map(Gauge::getValue).orElse(0L);
     }
-    
+
     /**
      * Capture the current counter value for later comparison with {@link #delta()}
      * <p>
@@ -76,19 +77,19 @@ public class GaugeMetric {
     public long delta() {
         return value() - baseline;
     }
-    
+
     /**
      * Return the actual {@link Counter} object for the metric, if it exists.
      * 
-     * @return an {@code Optional} containing the {@code Counter}, or an empty {@code Optional} if the metric does not exist.
+     * @return an {@code Optional} containing the {@code Counter}, or an empty {@code Optional} if the metric does not
+     *         exist.
      */
     @SuppressWarnings("unchecked")
     public Optional<Gauge<Long>> gauge() {
         Gauge<?> gauge = registry.getGauges().get(metricId);
         if (gauge == null) {
             return Optional.empty();
-        }
-        else {
+        } else {
             assertThat(gauge.getValue(), instanceOf(Long.class));
             return Optional.of((Gauge<Long>) gauge);
         }

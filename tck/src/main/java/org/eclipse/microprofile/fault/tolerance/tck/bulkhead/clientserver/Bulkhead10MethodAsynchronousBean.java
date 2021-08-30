@@ -22,11 +22,11 @@ package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
-import javax.enterprise.context.ApplicationScoped;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
+
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * A simple method level Asynchronous @Bulkhead(10)
@@ -35,7 +35,7 @@ import org.eclipse.microprofile.faulttolerance.Bulkhead;
  * @author Andrew Rouse
  */
 @ApplicationScoped
-public class Bulkhead10MethodAsynchronousBean  {
+public class Bulkhead10MethodAsynchronousBean {
 
     @Bulkhead(10)
     @Asynchronous

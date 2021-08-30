@@ -22,8 +22,6 @@ package org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod;
 
 import static org.testng.Assert.assertEquals;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodSuperclassBeanA;
 import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodSuperclassBeanB;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -34,25 +32,28 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
+import jakarta.inject.Inject;
+
 /**
  * Test for protected fallback method on a superclass
  */
 public class FallbackMethodSuperclassTest extends Arquillian {
-    
+
     @Deployment
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodSuperclass.jar")
                 .addClasses(FallbackMethodSuperclassBeanA.class, FallbackMethodSuperclassBeanB.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
-        
+
         WebArchive war = ShrinkWrap
                 .create(WebArchive.class, "ftFallbackMethodSuperclass.war")
                 .addAsLibrary(testJar);
         return war;
     }
-    
-    @Inject private FallbackMethodSuperclassBeanA bean;
-    
+
+    @Inject
+    private FallbackMethodSuperclassBeanA bean;
+
     @Test
     public void fallbackMethodSuperclass() {
         assertEquals(bean.method(1, 2L), "fallback");

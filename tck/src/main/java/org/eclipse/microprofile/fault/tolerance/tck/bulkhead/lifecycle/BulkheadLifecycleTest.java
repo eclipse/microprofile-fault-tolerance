@@ -19,6 +19,16 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.bulkhead.lifecycle;
 
+import static org.awaitility.Awaitility.await;
+import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expect;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncCaller;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
 import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
@@ -30,17 +40,8 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import static org.awaitility.Awaitility.await;
-import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expect;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 
 /**
  * Test that bulkhead is a singleton, even if the bean is not.
@@ -109,16 +110,14 @@ public class BulkheadLifecycleTest extends Arquillian {
             expect(BulkheadException.class, async.run(() -> service2a.service(barrier)));
             expect(BulkheadException.class, async.run(() -> service1b.service(barrier)));
             expect(BulkheadException.class, async.run(() -> service2b.service(barrier)));
-        }
-        finally {
+        } finally {
             try {
                 barrier.open();
 
                 for (Future<Void> future : futures) {
                     future.get(1, TimeUnit.MINUTES);
                 }
-            }
-            finally {
+            } finally {
                 service1.destroy(service1a);
                 service1.destroy(service1b);
                 service2.destroy(service2a);
@@ -128,7 +127,8 @@ public class BulkheadLifecycleTest extends Arquillian {
     }
 
     @Test
-    public void noSharingBetweenClassesWithCommonSuperclass() throws InterruptedException, ExecutionException, TimeoutException {
+    public void noSharingBetweenClassesWithCommonSuperclass()
+            throws InterruptedException, ExecutionException, TimeoutException {
         Barrier barrier = new Barrier();
 
         BulkheadLifecycleServiceSubclass1 service1a = subclassService1.get();
@@ -155,16 +155,14 @@ public class BulkheadLifecycleTest extends Arquillian {
             expect(BulkheadException.class, async.run(() -> service2a.service(barrier)));
             expect(BulkheadException.class, async.run(() -> service1b.service(barrier)));
             expect(BulkheadException.class, async.run(() -> service2b.service(barrier)));
-        }
-        finally {
+        } finally {
             try {
                 barrier.open();
 
                 for (Future<Void> future : futures) {
                     future.get(1, TimeUnit.MINUTES);
                 }
-            }
-            finally {
+            } finally {
                 subclassService1.destroy(service1a);
                 subclassService1.destroy(service1b);
                 subclassService2.destroy(service2a);
@@ -198,16 +196,14 @@ public class BulkheadLifecycleTest extends Arquillian {
             expect(BulkheadException.class, async.run(() -> multipleMethodsService1.service2(barrier)));
             expect(BulkheadException.class, async.run(() -> multipleMethodsService2.service1(barrier)));
             expect(BulkheadException.class, async.run(() -> multipleMethodsService2.service2(barrier)));
-        }
-        finally {
+        } finally {
             try {
                 barrier.open();
 
                 for (Future<Void> future : futures) {
                     future.get(1, TimeUnit.MINUTES);
                 }
-            }
-            finally {
+            } finally {
                 multipleMethodsService.destroy(multipleMethodsService1);
                 multipleMethodsService.destroy(multipleMethodsService2);
             }

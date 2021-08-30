@@ -1,4 +1,13 @@
 package org.eclipse.microprofile.fault.tolerance.tck.asyncretry.clientserver;
+
+import static java.util.Objects.nonNull;
+
+import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
+
 /*
  *******************************************************************************
  * Copyright (c) 2018 Contributors to the Eclipse Foundation
@@ -18,21 +27,13 @@ package org.eclipse.microprofile.fault.tolerance.tck.asyncretry.clientserver;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncCallerExecutor;
 import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Retry;
 
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
-import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
-
-import static java.util.Objects.nonNull;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
 
 /**
  * A client to demonstrate the combination of the @Retry and @Asynchronous annotations.
@@ -111,15 +112,15 @@ public class AsyncRetryClient {
         if (countInvocationsServC < 3) {
             // fail 2 first invocations
             future.completeExceptionally(new IOException("Simulated error"));
-        }
-        else {
+        } else {
             future.complete("Success");
         }
         return future;
     }
 
     /**
-     * Service will retry a method returning a chained, running sequentially, CompletionStage configured to completeExceptionally twice.
+     * Service will retry a method returning a chained, running sequentially, CompletionStage configured to
+     * completeExceptionally twice.
      *
      * @return a {@link CompletionStage}
      */
@@ -131,17 +132,16 @@ public class AsyncRetryClient {
         if (countInvocationsServD < 3) {
             // fail 2 first invocations
             return CompletableFuture.supplyAsync(doTask(null), executor)
-                .thenCompose(s -> CompletableFuture.supplyAsync(doTask("Simulated error"), executor));
-        }
-        else {
+                    .thenCompose(s -> CompletableFuture.supplyAsync(doTask("Simulated error"), executor));
+        } else {
             return CompletableFuture.supplyAsync(doTask(null), executor)
-                .thenCompose(s -> CompletableFuture.supplyAsync(doTask(null), executor));
+                    .thenCompose(s -> CompletableFuture.supplyAsync(doTask(null), executor));
         }
     }
 
     /**
-     * Service will retry a method returning a chained, running sequentially,
-     * CompletionStage configured to completeExceptionally on all calls.
+     * Service will retry a method returning a chained, running sequentially, CompletionStage configured to
+     * completeExceptionally on all calls.
      *
      * @return a {@link CompletionStage}
      */
@@ -152,7 +152,7 @@ public class AsyncRetryClient {
 
         // always fail
         return CompletableFuture.supplyAsync(doTask(null), executor)
-            .thenCompose(s -> CompletableFuture.supplyAsync(doTask("Simulated error"), executor));
+                .thenCompose(s -> CompletableFuture.supplyAsync(doTask("Simulated error"), executor));
     }
 
     /**
@@ -169,21 +169,19 @@ public class AsyncRetryClient {
         if (countInvocationsServF < 3) {
             // fail 2 first invocations
             return CompletableFuture.supplyAsync(doTask(null), executor)
-                .thenCombine(CompletableFuture.supplyAsync(doTask("Simulated error"), executor),
-                    (s, s2) -> s + " then " + s2);
-        }
-        else {
+                    .thenCombine(CompletableFuture.supplyAsync(doTask("Simulated error"), executor),
+                            (s, s2) -> s + " then " + s2);
+        } else {
             return CompletableFuture.supplyAsync(doTask(null), executor)
-                .thenCombine(CompletableFuture.supplyAsync(doTask(null), executor),
-                    (s, s2) -> s + " then " + s2);
+                    .thenCombine(CompletableFuture.supplyAsync(doTask(null), executor),
+                            (s, s2) -> s + " then " + s2);
         }
-
 
     }
 
     /**
-     * Service will retry a method returning a parallel execution of 2 CompletionStages. One of them configured to
-     * fail twice.
+     * Service will retry a method returning a parallel execution of 2 CompletionStages. One of them configured to fail
+     * twice.
      *
      * @return a {@link CompletionStage}
      */
@@ -193,14 +191,13 @@ public class AsyncRetryClient {
         countInvocationsServG++;
         // always fail
         return CompletableFuture.supplyAsync(doTask(null), executor)
-            .thenCombine(CompletableFuture.supplyAsync(doTask("Simulated error"), executor),
-                (s, s2) -> s + " then " + s2);
+                .thenCombine(CompletableFuture.supplyAsync(doTask("Simulated error"), executor),
+                        (s, s2) -> s + " then " + s2);
 
     }
 
     /**
-     * Service will retry a method returning CompletionStages but throwing an exception.
-     * fail twice.
+     * Service will retry a method returning CompletionStages but throwing an exception. fail twice.
      *
      * @return a {@link CompletionStage}
      */
@@ -259,14 +256,12 @@ public class AsyncRetryClient {
             try {
                 // simulate some processing.
                 TimeUnit.MILLISECONDS.sleep(config.getTimeoutInMillis(50));
-            }
-            catch (InterruptedException e) {
+            } catch (InterruptedException e) {
                 throw new RuntimeException("Unplanned error: " + e);
             }
             if (nonNull(errorMessage)) {
                 throw new RuntimeException(errorMessage);
-            }
-            else {
+            } else {
                 return "Success";
             }
         };

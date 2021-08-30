@@ -22,8 +22,6 @@ package org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod;
 
 import static org.testng.Assert.assertEquals;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodSubclassOverrideBeanA;
 import org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans.FallbackMethodSubclassOverrideBeanB;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -34,25 +32,28 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
+import jakarta.inject.Inject;
+
 /**
  * Test that if a fallback method is overridden in a subclass, the method from the subclass is called
  */
 public class FallbackMethodSubclassOverrideTest extends Arquillian {
-    
+
     @Deployment
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftFallbackMethodSubclassOverrideTest.jar")
                 .addClasses(FallbackMethodSubclassOverrideBeanA.class, FallbackMethodSubclassOverrideBeanB.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
-        
+
         WebArchive war = ShrinkWrap
                 .create(WebArchive.class, "ftFallbackMethodSubclassOverrideTest.war")
                 .addAsLibrary(testJar);
         return war;
     }
-    
-    @Inject private FallbackMethodSubclassOverrideBeanA bean;
-    
+
+    @Inject
+    private FallbackMethodSubclassOverrideBeanA bean;
+
     @Test
     public void fallbackMethodSubclassOverride() {
         assertEquals(bean.method(1, 2L), "fallback");

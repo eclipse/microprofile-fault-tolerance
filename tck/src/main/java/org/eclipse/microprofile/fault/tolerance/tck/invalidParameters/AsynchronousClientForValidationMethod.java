@@ -19,13 +19,13 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.invalidParameters;
 
-import javax.enterprise.context.ApplicationScoped;
-
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
+
+import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class AsynchronousClientForValidationMethod {
-    
+
     /**
      * Invalid because it's annotated with {@link Asynchronous} but does not return Future or CompletionStage
      * 

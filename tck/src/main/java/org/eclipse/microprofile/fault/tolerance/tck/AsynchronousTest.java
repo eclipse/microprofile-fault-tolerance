@@ -30,8 +30,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.AsyncApplicationScopeClient;
 import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.AsyncClassLevelClient;
 import org.eclipse.microprofile.fault.tolerance.tck.asynchronous.AsyncClient;
@@ -48,35 +46,33 @@ import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
+import jakarta.inject.Inject;
+
 /**
  * Verify the asynchronous invocation
  */
 public class AsynchronousTest extends Arquillian {
 
-    private @Inject
-    AsyncClient client;
+    private @Inject AsyncClient client;
 
-    private @Inject
-    AsyncClassLevelClient clientClass;
+    private @Inject AsyncClassLevelClient clientClass;
 
     // AsyncApplicationScopeClient is an @ApplicationScoped bean
-    private @Inject
-    AsyncApplicationScopeClient clientApplicationScope;
+    private @Inject AsyncApplicationScopeClient clientApplicationScope;
 
     private List<CompletableFuture<Void>> waitingFutures = new ArrayList<>();
 
     @Deployment
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
-            .create(JavaArchive.class, "ftAsynchronous.jar")
-            .addClasses(AsyncClient.class, AsyncClassLevelClient.class, AsyncApplicationScopeClient.class, 
-                   AsyncRequestScopeClient.class, Connection.class, CompletableFutureHelper.class)
-            .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
-            .as(JavaArchive.class);
+                .create(JavaArchive.class, "ftAsynchronous.jar")
+                .addClasses(AsyncClient.class, AsyncClassLevelClient.class, AsyncApplicationScopeClient.class,
+                        AsyncRequestScopeClient.class, Connection.class, CompletableFutureHelper.class)
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
+                .as(JavaArchive.class);
 
         return ShrinkWrap.create(WebArchive.class, "ftAsynchronous.war").addAsLibrary(testJar);
     }
-
 
     /**
      * Test that the future returned by calling an asynchronous method is not done if called right after the operation
@@ -89,7 +85,8 @@ public class AsynchronousTest extends Arquillian {
     }
 
     /**
-     * Test that the future returned by calling an asynchronous method is done if called after waiting enough time to end the operation
+     * Test that the future returned by calling an asynchronous method is done if called after waiting enough time to
+     * end the operation
      */
     @Test
     public void testAsyncIsFinished() {
@@ -97,12 +94,12 @@ public class AsynchronousTest extends Arquillian {
         Future<Connection> future = client.service(waitingFuture);
         waitingFuture.complete(null);
         await().atMost(30, TimeUnit.SECONDS)
-            .untilAsserted(()-> Assert.assertTrue(future.isDone()));
+                .untilAsserted(() -> Assert.assertTrue(future.isDone()));
     }
 
-
     /**
-     * Test that the future returned by calling a method in an asynchronous class is not done if called right after the operation
+     * Test that the future returned by calling a method in an asynchronous class is not done if called right after the
+     * operation
      */
     @Test
     public void testClassLevelAsyncIsNotFinished() {
@@ -112,7 +109,8 @@ public class AsynchronousTest extends Arquillian {
     }
 
     /**
-     * Test that the future returned by calling a method in an asynchronous class is done if called after waiting enough time to end the operation
+     * Test that the future returned by calling a method in an asynchronous class is done if called after waiting enough
+     * time to end the operation
      */
     @Test
     public void testClassLevelAsyncIsFinished() {
@@ -120,21 +118,23 @@ public class AsynchronousTest extends Arquillian {
         Future<Connection> future = clientClass.service(waitingFuture);
         waitingFuture.complete(null);
         await().atMost(30, TimeUnit.SECONDS)
-            .untilAsserted(()-> Assert.assertTrue(future.isDone()));
+                .untilAsserted(() -> Assert.assertTrue(future.isDone()));
     }
 
     /**
-     * Test that the request context is active during execution for an asynchronous method that returns a CompletionStage
+     * Test that the request context is active during execution for an asynchronous method that returns a
+     * CompletionStage
      * 
-     * If the request scope is active, then an @ApplicationScoped bean should be able to asynchronously
-     * call an @Asynchronous method returning a CompletionStage on a @RequestScoped bean, and return the correct result
+     * If the request scope is active, then an @ApplicationScoped bean should be able to asynchronously call
+     * an @Asynchronous method returning a CompletionStage on a @RequestScoped bean, and return the correct result
      * 
-     * @throws TimeoutException 
-     * @throws ExecutionException 
-     * @throws InterruptedException 
+     * @throws TimeoutException
+     * @throws ExecutionException
+     * @throws InterruptedException
      */
     @Test
-    public void testAsyncRequestContextWithCompletionStage() throws InterruptedException, ExecutionException, TimeoutException {
+    public void testAsyncRequestContextWithCompletionStage()
+            throws InterruptedException, ExecutionException, TimeoutException {
         CompletionStage<String> completionStage = clientApplicationScope.serviceCallingCompletionStageMethod();
         String result = CompletableFutureHelper.toCompletableFuture(completionStage).get(30, TimeUnit.SECONDS);
         Assert.assertEquals(result, "testCompletionStageString");
@@ -143,12 +143,12 @@ public class AsynchronousTest extends Arquillian {
     /**
      * Test that the request context is active during execution for an asynchronous method that returns a Future
      * 
-     * If the request scope is active, then an @ApplicationScoped bean should be able to asynchronously
-     * call an @Asynchronous method returning a Future on a @RequestScoped bean, and return the correct result
+     * If the request scope is active, then an @ApplicationScoped bean should be able to asynchronously call
+     * an @Asynchronous method returning a Future on a @RequestScoped bean, and return the correct result
      * 
-     * @throws TimeoutException 
-     * @throws ExecutionException 
-     * @throws InterruptedException 
+     * @throws TimeoutException
+     * @throws ExecutionException
+     * @throws InterruptedException
      */
     @Test
     public void testAsyncRequestContextWithFuture() throws InterruptedException, ExecutionException, TimeoutException {
@@ -158,11 +158,9 @@ public class AsynchronousTest extends Arquillian {
     }
 
     /**
-     * Use this method to obtain futures for passing to methods on
-     * {@link AsyncClient}
+     * Use this method to obtain futures for passing to methods on {@link AsyncClient}
      * <p>
-     * Using this factory method ensures they will be completed at the end of
-     * the test if your test fails.
+     * Using this factory method ensures they will be completed at the end of the test if your test fails.
      */
     private CompletableFuture<Void> newWaitingFuture() {
         CompletableFuture<Void> result = new CompletableFuture<>();

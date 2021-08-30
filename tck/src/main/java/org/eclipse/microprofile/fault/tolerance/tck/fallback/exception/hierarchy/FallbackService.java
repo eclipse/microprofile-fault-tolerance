@@ -24,7 +24,7 @@ import org.eclipse.microprofile.fault.tolerance.tck.exception.hierarchy.E1;
 import org.eclipse.microprofile.fault.tolerance.tck.exception.hierarchy.E2;
 import org.eclipse.microprofile.faulttolerance.Fallback;
 
-import javax.enterprise.context.Dependent;
+import jakarta.enterprise.context.Dependent;
 
 @Dependent
 public class FallbackService {

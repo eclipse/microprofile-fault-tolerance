@@ -28,8 +28,11 @@ import org.jboss.arquillian.core.spi.LoadableExtension;
  */
 public class TckLoadableExtension implements LoadableExtension {
 
-    /* (non-Javadoc)
-     * @see org.jboss.arquillian.core.spi.LoadableExtension#register(org.jboss.arquillian.core.spi.LoadableExtension.ExtensionBuilder)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.jboss.arquillian.core.spi.LoadableExtension#register(org.jboss.arquillian.core.spi.LoadableExtension.
+     * ExtensionBuilder)
      */
     @Override
     public void register(ExtensionBuilder builder) {

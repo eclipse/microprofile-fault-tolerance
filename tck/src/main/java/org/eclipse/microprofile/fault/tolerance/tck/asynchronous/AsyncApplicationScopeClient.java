@@ -23,10 +23,10 @@ package org.eclipse.microprofile.fault.tolerance.tck.asynchronous;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Future;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class AsyncApplicationScopeClient {

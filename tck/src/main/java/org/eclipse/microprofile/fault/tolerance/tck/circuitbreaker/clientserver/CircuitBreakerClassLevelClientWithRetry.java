@@ -22,13 +22,14 @@ package org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver
 import java.io.Serializable;
 import java.sql.Connection;
 
-import javax.enterprise.context.RequestScoped;
-
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 import org.eclipse.microprofile.faulttolerance.Retry;
+
+import jakarta.enterprise.context.RequestScoped;
+
 /**
- * A client to exercise Circuit Breaker thresholds using Retries. Annotations are
- * specified at both the Class and Method level.
+ * A client to exercise Circuit Breaker thresholds using Retries. Annotations are specified at both the Class and Method
+ * level.
  * 
  * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  *
@@ -43,11 +44,11 @@ public class CircuitBreakerClassLevelClientWithRetry implements Serializable {
     public int getCounterForInvokingServiceA() {
         return counterForInvokingServiceA;
     }
-    
+
     public int getCounterForInvokingServiceB() {
         return counterForInvokingServiceB;
     }
-    
+
     public Connection serviceA() {
         Connection conn = null;
         counterForInvokingServiceA++;
@@ -63,8 +64,8 @@ public class CircuitBreakerClassLevelClientWithRetry implements Serializable {
         conn = connectionService();
         return conn;
     }
-    
-    //simulate a backend service
+
+    // simulate a backend service
     private Connection connectionService() {
         throw new RuntimeException("Connection failed");
     }

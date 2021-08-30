@@ -36,8 +36,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.bulkhead.clientserver.BulkheadPressureBean;
 import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncCaller;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
@@ -51,106 +49,106 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
+import jakarta.inject.Inject;
+
 /**
- * Test that a bulkhead behaves correctly under pressure, in something more resembling
- * a real-world scenario.
+ * Test that a bulkhead behaves correctly under pressure, in something more resembling a real-world scenario.
  */
 public class BulkheadPressureTest extends Arquillian {
-    
+
     @Deployment
     public static WebArchive deployment() {
         JavaArchive jar = ShrinkWrap.create(JavaArchive.class, "ftBulkheadPressure.jar")
                 .addPackage(Packages.UTILS)
                 .addClass(BulkheadPressureBean.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
-        
+
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftBulkheadPressure.war")
                 .addAsLibraries(jar);
-        
+
         return war;
     }
-    
+
     private TCKConfig config = TCKConfig.getConfig();
-    
+
     @Inject
     private AsyncCaller executor;
-    
+
     @Inject
     private BulkheadPressureBean bean;
-    
+
     @Test
     public void testBulkheadPressureSync() throws InterruptedException {
         bean.reset();
-        
+
         List<Future<?>> futures = new ArrayList<>();
         try {
             for (int i = 0; i < 100; i++) {
                 futures.add(executor.run(() -> bean.servicePressure(config.getTimeoutInMillis(50))));
                 Thread.sleep(config.getTimeoutInMillis(25));
             }
-        }
-        finally {
+        } finally {
             // We want to wait for every started task to finish, even if there was an exception starting one
-            await().untilAsserted(() -> futures.forEach(f->assertTrue(f.isDone())));
+            await().untilAsserted(() -> futures.forEach(f -> assertTrue(f.isDone())));
         }
-            
-        Map<ResultCategory, List<Future<?>>> results = futures.stream().collect(Collectors.groupingBy(this::getResultCategory));
-        
+
+        Map<ResultCategory, List<Future<?>>> results =
+                futures.stream().collect(Collectors.groupingBy(this::getResultCategory));
+
         // Bulkhead size is 5, so at least 5 tasks should complete
-        assertThat("Calls returning successfully", results.get(ResultCategory.NO_EXCEPTION), hasSize(greaterThanOrEqualTo(5)));
+        assertThat("Calls returning successfully", results.get(ResultCategory.NO_EXCEPTION),
+                hasSize(greaterThanOrEqualTo(5)));
         // Everything should either complete or fail with a bulkhead exception
-        assertThat("Calls throwing non-bulkhead exception", results.get(ResultCategory.OTHER_EXCEPTION), is(nullValue()));
-        
+        assertThat("Calls throwing non-bulkhead exception", results.get(ResultCategory.OTHER_EXCEPTION),
+                is(nullValue()));
+
         assertThat("Max concurrent tasks", bean.getMaxInProgress(), lessThanOrEqualTo(5));
     }
-    
+
     @Test
     public void testBulkheadPressureAsync() throws InterruptedException {
         bean.reset();
-        
+
         List<Future<?>> futures = new ArrayList<>();
         try {
             for (int i = 0; i < 100; i++) {
                 futures.add(bean.servicePressureAsync(config.getTimeoutInMillis(50)));
                 Thread.sleep(config.getTimeoutInMillis(25));
             }
-        }
-        finally {
+        } finally {
             // We want to wait for every started task to finish, even if there was an exception starting one
-            await().untilAsserted(() -> futures.forEach(f->assertTrue(f.isDone())));
+            await().untilAsserted(() -> futures.forEach(f -> assertTrue(f.isDone())));
         }
-            
-        Map<ResultCategory, List<Future<?>>> results = futures.stream().collect(Collectors.groupingBy(this::getResultCategory));
-        
+
+        Map<ResultCategory, List<Future<?>>> results =
+                futures.stream().collect(Collectors.groupingBy(this::getResultCategory));
+
         // Bulkhead size is 5 and queue size is 5, so at least 10 tasks should complete
-        assertThat("Calls returning successfully", results.get(ResultCategory.NO_EXCEPTION), hasSize(greaterThanOrEqualTo(10)));
+        assertThat("Calls returning successfully", results.get(ResultCategory.NO_EXCEPTION),
+                hasSize(greaterThanOrEqualTo(10)));
         // Everything should either complete or fail with a bulkhead exception
-        assertThat("Calls throwing non-bulkhead exception", results.get(ResultCategory.OTHER_EXCEPTION), is(nullValue()));
-        
+        assertThat("Calls throwing non-bulkhead exception", results.get(ResultCategory.OTHER_EXCEPTION),
+                is(nullValue()));
+
         assertThat("Max concurrent tasks", bean.getMaxInProgress(), lessThanOrEqualTo(5));
     }
 
     private enum ResultCategory {
-        BULKHEAD_EXCEPTION,
-        OTHER_EXCEPTION,
-        NO_EXCEPTION
+        BULKHEAD_EXCEPTION, OTHER_EXCEPTION, NO_EXCEPTION
     }
-    
+
     private ResultCategory getResultCategory(Future<?> future) {
         assertTrue(future.isDone(), "Checking result category when future is not done");
         try {
             future.get();
             return ResultCategory.NO_EXCEPTION;
-        }
-        catch (ExecutionException e) {
+        } catch (ExecutionException e) {
             if (e.getCause() instanceof BulkheadException) {
                 return ResultCategory.BULKHEAD_EXCEPTION;
-            }
-            else {
+            } else {
                 return ResultCategory.OTHER_EXCEPTION;
             }
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             throw new AssertionError("Interrupted getting result category", e);
         }
     }

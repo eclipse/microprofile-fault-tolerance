@@ -25,8 +25,6 @@ import static org.hamcrest.Matchers.is;
 
 import java.util.concurrent.ExecutionException;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationFallback;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricGetter;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -36,6 +34,8 @@ import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
+import jakarta.inject.Inject;
+
 public class ClashingNameTest extends Arquillian {
 
     @Deployment
@@ -44,22 +44,23 @@ public class ClashingNameTest extends Arquillian {
                 .addClasses(ClashingNameBean.class)
                 .addPackage(MetricGetter.class.getPackage())
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
-        
+
         return war;
     }
-    
+
     @Inject
     private ClashingNameBean clashingNameBean;
-    
+
     @Test
     public void testClashingName() throws InterruptedException, ExecutionException {
         MetricGetter m = new MetricGetter(ClashingNameBean.class, "doWork");
         m.baselineMetrics();
-        
+
         clashingNameBean.doWork().get();
         clashingNameBean.doWork("dummy").get();
-        
-        assertThat("invocations", m.getInvocations(VALUE_RETURNED, InvocationFallback.NOT_APPLIED).delta(), is(greaterThan(0L)));
+
+        assertThat("invocations", m.getInvocations(VALUE_RETURNED, InvocationFallback.NOT_APPLIED).delta(),
+                is(greaterThan(0L)));
     }
 
 }

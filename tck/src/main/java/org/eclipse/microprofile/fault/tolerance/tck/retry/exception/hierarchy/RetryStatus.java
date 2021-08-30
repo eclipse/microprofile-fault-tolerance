@@ -20,7 +20,5 @@
 package org.eclipse.microprofile.fault.tolerance.tck.retry.exception.hierarchy;
 
 public enum RetryStatus {
-    NOT_YET_INVOKED,
-    FIRST_INVOCATION,
-    RETRIED_INVOCATION
+    NOT_YET_INVOKED, FIRST_INVOCATION, RETRIED_INVOCATION
 }

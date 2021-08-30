@@ -19,12 +19,12 @@
  *******************************************************************************/
 
 /**
- * <p>CDI Support for Microprofile Fault Tolerance
+ * <p>
+ * CDI Support for Microprofile Fault Tolerance
  *
  * 
  *
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  */
-@org.osgi.annotation.versioning.Version("1.2")
+@org.osgi.annotation.versioning.Version("1.2.1")
 package org.eclipse.microprofile.faulttolerance;
-

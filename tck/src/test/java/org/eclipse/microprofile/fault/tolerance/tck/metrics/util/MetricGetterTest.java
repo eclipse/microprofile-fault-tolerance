@@ -31,25 +31,25 @@ import org.testng.annotations.Test;
  * Tests for MetricGetterTest.getTagCombinations()
  */
 public class MetricGetterTest {
-    
+
     @Test
     public void testTagComboZero() {
         TagValue[][] expected = {{}};
         assertEquals(MetricGetter.getTagCombinations(), expected);
     }
-    
+
     @Test
     public void testTagComboOne() {
         TagValue[][] expected = {{TimeoutTimedOut.TRUE}, {TimeoutTimedOut.FALSE}};
         assertEquals(MetricGetter.getTagCombinations(TimeoutTimedOut.class), expected);
     }
-    
+
     @Test
     public void testTagComboTwo() {
         TagValue[][] expected = {{TimeoutTimedOut.TRUE, InvocationResult.VALUE_RETURNED},
-                                 {TimeoutTimedOut.TRUE, InvocationResult.EXCEPTION_THROWN},
-                                 {TimeoutTimedOut.FALSE, InvocationResult.VALUE_RETURNED},
-                                 {TimeoutTimedOut.FALSE, InvocationResult.EXCEPTION_THROWN}};
+                {TimeoutTimedOut.TRUE, InvocationResult.EXCEPTION_THROWN},
+                {TimeoutTimedOut.FALSE, InvocationResult.VALUE_RETURNED},
+                {TimeoutTimedOut.FALSE, InvocationResult.EXCEPTION_THROWN}};
         assertEquals(MetricGetter.getTagCombinations(TimeoutTimedOut.class, InvocationResult.class), expected);
     }
 

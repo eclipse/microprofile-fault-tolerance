@@ -26,8 +26,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.time.temporal.ChronoUnit;
 
-import javax.enterprise.util.Nonbinding;
-import javax.interceptor.InterceptorBinding;
+import jakarta.enterprise.util.Nonbinding;
+import jakarta.interceptor.InterceptorBinding;
 
 /**
  * The annotation to define a method execution timeout.
@@ -40,13 +40,13 @@ import javax.interceptor.InterceptorBinding;
 @Inherited
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.METHOD, ElementType.TYPE})
+@Target({ElementType.METHOD, ElementType.TYPE})
 @InterceptorBinding
 public @interface Timeout {
 
     /**
-     * The timeout value. The value must be greater than or equal to 0. 0 means no timeout configured.
-     * Otherwise, {@link org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException} occurs.
+     * The timeout value. The value must be greater than or equal to 0. 0 means no timeout configured. Otherwise,
+     * {@link org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException} occurs.
      *
      * @return the timeout value
      */

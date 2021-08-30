@@ -19,16 +19,18 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver;
 
-import org.eclipse.microprofile.faulttolerance.Retry;
-
-import javax.enterprise.context.RequestScoped;
 import java.sql.Connection;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.microprofile.faulttolerance.Retry;
+
+import jakarta.enterprise.context.RequestScoped;
+
 /**
  * A client to demonstrate the delay configurations
+ * 
  * @author <a href="mailto:bbaptista@tomitribe.com">Bruno Baptista</a>
  *
  */
@@ -38,15 +40,14 @@ public class RetryClientWithNoDelayAndJitter {
     private long timestampForConnectionService = 0L;
     private final List<Long> delayTimes = new ArrayList<>();
 
-
-    //There should be 0-400ms (jitter is -400ms - 400ms but min value must be 0) delays between each invocation
-    //there should be at least 8 retries
-    @Retry(delay = 0, maxDuration= 3200, jitter= 400, maxRetries = 100)
+    // There should be 0-400ms (jitter is -400ms - 400ms but min value must be 0) delays between each invocation
+    // there should be at least 8 retries
+    @Retry(delay = 0, maxDuration = 3200, jitter = 400, maxRetries = 100)
     public Connection serviceA() {
         return connectionService();
     }
 
-    //simulate a backend service
+    // simulate a backend service
     private Connection connectionService() {
         // the time delay between each invocation should be 0-400ms
         long currentTime = System.nanoTime();

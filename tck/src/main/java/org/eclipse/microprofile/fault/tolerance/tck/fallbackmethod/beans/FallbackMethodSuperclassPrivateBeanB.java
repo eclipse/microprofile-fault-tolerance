@@ -21,10 +21,10 @@
 package org.eclipse.microprofile.fault.tolerance.tck.fallbackmethod.beans;
 
 public class FallbackMethodSuperclassPrivateBeanB {
-    
+
     @SuppressWarnings("unused")
     private String fallback(int a, Long b) {
         return "fallback";
     }
-    
+
 }

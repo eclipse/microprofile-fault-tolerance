@@ -28,7 +28,7 @@ import org.testng.annotations.Test;
 /**
  * Checks standard Java annotation retrievals for Retry annotation.
  *
- *  @author <a href="mailto:matthieu@brouillard.fr">Matthieu Brouillard</a>
+ * @author <a href="mailto:matthieu@brouillard.fr">Matthieu Brouillard</a>
  */
 public class PureJ2SERetryVisibilityTest {
     @Test
@@ -50,7 +50,8 @@ public class PureJ2SERetryVisibilityTest {
 
         foundAnnotation = RetryOnClassServiceNoAnnotationOnOveriddenMethod.class.getAnnotation(Retry.class);
         Assert.assertNotNull(foundAnnotation,
-                "a Retry annotation should have been found because of inheritance on RetryOnClassServiceNoAnnotationOnOveriddenMethod " +
+                "a Retry annotation should have been found because of inheritance on RetryOnClassServiceNoAnnotationOnOveriddenMethod "
+                        +
                         "class via getAnnotation()");
     }
 
@@ -58,7 +59,7 @@ public class PureJ2SERetryVisibilityTest {
     public void checkBaseRomRetryMissingOnMethod() throws Exception {
         Retry foundAnnotation;
         Method m = RetryOnMethodServiceNoAnnotationOnOverridedMethod.class.getDeclaredMethod("service");
-        
+
         foundAnnotation = m.getDeclaredAnnotation(Retry.class);
         Assert.assertNull(foundAnnotation,
                 "no Retry annotation should be found on RetryOnMethodServiceNoAnnotationOnOverridedMethod#service() " +

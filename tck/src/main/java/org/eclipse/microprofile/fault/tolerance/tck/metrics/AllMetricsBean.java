@@ -23,8 +23,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
-import javax.enterprise.context.RequestScoped;
-
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
@@ -32,9 +30,11 @@ import org.eclipse.microprofile.faulttolerance.Fallback;
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.faulttolerance.Timeout;
 
+import jakarta.enterprise.context.RequestScoped;
+
 @RequestScoped
 public class AllMetricsBean {
-    
+
     @Retry(maxRetries = 5)
     @Bulkhead(3)
     @Timeout(value = 1, unit = ChronoUnit.MINUTES)
@@ -44,7 +44,7 @@ public class AllMetricsBean {
     public Future<Void> doWork() {
         return CompletableFuture.completedFuture(null);
     }
-    
+
     public Future<Void> doFallback() {
         return CompletableFuture.completedFuture(null);
     }

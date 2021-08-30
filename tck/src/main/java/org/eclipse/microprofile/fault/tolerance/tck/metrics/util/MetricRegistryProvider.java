@@ -22,26 +22,27 @@ package org.eclipse.microprofile.fault.tolerance.tck.metrics.util;
 
 import java.lang.reflect.Proxy;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.spi.CDI;
-
 import org.eclipse.microprofile.metrics.MetricRegistry.Type;
 import org.eclipse.microprofile.metrics.annotation.RegistryType;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Produces;
+import jakarta.enterprise.inject.spi.CDI;
 
 /**
  * Registers a MetricRegistryProxy bean for the BASE scope
  */
 @ApplicationScoped
 public class MetricRegistryProvider {
-    
+
     @Produces
     @RegistryType(type = Type.BASE)
     public MetricRegistryProxy getBaseRegistry() {
-        Object metricRegistry = CDI.current().select(MetricRegistryProxyHandler.METRIC_REGISTRY_CLAZZ, RegistryTypeLiteral.BASE).get();
+        Object metricRegistry =
+                CDI.current().select(MetricRegistryProxyHandler.METRIC_REGISTRY_CLAZZ, RegistryTypeLiteral.BASE).get();
         return getProxy(metricRegistry);
     }
-    
+
     private MetricRegistryProxy getProxy(Object metricRegistry) {
         MetricRegistryProxyHandler handler = new MetricRegistryProxyHandler(metricRegistry);
         ClassLoader cl = MetricRegistryProvider.class.getClassLoader();
