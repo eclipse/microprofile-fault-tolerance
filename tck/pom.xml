@@ -31,7 +31,7 @@
     <properties>
         <arquillian.version>1.1.14.Final</arquillian.version>
         <checkstyle.methodNameFormat>^_?[a-z][a-zA-Z0-9_]*$</checkstyle.methodNameFormat>
-        <microprofile-config-api.version>3.0-RC3</microprofile-config-api.version>
+        <microprofile-config-api.version>3.0-RC4</microprofile-config-api.version>
         <microprofile-metrics-api.version>4.0-RC1</microprofile-metrics-api.version>
     </properties>
 
