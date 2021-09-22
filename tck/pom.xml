@@ -29,7 +29,6 @@
 
     <description>Fault Tolerance for MicroProfile :: TCK</description>
     <properties>
-        <arquillian.version>1.1.14.Final</arquillian.version>
         <checkstyle.methodNameFormat>^_?[a-z][a-zA-Z0-9_]*$</checkstyle.methodNameFormat>
         <microprofile-config-api.version>3.0-RC5</microprofile-config-api.version>
         <microprofile-metrics-api.version>4.0-RC2</microprofile-metrics-api.version>
@@ -40,7 +39,7 @@
             <dependency>
                 <groupId>org.jboss.arquillian</groupId>
                 <artifactId>arquillian-bom</artifactId>
-                <version>${arquillian.version}</version>
+                <version>${version.arquillian}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -79,13 +78,13 @@
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>6.9.9</version>
+            <version>${version.testng}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.jboss.arquillian.testng</groupId>
             <artifactId>arquillian-testng-container</artifactId>
-            <version>${arquillian.version}</version>
+            <version>${version.arquillian}</version>
         </dependency>
 
         <dependency>
