@@ -26,5 +26,5 @@
  *
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  */
-@org.osgi.annotation.versioning.Version("1.2.1")
+@org.osgi.annotation.versioning.Version("2.0")
 package org.eclipse.microprofile.faulttolerance;
