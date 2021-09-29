@@ -31,7 +31,7 @@
     <properties>
         <checkstyle.methodNameFormat>^_?[a-z][a-zA-Z0-9_]*$</checkstyle.methodNameFormat>
         <microprofile-config-api.version>3.0-RC5</microprofile-config-api.version>
-        <microprofile-metrics-api.version>4.0-RC2</microprofile-metrics-api.version>
+        <microprofile-metrics-api.version>4.0-RC4</microprofile-metrics-api.version>
     </properties>
 
     <dependencyManagement>
