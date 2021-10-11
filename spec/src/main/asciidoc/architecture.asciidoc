@@ -63,5 +63,5 @@ This specification introduces the following interceptor bindings:
 
 * `Asynchronous`
 
-Refer to https://download.oracle.com/otn-pub/jcp/interceptors-1_2A-mrel3-eval-spec/Intercept.pdf[Interceptor Specification^] for more information.
+Refer to https://jakarta.ee/specifications/interceptors/2.0/interceptors-spec-2.0.html[Interceptor Specification^] for more information.
 
