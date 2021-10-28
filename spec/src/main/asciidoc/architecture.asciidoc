@@ -21,7 +21,7 @@
 [[architecture]]
 == Architecture
 
-This specification defines an easy to use and flexible system for building resilient applications.
+This specification defines an easy-to-use and flexible system for building resilient applications.
 
 
 === Rational
@@ -63,5 +63,5 @@ This specification introduces the following interceptor bindings:
 
 * `Asynchronous`
 
-Refer to https://download.oracle.com/otn-pub/jcp/interceptors-1_2A-mrel3-eval-spec/Intercept.pdf?AuthParam=1541543428_889968d50f535735cbabe343350e09a4[Interceptor Specification^] for more information. 
+Refer to https://jakarta.ee/specifications/interceptors/2.0/interceptors-spec-2.0.html[Interceptor Specification^] for more information.
 
