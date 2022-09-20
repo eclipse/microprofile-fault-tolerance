@@ -37,9 +37,9 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.jboss.arquillian</groupId>
-                <artifactId>arquillian-bom</artifactId>
-                <version>${version.arquillian}</version>
+                <groupId>org.eclipse.microprofile</groupId>
+                <artifactId>microprofile-tck-bom</artifactId>
+                <version>${version.microprofile.tck.bom}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -78,13 +78,10 @@
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>${version.testng}</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.jboss.arquillian.testng</groupId>
             <artifactId>arquillian-testng-container</artifactId>
-            <version>${version.arquillian}</version>
         </dependency>
 
         <dependency>
