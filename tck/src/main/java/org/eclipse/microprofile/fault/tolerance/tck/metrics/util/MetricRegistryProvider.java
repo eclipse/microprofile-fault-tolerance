@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2020 Contributors to the Eclipse Foundation
+ * Copyright (c) 2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -20,34 +20,24 @@
 
 package org.eclipse.microprofile.fault.tolerance.tck.metrics.util;
 
-import java.lang.reflect.Proxy;
-
-import org.eclipse.microprofile.metrics.MetricRegistry.Type;
-import org.eclipse.microprofile.metrics.annotation.RegistryType;
+import org.eclipse.microprofile.metrics.MetricRegistry;
+import org.eclipse.microprofile.metrics.annotation.RegistryScope;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Produces;
-import jakarta.enterprise.inject.spi.CDI;
+import jakarta.inject.Inject;
 
 /**
- * Registers a MetricRegistryProxy bean for the BASE scope
+ * Provides a way to get hold of the base registry without injecting it
  */
 @ApplicationScoped
 public class MetricRegistryProvider {
 
-    @Produces
-    @RegistryType(type = Type.BASE)
-    public MetricRegistryProxy getBaseRegistry() {
-        Object metricRegistry =
-                CDI.current().select(MetricRegistryProxyHandler.METRIC_REGISTRY_CLAZZ, RegistryTypeLiteral.BASE).get();
-        return getProxy(metricRegistry);
-    }
+    @Inject
+    @RegistryScope(scope = MetricRegistry.BASE_SCOPE)
+    private MetricRegistry baseRegistry;
 
-    private MetricRegistryProxy getProxy(Object metricRegistry) {
-        MetricRegistryProxyHandler handler = new MetricRegistryProxyHandler(metricRegistry);
-        ClassLoader cl = MetricRegistryProvider.class.getClassLoader();
-        return (MetricRegistryProxy) Proxy.newProxyInstance(cl, new Class<?>[]{MetricRegistryProxy.class}, handler);
-
+    public MetricRegistry getBaseRegistry() {
+        return baseRegistry;
     }
 
 }

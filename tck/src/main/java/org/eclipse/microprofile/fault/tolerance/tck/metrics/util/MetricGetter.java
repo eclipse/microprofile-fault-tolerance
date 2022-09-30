@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2020 Contributors to the Eclipse Foundation
+ * Copyright (c) 2020-2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -47,6 +47,7 @@ import org.eclipse.microprofile.metrics.Gauge;
 import org.eclipse.microprofile.metrics.Histogram;
 import org.eclipse.microprofile.metrics.Metric;
 import org.eclipse.microprofile.metrics.MetricID;
+import org.eclipse.microprofile.metrics.MetricRegistry;
 import org.eclipse.microprofile.metrics.Tag;
 
 import jakarta.enterprise.inject.spi.CDI;
@@ -61,7 +62,7 @@ import jakarta.enterprise.inject.spi.CDI;
  */
 public class MetricGetter {
 
-    private MetricRegistryProxy registry;
+    private MetricRegistry registry;
     private final Tag methodTag;
 
     private Map<MetricID, CounterMetric> counterMetrics = new HashMap<>();
@@ -70,7 +71,7 @@ public class MetricGetter {
     public MetricGetter(Class<?> clazz, String methodName) {
         validateClassAndMethodName(clazz, methodName);
         methodTag = new Tag("method", clazz.getCanonicalName() + "." + methodName);
-        registry = CDI.current().select(MetricRegistryProxy.class, RegistryTypeLiteral.BASE).get();
+        registry = CDI.current().select(MetricRegistryProvider.class).get().getBaseRegistry();
     }
 
     public CounterMetric getInvocations(InvocationResult result, InvocationFallback fallbackUsed) {

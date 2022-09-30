@@ -28,6 +28,7 @@ import java.util.Optional;
 import org.eclipse.microprofile.metrics.Counter;
 import org.eclipse.microprofile.metrics.Gauge;
 import org.eclipse.microprofile.metrics.MetricID;
+import org.eclipse.microprofile.metrics.MetricRegistry;
 
 /**
  * Allows tests to get the value of a {@code Gauge<Long>} and compare it with a baseline.
@@ -39,11 +40,11 @@ import org.eclipse.microprofile.metrics.MetricID;
  */
 public class GaugeMetric {
 
-    private MetricRegistryProxy registry;
+    private MetricRegistry registry;
     private MetricID metricId;
     private long baseline;
 
-    public GaugeMetric(MetricRegistryProxy registry, MetricID metricId) {
+    public GaugeMetric(MetricRegistry registry, MetricID metricId) {
         this.registry = registry;
         this.metricId = metricId;
         this.baseline = 0;
