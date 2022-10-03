@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018-2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -18,27 +18,20 @@
  */
 package org.eclipse.microprofile.fault.tolerance.tck.metrics;
 
-import static java.util.stream.Collectors.toList;
 import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationResult.EXCEPTION_THROWN;
 import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationResult.VALUE_RETURNED;
 import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expectTimeout;
 import static org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig.getConfig;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
-import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricComparator;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationFallback;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.TimeoutTimedOut;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricGetter;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.eclipse.microprofile.faulttolerance.Timeout;
 import org.eclipse.microprofile.metrics.Histogram;
-import org.eclipse.microprofile.metrics.Snapshot;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -95,7 +88,6 @@ public class TimeoutMetricTest extends Arquillian {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void testTimeoutHistogram() {
         MetricGetter m = new MetricGetter(TimeoutMetricBean.class, "histogramTestWorkForMillis");
 
@@ -105,12 +97,8 @@ public class TimeoutMetricTest extends Arquillian {
                                                                                                            // after 2000
 
         Histogram histogram = m.getTimeoutExecutionDuration().get();
-        Snapshot snapshot = histogram.getSnapshot();
-        List<Long> values = Arrays.stream(snapshot.getValues()).boxed().sorted().collect(toList());
 
         assertThat("Histogram count", histogram.getCount(), is(2L));
-        assertThat("SnapshotValues", values, contains(MetricComparator.approxMillis(300),
-                MetricComparator.approxMillis(2000)));
     }
 
 }
