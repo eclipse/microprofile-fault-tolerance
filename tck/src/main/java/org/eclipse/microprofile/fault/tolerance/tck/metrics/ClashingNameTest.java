@@ -27,6 +27,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationFallback;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricGetter;
+import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -42,7 +43,7 @@ public class ClashingNameTest extends Arquillian {
     public static WebArchive deploy() {
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftMetricClash.war")
                 .addClasses(ClashingNameBean.class)
-                .addPackage(MetricGetter.class.getPackage())
+                .addPackages(false, Packages.METRICS_SUPPORT)
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
 
         return war;

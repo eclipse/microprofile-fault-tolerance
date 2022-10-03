@@ -54,6 +54,7 @@
     <modules>
         <module>api</module>
         <module>tck</module>
+        <module>tck-metrics5</module>
         <module>spec</module>
     </modules>
 

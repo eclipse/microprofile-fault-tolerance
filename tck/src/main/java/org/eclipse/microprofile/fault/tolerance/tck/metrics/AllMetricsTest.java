@@ -37,6 +37,7 @@ import static org.testng.Assert.assertNotNull;
 import java.util.concurrent.ExecutionException;
 
 import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
+import org.eclipse.microprofile.fault.tolerance.tck.metrics.common.BaseRegistry;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationFallback;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.RetryResult;
@@ -46,9 +47,7 @@ import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricGetter;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.eclipse.microprofile.metrics.Metadata;
 import org.eclipse.microprofile.metrics.MetricRegistry;
-import org.eclipse.microprofile.metrics.MetricRegistry.Type;
 import org.eclipse.microprofile.metrics.MetricUnits;
-import org.eclipse.microprofile.metrics.annotation.RegistryType;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -74,7 +73,7 @@ public class AllMetricsTest extends Arquillian {
         JavaArchive jar = ShrinkWrap.create(JavaArchive.class, "ftMetricAll.jar")
                 .addClasses(AllMetricsBean.class)
                 .addPackage(Packages.UTILS)
-                .addPackage(Packages.METRIC_UTILS)
+                .addPackages(false, Packages.METRICS_SUPPORT)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                 .addAsManifestResource(allMetricsBeanConfig, "microprofile-config.properties");
 
@@ -88,7 +87,7 @@ public class AllMetricsTest extends Arquillian {
     private AllMetricsBean allMetricsBean;
 
     @Inject
-    @RegistryType(type = Type.BASE)
+    @BaseRegistry
     private MetricRegistry metricRegistry;
 
     @Test

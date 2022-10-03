@@ -58,7 +58,7 @@ public class MetricsDisabledTest extends Arquillian {
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftMetricDisabled.war")
                 .addClasses(AllMetricsBean.class)
                 .addPackage(Packages.UTILS)
-                .addPackage(Packages.METRIC_UTILS)
+                .addPackages(false, Packages.METRICS_SUPPORT)
                 .addAsResource(new StringAsset("MP_Fault_Tolerance_Metrics_Enabled=false"),
                         "META-INF/microprofile-config.properties")
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");

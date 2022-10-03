@@ -49,7 +49,7 @@ public class ClassLevelMetricTest extends Arquillian {
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftMetricClassLevel.war")
                 .addClasses(ClassLevelMetricBean.class)
                 .addPackage(Packages.UTILS)
-                .addPackage(Packages.METRIC_UTILS)
+                .addPackages(false, Packages.METRICS_SUPPORT)
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
 
         return war;

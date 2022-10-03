@@ -60,7 +60,7 @@ public class BulkheadMetricTest extends Arquillian {
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftMetricBulkhead.war")
                 .addClasses(BulkheadMetricBean.class)
                 .addPackage(Packages.UTILS)
-                .addPackage(Packages.METRIC_UTILS)
+                .addPackages(false, Packages.METRICS_SUPPORT)
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
         return war;
     }

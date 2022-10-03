@@ -55,7 +55,7 @@ public class TimeoutMetricTest extends Arquillian {
         JavaArchive jar = ShrinkWrap.create(JavaArchive.class, "ftMetricTimeout.jar")
                 .addClasses(TimeoutMetricBean.class)
                 .addPackage(Packages.UTILS)
-                .addPackage(Packages.METRIC_UTILS)
+                .addPackages(false, Packages.METRICS_SUPPORT)
                 .addAsManifestResource(config, "microprofile-config.properties")
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
 

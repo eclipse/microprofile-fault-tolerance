@@ -61,7 +61,7 @@ public class CircuitBreakerMetricTest extends Arquillian {
         JavaArchive jar = ShrinkWrap.create(JavaArchive.class, "ftMetricCircuitBreaker.jar")
                 .addClasses(CircuitBreakerMetricBean.class)
                 .addPackage(Packages.UTILS)
-                .addPackage(Packages.METRIC_UTILS)
+                .addPackages(false, Packages.METRICS_SUPPORT)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                 .addAsManifestResource(config, "microprofile-config.properties");
 

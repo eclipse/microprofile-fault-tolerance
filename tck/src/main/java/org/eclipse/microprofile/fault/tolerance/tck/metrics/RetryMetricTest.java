@@ -57,7 +57,7 @@ public class RetryMetricTest extends Arquillian {
         JavaArchive jar = ShrinkWrap.create(JavaArchive.class, "ftMetricRetry.jar")
                 .addClasses(RetryMetricBean.class)
                 .addPackage(Packages.UTILS)
-                .addPackage(Packages.METRIC_UTILS)
+                .addPackages(false, Packages.METRICS_SUPPORT)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                 .addAsManifestResource(config, "microprofile-config.properties");
 

@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2020 Contributors to the Eclipse Foundation
+ * Copyright (c) 2020-2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.eclipse.microprofile.fault.tolerance.tck.metrics.common.BaseRegistry;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.BulkheadResult;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.CircuitBreakerResult;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.CircuitBreakerState;
@@ -71,7 +72,7 @@ public class MetricGetter {
     public MetricGetter(Class<?> clazz, String methodName) {
         validateClassAndMethodName(clazz, methodName);
         methodTag = new Tag("method", clazz.getCanonicalName() + "." + methodName);
-        registry = CDI.current().select(MetricRegistry.class, RegistryTypeLiteral.BASE).get();
+        registry = CDI.current().select(MetricRegistry.class, new BaseRegistry.Literal()).get();
     }
 
     public CounterMetric getInvocations(InvocationResult result, InvocationFallback fallbackUsed) {
