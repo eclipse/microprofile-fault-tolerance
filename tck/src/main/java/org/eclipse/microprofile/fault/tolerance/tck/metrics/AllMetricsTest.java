@@ -46,9 +46,9 @@ import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinitio
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.RetryRetried;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.TimeoutTimedOut;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricGetter;
-import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricRegistryProxy;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.eclipse.microprofile.metrics.Metadata;
+import org.eclipse.microprofile.metrics.MetricRegistry;
 import org.eclipse.microprofile.metrics.MetricRegistry.Type;
 import org.eclipse.microprofile.metrics.MetricUnits;
 import org.eclipse.microprofile.metrics.annotation.RegistryType;
@@ -92,7 +92,7 @@ public class AllMetricsTest extends Arquillian {
 
     @Inject
     @RegistryType(type = Type.BASE)
-    private MetricRegistryProxy metricRegistry;
+    private MetricRegistry metricRegistry;
 
     @Test
     public void testAllMetrics() throws InterruptedException, ExecutionException {
