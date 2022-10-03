@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Contributors to the Eclipse Foundation
+ * Copyright (c) 2018-2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -34,9 +34,6 @@ import static org.hamcrest.Matchers.is;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
@@ -169,42 +166,9 @@ public class AllMetricsTest extends Arquillian {
 
             assertNotNull(metadata, "Missing metadata for metric " + metric);
 
-            assertEquals(getUnit(metadata), metric.getUnit(), "Incorrect unit for metric " + metric);
+            assertEquals(metadata.unit().orElse(MetricUnits.NONE), metric.getUnit(),
+                    "Incorrect unit for metric " + metric);
         }
-    }
-
-    /**
-     * Gets metric unit from metadata via reflection which works for Metrics 2.x and 3.x
-     * 
-     * @param metadata
-     *            the metadata
-     * @return the unit or {@code MetricUnits.NONE} if the metadata has no unit
-     */
-    private String getUnit(Metadata metadata) {
-        Method getUnit = null;
-        try {
-            // Look for Metrics 3.0 method
-            getUnit = Metadata.class.getMethod("unit");
-        } catch (NoSuchMethodException e) {
-            // Look for Metrics 2.x method
-            try {
-                getUnit = Metadata.class.getMethod("getUnit");
-            } catch (NoSuchMethodException e1) {
-                throw new RuntimeException(e1);
-            }
-        }
-
-        if (!getUnit.getReturnType().equals(Optional.class)) {
-            throw new RuntimeException("Method found to get unit has wrong return type: " + getUnit);
-        }
-
-        Optional<String> optional;
-        try {
-            optional = (Optional<String>) getUnit.invoke(metadata);
-        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            throw new RuntimeException("Failure calling method to get unit: " + getUnit, e);
-        }
-        return optional.orElse(MetricUnits.NONE);
     }
 
 }
