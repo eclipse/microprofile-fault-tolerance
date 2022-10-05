@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2020 Contributors to the Eclipse Foundation
+ * Copyright (c) 2020-2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -23,6 +23,8 @@ package org.eclipse.microprofile.fault.tolerance.tck.metrics.util;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Optional;
 
 import org.eclipse.microprofile.metrics.Counter;
@@ -43,6 +45,16 @@ public class GaugeMetric {
     private MetricID metricId;
     private long baseline;
 
+    private static final Method GET_VALUE_METHOD;
+
+    static {
+        try {
+            GET_VALUE_METHOD = Gauge.class.getMethod("getValue");
+        } catch (NoSuchMethodException | SecurityException e1) {
+            throw new RuntimeException(e1);
+        }
+    }
+
     public GaugeMetric(MetricRegistryProxy registry, MetricID metricId) {
         this.registry = registry;
         this.metricId = metricId;
@@ -57,7 +69,7 @@ public class GaugeMetric {
      * @return the counter value, or zero if the metric doesn't exist
      */
     public long value() {
-        return gauge().map(Gauge::getValue).orElse(0L);
+        return gauge().map(GaugeMetric::getValue).orElse(0L);
     }
 
     /**
@@ -90,8 +102,26 @@ public class GaugeMetric {
         if (gauge == null) {
             return Optional.empty();
         } else {
-            assertThat(gauge.getValue(), instanceOf(Long.class));
+            assertThat(getValue(gauge), instanceOf(Long.class));
             return Optional.of((Gauge<Long>) gauge);
+        }
+    }
+
+    /**
+     * Reflectively call `getValue()` to account for different signature in MP Metrics 4.0 vs 5.0
+     * 
+     * @param <T>
+     *            the gauge type
+     * @param gauge
+     *            the gauge
+     * @return the gauge's value
+     */
+    @SuppressWarnings("unchecked")
+    private static <T> T getValue(Gauge<T> gauge) {
+        try {
+            return (T) GET_VALUE_METHOD.invoke(gauge);
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            throw new RuntimeException(e);
         }
     }
 
