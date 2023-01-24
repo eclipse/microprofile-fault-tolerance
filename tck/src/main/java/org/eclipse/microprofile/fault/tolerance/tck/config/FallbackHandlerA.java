@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2020 Contributors to the Eclipse Foundation
+ * Copyright (c) 2020, 2023 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -23,6 +23,9 @@ package org.eclipse.microprofile.fault.tolerance.tck.config;
 import org.eclipse.microprofile.faulttolerance.ExecutionContext;
 import org.eclipse.microprofile.faulttolerance.FallbackHandler;
 
+import jakarta.enterprise.context.Dependent;
+
+@Dependent
 public class FallbackHandlerA implements FallbackHandler<String> {
 
     @Override
