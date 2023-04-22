@@ -28,7 +28,7 @@ import jakarta.enterprise.context.RequestScoped;
 
 /**
  * A client to demonstrate the maxRetries and max duration configuration
- * 
+ *
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  *
  */
@@ -57,7 +57,7 @@ public class RetryClientForMaxRetries {
 
     /**
      * Max retries is configured to 90 but the max duration is 1 second with a default durationUnit of milliseconds.
-     * 
+     *
      * Once the duration is reached, no more retries should be performed.
      */
     @Retry(maxRetries = 90, maxDuration = 1000)
@@ -68,7 +68,7 @@ public class RetryClientForMaxRetries {
 
     /**
      * Max retries is configured to 90 but the max duration is 1 second with a durationUnit of seconds specified.
-     * 
+     *
      * Once the duration is reached, no more retries should be performed.
      */
     @Retry(maxRetries = 90, maxDuration = 1, durationUnit = ChronoUnit.SECONDS)

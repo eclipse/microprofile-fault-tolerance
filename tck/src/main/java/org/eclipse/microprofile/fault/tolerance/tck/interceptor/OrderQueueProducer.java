@@ -27,7 +27,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 /**
  * Creates the order queue that will be used by the interceptors and the test bean to store the order in which this
  * components are called.
- * 
+ *
  * @author carlosdlr
  */
 
@@ -38,7 +38,7 @@ public class OrderQueueProducer {
 
     /**
      * get the order queue that stores the interceptors call order.
-     * 
+     *
      * @return order queue
      */
     public Queue<String> getOrderQueue() {

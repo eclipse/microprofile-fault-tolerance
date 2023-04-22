@@ -30,7 +30,7 @@ import jakarta.enterprise.context.RequestScoped;
 /**
  * A client to exercise Circuit Breaker thresholds using Retries. Annotations are specified at both the Class and Method
  * level.
- * 
+ *
  * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  *
  */

@@ -56,7 +56,7 @@ import jakarta.inject.Inject;
 /**
  * Test the retryOn and abortOn conditions. If retryOn condition is not met, no retry will be performed. If abortOn
  * condition is met, no retry will be performed.
- * 
+ *
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  *
  */

@@ -38,7 +38,7 @@ import jakarta.interceptor.InvocationContext;
 
 /**
  * An interceptor that is called after the FT interceptor in the chain and count the invocation.
- * 
+ *
  * @author carlosdlr
  */
 @Interceptor

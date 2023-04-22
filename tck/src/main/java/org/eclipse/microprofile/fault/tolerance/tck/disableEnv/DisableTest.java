@@ -35,11 +35,11 @@ import jakarta.inject.Inject;
 
 /**
  * Test the impact of the MP_Fault_Tolerance_NonFallback_Enabled environment variable.
- * 
+ *
  * The test assumes that the container supports both the MicroProfile Configuration API and the MicroProfile Fault
  * Tolerance API. The MP_Fault_Tolerance_NonFallback_Enabled Variable is set to "false" in the manifest of the deployed
  * application.
- * 
+ *
  * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  *
  */
@@ -65,7 +65,7 @@ public class DisableTest extends Arquillian {
 
     /**
      * Test maxRetries on @Retry.
-     * 
+     *
      * ServiceA is annotated with maxRetries = 1 so serviceA is expected to execute 2 times but if
      * MP_Fault_Tolerance_NonFallback_Enabled is set to false in the Container environment, then no retries should be
      * attempted.
@@ -84,7 +84,7 @@ public class DisableTest extends Arquillian {
 
     /**
      * Test that a Fallback service is driven when a Service fails.
-     * 
+     *
      * ServiceB is annotated with maxRetries = 1 so serviceB is expected to execute 2 times but if
      * MP_Fault_Tolerance_NonFallback_Enabled is set to false in the Container environment, then no retries should be
      * attempted HOWEVER the Fallback should still be driven successfully, so the test checks that a Fallback was driven
@@ -108,7 +108,7 @@ public class DisableTest extends Arquillian {
 
     /**
      * A test to exercise Circuit Breaker thresholds, with a default SuccessThreshold
-     * 
+     *
      * If MP_Fault_Tolerance_NonFallback_Enabled is set to false in the Container environment, then the CircuitBreaker
      * will not operate, no CircuitBreakerOpenExceptions will be thrown and execution will fail 7 times.
      */
@@ -133,12 +133,12 @@ public class DisableTest extends Arquillian {
 
     /**
      * A test to exercise the default timeout.
-     * 
+     *
      * In normal operation, the default Fault Tolerance timeout is 1 second but serviceD will attempt to sleep for 3
      * seconds, so would be expected to throw a TimeoutException. However, if MP_Fault_Tolerance_NonFallback_Enabled is
      * set to false in the Container environment, then no Timeout will occur and a RuntimeException will be thrown after
      * 3 seconds.
-     * 
+     *
      */
     @Test
     public void testTimeout() {

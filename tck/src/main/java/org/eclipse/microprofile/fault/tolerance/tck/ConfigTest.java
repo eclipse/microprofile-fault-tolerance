@@ -36,10 +36,10 @@ import jakarta.inject.Inject;
 
 /**
  * Test that Fault Tolerance values configured through annotations can be overridden by configuration properties.
- * 
+ *
  * The test assumes that the container supports both the MicroProfile Configuration API and the MicroProfile Fault
  * Tolerance API. Configuration Properties are provided in the manifest of the deployed application.
- * 
+ *
  * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  *
  */
@@ -74,10 +74,10 @@ public class ConfigTest extends Arquillian {
 
     /**
      * Test the configuration of maxRetries on a specific method.
-     * 
+     *
      * The serviceA is annotated with maxRetries = 5, but a configuration property overrides it with a value of 3, so
      * serviceA should be executed 4 times.
-     * 
+     *
      * The test assumes that the container has been configured with the property,
      * org.eclipse.microprofile.fault.tolerance.tck.config.clientserver.ConfigClient/serviceA/Retry/maxRetries=3
      */
@@ -96,10 +96,10 @@ public class ConfigTest extends Arquillian {
 
     /**
      * Test the configuration of maxRetries on a class.
-     * 
+     *
      * The class is annotated with maxRetries = 5, but a configuration property overrides it with a value of 3, so
      * serviceA should be executed 4 times.
-     * 
+     *
      * The test assumes that the container has been configured with the property,
      * org.eclipse.microprofile.fault.tolerance.tck.config.clientserver.ConfigClassLevelClient/Retry/maxRetries=3
      */
@@ -118,10 +118,10 @@ public class ConfigTest extends Arquillian {
 
     /**
      * Test the configuration of maxRetries on a class.
-     * 
+     *
      * The class is annotated with maxRetries = 5. A configuration property overrides it with a value of 3 but serviceB
      * has its own annotation and should be executed 2 times.
-     * 
+     *
      * The test assumes that the container has been configured with the property,
      * org.eclipse.microprofile.fault.tolerance.tck.config.clientserver.ConfigClassLevelClient/Retry/maxRetries=3
      */
@@ -140,10 +140,10 @@ public class ConfigTest extends Arquillian {
 
     /**
      * Test the configuration of maxDuration on a specific method.
-     * 
+     *
      * The serviceA is annotated with maxDuration=3000 but a configuration property overrides it with a value of 1000,
      * so serviceA should be executed 11 or less times.
-     * 
+     *
      * The test assumes that the container has been configured with the property,
      * org.eclipse.microprofile.fault.tolerance.tck.config.clientserver.ConfigClient/serviceC/Retry/maxDuration=1000
      */
@@ -166,10 +166,10 @@ public class ConfigTest extends Arquillian {
 
     /**
      * Test the configuration of maxDuration on a class.
-     * 
+     *
      * The class is annotated with maxDuration=3000 but a configuration property overrides it with a value of 1000 so
      * serviceA should be executed 11 or less times.
-     * 
+     *
      * The test assumes that the container has been configured with the property,
      * org.eclipse.microprofile.fault.tolerance.tck.config.clientserver.ConfigClassLevelMaxDurationClient/Retry/maxDuration=1000
      */

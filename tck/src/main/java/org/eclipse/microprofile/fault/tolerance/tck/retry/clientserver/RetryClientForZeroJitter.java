@@ -25,7 +25,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * A client to check for proper processing of jitter = 0 on @Retry
- * 
+ *
  * @author <a href="mailto:doychin@dsoft-bg.com">Doychin Bondzhev</a>
  *
  */

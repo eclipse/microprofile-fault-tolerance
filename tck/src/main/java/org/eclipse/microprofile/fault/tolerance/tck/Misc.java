@@ -26,7 +26,7 @@ public abstract class Misc {
     public abstract static class Ints {
         /**
          * Search for the existence of an int value in a given int array.
-         * 
+         *
          * @param data
          *            the int data to search into
          * @param value

@@ -207,7 +207,7 @@ public class TimeoutUninterruptableTest extends Arquillian {
 
     /**
      * Test that the timeout timer is started when the execution is added to the queue
-     * 
+     *
      * @throws InterruptedException
      *             if the test is interrupted
      * @throws ExecutionException
@@ -261,7 +261,7 @@ public class TimeoutUninterruptableTest extends Arquillian {
 
     /**
      * Test that the fallback is run as soon as the timeout occurs
-     * 
+     *
      * @throws InterruptedException
      *             if the test is interrupted
      */
@@ -290,7 +290,7 @@ public class TimeoutUninterruptableTest extends Arquillian {
 
     /**
      * Creates a waiting future and adds it to a list to be cleaned up at the end of the test
-     * 
+     *
      * @return the waiting future
      */
     private CompletableFuture<Void> newWaitingFuture() {

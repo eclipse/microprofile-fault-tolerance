@@ -93,7 +93,7 @@ public enum MetricDefinition {
 
     /**
      * The metric name
-     * 
+     *
      * @return the name
      */
     public String getName() {
@@ -102,7 +102,7 @@ public enum MetricDefinition {
 
     /**
      * The metric unit
-     * 
+     *
      * @return the unit
      */
     public String getUnit() {
@@ -111,7 +111,7 @@ public enum MetricDefinition {
 
     /**
      * The subclass of {@link Metric} used by this metric
-     * 
+     *
      * @return the metric class
      */
     public Class<? extends Metric> getMetricClass() {
@@ -122,7 +122,7 @@ public enum MetricDefinition {
      * The tags which are applied to this metric
      * <p>
      * The classes returned from this method will be enums which implement {@link TagValue}
-     * 
+     *
      * @return the tags which are applied to this metric
      */
     public Class<? extends TagValue>[] getTagClasses() {

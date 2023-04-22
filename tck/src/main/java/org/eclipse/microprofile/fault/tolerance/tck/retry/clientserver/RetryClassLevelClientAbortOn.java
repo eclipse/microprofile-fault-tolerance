@@ -28,7 +28,7 @@ import jakarta.enterprise.context.RequestScoped;
 
 /**
  * A client to demonstrate the specification of abortOn conditions at the Class level.
- * 
+ *
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  *
  */

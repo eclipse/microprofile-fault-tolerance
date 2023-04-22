@@ -30,7 +30,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * A class level {@code @Asynchronous @Bulkhead(value = 5, waitingTaskQueue = 5)} bean
- * 
+ *
  * @author Gordon Hutchison
  * @author Andrew Rouse
  */

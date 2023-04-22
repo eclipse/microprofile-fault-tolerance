@@ -28,7 +28,7 @@ public class AsynchronousClientForValidationMethod {
 
     /**
      * Invalid because it's annotated with {@link Asynchronous} but does not return Future or CompletionStage
-     * 
+     *
      * @return "foo"
      */
     @Asynchronous

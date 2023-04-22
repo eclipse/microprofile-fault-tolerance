@@ -28,7 +28,7 @@ import jakarta.enterprise.context.Dependent;
  * <p>
  * The method being tracked needs to call {@link #executionStarted()} when it starts and {@link #executionEnded()} when
  * it's about to end.
- * 
+ *
  * <pre>
  * try {
  *     tracker.executionStarted();

@@ -33,7 +33,7 @@ import org.eclipse.microprofile.faulttolerance.Bulkhead;
 import jakarta.enterprise.context.ApplicationScoped;
 
 /**
- * 
+ *
  */
 @ApplicationScoped
 public class BulkheadPressureBean {

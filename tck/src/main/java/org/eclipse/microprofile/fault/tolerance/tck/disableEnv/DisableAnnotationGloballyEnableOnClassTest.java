@@ -50,7 +50,7 @@ import jakarta.inject.Inject;
 
 /**
  * Test that annotations can be disabled globally and then re-enabled at the class level
- * 
+ *
  * @author <a href="mailto:antoine@sabot-durand.net">Antoine Sabot-Durand</a>
  * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  * @author <a href="mailto:anrouse@uk.ibm.com">Andrew Rouse</a>

@@ -46,7 +46,7 @@ public class InvalidRetryJitterTest extends Arquillian {
     }
     /**
      * Test that the deployment of an invalid @Retry parameter leads to a DeploymentException.
-     * 
+     *
      * A Service is annotated with a @Retry annotation with a negative jitter.
      */
     @Test

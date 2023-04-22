@@ -49,7 +49,7 @@ public class CounterMetric {
      * Get the counter value, or zero if the metric doesn't exist
      * <p>
      * This method will not create the metric if it does not exist.
-     * 
+     *
      * @return the counter value, or zero if the metric doesn't exist
      */
     public long value() {
@@ -67,7 +67,7 @@ public class CounterMetric {
 
     /**
      * Return the difference between the current value of the metric and the value when {@link #baseline} was called.
-     * 
+     *
      * @return the difference between the metric value and the baseline
      */
     public long delta() {
@@ -76,7 +76,7 @@ public class CounterMetric {
 
     /**
      * Return the actual {@link Counter} object for the metric, if it exists.
-     * 
+     *
      * @return an {@code Optional} containing the {@code Counter}, or an empty {@code Optional} if the metric does not
      *         exist.
      */

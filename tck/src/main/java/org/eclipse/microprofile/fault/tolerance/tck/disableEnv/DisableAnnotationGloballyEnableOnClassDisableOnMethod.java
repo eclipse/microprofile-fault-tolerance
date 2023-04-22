@@ -118,7 +118,7 @@ public class DisableAnnotationGloballyEnableOnClassDisableOnMethod extends Arqui
 
     /**
      * Test that a Fallback service is ignored when service fails.
-     * 
+     *
      * Retry is enabled at the class level and not disabled for this method so we expect to get two executions
      */
     @Test

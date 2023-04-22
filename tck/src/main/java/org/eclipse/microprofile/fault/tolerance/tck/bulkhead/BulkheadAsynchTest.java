@@ -229,7 +229,7 @@ public class BulkheadAsynchTest extends Arquillian {
      * <p>
      * The {@code bulkheadMethod} should be a reference to a method annotated with {@link Bulkhead} and
      * {@link Asynchronous} which accepts a {@code Barrier} and calls {@link Barrier#await()}.
-     * 
+     *
      * @param maxRunning
      *            expected number of tasks permitted to run
      * @param maxQueued

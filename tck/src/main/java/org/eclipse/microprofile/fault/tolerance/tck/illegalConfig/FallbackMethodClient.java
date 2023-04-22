@@ -26,7 +26,7 @@ import jakarta.enterprise.context.RequestScoped;
 
 /**
  * A client to demonstrate the fallback after doing retries
- * 
+ *
  * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  *
  */
@@ -35,7 +35,7 @@ public class FallbackMethodClient {
 
     /**
      * Retry 5 times and then fallback
-     * 
+     *
      * @return a dummy number
      */
     @Retry(maxRetries = 4)
@@ -46,7 +46,7 @@ public class FallbackMethodClient {
 
     /**
      * Fallback method with incompatible signature, different return type
-     * 
+     *
      * @return dummy string
      */
     public String fallbackForServiceB() {
