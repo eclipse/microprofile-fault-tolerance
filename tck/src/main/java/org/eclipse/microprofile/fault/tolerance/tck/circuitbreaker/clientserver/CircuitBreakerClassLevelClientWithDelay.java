@@ -22,6 +22,7 @@ package org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver
 import java.io.Serializable;
 import java.sql.Connection;
 
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 
 import jakarta.enterprise.context.RequestScoped;
@@ -88,7 +89,7 @@ public class CircuitBreakerClassLevelClientWithDelay implements Serializable {
     // simulate a backend service
     private Connection connectionService() {
         if (counterForInvokingService < 5) {
-            throw new RuntimeException("Connection failed");
+            throw new TestException("Connection failed");
         }
         return null;
     }

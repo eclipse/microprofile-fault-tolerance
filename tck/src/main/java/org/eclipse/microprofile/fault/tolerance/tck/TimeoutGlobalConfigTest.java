@@ -20,6 +20,7 @@
 package org.eclipse.microprofile.fault.tolerance.tck;
 
 import org.eclipse.microprofile.fault.tolerance.tck.timeout.clientserver.TimeoutClient;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.exceptions.TimeoutException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
@@ -44,7 +45,7 @@ public class TimeoutGlobalConfigTest extends Arquillian {
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
                 .create(JavaArchive.class, "ftTimeout.jar")
-                .addClasses(TimeoutClient.class)
+                .addClasses(TimeoutClient.class, TestException.class)
                 .addAsManifestResource(new StringAsset(
                         "Timeout/value=200"), "microprofile-config.properties")
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml").as(JavaArchive.class);
@@ -64,9 +65,9 @@ public class TimeoutGlobalConfigTest extends Arquillian {
             Assert.fail("serviceA should throw a TimeoutException in testTimeout");
         } catch (TimeoutException ex) {
             // Expected
-        } catch (RuntimeException ex) {
+        } catch (TestException ex) {
             // Not Expected
-            Assert.fail("serviceA should throw a TimeoutException in testTimeout not a RuntimeException");
+            Assert.fail("serviceA should throw a TimeoutException in testTimeout not a RuntimeException", ex);
         }
     }
 

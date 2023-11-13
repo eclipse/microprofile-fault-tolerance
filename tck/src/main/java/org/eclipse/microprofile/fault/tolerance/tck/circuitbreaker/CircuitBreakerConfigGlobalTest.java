@@ -23,6 +23,7 @@ import static org.eclipse.microprofile.fault.tolerance.tck.Misc.Ints.contains;
 
 import org.eclipse.microprofile.fault.tolerance.tck.Misc;
 import org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver.CircuitBreakerClientDefaultSuccessThreshold;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.exceptions.CircuitBreakerOpenException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
@@ -48,7 +49,8 @@ public class CircuitBreakerConfigGlobalTest extends Arquillian {
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftCircuitBreaker.jar")
                 .addClasses(CircuitBreakerClientDefaultSuccessThreshold.class,
-                        Misc.class)
+                        Misc.class,
+                        TestException.class)
                 .addAsManifestResource(new StringAsset(
                         "CircuitBreaker/delay=200"), "microprofile-config.properties")
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
@@ -88,15 +90,15 @@ public class CircuitBreakerConfigGlobalTest extends Arquillian {
                         e.printStackTrace();
                     }
                 }
-            } catch (RuntimeException ex) {
+            } catch (TestException ex) {
                 // Expected
                 if (!contains(new int[]{1, 2, 3, 4, 7, 8, 9, 10}, i)) {
-                    Assert.fail("serviceA should not throw a RuntimeException on iteration " + i);
+                    Assert.fail("serviceA should not throw a TestException on iteration " + i);
                 }
             } catch (Exception ex) {
                 // Not Expected
                 Assert.fail(
-                        "serviceA should throw a RuntimeException or CircuitBreakerOpenException in testCircuitDefaultSuccessThreshold "
+                        "serviceA should throw a TestException or CircuitBreakerOpenException in testCircuitDefaultSuccessThreshold "
                                 + "on iteration " + i);
             }
         }

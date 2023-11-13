@@ -22,6 +22,7 @@ package org.eclipse.microprofile.fault.tolerance.tck.retrytimeout.clientserver;
 import static org.testng.Assert.fail;
 
 import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.faulttolerance.Timeout;
 import org.eclipse.microprofile.faulttolerance.exceptions.BulkheadException;
@@ -68,7 +69,7 @@ public class RetryTimeoutClient {
         try {
             counterForInvokingServiceA++;
             Thread.sleep(timeToSleep);
-            throw new RuntimeException("Timeout did not interrupt");
+            throw new TestException("Timeout did not interrupt");
         } catch (InterruptedException e) {
             // expected
         }

@@ -22,6 +22,7 @@ package org.eclipse.microprofile.fault.tolerance.tck;
 import org.eclipse.microprofile.fault.tolerance.tck.timeout.clientserver.DefaultTimeoutClient;
 import org.eclipse.microprofile.fault.tolerance.tck.timeout.clientserver.ShorterTimeoutClient;
 import org.eclipse.microprofile.fault.tolerance.tck.timeout.clientserver.TimeoutClient;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.exceptions.TimeoutException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
@@ -50,7 +51,8 @@ public class TimeoutTest extends Arquillian {
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
                 .create(JavaArchive.class, "ftTimeout.jar")
-                .addClasses(TimeoutClient.class, DefaultTimeoutClient.class, ShorterTimeoutClient.class)
+                .addClasses(TimeoutClient.class, DefaultTimeoutClient.class, ShorterTimeoutClient.class,
+                        TestException.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml").as(JavaArchive.class);
 
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftTimeout.war").addAsLibrary(testJar);
@@ -69,9 +71,9 @@ public class TimeoutTest extends Arquillian {
             Assert.fail("serviceA should throw a TimeoutException in testTimeout");
         } catch (TimeoutException ex) {
             // Expected
-        } catch (RuntimeException ex) {
+        } catch (TestException ex) {
             // Not Expected
-            Assert.fail("serviceA should throw a TimeoutException in testTimeout not a RuntimeException");
+            Assert.fail("serviceA should throw a TimeoutException in testTimeout not a RuntimeException", ex);
         }
     }
 
@@ -88,7 +90,7 @@ public class TimeoutTest extends Arquillian {
         } catch (TimeoutException ex) {
             // Not Expected
             Assert.fail("serviceB should throw a RuntimeException in testNoTimeout not a TimeoutException");
-        } catch (RuntimeException ex) {
+        } catch (TestException ex) {
             // Expected
         }
     }
@@ -104,9 +106,9 @@ public class TimeoutTest extends Arquillian {
             Assert.fail("serviceB should throw a TimeoutException in testGTDefaultTimeout");
         } catch (TimeoutException ex) {
             // Expected
-        } catch (RuntimeException ex) {
+        } catch (TestException ex) {
             // Not Expected
-            Assert.fail("serviceB should throw a TimeoutException in testGTDefaultTimeout not a RuntimeException");
+            Assert.fail("serviceB should throw a TimeoutException in testGTDefaultTimeout not a RuntimeException", ex);
         }
     }
 
@@ -123,8 +125,9 @@ public class TimeoutTest extends Arquillian {
             Assert.fail("serviceB should throw a RuntimeException in testGTDefaultNoTimeout");
         } catch (TimeoutException ex) {
             // Not Expected
-            Assert.fail("serviceB should throw a RuntimeException in testGTDefaultNoTimeout not a TimeoutException");
-        } catch (RuntimeException ex) {
+            Assert.fail("serviceB should throw a RuntimeException in testGTDefaultNoTimeout not a TimeoutException",
+                    ex);
+        } catch (TestException ex) {
             // Expected
         }
     }
@@ -140,9 +143,9 @@ public class TimeoutTest extends Arquillian {
             Assert.fail("serviceC should throw a TimeoutException in testLTDefaultTimeout");
         } catch (TimeoutException ex) {
             // Expected
-        } catch (RuntimeException ex) {
+        } catch (TestException ex) {
             // Not Expected
-            Assert.fail("serviceC should throw a TimeoutException in testLTDefaultTimeout not a RuntimeException");
+            Assert.fail("serviceC should throw a TimeoutException in testLTDefaultTimeout not a RuntimeException", ex);
         }
     }
 
@@ -158,8 +161,9 @@ public class TimeoutTest extends Arquillian {
             Assert.fail("serviceC should throw a RuntimeException in testLTDefaultNoTimeout");
         } catch (TimeoutException ex) {
             // Not Expected
-            Assert.fail("serviceC should throw a RuntimeException in testLTDefaultNoTimeout not a TimeoutException");
-        } catch (RuntimeException ex) {
+            Assert.fail("serviceC should throw a RuntimeException in testLTDefaultNoTimeout not a TimeoutException",
+                    ex);
+        } catch (TestException ex) {
             // Expected
         }
     }
@@ -176,9 +180,9 @@ public class TimeoutTest extends Arquillian {
             Assert.fail("serviceD should throw a TimeoutException in testSecondsTimeout");
         } catch (TimeoutException ex) {
             // Expected
-        } catch (RuntimeException ex) {
+        } catch (TestException ex) {
             // Not Expected
-            Assert.fail("serviceD should throw a TimeoutException in testSecondsTimeout not a RuntimeException");
+            Assert.fail("serviceD should throw a TimeoutException in testSecondsTimeout not a RuntimeException", ex);
         }
     }
 
@@ -195,8 +199,8 @@ public class TimeoutTest extends Arquillian {
             Assert.fail("serviceD should throw a RuntimeException in testSecondsNoTimeout");
         } catch (TimeoutException ex) {
             // Not Expected
-            Assert.fail("serviceD should throw a RuntimeException in testSecondsNoTimeout not a TimeoutException");
-        } catch (RuntimeException ex) {
+            Assert.fail("serviceD should throw a RuntimeException in testSecondsNoTimeout not a TimeoutException", ex);
+        } catch (TestException ex) {
             // Expected
         }
     }
@@ -213,9 +217,9 @@ public class TimeoutTest extends Arquillian {
             Assert.fail("serviceA should throw a TimeoutException in testTimeout");
         } catch (TimeoutException ex) {
             // Expected
-        } catch (RuntimeException ex) {
+        } catch (TestException ex) {
             // Not Expected
-            Assert.fail("serviceA should throw a TimeoutException in testTimeout not a RuntimeException");
+            Assert.fail("serviceA should throw a TimeoutException in testTimeout not a RuntimeException", ex);
         }
     }
 
@@ -233,7 +237,7 @@ public class TimeoutTest extends Arquillian {
         } catch (TimeoutException ex) {
             // Not Expected
             Assert.fail("serviceB should throw a RuntimeException in testNoTimeoutClassLevel not a TimeoutException");
-        } catch (RuntimeException ex) {
+        } catch (TestException ex) {
             // Expected
         }
     }
@@ -250,9 +254,9 @@ public class TimeoutTest extends Arquillian {
             Assert.fail("serviceB should throw a TimeoutException in testGTDefaultTimeout");
         } catch (TimeoutException ex) {
             // Expected
-        } catch (RuntimeException ex) {
+        } catch (TestException ex) {
             // Not Expected
-            Assert.fail("serviceB should throw a TimeoutException in testGTDefaultTimeout not a RuntimeException");
+            Assert.fail("serviceB should throw a TimeoutException in testGTDefaultTimeout not a RuntimeException", ex);
         }
     }
 
@@ -270,7 +274,7 @@ public class TimeoutTest extends Arquillian {
         } catch (TimeoutException ex) {
             // Not Expected
             Assert.fail("serviceB should throw a RuntimeException in testGTDefaultNoTimeout not a TimeoutException");
-        } catch (RuntimeException ex) {
+        } catch (TestException ex) {
             // Expected
         }
     }
@@ -286,10 +290,11 @@ public class TimeoutTest extends Arquillian {
             Assert.fail("serviceA should throw a TimeoutException in testLTDefaultTimeoutClassLevel");
         } catch (TimeoutException ex) {
             // Expected
-        } catch (RuntimeException ex) {
+        } catch (TestException ex) {
             // Not Expected
             Assert.fail(
-                    "serviceA should throw a TimeoutException in testLTDefaultTimeoutClassLevel not a RuntimeException");
+                    "serviceA should throw a TimeoutException in testLTDefaultTimeoutClassLevel not a RuntimeException",
+                    ex);
         }
     }
 
@@ -306,8 +311,9 @@ public class TimeoutTest extends Arquillian {
         } catch (TimeoutException ex) {
             // Not Expected
             Assert.fail(
-                    "serviceA should throw a RuntimeException in testLTDefaultNoTimeoutClassLevel not a TimeoutException");
-        } catch (RuntimeException ex) {
+                    "serviceA should throw a RuntimeException in testLTDefaultNoTimeoutClassLevel not a TimeoutException",
+                    ex);
+        } catch (TestException ex) {
             // Expected
         }
     }
@@ -324,10 +330,11 @@ public class TimeoutTest extends Arquillian {
             Assert.fail("serviceB should throw a TimeoutException in testGTShorterTimeoutOverride");
         } catch (TimeoutException ex) {
             // Expected
-        } catch (RuntimeException ex) {
+        } catch (TestException ex) {
             // Not Expected
             Assert.fail(
-                    "serviceB should throw a TimeoutException in testGTShorterTimeoutOverride not a RuntimeException");
+                    "serviceB should throw a TimeoutException in testGTShorterTimeoutOverride not a RuntimeException",
+                    ex);
         }
     }
 
@@ -345,8 +352,9 @@ public class TimeoutTest extends Arquillian {
         } catch (TimeoutException ex) {
             // Not Expected
             Assert.fail(
-                    "serviceB should throw a RuntimeException in testGTShorterNoTimeoutOverride not a TimeoutException");
-        } catch (RuntimeException ex) {
+                    "serviceB should throw a RuntimeException in testGTShorterNoTimeoutOverride not a TimeoutException",
+                    ex);
+        } catch (TestException ex) {
             // Expected
         }
     }

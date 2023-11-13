@@ -22,6 +22,7 @@ package org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver
 import java.io.Serializable;
 import java.sql.Connection;
 
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 
 import jakarta.enterprise.context.RequestScoped;
@@ -60,7 +61,7 @@ public class CircuitBreakerClientRollingWindow implements Serializable {
     // Throw exception for the 2nd and 3rd request.
     private Connection connectionService1() {
         if ((counterForInvokingService1 == 2) || (counterForInvokingService1 == 3)) {
-            throw new RuntimeException("Connection failed");
+            throw new TestException("Connection failed");
         }
         return null;
 
@@ -80,7 +81,7 @@ public class CircuitBreakerClientRollingWindow implements Serializable {
     // Throw exception for the 2nd and 5th request.
     private Connection connectionService2() {
         if ((counterForInvokingService2 == 2) || (counterForInvokingService2 == 5)) {
-            throw new RuntimeException("Connection failed");
+            throw new TestException("Connection failed");
         }
         return null;
 

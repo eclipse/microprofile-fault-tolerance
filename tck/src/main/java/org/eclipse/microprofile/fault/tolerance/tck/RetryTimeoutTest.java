@@ -26,6 +26,7 @@ import static org.testng.Assert.fail;
 import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
 import org.eclipse.microprofile.fault.tolerance.tck.retrytimeout.clientserver.RetryTimeoutClient;
 import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.Timeout;
 import org.eclipse.microprofile.faulttolerance.exceptions.TimeoutException;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -64,7 +65,7 @@ public class RetryTimeoutTest extends Arquillian {
 
         JavaArchive testJar = ShrinkWrap
                 .create(JavaArchive.class, "ftRetryTimeout.jar")
-                .addClasses(RetryTimeoutClient.class)
+                .addClasses(RetryTimeoutClient.class, TestException.class)
                 .addAsManifestResource(config, "microprofile-config.properties")
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                 .as(JavaArchive.class);
@@ -88,9 +89,9 @@ public class RetryTimeoutTest extends Arquillian {
             String result = clientForRetryTimeout.serviceA(config.getTimeoutInMillis(1000));
         } catch (TimeoutException ex) {
             // Expected
-        } catch (RuntimeException ex) {
+        } catch (TestException ex) {
             // Not Expected
-            Assert.fail("serviceA should not throw a RuntimeException in testRetryTimeout");
+            Assert.fail("serviceA should not throw a RuntimeException in testRetryTimeout", ex);
         }
 
         Assert.assertEquals(clientForRetryTimeout.getCounterForInvokingServiceA(), 2,
@@ -112,7 +113,7 @@ public class RetryTimeoutTest extends Arquillian {
         } catch (TimeoutException ex) {
             // Not Expected
             Assert.fail("serviceA should not throw a TimeoutException in testRetrytNoTimeout");
-        } catch (RuntimeException ex) {
+        } catch (TestException ex) {
             // Expected
         }
 

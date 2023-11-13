@@ -22,6 +22,7 @@ package org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver;
 import java.io.IOException;
 import java.sql.Connection;
 
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.Retry;
 
 import jakarta.enterprise.context.RequestScoped;
@@ -44,7 +45,7 @@ public class RetryClassLevelClientAbortOn {
 
     private Connection connectionService() {
         counterForInvokingConnenectionService++;
-        throw new RuntimeException("Connection failed");
+        throw new TestException("Connection failed");
     }
 
     public int getRetryCountForConnectionService() {
@@ -63,7 +64,7 @@ public class RetryClassLevelClientAbortOn {
         counterForInvokingWritingService++;
         try {
             Thread.sleep(100);
-            throw new RuntimeException("WritingService failed");
+            throw new TestException("WritingService failed");
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

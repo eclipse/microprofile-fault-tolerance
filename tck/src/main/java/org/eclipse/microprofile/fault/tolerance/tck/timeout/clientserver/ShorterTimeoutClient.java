@@ -21,6 +21,7 @@ package org.eclipse.microprofile.fault.tolerance.tck.timeout.clientserver;
 
 import java.sql.Connection;
 
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.Timeout;
 
 import jakarta.enterprise.context.RequestScoped;
@@ -45,7 +46,7 @@ public class ShorterTimeoutClient {
     public Connection serviceA(long timeToSleep) {
         try {
             Thread.sleep(timeToSleep);
-            throw new RuntimeException("Timeout did not interrupt");
+            throw new TestException("Timeout did not interrupt");
         } catch (InterruptedException e) {
             // expected
         }
@@ -63,7 +64,7 @@ public class ShorterTimeoutClient {
     public Connection serviceB(long timeToSleep) {
         try {
             Thread.sleep(timeToSleep);
-            throw new RuntimeException("Timeout did not interrupt");
+            throw new TestException("Timeout did not interrupt");
         } catch (InterruptedException e) {
             // expected
         }

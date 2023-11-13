@@ -20,6 +20,7 @@
 package org.eclipse.microprofile.fault.tolerance.tck.disableEnv;
 
 import org.eclipse.microprofile.fault.tolerance.tck.fallback.clientserver.StringFallbackHandler;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.exceptions.TimeoutException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
@@ -51,7 +52,7 @@ public class DisableTest extends Arquillian {
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
                 .create(JavaArchive.class, "ftDisableAllButFallback.jar")
-                .addClasses(DisableClient.class, StringFallbackHandler.class)
+                .addClasses(DisableClient.class, StringFallbackHandler.class, TestException.class)
                 .addAsManifestResource(new StringAsset("MP_Fault_Tolerance_NonFallback_Enabled=false"),
                         "microprofile-config.properties")
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
@@ -75,7 +76,7 @@ public class DisableTest extends Arquillian {
         try {
             disableClient.serviceA();
             Assert.fail("serviceA should throw a RuntimeException in testRetryDisabled");
-        } catch (RuntimeException ex) {
+        } catch (TestException ex) {
             // Expected
         }
         Assert.assertEquals(disableClient.getRetryCountForConnectionService(), 1,
@@ -98,8 +99,8 @@ public class DisableTest extends Arquillian {
             System.out.println("testFallbackSuccess got result - " + result);
             Assert.assertTrue(result.contains("serviceB"),
                     "The message should be \"fallback for serviceB\"");
-        } catch (RuntimeException ex) {
-            Assert.fail("serviceB should not throw a RuntimeException in testFallbackSuccess");
+        } catch (TestException ex) {
+            Assert.fail("serviceB should not throw a RuntimeException in testFallbackSuccess", ex);
         }
         Assert.assertEquals(disableClient.getCounterForInvokingServiceB(), 1,
                 "The execution count should be 1 (0 retries + 1)");
@@ -118,7 +119,7 @@ public class DisableTest extends Arquillian {
 
             try {
                 disableClient.serviceC();
-            } catch (RuntimeException ex) {
+            } catch (TestException ex) {
                 // Expected
             } catch (Exception ex) {
                 // Not Expected
@@ -148,7 +149,7 @@ public class DisableTest extends Arquillian {
         } catch (TimeoutException ex) {
             // Not Expected
             Assert.fail("serviceD should throw a RuntimeException in testTimeout not a TimeoutException");
-        } catch (RuntimeException ex) {
+        } catch (TestException ex) {
             // Expected
         }
     }

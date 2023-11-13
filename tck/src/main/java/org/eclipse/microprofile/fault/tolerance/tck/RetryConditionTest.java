@@ -42,6 +42,7 @@ import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.exception
 import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncCaller;
 import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncCallerExecutor;
 import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -62,6 +63,9 @@ import jakarta.inject.Inject;
  */
 public class RetryConditionTest extends Arquillian {
 
+    private final static String SIMULATED_EXCEPTION_MESSAGE = "Simulated error";
+    private final static String SIMULATED_RUNTIME_EXCEPTION_MESSAGE = "Test Exception - Simulated error";
+
     private @Inject RetryClientRetryOn clientForRetryOn;
     private @Inject RetryClientAbortOn clientForAbortOn;
     private @Inject RetryClassLevelClientRetryOn clientForClassLevelRetryOn;
@@ -79,7 +83,8 @@ public class RetryConditionTest extends Arquillian {
                         AsyncRetryClient.class,
                         CompletableFutureHelper.class,
                         RetryChildException.class,
-                        RetryParentException.class)
+                        RetryParentException.class,
+                        TestException.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                 .as(JavaArchive.class);
 
@@ -93,14 +98,14 @@ public class RetryConditionTest extends Arquillian {
      * Test that retries are executed where a failure declared as "retry on" in the {@code @Retry} annotation is
      * encountered.
      *
-     * serviceA is configured to retry on a RuntimeException. The service should be retried 3 times.
+     * serviceA is configured to retry on a TestException. The service should be retried 3 times.
      */
     @Test
     public void testRetryOnTrue() {
         try {
             clientForRetryOn.serviceA();
-            Assert.fail("serviceA should throw a RuntimeException in testRetryOnTrue");
-        } catch (RuntimeException ex) {
+            Assert.fail("serviceA should throw a TestException in testRetryOnTrue");
+        } catch (TestException ex) {
             // Expected
         }
         Assert.assertEquals(clientForRetryOn.getRetryCountForConnectionService(), 4,
@@ -112,14 +117,14 @@ public class RetryConditionTest extends Arquillian {
      * encountered.
      *
      * serviceB is configured to retry on an IOException. In practice the only exception that the service will throw is
-     * a RuntimeException, therefore no retries should be executed.
+     * a TestException, therefore no retries should be executed.
      */
     @Test
     public void testRetryOnFalse() {
         try {
             clientForRetryOn.serviceB();
-            Assert.fail("serviceB should throw a RuntimeException in testRetryOnFalse");
-        } catch (RuntimeException ex) {
+            Assert.fail("serviceB should throw a TestException in testRetryOnFalse");
+        } catch (TestException ex) {
             // Expected
         }
         Assert.assertEquals(clientForRetryOn.getRetryCountForWritingService(), 1,
@@ -175,14 +180,14 @@ public class RetryConditionTest extends Arquillian {
      * annotation is NOT encountered.
      *
      * serviceA is configured to abort on an IOException. In practice the only exception that the service will throw is
-     * a RuntimeException, therefore the default number of 3 retries should be executed.
+     * a TestException, therefore the default number of 3 retries should be executed.
      */
     @Test
     public void testRetryWithAbortOnFalse() {
         try {
             clientForAbortOn.serviceA();
-            Assert.fail("serviceA should throw a RuntimeException in testRetryWithAbortOnFalse");
-        } catch (RuntimeException ex) {
+            Assert.fail("serviceA should throw a TestException in testRetryWithAbortOnFalse");
+        } catch (TestException ex) {
             // Expected
         }
         Assert.assertEquals(clientForAbortOn.getRetryCountForConnectionService(), 4,
@@ -193,14 +198,14 @@ public class RetryConditionTest extends Arquillian {
      * Test that no retries are executed where a failure declared as "abort on" in the {@code @Retry} annotation is
      * encountered.
      *
-     * serviceB is configured to abort on a RuntimeException. The service should not be retried.
+     * serviceB is configured to abort on a TestException. The service should not be retried.
      */
     @Test
     public void testRetryWithAbortOnTrue() {
         try {
             clientForAbortOn.serviceB();
-            Assert.fail("serviceB should throw a RuntimeException in testRetryWithAbortOnTrue");
-        } catch (RuntimeException ex) {
+            Assert.fail("serviceB should throw a TestException in testRetryWithAbortOnTrue");
+        } catch (TestException ex) {
             // Expected
         }
         Assert.assertEquals(clientForAbortOn.getRetryCountForWritingService(), 1,
@@ -210,14 +215,14 @@ public class RetryConditionTest extends Arquillian {
     /**
      * Analogous to testRetryOnTrue but using a Class level rather than method level annotation.
      *
-     * serviceA is configured to retry on a RuntimeException. The service should be retried 3 times.
+     * serviceA is configured to retry on a TestException. The service should be retried 3 times.
      */
     @Test
     public void testClassLevelRetryOnTrue() {
         try {
             clientForClassLevelRetryOn.serviceA();
-            Assert.fail("serviceA should throw a RuntimeException in testClassLevelRetryOnTrue");
-        } catch (RuntimeException ex) {
+            Assert.fail("serviceA should throw a TestException in testClassLevelRetryOnTrue");
+        } catch (TestException ex) {
             // Expected
         }
         Assert.assertEquals(clientForClassLevelRetryOn.getRetryCountForConnectionService(), 4,
@@ -229,14 +234,14 @@ public class RetryConditionTest extends Arquillian {
      * Class level {@code @Retry} annotation.
      *
      * serviceB is configured to retry on an IOException. In practice the only exception that the service will throw is
-     * a RuntimeException, therefore no retries should be executed.
+     * a TestException, therefore no retries should be executed.
      */
     @Test
     public void testClassLevelRetryOnFalse() {
         try {
             clientForClassLevelRetryOn.serviceB();
-            Assert.fail("serviceB should throw a RuntimeException in testClassLevelRetryOnFalse");
-        } catch (RuntimeException ex) {
+            Assert.fail("serviceB should throw a TestException in testClassLevelRetryOnFalse");
+        } catch (TestException ex) {
             // Expected
         }
         Assert.assertEquals(clientForClassLevelRetryOn.getRetryCountForWritingService(), 1,
@@ -249,14 +254,14 @@ public class RetryConditionTest extends Arquillian {
      * {@code @Retry} annotation is NOT encountered.
      *
      * The Class, and therefore serviceA, is configured to abort on an IOException. In practice the only exception that
-     * the service will throw is a RuntimeException, therefore the default number of 3 retries should be executed.
+     * the service will throw is a TestException, therefore the default number of 3 retries should be executed.
      */
     @Test
     public void testClassLevelRetryWithAbortOnFalse() {
         try {
             clientForClassLevelAbortOn.serviceA();
-            Assert.fail("serviceA should throw a RuntimeException in testClassLevelRetryWithAbortOnFalse");
-        } catch (RuntimeException ex) {
+            Assert.fail("serviceA should throw a TestException in testClassLevelRetryWithAbortOnFalse");
+        } catch (TestException ex) {
             // Expected
         }
         Assert.assertEquals(clientForClassLevelAbortOn.getRetryCountForConnectionService(), 4,
@@ -270,14 +275,14 @@ public class RetryConditionTest extends Arquillian {
      * Test that no retries are executed where a failure declared as "abort on" in the {@code @Retry} annotation is
      * encountered.
      *
-     * serviceB is configured to abort on a RuntimeException. The service should not be retried.
+     * serviceB is configured to abort on a TestException. The service should not be retried.
      */
     @Test
     public void testClassLevelRetryWithAbortOnTrue() {
         try {
             clientForClassLevelAbortOn.serviceB();
-            Assert.fail("serviceB should throw a RuntimeException in testClassLevelRetryWithAbortOnTrue");
-        } catch (RuntimeException ex) {
+            Assert.fail("serviceB should throw a TestException in testClassLevelRetryWithAbortOnTrue");
+        } catch (TestException ex) {
             // Expected
         }
         Assert.assertEquals(clientForClassLevelAbortOn.getRetryCountForWritingService(), 1,
@@ -292,7 +297,7 @@ public class RetryConditionTest extends Arquillian {
     public void testAsyncRetryExceptionally() {
         final CompletionStage<String> future = asyncRetryClient.serviceA();
 
-        assertCompleteExceptionally(future, IOException.class, "Simulated error");
+        assertCompleteExceptionally(future, IOException.class, SIMULATED_EXCEPTION_MESSAGE);
         assertEquals(asyncRetryClient.getCountInvocationsServA(), 3);
     }
 
@@ -305,7 +310,7 @@ public class RetryConditionTest extends Arquillian {
         CompletableFuture<String> future = new CompletableFuture<>();
 
         assertCompleteExceptionally(asyncRetryClient.serviceBFailExceptionally(future),
-                IOException.class, "Simulated error");
+                IOException.class, SIMULATED_EXCEPTION_MESSAGE);
         // no retries
         assertEquals(asyncRetryClient.getCountInvocationsServBFailExceptionally(), 1, "No retries are expected");
     }
@@ -321,8 +326,8 @@ public class RetryConditionTest extends Arquillian {
         try {
             asyncRetryClient.serviceBFailException(future);
             fail("Was expecting an exception");
-        } catch (RuntimeException e) {
-            assertEquals(e.getMessage(), "Simulated error");
+        } catch (TestException e) {
+            assertEquals(e.getMessage(), SIMULATED_RUNTIME_EXCEPTION_MESSAGE);
         }
         // 2 retries
         assertEquals(asyncRetryClient.getCountInvocationsServBFailException(), 3);
@@ -359,7 +364,8 @@ public class RetryConditionTest extends Arquillian {
      */
     @Test
     public void testRetryChainExceptionally() {
-        assertCompleteExceptionally(asyncRetryClient.serviceE(), RuntimeException.class, "Simulated error");
+        assertCompleteExceptionally(asyncRetryClient.serviceE(), TestException.class,
+                SIMULATED_RUNTIME_EXCEPTION_MESSAGE);
         assertEquals(asyncRetryClient.getCountInvocationsServE(), 3);
     }
 
@@ -369,7 +375,8 @@ public class RetryConditionTest extends Arquillian {
      */
     @Test
     public void testRetryParallelExceptionally() {
-        assertCompleteExceptionally(asyncRetryClient.serviceG(), RuntimeException.class, "Simulated error");
+        assertCompleteExceptionally(asyncRetryClient.serviceG(), TestException.class,
+                SIMULATED_RUNTIME_EXCEPTION_MESSAGE);
         assertEquals(asyncRetryClient.getCountInvocationsServG(), 3);
     }
 

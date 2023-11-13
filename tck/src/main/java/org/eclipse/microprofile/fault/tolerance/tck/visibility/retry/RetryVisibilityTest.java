@@ -21,6 +21,7 @@ package org.eclipse.microprofile.fault.tolerance.tck.visibility.retry;
 
 import java.io.IOException;
 
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -42,7 +43,7 @@ public class RetryVisibilityTest extends Arquillian {
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
                 .create(JavaArchive.class, "ftRetryVisibility.jar")
-                // .addClasses(
+                .addClasses(TestException.class
                 // RS.class,
                 // RetryServiceType.class,
                 // RetryService.class,
@@ -50,7 +51,7 @@ public class RetryVisibilityTest extends Arquillian {
                 // RetryOnClassServiceOverrideClassLevel.class,
                 // RetryOnClassServiceOverrideMethodLevel.class,
                 // RetryOnClassServiceNoAnnotationOnOveriddenMethod.class
-                // )
+                )
                 .addPackage("org.eclipse.microprofile.fault.tolerance.tck.visibility.retry")
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                 .as(JavaArchive.class);
@@ -272,11 +273,11 @@ public class RetryVisibilityTest extends Arquillian {
                             RetryVisibilityTest.class.getSimpleName(),
                             testName,
                             expectedNbCalls));
-        } catch (RuntimeException ex) {
+        } catch (TestException ex) {
             Assert.fail(String.format("no %s exception should have been thrown in %s#%s",
                     ex.getClass().getName(),
                     RetryVisibilityTest.class.getSimpleName(),
-                    testName));
+                    testName), ex);
         }
     }
 }

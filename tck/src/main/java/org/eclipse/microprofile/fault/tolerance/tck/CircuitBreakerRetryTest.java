@@ -81,7 +81,8 @@ public class CircuitBreakerRetryTest extends Arquillian {
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftCircuitBreakerRetry.jar")
                 .addClasses(CircuitBreakerClientWithRetry.class,
                         CircuitBreakerClassLevelClientWithRetry.class,
-                        CircuitBreakerClientWithRetryAsync.class)
+                        CircuitBreakerClientWithRetryAsync.class,
+                        TestException.class)
                 .addPackage(Packages.UTILS)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                 .addAsManifestResource(config, "microprofile-config.properties")
@@ -128,7 +129,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
 
     /**
      * A test to exercise Circuit Breaker thresholds with insufficient retries to open the Circuit so that the Circuit
-     * remains closed and a RuntimeException is caught.
+     * remains closed and a TestException is caught.
      */
     @Test
     public void testCircuitOpenWithFewRetries() {
@@ -145,10 +146,10 @@ public class CircuitBreakerRetryTest extends Arquillian {
             // Not Expected
             invokeCounter = clientForCBWithRetry.getCounterForInvokingServiceB();
             Assert.fail(
-                    "serviceB should retry or throw a RuntimeException (not a CBOE) in testCircuitOpenWithFewRetries on iteration "
+                    "serviceB should retry or throw a TestException (not a CBOE) in testCircuitOpenWithFewRetries on iteration "
                             + invokeCounter);
 
-        } catch (RuntimeException ex) {
+        } catch (TestException ex) {
             // Expected on iteration 3
             invokeCounter = clientForCBWithRetry.getCounterForInvokingServiceB();
             if (invokeCounter < 3) {
@@ -159,7 +160,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
             // Not Expected
             invokeCounter = clientForCBWithRetry.getCounterForInvokingServiceB();
             Assert.fail(
-                    "serviceB should retry or throw a RuntimeException in testCircuitOpenWithFewRetries on iteration "
+                    "serviceB should retry or throw a TestException in testCircuitOpenWithFewRetries on iteration "
                             + invokeCounter);
         }
 
@@ -220,10 +221,10 @@ public class CircuitBreakerRetryTest extends Arquillian {
             // Not Expected
             invokeCounter = clientForClassLevelCBWithRetry.getCounterForInvokingServiceB();
             Assert.fail(
-                    "serviceB should retry or throw a RuntimeException (not a CBOE) in testClassLevelCircuitOpenWithFewRetries on iteration "
+                    "serviceB should retry or throw a TestException (not a CBOE) in testClassLevelCircuitOpenWithFewRetries on iteration "
                             + invokeCounter);
 
-        } catch (RuntimeException ex) {
+        } catch (TestException ex) {
             // Expected on iteration 3
             invokeCounter = clientForClassLevelCBWithRetry.getCounterForInvokingServiceB();
             if (invokeCounter < 3) {
@@ -234,7 +235,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
             // Not Expected
             invokeCounter = clientForClassLevelCBWithRetry.getCounterForInvokingServiceB();
             Assert.fail(
-                    "serviceB should retry or throw a RuntimeException in testClassLevelCircuitOpenWithFewRetries on iteration "
+                    "serviceB should retry or throw a TestException in testClassLevelCircuitOpenWithFewRetries on iteration "
                             + invokeCounter);
         }
 
@@ -407,7 +408,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
 
     /**
      * A test to exercise Circuit Breaker thresholds with insufficient retries to open the Circuit so that the Circuit
-     * remains closed and a RuntimeException is caught when using an Asynchronous call.
+     * remains closed and a TestException is caught when using an Asynchronous call.
      */
     @Test
     public void testCircuitOpenWithFewRetriesAsync() {
@@ -437,7 +438,7 @@ public class CircuitBreakerRetryTest extends Arquillian {
             // Not Expected
             invokeCounter = clientForCBWithRetryAsync.getCounterForInvokingServiceB();
             Assert.fail(
-                    "serviceB should retry or throw a RuntimeException in testCircuitOpenWithFewRetries on iteration "
+                    "serviceB should retry or throw a TestException in testCircuitOpenWithFewRetries on iteration "
                             + invokeCounter);
         }
 

@@ -29,6 +29,7 @@ import java.util.function.Supplier;
  *******************************************************************************/
 import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncCallerExecutor;
 import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Retry;
 
@@ -94,7 +95,7 @@ public class AsyncRetryClient {
     public CompletionStage<String> serviceBFailException(final CompletionStage future) {
         countInvocationsServBFailException++;
         // always fail
-        throw new RuntimeException("Simulated error");
+        throw new TestException("Simulated error");
     }
 
     /**
@@ -207,7 +208,7 @@ public class AsyncRetryClient {
         countInvocationsServH++;
         // fails twice
         if (countInvocationsServH < 3) {
-            throw new RuntimeException("Simulated error");
+            throw new TestException("Simulated error");
         }
 
         CompletableFuture<String> future = new CompletableFuture<>();
@@ -257,10 +258,10 @@ public class AsyncRetryClient {
                 // simulate some processing.
                 TimeUnit.MILLISECONDS.sleep(config.getTimeoutInMillis(50));
             } catch (InterruptedException e) {
-                throw new RuntimeException("Unplanned error: " + e);
+                throw new TestException("Unplanned error: " + e);
             }
             if (nonNull(errorMessage)) {
-                throw new RuntimeException(errorMessage);
+                throw new TestException(errorMessage);
             } else {
                 return "Success";
             }

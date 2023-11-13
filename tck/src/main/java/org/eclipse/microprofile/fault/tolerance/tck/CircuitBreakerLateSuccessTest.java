@@ -22,6 +22,7 @@ package org.eclipse.microprofile.fault.tolerance.tck;
 import static org.eclipse.microprofile.fault.tolerance.tck.Misc.Ints.contains;
 
 import org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver.CircuitBreakerClientDefaultSuccessThreshold;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.exceptions.CircuitBreakerOpenException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
@@ -49,7 +50,8 @@ public class CircuitBreakerLateSuccessTest extends Arquillian {
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftCircuitBreakerLateSuccess.jar")
                 .addClasses(CircuitBreakerClientDefaultSuccessThreshold.class,
-                        Misc.class)
+                        Misc.class,
+                        TestException.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                 .as(JavaArchive.class);
 
@@ -99,10 +101,10 @@ public class CircuitBreakerLateSuccessTest extends Arquillian {
                         e.printStackTrace();
                     }
                 }
-            } catch (RuntimeException ex) {
+            } catch (TestException ex) {
                 // Expected
                 if (!contains(new int[]{1, 2, 3, 7, 8, 9}, i)) {
-                    Assert.fail("serviceA should not throw a RuntimeException on iteration " + i);
+                    Assert.fail("serviceA should not throw a RuntimeException on iteration " + i, ex);
                 }
             } catch (Exception ex) {
                 // Not Expected

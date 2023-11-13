@@ -22,6 +22,7 @@ package org.eclipse.microprofile.fault.tolerance.tck;
 import static org.eclipse.microprofile.fault.tolerance.tck.Misc.Ints.contains;
 
 import org.eclipse.microprofile.fault.tolerance.tck.circuitbreaker.clientserver.CircuitBreakerClientDefaultSuccessThreshold;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.exceptions.CircuitBreakerOpenException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
@@ -49,7 +50,8 @@ public class CircuitBreakerInitialSuccessTest extends Arquillian {
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap.create(JavaArchive.class, "ftCircuitBreakerInitialSuccess.jar")
                 .addClasses(CircuitBreakerClientDefaultSuccessThreshold.class,
-                        Misc.class)
+                        Misc.class,
+                        TestException.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                 .as(JavaArchive.class);
 
@@ -63,12 +65,12 @@ public class CircuitBreakerInitialSuccessTest extends Arquillian {
      * 
      * With requestVolumeThreshold = 4, failureRatio=0.75 and successThreshold = 1 the expected behaviour is,
      *
-     * Execution Behaviour ========= ========= 1 SUCCESS 2 RunTimeException 3 RunTimeException 4 RunTimeException 5
+     * Execution Behaviour ========= ========= 1 SUCCESS 2 TestException 3 TestException 4 TestException 5
      * CircuitBreakerOpenException Pause for longer than CircuitBreaker delay, so that it transitions to half-open 6
      * SUCCEED (CircuitBreaker will be re-closed as successThreshold is 1. The impact of the success of the service and
      * the closure of the Circuit is to reset the rolling failure window to an empty state. Therefore another 4 requests
-     * need to be made - of which at least 3 need to fail - for the Circuit to open again) 7 SUCCESS 8 RunTimeException
-     * 9 RunTimeException 10 RuntimeException 11 CircuitBreakerOpenException
+     * need to be made - of which at least 3 need to fail - for the Circuit to open again) 7 SUCCESS 8 TestException 9
+     * TestException 10 TestException 11 CircuitBreakerOpenException
      *
      */
     @Test
@@ -97,15 +99,15 @@ public class CircuitBreakerInitialSuccessTest extends Arquillian {
                         e.printStackTrace();
                     }
                 }
-            } catch (RuntimeException ex) {
+            } catch (TestException ex) {
                 // Expected
                 if (!contains(new int[]{2, 3, 4, 8, 9, 10}, i)) {
-                    Assert.fail("serviceA should not throw a RuntimeException on iteration " + i);
+                    Assert.fail("serviceA should not throw a TestException on iteration " + i);
                 }
             } catch (Exception ex) {
                 // Not Expected
                 Assert.fail(
-                        "serviceA should throw a RuntimeException or CircuitBreakerOpenException in testCircuitDefaultSuccessThreshold "
+                        "serviceA should throw a TestException or CircuitBreakerOpenException in testCircuitDefaultSuccessThreshold "
                                 + "on iteration " + i);
             }
         }

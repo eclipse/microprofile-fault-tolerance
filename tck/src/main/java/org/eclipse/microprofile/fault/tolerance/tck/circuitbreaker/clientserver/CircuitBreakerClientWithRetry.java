@@ -57,7 +57,7 @@ public class CircuitBreakerClientWithRetry implements Serializable {
     }
 
     @CircuitBreaker(successThreshold = 2, requestVolumeThreshold = 4, failureRatio = 0.75, delay = 50000)
-    @Retry(retryOn = {RuntimeException.class}, maxRetries = 7)
+    @Retry(retryOn = {TestException.class}, maxRetries = 7)
     public Connection serviceA() {
         Connection conn = null;
         counterForInvokingServiceA++;
@@ -66,7 +66,7 @@ public class CircuitBreakerClientWithRetry implements Serializable {
     }
 
     @CircuitBreaker(successThreshold = 2, requestVolumeThreshold = 4, failureRatio = 0.75, delay = 50000)
-    @Retry(retryOn = {RuntimeException.class}, maxRetries = 2)
+    @Retry(retryOn = {TestException.class}, maxRetries = 2)
     public Connection serviceB() {
         Connection conn = null;
         counterForInvokingServiceB++;
@@ -78,7 +78,7 @@ public class CircuitBreakerClientWithRetry implements Serializable {
      * Configured to always time out and Retry until CircuitBreaker is triggered on 4th call.
      */
     @CircuitBreaker(successThreshold = 2, requestVolumeThreshold = 4, failureRatio = 0.75, delay = 50000)
-    @Retry(retryOn = {RuntimeException.class, TimeoutException.class}, maxRetries = 7, maxDuration = 20000)
+    @Retry(retryOn = {TestException.class, TimeoutException.class}, maxRetries = 7, maxDuration = 20000)
     @Timeout(100) // Scaled via config
     public Connection serviceC() {
         Connection conn = null;
@@ -86,7 +86,7 @@ public class CircuitBreakerClientWithRetry implements Serializable {
 
         try {
             Thread.sleep(TCKConfig.getConfig().getTimeoutInMillis(5000));
-            throw new RuntimeException("Timeout did not interrupt");
+            throw new TestException("Timeout did not interrupt");
         } catch (InterruptedException e) {
             // expected
         }
@@ -151,6 +151,6 @@ public class CircuitBreakerClientWithRetry implements Serializable {
 
     // simulate a backend service
     private Connection connectionService() {
-        throw new RuntimeException("Connection failed");
+        throw new TestException("Connection failed");
     }
 }

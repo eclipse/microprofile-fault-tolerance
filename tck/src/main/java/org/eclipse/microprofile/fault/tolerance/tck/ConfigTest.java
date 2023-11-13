@@ -22,6 +22,7 @@ package org.eclipse.microprofile.fault.tolerance.tck;
 import org.eclipse.microprofile.fault.tolerance.tck.config.clientserver.ConfigClassLevelClient;
 import org.eclipse.microprofile.fault.tolerance.tck.config.clientserver.ConfigClassLevelMaxDurationClient;
 import org.eclipse.microprofile.fault.tolerance.tck.config.clientserver.ConfigClient;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -53,7 +54,8 @@ public class ConfigTest extends Arquillian {
     public static WebArchive deploy() {
         JavaArchive testJar = ShrinkWrap
                 .create(JavaArchive.class, "ftConfig.jar")
-                .addClasses(ConfigClient.class, ConfigClassLevelClient.class, ConfigClassLevelMaxDurationClient.class)
+                .addClasses(ConfigClient.class, ConfigClassLevelClient.class, ConfigClassLevelMaxDurationClient.class,
+                        TestException.class)
                 .addAsManifestResource(new StringAsset(
                         "org.eclipse.microprofile.fault.tolerance.tck.config.clientserver.ConfigClient/serviceA/Retry/maxRetries=3"
                                 +
@@ -86,8 +88,8 @@ public class ConfigTest extends Arquillian {
         try {
             clientForConfig.serviceA();
 
-            Assert.fail("serviceA should throw a RuntimeException in testConfigMaxRetries");
-        } catch (RuntimeException ex) {
+            Assert.fail("serviceA should throw a TestException in testConfigMaxRetries");
+        } catch (TestException ex) {
             // Expected
         }
         int count = clientForConfig.getCounterForInvokingConnectionService();
@@ -108,8 +110,8 @@ public class ConfigTest extends Arquillian {
         try {
             clientForClassLevelConfig.serviceA();
 
-            Assert.fail("serviceA should throw a RuntimeException in testClassLevelConfigMaxRetries");
-        } catch (RuntimeException ex) {
+            Assert.fail("serviceA should throw a TestException in testClassLevelConfigMaxRetries");
+        } catch (TestException ex) {
             // Expected
         }
         int count = clientForClassLevelConfig.getCounterForInvokingConnectionService();
@@ -130,8 +132,8 @@ public class ConfigTest extends Arquillian {
         try {
             clientForClassLevelConfig.serviceB();
 
-            Assert.fail("serviceB should throw a RuntimeException in testClassLevelConfigMethodOverrideMaxRetries");
-        } catch (RuntimeException ex) {
+            Assert.fail("serviceB should throw a TestException in testClassLevelConfigMethodOverrideMaxRetries");
+        } catch (TestException ex) {
             // Expected
         }
         int count = clientForClassLevelConfig.getCounterForInvokingConnectionService();
@@ -151,8 +153,8 @@ public class ConfigTest extends Arquillian {
     public void testConfigMaxDuration() {
         try {
             clientForConfig.serviceC();
-            Assert.fail("serviceC should throw a RuntimeException in testConfigMaxDuration");
-        } catch (RuntimeException ex) {
+            Assert.fail("serviceC should throw a TestException in testConfigMaxDuration");
+        } catch (TestException ex) {
             // Expected
         }
 
@@ -177,8 +179,8 @@ public class ConfigTest extends Arquillian {
     public void testClassLevelConfigMaxDuration() {
         try {
             clientForClassLevelMaxDurationConfig.serviceA();
-            Assert.fail("serviceB should throw a RuntimeException in testClassLevelConfigMaxDuration");
-        } catch (RuntimeException ex) {
+            Assert.fail("serviceB should throw a TestException in testClassLevelConfigMaxDuration");
+        } catch (TestException ex) {
             // Expected
         }
 
