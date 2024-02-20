@@ -19,11 +19,9 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.visibility.retry;
 
-import java.io.IOException;
 import java.sql.Connection;
 
 import org.eclipse.microprofile.faulttolerance.Retry;
-import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 
 import jakarta.enterprise.context.RequestScoped;
 

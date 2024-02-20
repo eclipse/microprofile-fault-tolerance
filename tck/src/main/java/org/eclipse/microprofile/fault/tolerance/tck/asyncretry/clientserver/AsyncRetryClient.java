@@ -9,7 +9,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import org.eclipse.microprofile.fault.tolerance.tck.RetryConditionTest;
-
 /*
  *******************************************************************************
  * Copyright (c) 2018 Contributors to the Eclipse Foundation
@@ -84,7 +83,8 @@ public class AsyncRetryClient {
     public CompletionStage<String> serviceBFailExceptionally(final CompletionStage future) {
         countInvocationsServBFailExceptionally++;
         // always fail
-        future.toCompletableFuture().completeExceptionally(new IOException(RetryConditionTest.SIMULATED_EXCEPTION_MESSAGE));
+        future.toCompletableFuture()
+                .completeExceptionally(new IOException(RetryConditionTest.SIMULATED_EXCEPTION_MESSAGE));
         return future;
     }
 
@@ -135,7 +135,8 @@ public class AsyncRetryClient {
         if (countInvocationsServD < 3) {
             // fail 2 first invocations
             return CompletableFuture.supplyAsync(doTask(null), executor)
-                    .thenCompose(s -> CompletableFuture.supplyAsync(doTask(RetryConditionTest.SIMULATED_EXCEPTION_MESSAGE), executor));
+                    .thenCompose(s -> CompletableFuture
+                            .supplyAsync(doTask(RetryConditionTest.SIMULATED_EXCEPTION_MESSAGE), executor));
         } else {
             return CompletableFuture.supplyAsync(doTask(null), executor)
                     .thenCompose(s -> CompletableFuture.supplyAsync(doTask(null), executor));
@@ -155,7 +156,8 @@ public class AsyncRetryClient {
 
         // always fail
         return CompletableFuture.supplyAsync(doTask(null), executor)
-                .thenCompose(s -> CompletableFuture.supplyAsync(doTask(RetryConditionTest.SIMULATED_EXCEPTION_MESSAGE), executor));
+                .thenCompose(s -> CompletableFuture.supplyAsync(doTask(RetryConditionTest.SIMULATED_EXCEPTION_MESSAGE),
+                        executor));
     }
 
     /**
@@ -172,7 +174,9 @@ public class AsyncRetryClient {
         if (countInvocationsServF < 3) {
             // fail 2 first invocations
             return CompletableFuture.supplyAsync(doTask(null), executor)
-                    .thenCombine(CompletableFuture.supplyAsync(doTask(RetryConditionTest.SIMULATED_EXCEPTION_MESSAGE), executor),
+                    .thenCombine(
+                            CompletableFuture.supplyAsync(doTask(RetryConditionTest.SIMULATED_EXCEPTION_MESSAGE),
+                                    executor),
                             (s, s2) -> s + " then " + s2);
         } else {
             return CompletableFuture.supplyAsync(doTask(null), executor)
@@ -194,7 +198,8 @@ public class AsyncRetryClient {
         countInvocationsServG++;
         // always fail
         return CompletableFuture.supplyAsync(doTask(null), executor)
-                .thenCombine(CompletableFuture.supplyAsync(doTask(RetryConditionTest.SIMULATED_EXCEPTION_MESSAGE), executor),
+                .thenCombine(
+                        CompletableFuture.supplyAsync(doTask(RetryConditionTest.SIMULATED_EXCEPTION_MESSAGE), executor),
                         (s, s2) -> s + " then " + s2);
 
     }

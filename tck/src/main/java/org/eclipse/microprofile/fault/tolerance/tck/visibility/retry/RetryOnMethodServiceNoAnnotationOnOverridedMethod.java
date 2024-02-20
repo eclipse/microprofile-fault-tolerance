@@ -18,6 +18,7 @@
  * limitations under the License.
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.visibility.retry;
+
 import java.sql.Connection;
 
 import jakarta.enterprise.context.RequestScoped;

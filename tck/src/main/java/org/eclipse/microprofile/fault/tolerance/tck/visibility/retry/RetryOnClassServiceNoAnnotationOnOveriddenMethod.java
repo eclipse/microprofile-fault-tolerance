@@ -19,12 +19,9 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.visibility.retry;
 
-import java.io.IOException;
 import java.sql.Connection;
 
 import jakarta.enterprise.context.RequestScoped;
-
-import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 
 @RequestScoped
 @RS(RetryServiceType.BASE_ROC_RETRY_MISSING_ON_METHOD)
