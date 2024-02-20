@@ -19,7 +19,6 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.visibility.retry;
 
-import java.io.IOException;
 import java.sql.Connection;
 
 import org.eclipse.microprofile.faulttolerance.Retry;
@@ -31,7 +30,7 @@ import jakarta.enterprise.context.RequestScoped;
 @Retry(maxRetries = 5)
 public class RetryOnClassAndMethodServiceOverrideClassLevelMethodOverride extends BaseRetryOnClassAndMethodService {
     @Override
-    public Connection service() throws IOException {
+    public Connection service() {
         return super.service();
     }
 }

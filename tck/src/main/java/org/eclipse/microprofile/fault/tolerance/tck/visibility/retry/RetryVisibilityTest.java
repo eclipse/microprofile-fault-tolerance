@@ -19,8 +19,6 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.visibility.retry;
 
-import java.io.IOException;
-
 import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
@@ -265,7 +263,7 @@ public class RetryVisibilityTest extends Arquillian {
             service.service();
             Assert.fail(String.format("in %s#%s service() should have failed",
                     RetryVisibilityTest.class.getSimpleName(), testName));
-        } catch (IOException re) {
+        } catch (TestException re) {
             Assert.assertEquals(
                     service.getNumberOfServiceCalls(),
                     expectedNbCalls,
@@ -273,7 +271,7 @@ public class RetryVisibilityTest extends Arquillian {
                             RetryVisibilityTest.class.getSimpleName(),
                             testName,
                             expectedNbCalls));
-        } catch (TestException ex) {
+        } catch (Exception ex) {
             Assert.fail(String.format("no %s exception should have been thrown in %s#%s",
                     ex.getClass().getName(),
                     RetryVisibilityTest.class.getSimpleName(),

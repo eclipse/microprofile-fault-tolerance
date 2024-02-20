@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.sql.Connection;
 
 import org.eclipse.microprofile.faulttolerance.Retry;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 
 import jakarta.enterprise.context.RequestScoped;
 
@@ -37,7 +38,7 @@ import jakarta.enterprise.context.RequestScoped;
 public class RetryOnClassServiceOverrideMethodLevel extends BaseRetryOnClassService {
     @Override
     @Retry(maxRetries = 4)
-    public Connection service() throws IOException {
+    public Connection service() {
         return super.service();
     }
 }

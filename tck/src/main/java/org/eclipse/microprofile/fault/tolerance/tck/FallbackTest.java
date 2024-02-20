@@ -83,7 +83,7 @@ public class FallbackTest extends Arquillian {
             Assert.assertTrue(result.contains("serviceA"),
                     "The message should be \"fallback for serviceA\"");
         } catch (TestException ex) {
-            Assert.fail("serviceA should not throw a RuntimeException in testFallbackSuccess", ex);
+            Assert.fail("serviceA should not throw a TestException in testFallbackSuccess", ex);
         }
         Assert.assertEquals(fallbackClient.getCounterForInvokingServiceA(), 2,
                 "The execution count should be 2 (1 retry + 1)");
@@ -92,7 +92,7 @@ public class FallbackTest extends Arquillian {
             Assert.assertTrue(result.contains("serviceB"),
                     "The message should be \"fallback for serviceB\"");
         } catch (TestException ex) {
-            Assert.fail("serviceB should not throw a RuntimeException in testFallbackSuccess", ex);
+            Assert.fail("serviceB should not throw a TestException in testFallbackSuccess", ex);
         }
         Assert.assertEquals(fallbackClient.getCounterForInvokingServiceB(), 3,
                 "The execution count should be 3 (2 retries + 1)");
@@ -115,7 +115,7 @@ public class FallbackTest extends Arquillian {
             Assert.assertTrue(result.contains("34"),
                     "The message should be \"fallback for serviceA myBean.getCount()=34\"");
         } catch (TestException ex) {
-            Assert.fail("serviceA should not throw a RuntimeException in testFallbackWithBeanSuccess", ex);
+            Assert.fail("serviceA should not throw a TestException in testFallbackWithBeanSuccess", ex);
         }
         Assert.assertEquals(fallbackWithBeanClient.getCounterForInvokingServiceA(), 2,
                 "The execution count should be 2 (1 retry + 1)");
@@ -128,7 +128,7 @@ public class FallbackTest extends Arquillian {
             Assert.assertTrue(result.contains("35"),
                     "The message should be \"fallback for serviceB myBean.getCount()=35\"");
         } catch (TestException ex) {
-            Assert.fail("serviceB should not throw a RuntimeException in testFallbackWithBeanSuccess", ex);
+            Assert.fail("serviceB should not throw a TestException in testFallbackWithBeanSuccess", ex);
         }
         Assert.assertEquals(fallbackWithBeanClient.getCounterForInvokingServiceB(), 3,
                 "The execution count should be 3 (2 retries + 1)");
@@ -146,7 +146,7 @@ public class FallbackTest extends Arquillian {
             Assert.assertTrue(result.contains("serviceA"),
                     "The message should be \"fallback for serviceA\"");
         } catch (TestException ex) {
-            Assert.fail("serviceA should not throw a RuntimeException in testFallbackSuccess", ex);
+            Assert.fail("serviceA should not throw a TestException in testFallbackSuccess", ex);
         }
         Assert.assertEquals(fallbackClassLevelClient.getCounterForInvokingServiceA(), 2,
                 "The execution count should be 2 (1 retry + 1)");
@@ -158,7 +158,7 @@ public class FallbackTest extends Arquillian {
                     "The message should be " + TestException.class.getName());
 
         } catch (TestException ex) {
-            Assert.fail("serviceB should not throw a RuntimeException in testFallbackSuccess", ex);
+            Assert.fail("serviceB should not throw a TestException in testFallbackSuccess", ex);
         }
         Assert.assertEquals(fallbackClassLevelClient.getCounterForInvokingServiceB(), 3,
                 "The execution count should be 3 (2 retries + 1)");
@@ -181,7 +181,7 @@ public class FallbackTest extends Arquillian {
             Assert.fail("serviceC should not throw a TimeoutException in testFallbacktNoTimeout");
         } catch (TestException ex) {
             // Not expected
-            Assert.fail("serviceC should not throw a RuntimeException in testFallbacktNoTimeout", ex);
+            Assert.fail("serviceC should not throw a TestException in testFallbacktNoTimeout", ex);
         }
 
         Assert.assertEquals(fallbackClient.getCounterForInvokingServiceC(), 2,
@@ -205,7 +205,7 @@ public class FallbackTest extends Arquillian {
             Assert.fail("serviceC should not throw a TimeoutException in testFallbackTimeout");
         } catch (TestException ex) {
             // Not Expected
-            Assert.fail("serviceC should not throw a RuntimeException in testFallbackTimeout", ex);
+            Assert.fail("serviceC should not throw a TestException in testFallbackTimeout", ex);
         }
 
         Assert.assertEquals(fallbackClient.getCounterForInvokingServiceC(), 2,

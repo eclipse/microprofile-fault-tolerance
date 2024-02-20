@@ -20,6 +20,7 @@
 package org.eclipse.microprofile.fault.tolerance.tck.fallback.clientserver;
 
 import org.eclipse.microprofile.faulttolerance.Fallback;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 
 import jakarta.enterprise.context.RequestScoped;
 
@@ -59,6 +60,6 @@ public class FallbackOnlyClient {
     }
 
     private String nameService() {
-        throw new RuntimeException("Connection failed");
+        throw new TestException("Connection failed");
     }
 }

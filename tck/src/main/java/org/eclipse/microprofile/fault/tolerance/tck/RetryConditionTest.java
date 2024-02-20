@@ -63,8 +63,8 @@ import jakarta.inject.Inject;
  */
 public class RetryConditionTest extends Arquillian {
 
-    private final static String SIMULATED_EXCEPTION_MESSAGE = "Simulated error";
-    private final static String SIMULATED_RUNTIME_EXCEPTION_MESSAGE = "Test Exception - Simulated error";
+    public final static String SIMULATED_EXCEPTION_MESSAGE = "Simulated error";
+    public final static String SIMULATED_RUNTIME_EXCEPTION_MESSAGE = "Test Exception - Simulated error";
 
     private @Inject RetryClientRetryOn clientForRetryOn;
     private @Inject RetryClientAbortOn clientForAbortOn;

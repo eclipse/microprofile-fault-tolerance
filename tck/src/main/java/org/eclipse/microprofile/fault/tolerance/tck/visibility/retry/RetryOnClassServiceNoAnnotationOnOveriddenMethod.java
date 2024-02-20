@@ -24,11 +24,13 @@ import java.sql.Connection;
 
 import jakarta.enterprise.context.RequestScoped;
 
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
+
 @RequestScoped
 @RS(RetryServiceType.BASE_ROC_RETRY_MISSING_ON_METHOD)
 public class RetryOnClassServiceNoAnnotationOnOveriddenMethod extends BaseRetryOnClassService {
     @Override
-    public Connection service() throws IOException {
+    public Connection service() {
         return super.service();
     }
 }

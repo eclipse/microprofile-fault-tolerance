@@ -34,7 +34,6 @@ import org.eclipse.microprofile.fault.tolerance.tck.asynctimeout.clientserver.As
 import org.eclipse.microprofile.fault.tolerance.tck.asynctimeout.clientserver.AsyncTimeoutClient;
 import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Connection;
-import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.Timeout;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
@@ -79,8 +78,7 @@ public class AsyncTimeoutTest extends Arquillian {
 
         JavaArchive testJar = ShrinkWrap
                 .create(JavaArchive.class, "ftAsyncTimeout.jar")
-                .addClasses(AsyncTimeoutClient.class, AsyncClassLevelTimeoutClient.class, Connection.class,
-                        TestException.class)
+                .addClasses(AsyncTimeoutClient.class, AsyncClassLevelTimeoutClient.class, Connection.class)
                 .addAsManifestResource(config, "microprofile-config.properties")
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                 .as(JavaArchive.class);

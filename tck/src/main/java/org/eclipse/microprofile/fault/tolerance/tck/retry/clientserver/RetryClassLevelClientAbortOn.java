@@ -55,7 +55,7 @@ public class RetryClassLevelClientAbortOn {
     /**
      * serviceB is configured to retry on a RuntimeException. The WritingService throws RuntimeExceptions.
      */
-    @Retry(abortOn = {RuntimeException.class})
+    @Retry(abortOn = {TestException.class})
     public void serviceB() {
         writingService();
     }
