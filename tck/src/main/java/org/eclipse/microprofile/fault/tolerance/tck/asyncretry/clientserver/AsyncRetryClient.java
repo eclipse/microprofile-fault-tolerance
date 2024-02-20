@@ -8,6 +8,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
+import org.eclipse.microprofile.fault.tolerance.tck.RetryConditionTest;
 /*
  *******************************************************************************
  * Copyright (c) 2018 Contributors to the Eclipse Foundation
@@ -29,6 +30,7 @@ import java.util.function.Supplier;
  *******************************************************************************/
 import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncCallerExecutor;
 import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Retry;
 
@@ -68,7 +70,7 @@ public class AsyncRetryClient {
         countInvocationsServA++;
         // always fail
         CompletableFuture<String> future = new CompletableFuture<>();
-        future.completeExceptionally(new IOException("Simulated error"));
+        future.completeExceptionally(new IOException(RetryConditionTest.SIMULATED_EXCEPTION_MESSAGE));
         return future;
     }
 
@@ -81,7 +83,8 @@ public class AsyncRetryClient {
     public CompletionStage<String> serviceBFailExceptionally(final CompletionStage future) {
         countInvocationsServBFailExceptionally++;
         // always fail
-        future.toCompletableFuture().completeExceptionally(new IOException("Simulated error"));
+        future.toCompletableFuture()
+                .completeExceptionally(new IOException(RetryConditionTest.SIMULATED_EXCEPTION_MESSAGE));
         return future;
     }
 
@@ -94,7 +97,7 @@ public class AsyncRetryClient {
     public CompletionStage<String> serviceBFailException(final CompletionStage future) {
         countInvocationsServBFailException++;
         // always fail
-        throw new RuntimeException("Simulated error");
+        throw new TestException(RetryConditionTest.SIMULATED_EXCEPTION_MESSAGE);
     }
 
     /**
@@ -111,7 +114,7 @@ public class AsyncRetryClient {
 
         if (countInvocationsServC < 3) {
             // fail 2 first invocations
-            future.completeExceptionally(new IOException("Simulated error"));
+            future.completeExceptionally(new IOException(RetryConditionTest.SIMULATED_EXCEPTION_MESSAGE));
         } else {
             future.complete("Success");
         }
@@ -132,7 +135,8 @@ public class AsyncRetryClient {
         if (countInvocationsServD < 3) {
             // fail 2 first invocations
             return CompletableFuture.supplyAsync(doTask(null), executor)
-                    .thenCompose(s -> CompletableFuture.supplyAsync(doTask("Simulated error"), executor));
+                    .thenCompose(s -> CompletableFuture
+                            .supplyAsync(doTask(RetryConditionTest.SIMULATED_EXCEPTION_MESSAGE), executor));
         } else {
             return CompletableFuture.supplyAsync(doTask(null), executor)
                     .thenCompose(s -> CompletableFuture.supplyAsync(doTask(null), executor));
@@ -152,7 +156,8 @@ public class AsyncRetryClient {
 
         // always fail
         return CompletableFuture.supplyAsync(doTask(null), executor)
-                .thenCompose(s -> CompletableFuture.supplyAsync(doTask("Simulated error"), executor));
+                .thenCompose(s -> CompletableFuture.supplyAsync(doTask(RetryConditionTest.SIMULATED_EXCEPTION_MESSAGE),
+                        executor));
     }
 
     /**
@@ -169,7 +174,9 @@ public class AsyncRetryClient {
         if (countInvocationsServF < 3) {
             // fail 2 first invocations
             return CompletableFuture.supplyAsync(doTask(null), executor)
-                    .thenCombine(CompletableFuture.supplyAsync(doTask("Simulated error"), executor),
+                    .thenCombine(
+                            CompletableFuture.supplyAsync(doTask(RetryConditionTest.SIMULATED_EXCEPTION_MESSAGE),
+                                    executor),
                             (s, s2) -> s + " then " + s2);
         } else {
             return CompletableFuture.supplyAsync(doTask(null), executor)
@@ -191,7 +198,8 @@ public class AsyncRetryClient {
         countInvocationsServG++;
         // always fail
         return CompletableFuture.supplyAsync(doTask(null), executor)
-                .thenCombine(CompletableFuture.supplyAsync(doTask("Simulated error"), executor),
+                .thenCombine(
+                        CompletableFuture.supplyAsync(doTask(RetryConditionTest.SIMULATED_EXCEPTION_MESSAGE), executor),
                         (s, s2) -> s + " then " + s2);
 
     }
@@ -207,7 +215,7 @@ public class AsyncRetryClient {
         countInvocationsServH++;
         // fails twice
         if (countInvocationsServH < 3) {
-            throw new RuntimeException("Simulated error");
+            throw new TestException(RetryConditionTest.SIMULATED_EXCEPTION_MESSAGE);
         }
 
         CompletableFuture<String> future = new CompletableFuture<>();
@@ -257,10 +265,10 @@ public class AsyncRetryClient {
                 // simulate some processing.
                 TimeUnit.MILLISECONDS.sleep(config.getTimeoutInMillis(50));
             } catch (InterruptedException e) {
-                throw new RuntimeException("Unplanned error: " + e);
+                throw new TestException("Unplanned error: " + e);
             }
             if (nonNull(errorMessage)) {
-                throw new RuntimeException(errorMessage);
+                throw new TestException(errorMessage);
             } else {
                 return "Success";
             }

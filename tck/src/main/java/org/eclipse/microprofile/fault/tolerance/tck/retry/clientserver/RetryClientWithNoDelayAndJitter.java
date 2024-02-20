@@ -24,6 +24,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.Retry;
 
 import jakarta.enterprise.context.RequestScoped;
@@ -58,7 +59,7 @@ public class RetryClientWithNoDelayAndJitter {
         timestampForConnectionService = currentTime;
 
         counterForInvokingConnectionService++;
-        throw new RuntimeException("Connection failed");
+        throw new TestException("Connection failed");
     }
 
     public int getRetryCountForConnectionService() {

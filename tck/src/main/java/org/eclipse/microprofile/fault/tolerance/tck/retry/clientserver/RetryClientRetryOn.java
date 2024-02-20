@@ -24,6 +24,7 @@ import java.sql.Connection;
 
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.exceptions.RetryChildException;
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.exceptions.RetryParentException;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.Retry;
 
 import jakarta.enterprise.context.RequestScoped;
@@ -38,14 +39,14 @@ import jakarta.enterprise.context.RequestScoped;
 public class RetryClientRetryOn {
     private int counterForInvokingConnenectionService;
     private int counterForInvokingWritingService;
-    @Retry(retryOn = {RuntimeException.class})
+    @Retry(retryOn = {TestException.class})
     public Connection serviceA() {
         return connectionService();
     }
 
     private Connection connectionService() {
         counterForInvokingConnenectionService++;
-        throw new RuntimeException("Connection failed");
+        throw new TestException("Connection failed");
     }
 
     /**
@@ -88,7 +89,7 @@ public class RetryClientRetryOn {
         counterForInvokingWritingService++;
         try {
             Thread.sleep(100);
-            throw new RuntimeException("WritingService failed");
+            throw new TestException("WritingService failed");
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

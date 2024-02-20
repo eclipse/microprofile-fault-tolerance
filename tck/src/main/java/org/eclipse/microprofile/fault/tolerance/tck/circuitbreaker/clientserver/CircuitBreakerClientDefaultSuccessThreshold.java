@@ -24,6 +24,7 @@ import static org.eclipse.microprofile.fault.tolerance.tck.Misc.Ints.contains;
 import java.io.Serializable;
 import java.sql.Connection;
 
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 
 import jakarta.enterprise.context.RequestScoped;
@@ -60,7 +61,7 @@ public class CircuitBreakerClientDefaultSuccessThreshold implements Serializable
     private Connection connectionService(int[] successSet) {
         // Determine if execution succeeds
         if (!contains(successSet, counterForInvokingServiceA)) {
-            throw new RuntimeException("Connection failed");
+            throw new TestException("Connection failed");
         }
 
         return null;

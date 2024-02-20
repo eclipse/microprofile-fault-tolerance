@@ -22,6 +22,7 @@ package org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver;
 import java.io.IOException;
 import java.sql.Connection;
 
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.Retry;
 
 import jakarta.enterprise.context.RequestScoped;
@@ -33,7 +34,7 @@ import jakarta.enterprise.context.RequestScoped;
  *
  */
 @RequestScoped
-@Retry(retryOn = {RuntimeException.class}, maxRetries = 3)
+@Retry(retryOn = {TestException.class}, maxRetries = 3)
 public class RetryClassLevelClientRetryOn {
     private int counterForInvokingConnenectionService;
     private int counterForInvokingWritingService;
@@ -44,7 +45,7 @@ public class RetryClassLevelClientRetryOn {
 
     private Connection connectionService() {
         counterForInvokingConnenectionService++;
-        throw new RuntimeException("Connection failed");
+        throw new TestException("Connection failed");
     }
 
     public int getRetryCountForConnectionService() {
@@ -53,7 +54,7 @@ public class RetryClassLevelClientRetryOn {
 
     /**
      * serviceB is configured to retry on an IOException. In practice the only exception that will be thrown by the
-     * WritingService is a RuntimeException.
+     * WritingService is a TestException.
      */
     @Retry(retryOn = {IOException.class})
     public void serviceB() {
@@ -64,7 +65,7 @@ public class RetryClassLevelClientRetryOn {
         counterForInvokingWritingService++;
         try {
             Thread.sleep(100);
-            throw new RuntimeException("WritingService failed");
+            throw new TestException("WritingService failed");
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

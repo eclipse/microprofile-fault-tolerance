@@ -19,6 +19,7 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.fallback.clientserver;
 
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.Fallback;
 import org.eclipse.microprofile.faulttolerance.Retry;
 
@@ -59,7 +60,7 @@ public class FallbackWithBeanClient {
     }
 
     private String nameService() {
-        throw new RuntimeException("Connection failed");
+        throw new TestException("Connection failed");
     }
 
 }

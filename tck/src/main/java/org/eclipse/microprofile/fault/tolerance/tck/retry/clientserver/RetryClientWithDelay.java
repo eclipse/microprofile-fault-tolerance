@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.Retry;
 
 import jakarta.enterprise.context.RequestScoped;
@@ -65,7 +66,7 @@ public class RetryClientWithDelay {
         timestampForConnectionService = currentTime;
 
         counterForInvokingConnenectionService++;
-        throw new RuntimeException("Connection failed");
+        throw new TestException("Connection failed");
     }
 
     public void assertDelayInRange() {

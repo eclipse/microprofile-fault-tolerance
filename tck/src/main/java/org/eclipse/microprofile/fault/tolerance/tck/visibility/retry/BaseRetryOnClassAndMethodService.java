@@ -19,9 +19,9 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.visibility.retry;
 
-import java.io.IOException;
 import java.sql.Connection;
 
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.Retry;
 
 import jakarta.enterprise.context.RequestScoped;
@@ -34,13 +34,13 @@ public class BaseRetryOnClassAndMethodService implements RetryService {
 
     @Override
     @Retry(maxRetries = 4)
-    public Connection service() throws IOException {
+    public Connection service() {
         nbCalls++;
         return delegate();
     }
 
-    protected Connection delegate() throws IOException {
-        throw new IOException("cannot access delegate service");
+    protected Connection delegate() {
+        throw new TestException("cannot access delegate service");
     }
 
     @Override

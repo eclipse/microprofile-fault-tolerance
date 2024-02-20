@@ -24,6 +24,7 @@ import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClas
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClientForMaxRetries;
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClientWithDelay;
 import org.eclipse.microprofile.fault.tolerance.tck.retry.clientserver.RetryClientWithNoDelayAndJitter;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -60,7 +61,8 @@ public class RetryTest extends Arquillian {
                 .addClasses(RetryClientForMaxRetries.class,
                         RetryClientWithDelay.class,
                         RetryClassLevelClientForMaxRetries.class,
-                        RetryClientWithNoDelayAndJitter.class)
+                        RetryClientWithNoDelayAndJitter.class,
+                        TestException.class)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
                 .addAsManifestResource(config, "microprofile-config.properties");
 
@@ -79,8 +81,8 @@ public class RetryTest extends Arquillian {
     public void testRetryMaxRetries() {
         try {
             clientForMaxRetry.serviceA();
-            Assert.fail("serviceA should throw a RuntimeException in testRetryMaxRetries");
-        } catch (RuntimeException ex) {
+            Assert.fail("serviceA should throw a TestException in testRetryMaxRetries");
+        } catch (TestException ex) {
             // Expected
         }
         Assert.assertEquals(clientForMaxRetry.getRetryCountForConnectionService(), 6,
@@ -91,8 +93,8 @@ public class RetryTest extends Arquillian {
     public void testRetryMaxDuration() {
         try {
             clientForMaxRetry.serviceB();
-            Assert.fail("serviceB should throw a RuntimeException in testRetryMaxDuration");
-        } catch (RuntimeException ex) {
+            Assert.fail("serviceB should throw a TestException in testRetryMaxDuration");
+        } catch (TestException ex) {
             // Expected
         }
 
@@ -106,8 +108,8 @@ public class RetryTest extends Arquillian {
     public void testRetryMaxDurationSeconds() {
         try {
             clientForMaxRetry.serviceC();
-            Assert.fail("serviceC should throw a RuntimeException in testRetryMaxDuration");
-        } catch (RuntimeException ex) {
+            Assert.fail("serviceC should throw a TestException in testRetryMaxDuration");
+        } catch (TestException ex) {
             // Expected
         }
 
@@ -122,8 +124,8 @@ public class RetryTest extends Arquillian {
     public void testRetryWithDelay() {
         try {
             clientForDelay.serviceA();
-            Assert.fail("serviceA should throw a RuntimeException in testRetryWithDelay");
-        } catch (RuntimeException ex) {
+            Assert.fail("serviceA should throw a TestException in testRetryWithDelay");
+        } catch (TestException ex) {
             // Expected
         }
 
@@ -144,8 +146,8 @@ public class RetryTest extends Arquillian {
     public void testRetryWithNoDelayAndJitter() {
         try {
             retryClientWithNoDelayAndJitter.serviceA();
-            Assert.fail("serviceA should throw a RuntimeException in testRetryWithDelay");
-        } catch (RuntimeException ex) {
+            Assert.fail("serviceA should throw a TestException in testRetryWithDelay");
+        } catch (TestException ex) {
             // Expected
         }
 
@@ -169,8 +171,8 @@ public class RetryTest extends Arquillian {
     public void testClassLevelRetryMaxRetries() {
         try {
             clientForClassLevelMaxRetry.serviceA();
-            Assert.fail("serviceA should throw a RuntimeException in testClassLevelRetryMaxRetries");
-        } catch (RuntimeException ex) {
+            Assert.fail("serviceA should throw a TestException in testClassLevelRetryMaxRetries");
+        } catch (TestException ex) {
             // Expected
         }
 
@@ -189,8 +191,8 @@ public class RetryTest extends Arquillian {
     public void testClassLevelRetryMaxDuration() {
         try {
             clientForClassLevelMaxRetry.serviceB();
-            Assert.fail("serviceB should throw a RuntimeException in testClassLevelRetryMaxDuration");
-        } catch (RuntimeException ex) {
+            Assert.fail("serviceB should throw a TestException in testClassLevelRetryMaxDuration");
+        } catch (TestException ex) {
             // Expected
         }
 
@@ -216,8 +218,8 @@ public class RetryTest extends Arquillian {
     public void testClassLevelRetryMaxDurationSeconds() {
         try {
             clientForClassLevelMaxRetry.serviceC();
-            Assert.fail("serviceC should throw a RuntimeException in testClassLevelRetryMaxDurationSeconds");
-        } catch (RuntimeException ex) {
+            Assert.fail("serviceC should throw a TestException in testClassLevelRetryMaxDurationSeconds");
+        } catch (TestException ex) {
             // Expected
         }
 

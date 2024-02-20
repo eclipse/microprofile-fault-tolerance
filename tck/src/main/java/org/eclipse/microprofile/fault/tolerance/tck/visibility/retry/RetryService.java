@@ -19,11 +19,10 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.visibility.retry;
 
-import java.io.IOException;
 import java.sql.Connection;
 
 public interface RetryService {
-    Connection service() throws IOException;
+    Connection service();
 
     int getNumberOfServiceCalls();
 }

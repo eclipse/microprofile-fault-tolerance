@@ -19,6 +19,7 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.config.clientserver;
 
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.Retry;
 
 import jakarta.enterprise.context.RequestScoped;
@@ -48,7 +49,7 @@ public class ConfigClassLevelMaxDurationClient {
         counterForInvokingWritingService++;
         try {
             Thread.sleep(100);
-            throw new RuntimeException("WritingService failed");
+            throw new TestException("WritingService failed");
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

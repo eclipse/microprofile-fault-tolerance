@@ -19,7 +19,6 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.visibility.retry;
 
-import java.io.IOException;
 import java.sql.Connection;
 
 import jakarta.enterprise.context.RequestScoped;
@@ -28,7 +27,7 @@ import jakarta.enterprise.context.RequestScoped;
 @RS(RetryServiceType.BASE_ROC_RETRY_MISSING_ON_METHOD)
 public class RetryOnClassServiceNoAnnotationOnOveriddenMethod extends BaseRetryOnClassService {
     @Override
-    public Connection service() throws IOException {
+    public Connection service() {
         return super.service();
     }
 }

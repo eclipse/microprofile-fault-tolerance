@@ -32,6 +32,7 @@ import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.faulttolerance.Timeout;
 import org.eclipse.microprofile.faulttolerance.exceptions.CircuitBreakerOpenException;
 import org.eclipse.microprofile.faulttolerance.exceptions.TimeoutException;
+import org.testng.Assert;
 
 import jakarta.enterprise.context.RequestScoped;
 
@@ -94,7 +95,7 @@ public class CircuitBreakerClientWithRetryAsync implements Serializable {
 
         try {
             Thread.sleep(TCKConfig.getConfig().getTimeoutInMillis(5000));
-            throw new RuntimeException("Timeout did not interrupt");
+            Assert.fail("Timeout did not interrupt");
         } catch (InterruptedException e) {
             // expected
         }
@@ -105,7 +106,7 @@ public class CircuitBreakerClientWithRetryAsync implements Serializable {
      * Has a CircuitBreaker and Retries on CircuitBreakerOpenException
      * 
      * @param throwException
-     *            whether this method should throw a runtime exception to simulate an application failure
+     *            whether this method should throw a test exception to simulate an application failure
      * @return string "OK"
      */
     @CircuitBreaker(requestVolumeThreshold = 4, failureRatio = 0.75, delay = 1000)

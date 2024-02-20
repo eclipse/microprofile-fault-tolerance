@@ -21,6 +21,7 @@ package org.eclipse.microprofile.fault.tolerance.tck.config.clientserver;
 
 import java.sql.Connection;
 
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.Retry;
 
 import jakarta.enterprise.context.RequestScoped;
@@ -60,7 +61,7 @@ public class ConfigClassLevelClient {
 
     private Connection connectionService() {
         counterForInvokingConnenectionService++;
-        throw new RuntimeException("Connection failed");
+        throw new TestException("Connection failed");
     }
 
     public int getCounterForInvokingConnectionService() {

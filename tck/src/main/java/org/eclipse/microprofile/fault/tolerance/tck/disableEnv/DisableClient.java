@@ -22,6 +22,7 @@ package org.eclipse.microprofile.fault.tolerance.tck.disableEnv;
 import java.sql.Connection;
 
 import org.eclipse.microprofile.fault.tolerance.tck.fallback.clientserver.StringFallbackHandler;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 import org.eclipse.microprofile.faulttolerance.Fallback;
 import org.eclipse.microprofile.faulttolerance.Retry;
@@ -93,7 +94,7 @@ public class DisableClient {
     public Connection serviceD(long timeToSleep) {
         try {
             Thread.sleep(timeToSleep);
-            throw new RuntimeException("Timeout did not interrupt");
+            throw new TestException("Timeout did not interrupt");
         } catch (InterruptedException e) {
             // expected
         }
@@ -101,12 +102,12 @@ public class DisableClient {
     }
 
     private String nameService() {
-        throw new RuntimeException("Connection failed");
+        throw new TestException("Connection failed");
     }
 
     private Connection connectionService() {
         counterForInvokingConnenectionService++;
-        throw new RuntimeException("Connection failed");
+        throw new TestException("Connection failed");
     }
 
     public int getRetryCountForConnectionService() {
