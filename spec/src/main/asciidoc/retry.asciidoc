@@ -26,13 +26,16 @@ The `Retry` policy allows to configure :
 * `maxRetries`: the maximum retries
 * `delay`: delays between each retry
 * `delayUnit`: the delay unit
+* `delayFactor`: the delay factor, which exponentially backs off to the maxDelay and multiplying successive delays by the delayFactor
+* `maxDelay`: the maximum delay between the retries
+* `maxDelayUnit`: the maximum delay unit
 * `maxDuration`: maximum duration to perform the retry for.
-* `durationUnit`: duration unit
+* `durationUnit`: maximum duration unit
 * `jitter`: the random vary of retry delays
 * `jitterDelayUnit`: the jitter unit
 * `retryOn`: specify the failures to retry on
 * `abortOn`: specify the failures to abort on
-
+The delay between the retries will be affected by `delay`, `jitter` and `delayFactor`. After applying the policies, if the delay exceeds the `maxDelay`, the value of `maxDelay` will be used.
 === Retry usage
 
 `@Retry` can be applied to the class or method level.
