@@ -1,0 +1,296 @@
+//
+// Copyright (c) 2018-2020 Contributors to the Eclipse Foundation
+//
+// See the NOTICE file(s) distributed with this work for additional
+// information regarding copyright ownership.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// You may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// Contributors:
+// Andrew Rouse
+// Jan Bernitt
+
+== Integration with MicroProfile Metrics
+
+When Microprofile Fault Tolerance and Microprofile Metrics are used together, metrics are automatically added for each of
+the methods annotated with a `@Retry`, `@Timeout`, `@CircuitBreaker`, `@Bulkhead` or `@Fallback` annotation.
+
+=== Names
+
+The automatically added metrics follow a consistent pattern which includes the fully qualified name of the annotated method.
+
+If two methods have the same fully qualified name then the metrics for those methods will be combined. The result of this combination
+is non-portable and may vary between implementations. For portable behavior, monitored methods in the same class should have unique names.
+
+=== Scope
+
+Metrics added by this specification will appear in the `base` MicroProfile Metrics scope.
+
+=== Registration
+
+All metrics added by this specification for a particular method are registered with each applicable combination of tags either on startup or on first call of the annotated method. 
+Policies that have been disabled through configuration do not cause registration of the corresponding metrics.
+
+=== Metrics added for `@Retry`, `@Timeout`, `@CircuitBreaker`, `@Bulkhead` and `@Fallback`
+
+Implementations must ensure that if any of these annotations are present on a method, then the following metrics are added only once for that method.
+
+[cols="1,5"]
+|===
+| Name | `ft.invocations.total`
+
+| Type | `Counter`
+| Unit | None
+| Description | The number of times the method was called
+| Tags
+a| * `method` - the fully qualified method name
+ * `result` = `[valueReturned\|exceptionThrown]` - whether the invocation returned a value or threw an exception
+ * `fallback` = `[applied\|notApplied\|notDefined]` - `applied` if fallback was used, `notApplied` if a fallback is configured but was not used, `notDefined` if a fallback is not configured
+|===
+
+=== Metrics added for `@Retry`
+
+[cols="1,5"]
+|===
+| Name | `ft.retry.calls.total`
+
+| Type | `Counter`
+| Unit | None
+| Description | The number of times the retry logic was run. This will always be once per method call.
+| Tags
+a| * `method` - the fully qualified method name
+ * `retried` = `[true\|false]` - whether any retries occurred
+ * `retryResult` = `[valueReturned\|exceptionNotRetryable\|maxRetriesReached\|maxDurationReached]` - the reason that last attempt to call the method was not retried
+|===
+
+[cols="1,5"]
+|===
+| Name | `ft.retry.retries.total`
+
+| Type | `Counter`
+| Unit | None
+| Description | The number of times the method was retried
+| Tags
+a| * `method` - the fully qualified method name
+|===
+
+=== Metrics added for `@Timeout`
+
+[cols="1,5"]
+|===
+| Name | `ft.timeout.calls.total`
+
+| Type | `Counter`
+| Unit | None
+| Description | The number of times the timeout logic was run. This will usually be once per method call, but may be zero times if the circuit breaker prevents execution or more than once if the method is retried.
+| Tags
+a| * `method` - the fully qualified method name
+* `timedOut` = `[true\|false]` - whether the method call timed out
+|===
+
+[cols="1,5"]
+|===
+| Name | `ft.timeout.executionDuration`
+
+| Type | `Histogram`
+| Unit | Nanoseconds
+| Description | Histogram of execution times for the method
+| Tags
+a| * `method` - the fully qualified method name
+|===
+
+=== Metrics added for `@CircuitBreaker`
+
+[cols="1,5"]
+|===
+| Name | `ft.circuitbreaker.calls.total`
+
+| Type | `Counter`
+| Unit | None
+| Description | The number of times the circuit breaker logic was run. This will usually be once per method call, but may be more than once if the method call is retried.
+| Tags
+a| * `method` - the fully qualified method name
+ * `circuitBreakerResult` = `[success\|failure\|circuitBreakerOpen]` - the result of the method call, as considered by the circuit breaker according to the rules in <<circuitbreaker.asciidoc#circuit-breaker-success-failure,Configuring which exceptions are considered a failure>>
+ ** `success` - the method ran and was successful
+ ** `failure` - the method ran and failed
+ ** `circuitBreakerOpen` - the method did not run because the circuit breaker was in open or half-open state
+|===
+
+[cols="1,5"]
+|===
+| Name | `ft.circuitbreaker.state.total`
+
+| Type | `Gauge<Long>`
+| Unit | Nanoseconds
+| Description | Amount of time the circuit breaker has spent in each state
+| Tags
+a| * `method` - the fully qualified method name
+ * `state` = `[open\|closed\|halfOpen]` - the circuit breaker state
+| Notes | Although this metric is a `Gauge`, its value increases monotonically.
+|===
+
+[cols="1,5"]
+|===
+| Name | `ft.circuitbreaker.opened.total`
+
+| Type | `Counter`
+| Unit | None
+| Description | Number of times the circuit breaker has moved from closed state to open state
+| Tags
+a| * `method` - the fully qualified method name
+|===
+
+=== Metrics added for `@Bulkhead`
+
+[cols="1,5"]
+|===
+| Name | `ft.bulkhead.calls.total`
+
+| Type | `Counter`
+| Unit | None
+| Description | The number of times the bulkhead logic was run. This will usually be once per method call, but may be zero times if the circuit breaker prevented execution or more than once if the method call is retried.
+| Tags
+a| * `method` - the fully qualified method name
+ * `bulkheadResult` = `[accepted\|rejected]` - whether the bulkhead allowed the method call to run
+|===
+
+[cols="1,5"]
+|===
+| Name | `ft.bulkhead.executionsRunning`
+
+| Type | `Gauge<Long>`
+| Unit | None
+| Description | Number of currently running executions
+| Tags
+a| * `method` - the fully qualified method name
+|===
+
+[cols="1,5"]
+|===
+| Name | `ft.bulkhead.executionsWaiting`
+
+| Type | `Gauge<Long>`
+| Unit | None
+| Description | Number of executions currently waiting in the queue
+| Tags
+a| * `method` - the fully qualified method name
+| Notes | Only added if the method is also annotated with `@Asynchronous`
+|===
+
+[cols="1,5"]
+|===
+| Name | `ft.bulkhead.runningDuration`
+
+| Type | `Histogram`
+| Unit | Nanoseconds
+| Description | Histogram of the time that method executions spent running
+| Tags
+a| * `method` - the fully qualified method name
+|===
+
+[cols="1,5"]
+|===
+| Name | `ft.bulkhead.waitingDuration`
+
+| Type | `Histogram`
+| Unit | Nanoseconds
+| Description | Histogram of the time that method executions spent waiting in the queue
+| Tags
+a| * `method` - the fully qualified method name
+| Notes | Only added if the method is also annotated with `@Asynchronous`
+|===
+
+
+=== Notes
+
+Future versions of this specification may change the definitions of the metrics which are added to take advantage of
+enhancements in the MicroProfile Metrics specification.
+
+If more than one annotation is applied to a method, the metrics associated with each annotation will be added for that method.
+
+All of the counters count the number of events which occurred since the application started, and therefore never decrease.
+It is expected that these counters will be sampled regularly by monitoring software which is then able to compute deltas
+or moving averages from the gathered samples.
+
+=== Annotation Example
+
+[source, java]
+----
+package com.exmaple;
+
+@Timeout(1000)
+public class MyClass {
+
+    @Retry
+    public void doWork() {
+        // work
+    }
+
+}
+----
+
+This class would result in the following metrics being added.
+
+```
+ft.invocations.total{method="com.example.MyClass.doWork", result="valueReturned", fallback="notDefined"}
+ft.invocations.total{method="com.example.MyClass.doWork", result="exceptionThrown", fallback="notDefined"}
+ft.retry.calls.total{method="com.example.MyClass.doWork", retried="true", retryResult="valueReturned"}
+ft.retry.calls.total{method="com.example.MyClass.doWork", retried="true", retryResult="exceptionNotRetryable"}
+ft.retry.calls.total{method="com.example.MyClass.doWork", retried="true", retryResult="maxRetriesReached"}
+ft.retry.calls.total{method="com.example.MyClass.doWork", retried="true", retryResult="maxDurationReached"}
+ft.retry.calls.total{method="com.example.MyClass.doWork", retried="false", retryResult="valueReturned"}
+ft.retry.calls.total{method="com.example.MyClass.doWork", retried="false", retryResult="exceptionNotRetryable"}
+ft.retry.calls.total{method="com.example.MyClass.doWork", retried="false", retryResult="maxRetriesReached"}
+ft.retry.calls.total{method="com.example.MyClass.doWork", retried="false", retryResult="maxDurationReached"}
+ft.retry.retries.total{method="com.example.MyClass.doWork"}
+ft.timeout.calls.total{method="com.example.MyClass.doWork", timedOut="true"}
+ft.timeout.calls.total{method="com.example.MyClass.doWork", timedOut="false"}
+ft.timeout.executionDuration{method="com.example.MyClass.doWork"}
+```
+
+Now imagine the `doWork()` method is called and the invocation goes like this:
+
+* On the first attempt, the invocation takes more than 1000ms and times out
+* The invocation is retried but something goes wrong and the method throws an `IOException`
+* The invocation is retried again and this time the method returns successfully and the result of this attempt is returned to the user
+
+After this sequence, the following metrics would have new values:
+
+```
+ft.invocations.total{method="com.example.MyClass.doWork", result="valueReturned", fallback="notDefined"} = 1
+```
+The method has been called successfully once and it returned a value.
+
+```
+ft.retry.calls.total{method="com.example.MyClass.doWork", retried="true", retryResult="valueReturned"} = 1
+```
+One call was made and, after some retries, it returned a value.
+
+```
+ft.retry.retries.total{method="com.example.MyClass.doWork"} = 2
+```
+Two retries were made during the invocation.
+
+```
+ft.timeout.executionDuration{method="com.example.MyClass.doWork"}
+```
+The `Histogram` will have been updated with the length of time taken for each attempt. It will show a count of `3` and will have calculated averages and percentiles from the execution times.
+
+```
+ft.timeout.calls.total{method="com.example.MyClass.doWork", timedOut="true"} = 1
+```
+One of the attempts timed out.
+
+```
+ft.timeout.calls.total{method="com.example.MyClass.doWork", timedOut="false"} = 2
+```
+Two of the attempts did not time out.
