@@ -18,22 +18,24 @@
 // Contributors:
 // Andrew Rouse
 // Jan Bernitt
+// Benjamin Confino
 
-== Integration with MicroProfile Metrics
+== Integration with MicroProfile Telemetry
 
-When Microprofile Fault Tolerance and Microprofile Metrics are used together, metrics are automatically added for each of
+When Microprofile Fault Tolerance and Microprofile Telemetry are used together, metrics are automatically added for each of
 the methods annotated with a `@Retry`, `@Timeout`, `@CircuitBreaker`, `@Bulkhead` or `@Fallback` annotation.
 
 === Names
 
-The automatically added metrics follow a consistent pattern which includes the fully qualified name of the annotated method.
+The automatically added metrics follow a consistent pattern: Each metric has a name and a Microprofile Telemetry attribute with a string
+key of "method" and a value of the fully qualified name of the annotated method.
 
 If two methods have the same fully qualified name then the metrics for those methods will be combined. The result of this combination
 is non-portable and may vary between implementations. For portable behavior, monitored methods in the same class should have unique names.
 
 === Scope
 
-Metrics added by this specification will appear in the `base` MicroProfile Metrics scope.
+Metrics added by this specification will appear in the `base` MicroProfile Telemetry scope.
 
 === Registration
 
@@ -51,7 +53,7 @@ Implementations must ensure that if any of these annotations are present on a me
 | Type | `Counter`
 | Unit | None
 | Description | The number of times the method was called
-| Tags
+| Attributes
 a| * `method` - the fully qualified method name
  * `result` = `[valueReturned\|exceptionThrown]` - whether the invocation returned a value or threw an exception
  * `fallback` = `[applied\|notApplied\|notDefined]` - `applied` if fallback was used, `notApplied` if a fallback is configured but was not used, `notDefined` if a fallback is not configured
@@ -66,7 +68,7 @@ a| * `method` - the fully qualified method name
 | Type | `Counter`
 | Unit | None
 | Description | The number of times the retry logic was run. This will always be once per method call.
-| Tags
+| Attributes
 a| * `method` - the fully qualified method name
  * `retried` = `[true\|false]` - whether any retries occurred
  * `retryResult` = `[valueReturned\|exceptionNotRetryable\|maxRetriesReached\|maxDurationReached]` - the reason that last attempt to call the method was not retried
@@ -79,7 +81,7 @@ a| * `method` - the fully qualified method name
 | Type | `Counter`
 | Unit | None
 | Description | The number of times the method was retried
-| Tags
+| Attributes
 a| * `method` - the fully qualified method name
 |===
 
@@ -92,7 +94,7 @@ a| * `method` - the fully qualified method name
 | Type | `Counter`
 | Unit | None
 | Description | The number of times the timeout logic was run. This will usually be once per method call, but may be zero times if the circuit breaker prevents execution or more than once if the method is retried.
-| Tags
+| Attributes
 a| * `method` - the fully qualified method name
 * `timedOut` = `[true\|false]` - whether the method call timed out
 |===
@@ -104,7 +106,7 @@ a| * `method` - the fully qualified method name
 | Type | `Histogram`
 | Unit | Nanoseconds
 | Description | Histogram of execution times for the method
-| Tags
+| Attributes
 a| * `method` - the fully qualified method name
 |===
 
@@ -117,7 +119,7 @@ a| * `method` - the fully qualified method name
 | Type | `Counter`
 | Unit | None
 | Description | The number of times the circuit breaker logic was run. This will usually be once per method call, but may be more than once if the method call is retried.
-| Tags
+| Attributes
 a| * `method` - the fully qualified method name
  * `circuitBreakerResult` = `[success\|failure\|circuitBreakerOpen]` - the result of the method call, as considered by the circuit breaker according to the rules in <<circuitbreaker.asciidoc#circuit-breaker-success-failure,Configuring which exceptions are considered a failure>>
  ** `success` - the method ran and was successful
@@ -132,7 +134,7 @@ a| * `method` - the fully qualified method name
 | Type | `Gauge<Long>`
 | Unit | Nanoseconds
 | Description | Amount of time the circuit breaker has spent in each state
-| Tags
+| Attributes
 a| * `method` - the fully qualified method name
  * `state` = `[open\|closed\|halfOpen]` - the circuit breaker state
 | Notes | Although this metric is a `Gauge`, its value increases monotonically.
@@ -145,7 +147,7 @@ a| * `method` - the fully qualified method name
 | Type | `Counter`
 | Unit | None
 | Description | Number of times the circuit breaker has moved from closed state to open state
-| Tags
+| Attributes
 a| * `method` - the fully qualified method name
 |===
 
@@ -158,7 +160,7 @@ a| * `method` - the fully qualified method name
 | Type | `Counter`
 | Unit | None
 | Description | The number of times the bulkhead logic was run. This will usually be once per method call, but may be zero times if the circuit breaker prevented execution or more than once if the method call is retried.
-| Tags
+| Attributes
 a| * `method` - the fully qualified method name
  * `bulkheadResult` = `[accepted\|rejected]` - whether the bulkhead allowed the method call to run
 |===
@@ -170,7 +172,7 @@ a| * `method` - the fully qualified method name
 | Type | `Gauge<Long>`
 | Unit | None
 | Description | Number of currently running executions
-| Tags
+| Attributes
 a| * `method` - the fully qualified method name
 |===
 
@@ -181,7 +183,7 @@ a| * `method` - the fully qualified method name
 | Type | `Gauge<Long>`
 | Unit | None
 | Description | Number of executions currently waiting in the queue
-| Tags
+| Attributes
 a| * `method` - the fully qualified method name
 | Notes | Only added if the method is also annotated with `@Asynchronous`
 |===
@@ -193,7 +195,7 @@ a| * `method` - the fully qualified method name
 | Type | `Histogram`
 | Unit | Nanoseconds
 | Description | Histogram of the time that method executions spent running
-| Tags
+| Attributes
 a| * `method` - the fully qualified method name
 |===
 
@@ -204,7 +206,7 @@ a| * `method` - the fully qualified method name
 | Type | `Histogram`
 | Unit | Nanoseconds
 | Description | Histogram of the time that method executions spent waiting in the queue
-| Tags
+| Attributes
 a| * `method` - the fully qualified method name
 | Notes | Only added if the method is also annotated with `@Asynchronous`
 |===
@@ -213,7 +215,7 @@ a| * `method` - the fully qualified method name
 === Notes
 
 Future versions of this specification may change the definitions of the metrics which are added to take advantage of
-enhancements in the MicroProfile Metrics specification.
+enhancements in the MicroProfile Telemetry specification.
 
 If more than one annotation is applied to a method, the metrics associated with each annotation will be added for that method.
 
