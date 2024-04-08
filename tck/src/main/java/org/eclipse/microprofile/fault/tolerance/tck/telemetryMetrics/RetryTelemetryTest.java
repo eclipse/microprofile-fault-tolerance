@@ -16,25 +16,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eclipse.microprofile.fault.tolerance.tck.metrics;
+package org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics;
 
-import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationResult.EXCEPTION_THROWN;
-import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationResult.VALUE_RETURNED;
+import static org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.InvocationResult.EXCEPTION_THROWN;
+import static org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.InvocationResult.VALUE_RETURNED;
 import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expectTestException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
 import java.time.Duration;
+import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 
 import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.common.RetryMetricBean;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.common.RetryMetricBean.CallCounter;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.common.RetryMetricBean.NonRetryableException;
-import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationFallback;
-import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.RetryResult;
-import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.RetryRetried;
-import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricGetter;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.InMemoryMetricReader;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.PullExporterAutoConfigurationCustomizerProvider;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.InvocationFallback;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.RetryResult;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.RetryRetried;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricGetter;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -45,22 +53,30 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
+import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import jakarta.inject.Inject;
 
-public class RetryMetricTest extends Arquillian {
+public class RetryTelemetryTest extends Arquillian {
 
     @Deployment
     public static WebArchive deploy() {
 
+        Properties props = new Properties();
+        props.put("otel.sdk.disabled", "false");
+        props.put("otel.traces.exporter", "none");
+
         ConfigAnnotationAsset config = new ConfigAnnotationAsset()
-                .autoscaleMethod(RetryMetricBean.class, "failAfterDelay"); // Scale maxDuration
+                .autoscaleMethod(RetryMetricBean.class, "failAfterDelay")
+                .mergeProperties(props); // Scale maxDuration
 
         JavaArchive jar = ShrinkWrap.create(JavaArchive.class, "ftMetricRetry.jar")
                 .addClasses(RetryMetricBean.class)
                 .addPackage(Packages.UTILS)
-                .addPackage(Packages.METRIC_UTILS)
+                .addPackage(Packages.TELEMETRY_METRIC_UTILS)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
-                .addAsManifestResource(config, "microprofile-config.properties");
+                .addAsManifestResource(config, "microprofile-config.properties")
+                .addAsServiceProvider(AutoConfigurationCustomizerProvider.class,
+                        PullExporterAutoConfigurationCustomizerProvider.class);
 
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftMetricRetry.war")
                 .addAsLibrary(jar);
@@ -71,9 +87,9 @@ public class RetryMetricTest extends Arquillian {
     @Inject
     private RetryMetricBean retryBean;
 
-    @Test
+    @Test(groups = "main")
     public void testRetryMetricSuccessfulImmediately() {
-        MetricGetter m = new MetricGetter(RetryMetricBean.class, "failSeveralTimes");
+        TelemetryMetricGetter m = new TelemetryMetricGetter(RetryMetricBean.class, "failSeveralTimes");
         m.baselineMetrics();
 
         retryBean.failSeveralTimes(0, new CallCounter()); // Should succeed on first attempt
@@ -87,9 +103,9 @@ public class RetryMetricTest extends Arquillian {
                 m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_DEFINED).delta(), is(0L));
     }
 
-    @Test
+    @Test(groups = "main")
     public void testRetryMetricSuccessfulAfterRetry() {
-        MetricGetter m = new MetricGetter(RetryMetricBean.class, "failSeveralTimes");
+        TelemetryMetricGetter m = new TelemetryMetricGetter(RetryMetricBean.class, "failSeveralTimes");
         m.baselineMetrics();
 
         retryBean.failSeveralTimes(3, new CallCounter()); // Should retry 3 times, and eventually succeed
@@ -103,9 +119,9 @@ public class RetryMetricTest extends Arquillian {
                 m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_DEFINED).delta(), is(0L));
     }
 
-    @Test
+    @Test(groups = "main")
     public void testRetryMetricNonRetryableImmediately() {
-        MetricGetter m = new MetricGetter(RetryMetricBean.class, "failSeveralTimesThenNonRetryable");
+        TelemetryMetricGetter m = new TelemetryMetricGetter(RetryMetricBean.class, "failSeveralTimesThenNonRetryable");
         m.baselineMetrics();
 
         // Should throw non-retryable exception on first attempt
@@ -121,9 +137,9 @@ public class RetryMetricTest extends Arquillian {
                 m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_DEFINED).delta(), is(1L));
     }
 
-    @Test
+    @Test(groups = "main")
     public void testRetryMetricNonRetryableAfterRetries() {
-        MetricGetter m = new MetricGetter(RetryMetricBean.class, "failSeveralTimesThenNonRetryable");
+        TelemetryMetricGetter m = new TelemetryMetricGetter(RetryMetricBean.class, "failSeveralTimesThenNonRetryable");
         m.baselineMetrics();
 
         // Should throw non-retryable exception after 3 retries
@@ -139,9 +155,9 @@ public class RetryMetricTest extends Arquillian {
                 m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_DEFINED).delta(), is(1L));
     }
 
-    @Test
+    @Test(groups = "main")
     public void testRetryMetricMaxRetries() {
-        MetricGetter m = new MetricGetter(RetryMetricBean.class, "failSeveralTimes");
+        TelemetryMetricGetter m = new TelemetryMetricGetter(RetryMetricBean.class, "failSeveralTimes");
         m.baselineMetrics();
 
         expectTestException(() -> retryBean.failSeveralTimes(20, new CallCounter())); // Should retry 5 times, then fail
@@ -156,10 +172,10 @@ public class RetryMetricTest extends Arquillian {
                 m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_DEFINED).delta(), is(2L));
     }
 
-    @Test
+    @Test(groups = "main")
     public void testRetryMetricMaxRetriesHitButNoRetry() {
         // This is an edge case which can only occur when maxRetries = 0
-        MetricGetter m = new MetricGetter(RetryMetricBean.class, "maxRetriesZero");
+        TelemetryMetricGetter m = new TelemetryMetricGetter(RetryMetricBean.class, "maxRetriesZero");
         m.baselineMetrics();
 
         expectTestException(() -> retryBean.maxRetriesZero()); // Should fail immediately and not retry
@@ -173,9 +189,9 @@ public class RetryMetricTest extends Arquillian {
                 m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_DEFINED).delta(), is(1L));
     }
 
-    @Test
+    @Test(groups = "main")
     public void testRetryMetricMaxDuration() {
-        MetricGetter m = new MetricGetter(RetryMetricBean.class, "failAfterDelay");
+        TelemetryMetricGetter m = new TelemetryMetricGetter(RetryMetricBean.class, "failAfterDelay");
         m.baselineMetrics();
 
         Duration testDelay = TCKConfig.getConfig().getTimeoutInDuration(100);
@@ -190,9 +206,9 @@ public class RetryMetricTest extends Arquillian {
                 m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_DEFINED).delta(), is(1L));
     }
 
-    @Test
+    @Test(groups = "main")
     public void testRetryMetricMaxDurationNoRetries() {
-        MetricGetter m = new MetricGetter(RetryMetricBean.class, "failAfterDelay");
+        TelemetryMetricGetter m = new TelemetryMetricGetter(RetryMetricBean.class, "failAfterDelay");
         m.baselineMetrics();
 
         Duration testDelay = TCKConfig.getConfig().getTimeoutInDuration(1500);
@@ -208,7 +224,29 @@ public class RetryMetricTest extends Arquillian {
                 m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_DEFINED).delta(), is(1L));
     }
 
-    private void assertRetryCallsIncremented(MetricGetter m, RetryRetried retriedValue, RetryResult resultValue,
+    @Test(dependsOnGroups = "main")
+    public void testMetricUnits() throws InterruptedException, ExecutionException {
+        InMemoryMetricReader reader = InMemoryMetricReader.current();
+
+        // Validate that each metric has metadata which declares the correct unit
+        for (TelemetryMetricDefinition metric : TelemetryMetricDefinition.values()) {
+            if (!metric.getName().startsWith("ft.retry")) {
+                continue;
+            }
+
+            String unit = reader.getUnit(metric.getName());
+
+            if (metric.getUnit() == null) {
+                assertTrue(unit.isEmpty(), "Unexpected metadata for metric " + metric.getName());
+            } else {
+                assertFalse(unit.isEmpty(), "Missing metadata for metric " + metric.getName());
+                assertEquals(unit, metric.getUnit(), "Incorrect unit for metric " + metric.getName());
+            }
+        }
+    }
+
+    private void assertRetryCallsIncremented(TelemetryMetricGetter m, RetryRetried retriedValue,
+            RetryResult resultValue,
             Long expectedDelta) {
         for (RetryRetried retried : RetryRetried.values()) {
             for (RetryResult result : RetryResult.values()) {

@@ -17,10 +17,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.eclipse.microprofile.fault.tolerance.tck.metrics;
+package org.eclipse.microprofile.fault.tolerance.tck.metrics.common;
 
-import org.eclipse.microprofile.fault.tolerance.tck.metrics.FallbackMetricBean.Action;
-import org.eclipse.microprofile.fault.tolerance.tck.metrics.FallbackMetricBean.NonFallbackException;
+import org.eclipse.microprofile.fault.tolerance.tck.metrics.common.FallbackMetricBean.Action;
+import org.eclipse.microprofile.fault.tolerance.tck.metrics.common.FallbackMetricBean.NonFallbackException;
 import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.ExecutionContext;
 import org.eclipse.microprofile.faulttolerance.FallbackHandler;

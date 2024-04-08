@@ -16,52 +16,59 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eclipse.microprofile.fault.tolerance.tck.metrics;
+package org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics;
 
-import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationResult.EXCEPTION_THROWN;
-import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationResult.VALUE_RETURNED;
+import static org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.InvocationResult.EXCEPTION_THROWN;
+import static org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.InvocationResult.VALUE_RETURNED;
 import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expectTestException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.common.ClassLevelMetricBean;
-import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationFallback;
-import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.RetryResult;
-import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.RetryRetried;
-import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricGetter;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.PullExporterAutoConfigurationCustomizerProvider;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.InvocationFallback;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.RetryResult;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.RetryRetried;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricGetter;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
+import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
+import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import jakarta.inject.Inject;
 
 /**
  * Ensure that metrics are created correctly when a Fault Tolerance annotation is placed on the class rather than the
  * method.
  */
-public class ClassLevelMetricTest extends Arquillian {
+public class ClassLevelTelemetryTest extends Arquillian {
 
     @Deployment
     public static WebArchive deploy() {
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftMetricClassLevel.war")
                 .addClasses(ClassLevelMetricBean.class)
                 .addPackage(Packages.UTILS)
-                .addPackage(Packages.METRIC_UTILS)
-                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
+                .addPackage(Packages.TELEMETRY_METRIC_UTILS)
+                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
+                .addAsResource(new StringAsset(
+                        "otel.sdk.disabled=false\notel.traces.exporter=none"),
+                        "META-INF/microprofile-config.properties")
+                .addAsServiceProvider(AutoConfigurationCustomizerProvider.class,
+                        PullExporterAutoConfigurationCustomizerProvider.class);
 
         return war;
     }
-
     @Inject
     private ClassLevelMetricBean classLevelRetryBean;
 
     @Test
     public void testRetryMetricSuccessfulImmediately() {
-        MetricGetter m = new MetricGetter(ClassLevelMetricBean.class, "failSeveralTimes");
+        TelemetryMetricGetter m = new TelemetryMetricGetter(ClassLevelMetricBean.class, "failSeveralTimes");
         m.baselineMetrics();
 
         classLevelRetryBean.failSeveralTimes(0); // Should succeed on first attempt
@@ -77,7 +84,7 @@ public class ClassLevelMetricTest extends Arquillian {
 
     @Test
     public void testRetryMetricSuccessfulAfterRetry() {
-        MetricGetter m = new MetricGetter(ClassLevelMetricBean.class, "failSeveralTimes");
+        TelemetryMetricGetter m = new TelemetryMetricGetter(ClassLevelMetricBean.class, "failSeveralTimes");
         m.baselineMetrics();
 
         classLevelRetryBean.failSeveralTimes(3); // Should retry 3 times, and eventually succeed
@@ -93,7 +100,7 @@ public class ClassLevelMetricTest extends Arquillian {
 
     @Test
     public void testRetryMetricUnsuccessful() {
-        MetricGetter m = new MetricGetter(ClassLevelMetricBean.class, "failSeveralTimes");
+        TelemetryMetricGetter m = new TelemetryMetricGetter(ClassLevelMetricBean.class, "failSeveralTimes");
         m.baselineMetrics();
 
         expectTestException(() -> classLevelRetryBean.failSeveralTimes(20)); // Should retry 5 times, then fail
@@ -108,7 +115,8 @@ public class ClassLevelMetricTest extends Arquillian {
                 m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_DEFINED).delta(), is(2L));
     }
 
-    private void assertRetryCallsIncremented(MetricGetter m, RetryRetried retriedValue, RetryResult resultValue,
+    private void assertRetryCallsIncremented(TelemetryMetricGetter m, RetryRetried retriedValue,
+            RetryResult resultValue,
             Long expectedDelta) {
         for (RetryRetried retried : RetryRetried.values()) {
             for (RetryResult result : RetryResult.values()) {

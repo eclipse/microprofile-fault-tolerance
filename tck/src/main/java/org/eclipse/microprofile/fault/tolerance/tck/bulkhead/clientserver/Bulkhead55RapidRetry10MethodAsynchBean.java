@@ -42,7 +42,8 @@ public class Bulkhead55RapidRetry10MethodAsynchBean {
 
     @Bulkhead(waitingTaskQueue = 5, value = 5)
     @Asynchronous
-    @Retry(retryOn = BulkheadException.class, delay = 1, delayUnit = ChronoUnit.MICROS, jitter = 0, maxRetries = 10, maxDuration = 999999)
+    @Retry(retryOn = BulkheadException.class, delay = 1, delayUnit = ChronoUnit.MICROS, jitter = 0, maxRetries = 10,
+           maxDuration = 999999)
     public Future<?> test(Barrier barrier) {
         barrier.await();
         return CompletableFuture.completedFuture(null);

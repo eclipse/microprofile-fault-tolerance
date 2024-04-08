@@ -16,23 +16,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eclipse.microprofile.fault.tolerance.tck.metrics;
+package org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics;
 
-import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationResult.EXCEPTION_THROWN;
-import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationResult.VALUE_RETURNED;
+import static org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.InvocationResult.EXCEPTION_THROWN;
+import static org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.InvocationResult.VALUE_RETURNED;
 import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expectTimeout;
 import static org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig.getConfig;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+
+import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 
 import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.common.TimeoutMetricBean;
-import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationFallback;
-import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.TimeoutTimedOut;
-import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricGetter;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.InMemoryMetricReader;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.PullExporterAutoConfigurationCustomizerProvider;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.InvocationFallback;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.TimeoutTimedOut;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricGetter;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.eclipse.microprofile.faulttolerance.Timeout;
-import org.eclipse.microprofile.metrics.Histogram;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -41,24 +49,32 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
+import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import jakarta.inject.Inject;
 
-public class TimeoutMetricTest extends Arquillian {
+public class TimeoutTelemetryTest extends Arquillian {
 
     @Deployment
     public static WebArchive deploy() {
+        Properties props = new Properties();
+        props.put("otel.sdk.disabled", "false");
+        props.put("otel.traces.exporter", "none");
+
         final ConfigAnnotationAsset config = new ConfigAnnotationAsset()
                 .setValue(TimeoutMetricBean.class, "counterTestWorkForMillis", Timeout.class,
                         getConfig().getTimeoutInStr(500))
                 .setValue(TimeoutMetricBean.class, "histogramTestWorkForMillis", Timeout.class,
-                        getConfig().getTimeoutInStr(2000));
+                        getConfig().getTimeoutInStr(2000))
+                .mergeProperties(props);
 
         JavaArchive jar = ShrinkWrap.create(JavaArchive.class, "ftMetricTimeout.jar")
                 .addClasses(TimeoutMetricBean.class)
                 .addPackage(Packages.UTILS)
-                .addPackage(Packages.METRIC_UTILS)
+                .addPackage(Packages.TELEMETRY_METRIC_UTILS)
                 .addAsManifestResource(config, "microprofile-config.properties")
-                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
+                .addAsServiceProvider(AutoConfigurationCustomizerProvider.class,
+                        PullExporterAutoConfigurationCustomizerProvider.class);
 
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftMetricTimeout.war")
                 .addAsLibrary(jar);
@@ -68,9 +84,9 @@ public class TimeoutMetricTest extends Arquillian {
     @Inject
     private TimeoutMetricBean timeoutBean;
 
-    @Test
+    @Test(groups = "main")
     public void testTimeoutMetric() {
-        MetricGetter m = new MetricGetter(TimeoutMetricBean.class, "counterTestWorkForMillis");
+        TelemetryMetricGetter m = new TelemetryMetricGetter(TimeoutMetricBean.class, "counterTestWorkForMillis");
         m.baselineMetrics();
 
         expectTimeout(() -> timeoutBean.counterTestWorkForMillis(getConfig().getTimeoutInMillis(2000))); // Should
@@ -88,18 +104,38 @@ public class TimeoutMetricTest extends Arquillian {
                 is(2L));
     }
 
-    @Test
+    @Test(groups = "main")
     public void testTimeoutHistogram() {
-        MetricGetter m = new MetricGetter(TimeoutMetricBean.class, "histogramTestWorkForMillis");
+        TelemetryMetricGetter m = new TelemetryMetricGetter(TimeoutMetricBean.class, "histogramTestWorkForMillis");
 
         timeoutBean.histogramTestWorkForMillis(getConfig().getTimeoutInMillis(300));
         expectTimeout(() -> timeoutBean.histogramTestWorkForMillis(getConfig().getTimeoutInMillis(5000))); // Will
                                                                                                            // timeout
                                                                                                            // after 2000
 
-        Histogram histogram = m.getTimeoutExecutionDuration().get();
+        Long histogramCount = m.getTimeoutExecutionDuration().getHistogramCount().get();
+        assertThat("Histogram count", histogramCount, is(2L));
+    }
 
-        assertThat("Histogram count", histogram.getCount(), is(2L));
+    @Test(dependsOnGroups = "main")
+    public void testMetricUnits() throws InterruptedException, ExecutionException {
+        InMemoryMetricReader reader = InMemoryMetricReader.current();
+
+        // Validate that each metric has metadata which declares the correct unit
+        for (TelemetryMetricDefinition metric : TelemetryMetricDefinition.values()) {
+            if (!metric.getName().startsWith("ft.timeout")) {
+                continue;
+            }
+
+            String unit = reader.getUnit(metric.getName());
+
+            if (metric.getUnit() == null) {
+                assertTrue(unit.isEmpty(), "Unexpected metadata for metric " + metric.getName());
+            } else {
+                assertFalse(unit.isEmpty(), "Missing metadata for metric " + metric.getName());
+                assertEquals(unit, metric.getUnit(), "Incorrect unit for metric " + metric.getName());
+            }
+        }
     }
 
 }

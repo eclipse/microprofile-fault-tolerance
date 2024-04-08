@@ -17,7 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.eclipse.microprofile.fault.tolerance.tck.metrics.util;
+package org.eclipse.microprofile.fault.tolerance.tck.metrics.common.util;
 
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThan;
@@ -26,10 +26,10 @@ import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 
-public class MetricComparator {
+public class TimeUtils {
 
     // Utility class, no public constructor
-    private MetricComparator() {
+    private TimeUtils() {
     }
 
     /**
@@ -39,7 +39,7 @@ public class MetricComparator {
      * conversion and creates a {@link Matcher} to do the check.
      * <p>
      * Useful for checking the results from Histograms.
-     * 
+     *
      * @param originalMillis
      *            the expected time in milliseconds
      * @return a {@link Matcher} which matches against a time in nanoseconds
@@ -58,7 +58,7 @@ public class MetricComparator {
      * and creates a {@link Matcher} to do the check.
      * <p>
      * Useful for checking the results from Histograms.
-     * 
+     *
      * @param originalMillis
      *            the expected time in milliseconds
      * @return a {@link Matcher} which matches against a time in nanoseconds
