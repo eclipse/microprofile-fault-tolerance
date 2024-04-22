@@ -68,3 +68,11 @@ The MicroProfile Metrics specification provides a way to monitor microservice in
 * When `Timeout` is used, you would like to know how many times the method timed out.
 
 Because of this requirement, when MicroProfile Fault Tolerance and MicroProfile Metrics are used together, metrics are automatically added for each of the methods annotated with a `@Retry`, `@Timeout`, `@CircuitBreaker`, `@Bulkhead` or `@Fallback` annotation.
+
+=== Relationship to MicroProfile Telemetry
+The MicroProfile Telemetry specification provides a way to monitor microservice invocations. It is also important to find out how Fault Tolerance policies are operating, e.g.
+
+* When `Retry` is used, it is useful to know how many times a method was called and succeeded after retrying at least once.
+* When `Timeout` is used, you would like to know how many times the method timed out.
+
+Because of this requirement, when MicroProfile Fault Tolerance and MicroProfile Telemetry are used together, metrics are automatically added for each of the methods annotated with a `@Retry`, `@Timeout`, `@CircuitBreaker`, `@Bulkhead` or `@Fallback` annotation.

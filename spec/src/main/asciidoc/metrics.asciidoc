@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018-2020 Contributors to the Eclipse Foundation
+// Copyright (c) 2018-2024 Contributors to the Eclipse Foundation
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information regarding copyright ownership.
@@ -18,11 +18,15 @@
 // Contributors:
 // Andrew Rouse
 // Jan Bernitt
+// Benjamin Confino
 
-== Integration with MicroProfile Metrics
+== Integration with MicroProfile Metrics and MicroProfile Telemetry
 
-When Microprofile Fault Tolerance and Microprofile Metrics are used together, metrics are automatically added for each of
+When MicroProfile Fault Tolerance is used together with MicroProfile Metrics or MicroProfile Telemetry, metrics are automatically added for each of
 the methods annotated with a `@Retry`, `@Timeout`, `@CircuitBreaker`, `@Bulkhead` or `@Fallback` annotation.
+
+If all three of MicroProfile Fault Tolerance, MicroProfile Metrics, and MicroProfile Telemetry are used together then MicroProfile Fault Tolerance
+exports metrics to both MicroProfile Metrics and MicroProfile Telemetry.
 
 === Names
 
@@ -33,7 +37,7 @@ is non-portable and may vary between implementations. For portable behavior, mon
 
 === Scope
 
-Metrics added by this specification will appear in the `base` MicroProfile Metrics scope.
+In MicroProfile Metrics, metrics added by this specification will appear in the `base` MicroProfile Metrics scope.
 
 === Registration
 
@@ -44,11 +48,12 @@ Policies that have been disabled through configuration do not cause registration
 
 Implementations must ensure that if any of these annotations are present on a method, then the following metrics are added only once for that method.
 
-[cols="1,5"]
+[cols="2,4"]
 |===
 | Name | `ft.invocations.total`
 
-| Type | `Counter`
+| Type in MP Metrics | `Counter`
+| Type in MP Telemetry | A counter that emits long
 | Unit | None
 | Description | The number of times the method was called
 | Tags
@@ -59,11 +64,12 @@ a| * `method` - the fully qualified method name
 
 === Metrics added for `@Retry`
 
-[cols="1,5"]
+[cols="2,4"]
 |===
 | Name | `ft.retry.calls.total`
 
-| Type | `Counter`
+| Type in MP Metrics | `Counter`
+| Type in MP Telemetry | A counter that emits long
 | Unit | None
 | Description | The number of times the retry logic was run. This will always be once per method call.
 | Tags
@@ -72,11 +78,12 @@ a| * `method` - the fully qualified method name
  * `retryResult` = `[valueReturned\|exceptionNotRetryable\|maxRetriesReached\|maxDurationReached]` - the reason that last attempt to call the method was not retried
 |===
 
-[cols="1,5"]
+[cols="2,4"]
 |===
 | Name | `ft.retry.retries.total`
 
-| Type | `Counter`
+| Type in MP Metrics | `Counter`
+| Type in MP Telemetry | A counter that emits long
 | Unit | None
 | Description | The number of times the method was retried
 | Tags
@@ -85,11 +92,12 @@ a| * `method` - the fully qualified method name
 
 === Metrics added for `@Timeout`
 
-[cols="1,5"]
+[cols="2,4"]
 |===
 | Name | `ft.timeout.calls.total`
 
-| Type | `Counter`
+| Type in MP Metrics | `Counter`
+| Type in MP Telemetry | A counter that emits long
 | Unit | None
 | Description | The number of times the timeout logic was run. This will usually be once per method call, but may be zero times if the circuit breaker prevents execution or more than once if the method is retried.
 | Tags
@@ -97,11 +105,12 @@ a| * `method` - the fully qualified method name
 * `timedOut` = `[true\|false]` - whether the method call timed out
 |===
 
-[cols="1,5"]
+[cols="2,4"]
 |===
 | Name | `ft.timeout.executionDuration`
 
-| Type | `Histogram`
+| Type in MP Metrics  | `Histogram`
+| Type in MP Telemetry  | A histogram that emits long
 | Unit | Nanoseconds
 | Description | Histogram of execution times for the method
 | Tags
@@ -110,11 +119,12 @@ a| * `method` - the fully qualified method name
 
 === Metrics added for `@CircuitBreaker`
 
-[cols="1,5"]
+[cols="2,4"]
 |===
 | Name | `ft.circuitbreaker.calls.total`
 
-| Type | `Counter`
+| Type in MP Metrics | `Counter`
+| Type in MP Telemetry | A counter that emits long
 | Unit | None
 | Description | The number of times the circuit breaker logic was run. This will usually be once per method call, but may be more than once if the method call is retried.
 | Tags
@@ -125,11 +135,12 @@ a| * `method` - the fully qualified method name
  ** `circuitBreakerOpen` - the method did not run because the circuit breaker was in open or half-open state
 |===
 
-[cols="1,5"]
+[cols="2,4"]
 |===
 | Name | `ft.circuitbreaker.state.total`
 
-| Type | `Gauge<Long>`
+| Type in MP Metrics | `Gauge<Long>`
+| Type in MP Telemetry | A counter that emits long
 | Unit | Nanoseconds
 | Description | Amount of time the circuit breaker has spent in each state
 | Tags
@@ -138,7 +149,7 @@ a| * `method` - the fully qualified method name
 | Notes | Although this metric is a `Gauge`, its value increases monotonically.
 |===
 
-[cols="1,5"]
+[cols="2,4"]
 |===
 | Name | `ft.circuitbreaker.opened.total`
 
@@ -151,11 +162,12 @@ a| * `method` - the fully qualified method name
 
 === Metrics added for `@Bulkhead`
 
-[cols="1,5"]
+[cols="2,4"]
 |===
 | Name | `ft.bulkhead.calls.total`
 
-| Type | `Counter`
+| Type in MP Metrics | `Counter`
+| Type in MP Telemetry | A counter that emits long
 | Unit | None
 | Description | The number of times the bulkhead logic was run. This will usually be once per method call, but may be zero times if the circuit breaker prevented execution or more than once if the method call is retried.
 | Tags
@@ -163,22 +175,24 @@ a| * `method` - the fully qualified method name
  * `bulkheadResult` = `[accepted\|rejected]` - whether the bulkhead allowed the method call to run
 |===
 
-[cols="1,5"]
+[cols="2,4"]
 |===
 | Name | `ft.bulkhead.executionsRunning`
 
-| Type | `Gauge<Long>`
+| Type in MP Metrics | `Gauge<Long>`
+| Type in MP Telemetry | A gauge that emits long
 | Unit | None
 | Description | Number of currently running executions
 | Tags
 a| * `method` - the fully qualified method name
 |===
 
-[cols="1,5"]
+[cols="2,4"]
 |===
 | Name | `ft.bulkhead.executionsWaiting`
 
-| Type | `Gauge<Long>`
+| Type in MP Metrics | `Gauge<Long>`
+| Type in MP Telemetry | A gauge that emits long
 | Unit | None
 | Description | Number of executions currently waiting in the queue
 | Tags
@@ -186,22 +200,24 @@ a| * `method` - the fully qualified method name
 | Notes | Only added if the method is also annotated with `@Asynchronous`
 |===
 
-[cols="1,5"]
+[cols="2,4"]
 |===
 | Name | `ft.bulkhead.runningDuration`
 
-| Type | `Histogram`
+| Type in MP Metrics  | `Histogram`
+| Type in MP Telemetry  | A histogram that emits long
 | Unit | Nanoseconds
 | Description | Histogram of the time that method executions spent running
 | Tags
 a| * `method` - the fully qualified method name
 |===
 
-[cols="1,5"]
+[cols="2,4"]
 |===
 | Name | `ft.bulkhead.waitingDuration`
 
-| Type | `Histogram`
+| Type in MP Metrics  | `Histogram`
+| Type in MP Telemetry  | A histogram that emits long
 | Unit | Nanoseconds
 | Description | Histogram of the time that method executions spent waiting in the queue
 | Tags
@@ -213,7 +229,7 @@ a| * `method` - the fully qualified method name
 === Notes
 
 Future versions of this specification may change the definitions of the metrics which are added to take advantage of
-enhancements in the MicroProfile Metrics specification.
+enhancements in the MicroProfile Metrics or MicroProfile Telemetry specification.
 
 If more than one annotation is applied to a method, the metrics associated with each annotation will be added for that method.
 
