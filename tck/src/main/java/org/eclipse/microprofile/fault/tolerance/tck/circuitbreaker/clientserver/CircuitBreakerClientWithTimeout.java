@@ -59,7 +59,8 @@ public class CircuitBreakerClientWithTimeout {
      * 
      * @return should always throw TimeoutException
      */
-    @CircuitBreaker(successThreshold = 2, requestVolumeThreshold = 2, failureRatio = 0.75, delay = 50000, failOn = BulkheadException.class)
+    @CircuitBreaker(successThreshold = 2, requestVolumeThreshold = 2, failureRatio = 0.75, delay = 50000,
+                    failOn = BulkheadException.class)
     @Timeout(500) // Adjusted by config
     public String serviceWithTimeoutWithoutFailOn() {
         try {

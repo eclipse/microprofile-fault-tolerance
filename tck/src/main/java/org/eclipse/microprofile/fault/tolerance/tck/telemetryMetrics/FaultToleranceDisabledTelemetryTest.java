@@ -16,28 +16,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eclipse.microprofile.fault.tolerance.tck.metrics;
+package org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics;
 
-import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.BulkheadResult.ACCEPTED;
-import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.BulkheadResult.REJECTED;
-import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.CircuitBreakerResult.CIRCUIT_BREAKER_OPEN;
-import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.CircuitBreakerResult.FAILURE;
-import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.CircuitBreakerResult.SUCCESS;
-import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.CircuitBreakerState.CLOSED;
-import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.CircuitBreakerState.HALF_OPEN;
-import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationResult.EXCEPTION_THROWN;
-import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationResult.VALUE_RETURNED;
+import static org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.BulkheadResult.ACCEPTED;
+import static org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.BulkheadResult.REJECTED;
+import static org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.CircuitBreakerResult.CIRCUIT_BREAKER_OPEN;
+import static org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.CircuitBreakerResult.FAILURE;
+import static org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.CircuitBreakerResult.SUCCESS;
+import static org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.CircuitBreakerState.CLOSED;
+import static org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.CircuitBreakerState.HALF_OPEN;
+import static org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.InvocationResult.EXCEPTION_THROWN;
+import static org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.InvocationResult.VALUE_RETURNED;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 import java.util.concurrent.ExecutionException;
 
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.common.AllMetricsBean;
-import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationFallback;
-import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.RetryResult;
-import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.RetryRetried;
-import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.TimeoutTimedOut;
-import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricGetter;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.PullExporterAutoConfigurationCustomizerProvider;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.InvocationFallback;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.RetryResult;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.RetryRetried;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.TimeoutTimedOut;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricGetter;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
@@ -47,22 +48,26 @@ import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
+import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import jakarta.inject.Inject;
 
 /**
  * Check that metrics are not added when disabled by a config parameter
  */
-public class MetricsDisabledTest extends Arquillian {
+public class FaultToleranceDisabledTelemetryTest extends Arquillian {
 
     @Deployment
     public static WebArchive deploy() {
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftMetricDisabled.war")
                 .addClasses(AllMetricsBean.class)
                 .addPackage(Packages.UTILS)
-                .addPackage(Packages.METRIC_UTILS)
-                .addAsResource(new StringAsset("MP_Fault_Tolerance_Metrics_Enabled=false"),
+                .addPackage(Packages.TELEMETRY_METRIC_UTILS)
+                .addAsResource(new StringAsset(
+                        "otel.sdk.disabled=false\notel.traces.exporter=none\nMP_Fault_Tolerance_Metrics_Enabled=false"),
                         "META-INF/microprofile-config.properties")
-                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
+                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
+                .addAsServiceProvider(AutoConfigurationCustomizerProvider.class,
+                        PullExporterAutoConfigurationCustomizerProvider.class);
 
         return war;
     }
@@ -72,7 +77,7 @@ public class MetricsDisabledTest extends Arquillian {
 
     @Test
     public void testMetricsDisabled() throws InterruptedException, ExecutionException {
-        MetricGetter m = new MetricGetter(AllMetricsBean.class, "doWork");
+        TelemetryMetricGetter m = new TelemetryMetricGetter(AllMetricsBean.class, "doWork");
         m.baselineMetrics();
 
         allMetricsBean.doWork().get(); // Should succeed on first attempt
@@ -124,15 +129,16 @@ public class MetricsDisabledTest extends Arquillian {
         // Bulkhead metrics
         assertThat("bulkhead accepted calls", m.getBulkheadCalls(ACCEPTED).delta(), is(0L));
         assertThat("bulkhead rejected calls", m.getBulkheadCalls(REJECTED).delta(), is(0L));
-        assertThat("bulkhead executions running present", m.getBulkheadExecutionsRunning().gauge().isPresent(),
+        assertThat("bulkhead executions running present", m.getBulkheadExecutionsRunning().isPresent(),
                 is(false));
         assertThat("bulkhead executions running value", m.getBulkheadExecutionsRunning().value(), is(0L));
         assertThat("bulkhead running duration histogram present", m.getBulkheadRunningDuration().isPresent(),
                 is(false));
-        assertThat("bulkhead executions waiting present", m.getBulkheadExecutionsWaiting().gauge().isPresent(),
+        assertThat("bulkhead executions waiting present", m.getBulkheadExecutionsWaiting().isPresent(),
                 is(false));
         assertThat("bulkhead executions waiting value", m.getBulkheadExecutionsWaiting().value(), is(0L));
-        assertThat("bulkhead queue wait time histogram present", m.getBulkheadWaitingDuration().isPresent(), is(false));
+        assertThat("bulkhead queue wait time histogram present", m.getBulkheadWaitingDuration().isPresent(),
+                is(false));
     }
 
 }

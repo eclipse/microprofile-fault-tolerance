@@ -125,7 +125,9 @@ public class Exceptions {
             fail("Expected exception not thrown. Expected " + expectedException.getName());
         } catch (Exception e) {
             if (!expectedException.isInstance(e)) {
-                fail("Unexpected exception thrown", e);
+                fail("Unexpected exception thrown. Expected " + expectedException.getName() + ":"
+                        + expectedException.getClassLoader().toString() + " but got: "
+                        + e.getClass().getName() + ":" + e.getClass().getClassLoader().toString(), e);
             }
         }
     }

@@ -16,19 +16,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eclipse.microprofile.fault.tolerance.tck.metrics;
+package org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.eclipse.microprofile.fault.tolerance.tck.metrics.common.util.TimeUtils.approxMillis;
-import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.BulkheadResult.ACCEPTED;
-import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.BulkheadResult.REJECTED;
-import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationResult.EXCEPTION_THROWN;
-import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationResult.VALUE_RETURNED;
+import static org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.BulkheadResult.ACCEPTED;
+import static org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.BulkheadResult.REJECTED;
+import static org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.InvocationResult.EXCEPTION_THROWN;
+import static org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.InvocationResult.VALUE_RETURNED;
 import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expectBulkheadException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -37,24 +41,28 @@ import java.util.concurrent.TimeoutException;
 
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.common.BulkheadMetricBean;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.common.util.TimeUtils;
-import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationFallback;
-import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricGetter;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.InMemoryMetricReader;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.PullExporterAutoConfigurationCustomizerProvider;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.InvocationFallback;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricGetter;
 import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncCaller;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
-import org.eclipse.microprofile.metrics.Histogram;
-import org.eclipse.microprofile.metrics.Snapshot;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
+import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
+import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
+import io.opentelemetry.sdk.metrics.data.HistogramPointData;
 import jakarta.inject.Inject;
 
-public class BulkheadMetricTest extends Arquillian {
+public class BulkheadTelemetryTest extends Arquillian {
 
     @Deployment
     public static WebArchive deploy() {
@@ -62,8 +70,13 @@ public class BulkheadMetricTest extends Arquillian {
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftMetricBulkhead.war")
                 .addClasses(BulkheadMetricBean.class, TimeUtils.class)
                 .addPackage(Packages.UTILS)
-                .addPackage(Packages.METRIC_UTILS)
-                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
+                .addPackage(Packages.TELEMETRY_METRIC_UTILS)
+                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
+                .addAsResource(new StringAsset(
+                        "otel.sdk.disabled=false\notel.traces.exporter=none"),
+                        "META-INF/microprofile-config.properties")
+                .addAsServiceProvider(AutoConfigurationCustomizerProvider.class,
+                        PullExporterAutoConfigurationCustomizerProvider.class);
         return war;
     }
 
@@ -100,16 +113,19 @@ public class BulkheadMetricTest extends Arquillian {
         return result;
     }
 
-    @Test
+    @Test(groups = "main")
     public void bulkheadMetricTest() throws InterruptedException, ExecutionException, TimeoutException {
-        MetricGetter m = new MetricGetter(BulkheadMetricBean.class, "waitFor");
+        System.out.println("GREP + bulkheadMetricTest start");
+        TelemetryMetricGetter m = new TelemetryMetricGetter(BulkheadMetricBean.class, "waitFor");
         m.baselineMetrics();
+        System.out.println("GREP + bulkheadMetricTest after baseline");
 
         CompletableFuture<Void> waitingFuture = newWaitingFuture();
 
         Future<?> f1 = async.run(() -> bulkheadBean.waitFor(waitingFuture));
         Future<?> f2 = async.run(() -> bulkheadBean.waitFor(waitingFuture));
 
+        System.out.println("GREP + bulkheadMetricTest before fail");
         bulkheadBean.waitForRunningExecutions(2);
         assertThat("executions running", m.getBulkheadExecutionsRunning().value(), is(2L));
 
@@ -122,7 +138,7 @@ public class BulkheadMetricTest extends Arquillian {
         assertThat("rejected calls", m.getBulkheadCalls(REJECTED).delta(), is(0L));
 
         // Async metrics should not be present
-        assertThat("bulkhead executions waiting present", m.getBulkheadExecutionsWaiting().gauge().isPresent(),
+        assertThat("bulkhead executions waiting present", m.getBulkheadExecutionsWaiting().isPresent(),
                 is(false));
         assertThat("bulkhead waiting duration present", m.getBulkheadWaitingDuration().isPresent(), is(false));
 
@@ -133,9 +149,9 @@ public class BulkheadMetricTest extends Arquillian {
                 is(0L));
     }
 
-    @Test
+    @Test(groups = "main")
     public void bulkheadMetricRejectionTest() throws InterruptedException, ExecutionException, TimeoutException {
-        MetricGetter m = new MetricGetter(BulkheadMetricBean.class, "waitFor");
+        TelemetryMetricGetter m = new TelemetryMetricGetter(BulkheadMetricBean.class, "waitFor");
         m.baselineMetrics();
 
         CompletableFuture<Void> waitingFuture = newWaitingFuture();
@@ -166,9 +182,9 @@ public class BulkheadMetricTest extends Arquillian {
 
     }
 
-    @Test
+    @Test(groups = "main")
     public void bulkheadMetricHistogramTest() throws InterruptedException, ExecutionException, TimeoutException {
-        MetricGetter m = new MetricGetter(BulkheadMetricBean.class, "waitForHistogram");
+        TelemetryMetricGetter m = new TelemetryMetricGetter(BulkheadMetricBean.class, "waitForHistogram");
         m.baselineMetrics();
 
         CompletableFuture<Void> waitingFuture = newWaitingFuture();
@@ -186,25 +202,33 @@ public class BulkheadMetricTest extends Arquillian {
         f1.get(1, MINUTES);
         f2.get(1, MINUTES);
 
-        Histogram executionTimes = m.getBulkheadRunningDuration().get();
-        Snapshot snap = executionTimes.getSnapshot();
+        Long executionTimesCount = m.getBulkheadRunningDuration().getHistogramCount().get();
+        assertThat("histogram count", executionTimesCount, is(2L)); // Rejected executions
+                                                                    // not recorded in
 
-        assertThat("histogram count", executionTimes.getCount(), is(2L)); // Rejected executions not recorded in
-                                                                          // histogram
-        assertThat("mean", Math.round(snap.getMean()), approxMillis(1000));
+        Collection<HistogramPointData> executionTimesPoints = m.getBulkheadRunningDuration().getHistogramPoints();
+        double time = executionTimesPoints.stream()
+                .mapToDouble(points -> points.getSum())
+                .sum();
+
+        long count = executionTimesPoints.stream()
+                .mapToLong(points -> points.getCount())
+                .sum();
+
+        assertThat("mean", Math.round(time / count), approxMillis(1000)); // histogram
 
         // Now let's put some quick results through the bulkhead
         bulkheadBean.waitForHistogram(CompletableFuture.completedFuture(null));
         bulkheadBean.waitForHistogram(CompletableFuture.completedFuture(null));
 
         // Should have 4 results, ~0ms * 2 and ~1000ms * 2
-        snap = executionTimes.getSnapshot();
-        assertThat("histogram count", executionTimes.getCount(), is(4L));
+        executionTimesCount = m.getBulkheadRunningDuration().getHistogramCount().get();
+        assertThat("histogram count", executionTimesCount, is(4L));
     }
 
-    @Test
+    @Test(groups = "main")
     public void bulkheadMetricAsyncTest() throws InterruptedException, ExecutionException, TimeoutException {
-        MetricGetter m = new MetricGetter(BulkheadMetricBean.class, "waitForAsync");
+        TelemetryMetricGetter m = new TelemetryMetricGetter(BulkheadMetricBean.class, "waitForAsync");
         m.baselineMetrics();
 
         CompletableFuture<Void> waitingFuture = newWaitingFuture();
@@ -234,10 +258,10 @@ public class BulkheadMetricTest extends Arquillian {
         assertThat("accepted calls", m.getBulkheadCalls(ACCEPTED).delta(), is(4L));
         assertThat("rejections", m.getBulkheadCalls(REJECTED).delta(), is(1L));
 
-        Histogram queueWaits = m.getBulkheadWaitingDuration().get();
+        Long queueWaits = m.getBulkheadWaitingDuration().getHistogramCount().get();
 
         // Expect 2 * wait for 0ms, 2 * wait for durationms
-        assertThat("waiting duration histogram counts", queueWaits.getCount(), is(4L));
+        assertThat("waiting duration histogram counts", queueWaits, is(4L));
 
         // General metrics should be updated
         assertThat("successful invocations", m.getInvocations(VALUE_RETURNED, InvocationFallback.NOT_DEFINED).delta(),
@@ -246,7 +270,28 @@ public class BulkheadMetricTest extends Arquillian {
                 is(1L));
     }
 
-    private void waitForQueuePopulation(MetricGetter m,
+    @Test(dependsOnGroups = "main")
+    public void testMetricUnits() throws InterruptedException, ExecutionException {
+        InMemoryMetricReader reader = InMemoryMetricReader.current();
+
+        // Validate that each metric has metadata which declares the correct unit
+        for (TelemetryMetricDefinition metric : TelemetryMetricDefinition.values()) {
+            if (!metric.getName().startsWith("ft.bulkhead")) {
+                continue;
+            }
+
+            String unit = reader.getUnit(metric.getName());
+
+            if (metric.getUnit() == null) {
+                assertTrue(unit.isEmpty(), "Unexpected metadata for metric " + metric.getName());
+            } else {
+                assertFalse(unit.isEmpty(), "Missing metadata for metric " + metric.getName());
+                assertEquals(unit, metric.getUnit(), "Incorrect unit for metric " + metric.getName());
+            }
+        }
+    }
+
+    private void waitForQueuePopulation(TelemetryMetricGetter m,
             int expectedQueuePopulation,
             long timeoutInMs) throws InterruptedException {
         long timeoutTime = System.currentTimeMillis() + timeoutInMs;

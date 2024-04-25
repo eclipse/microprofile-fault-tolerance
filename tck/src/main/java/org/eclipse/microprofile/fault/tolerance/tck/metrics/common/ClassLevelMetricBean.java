@@ -17,30 +17,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package org.eclipse.microprofile.fault.tolerance.tck.metrics;
+package org.eclipse.microprofile.fault.tolerance.tck.metrics.common;
 
-import org.eclipse.microprofile.faulttolerance.Timeout;
+import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
+import org.eclipse.microprofile.faulttolerance.Retry;
 
 import jakarta.enterprise.context.RequestScoped;
 
+/**
+ * This is similar to RetryMetricBean but has the {@code @Retry} annotation on the class
+ */
 @RequestScoped
-public class TimeoutMetricBean {
+@Retry(maxRetries = 5)
+public class ClassLevelMetricBean {
 
-    @Timeout(value = 500)
-    public void counterTestWorkForMillis(long millis) {
-        doWork(millis);
-    }
+    private int calls = 0;
 
-    @Timeout(value = 2000)
-    public void histogramTestWorkForMillis(long millis) {
-        doWork(millis);
-    }
-
-    private void doWork(long millis) {
-        try {
-            Thread.sleep(millis);// timeout config must be done in the caller.
-        } catch (InterruptedException ex) {
-            throw new RuntimeException("Test was interrupted", ex);
+    public void failSeveralTimes(int timesToFail) {
+        calls++;
+        if (calls <= timesToFail) {
+            throw new TestException("call no. " + calls);
         }
     }
 

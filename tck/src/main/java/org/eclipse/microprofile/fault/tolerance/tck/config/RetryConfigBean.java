@@ -58,7 +58,8 @@ public class RetryConfigBean {
     }
 
     @Retry(retryOn = {TestConfigExceptionA.class,
-            TestConfigExceptionB.class}, abortOn = RuntimeException.class, maxRetries = 1, delay = 0, jitter = 0)
+            TestConfigExceptionB.class},
+           abortOn = RuntimeException.class, maxRetries = 1, delay = 0, jitter = 0)
     public void serviceAbortOn(RuntimeException e, AtomicInteger counter) {
         counter.getAndIncrement();
         throw e;
@@ -75,7 +76,8 @@ public class RetryConfigBean {
      * <p>
      * Limited to 10 seconds or 1000 retries, but will stop as soon as a delay of &gt; 100ms is observed.
      */
-    @Retry(abortOn = TestConfigExceptionA.class, delay = 0, jitter = 0, maxRetries = 1000, maxDuration = 10, durationUnit = ChronoUnit.SECONDS)
+    @Retry(abortOn = TestConfigExceptionA.class, delay = 0, jitter = 0, maxRetries = 1000, maxDuration = 10,
+           durationUnit = ChronoUnit.SECONDS)
     public void serviceJitter() {
         long startTime = System.nanoTime();
         if (lastStartTime != 0) {

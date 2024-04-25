@@ -16,49 +16,64 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eclipse.microprofile.fault.tolerance.tck.metrics;
+package org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics;
 
-import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationResult.EXCEPTION_THROWN;
-import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationResult.VALUE_RETURNED;
+import static org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.InvocationResult.EXCEPTION_THROWN;
+import static org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.InvocationResult.VALUE_RETURNED;
 import static org.eclipse.microprofile.fault.tolerance.tck.util.Exceptions.expectTestException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
+
+import java.util.concurrent.ExecutionException;
 
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.common.FallbackMetricBean;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.common.FallbackMetricBean.Action;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.common.FallbackMetricBean.NonFallbackException;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.common.FallbackMetricHandler;
-import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationFallback;
-import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricGetter;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.InMemoryMetricReader;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.PullExporterAutoConfigurationCustomizerProvider;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.InvocationFallback;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricGetter;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
+import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
+import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import jakarta.inject.Inject;
 
-public class FallbackMetricTest extends Arquillian {
+public class FallbackTelemetryTest extends Arquillian {
 
     @Deployment
     public static WebArchive deploy() {
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftMetricFallback.war")
                 .addClasses(FallbackMetricBean.class, FallbackMetricHandler.class)
                 .addPackage(Packages.UTILS)
-                .addPackage(Packages.METRIC_UTILS)
-                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
+                .addPackage(Packages.TELEMETRY_METRIC_UTILS)
+                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
+                .addAsResource(new StringAsset(
+                        "otel.sdk.disabled=false\notel.traces.exporter=none"),
+                        "META-INF/microprofile-config.properties")
+                .addAsServiceProvider(AutoConfigurationCustomizerProvider.class,
+                        PullExporterAutoConfigurationCustomizerProvider.class);
         return war;
     }
 
     @Inject
     private FallbackMetricBean fallbackBean;
 
-    @Test
+    @Test(groups = "main")
     public void fallbackMetricMethodTest() {
-        MetricGetter m = new MetricGetter(FallbackMetricBean.class, "doWork");
+        TelemetryMetricGetter m = new TelemetryMetricGetter(FallbackMetricBean.class, "doWork");
         m.baselineMetrics();
 
         fallbackBean.setFallbackAction(Action.PASS);
@@ -109,9 +124,9 @@ public class FallbackMetricTest extends Arquillian {
                 is(1L));
     }
 
-    @Test
+    @Test(groups = "main")
     public void fallbackMetricHandlerTest() {
-        MetricGetter m = new MetricGetter(FallbackMetricBean.class, "doWorkWithHandler");
+        TelemetryMetricGetter m = new TelemetryMetricGetter(FallbackMetricBean.class, "doWorkWithHandler");
         m.baselineMetrics();
 
         fallbackBean.setFallbackAction(Action.PASS);
@@ -160,6 +175,27 @@ public class FallbackMetricTest extends Arquillian {
                 m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_APPLIED).delta(), is(1L));
         assertThat("failed with fallback", m.getInvocations(EXCEPTION_THROWN, InvocationFallback.APPLIED).delta(),
                 is(1L));
+    }
+
+    @Test(dependsOnGroups = "main")
+    public void testMetricUnits() throws InterruptedException, ExecutionException {
+        InMemoryMetricReader reader = InMemoryMetricReader.current();
+
+        // Validate that each metric has metadata which declares the correct unit
+        for (TelemetryMetricDefinition metric : TelemetryMetricDefinition.values()) {
+            if (!metric.getName().equals("ft.invocations.total")) {
+                continue;
+            }
+
+            String unit = reader.getUnit(metric.getName());
+
+            if (metric.getUnit() == null) {
+                assertTrue(unit.isEmpty(), "Unexpected metadata for metric " + metric.getName());
+            } else {
+                assertFalse(unit.isEmpty(), "Missing metadata for metric " + metric.getName());
+                assertEquals(unit, metric.getUnit(), "Incorrect unit for metric " + metric.getName());
+            }
+        }
     }
 
 }

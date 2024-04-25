@@ -36,5 +36,11 @@ public class Packages {
      * The {@code org.eclipse.microprofile.fault.tolerance.tck.metrics.util} package
      */
     public static final Package METRIC_UTILS =
-            org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricComparator.class.getPackage();
+            org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricGetter.class.getPackage();
+
+    /**
+     * The {@code org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util} package
+     */
+    public static final Package TELEMETRY_METRIC_UTILS =
+            org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricGetter.class.getPackage();
 }

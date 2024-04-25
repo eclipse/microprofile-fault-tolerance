@@ -39,7 +39,8 @@ public class Bulkhead1Retry0MethodSyncBean {
 
     @Bulkhead(value = 1)
     @Retry(retryOn = {
-            BulkheadException.class}, delay = 1, delayUnit = ChronoUnit.SECONDS, maxRetries = 0, maxDuration = 999999)
+            BulkheadException.class},
+           delay = 1, delayUnit = ChronoUnit.SECONDS, maxRetries = 0, maxDuration = 999999)
     public void test(Barrier barrier) {
         barrier.await();
     }

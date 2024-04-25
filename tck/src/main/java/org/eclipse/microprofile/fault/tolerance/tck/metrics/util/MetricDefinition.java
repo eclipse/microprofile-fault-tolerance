@@ -50,26 +50,36 @@ import org.eclipse.microprofile.metrics.Tag;
 public enum MetricDefinition {
     INVOCATIONS("ft.invocations.total", Counter.class, InvocationResult.class, InvocationFallback.class), RETRY_CALLS(
             "ft.retry.calls.total", Counter.class, RetryRetried.class,
-            RetryResult.class), RETRY_RETRIES("ft.retry.retries.total", Counter.class), TIMEOUT_CALLS(
-                    "ft.timeout.calls.total", Counter.class,
-                    TimeoutTimedOut.class), TIMEOUT_EXECUTION_DURATION("ft.timeout.executionDuration", Histogram.class,
-                            MetricUnits.NANOSECONDS), CIRCUITBREAKER_CALLS("ft.circuitbreaker.calls.total",
-                                    Counter.class, CircuitBreakerResult.class), CIRCUITBREAKER_STATE(
-                                            "ft.circuitbreaker.state.total", Gauge.class, MetricUnits.NANOSECONDS,
-                                            CircuitBreakerState.class), CIRCUITBREAKER_OPENED(
-                                                    "ft.circuitbreaker.opened.total", Counter.class), BULKHEAD_CALLS(
-                                                            "ft.bulkhead.calls.total", Counter.class,
-                                                            BulkheadResult.class), BULKHEAD_EXECUTIONS_RUNNING(
-                                                                    "ft.bulkhead.executionsRunning",
-                                                                    Gauge.class), BULKHEAD_EXECUTIONS_WAITING(
-                                                                            "ft.bulkhead.executionsWaiting",
-                                                                            Gauge.class), BULKHEAD_RUNNING_DURATION(
-                                                                                    "ft.bulkhead.runningDuration",
-                                                                                    Histogram.class,
-                                                                                    MetricUnits.NANOSECONDS), BULKHEAD_WAITING_DURATION(
-                                                                                            "ft.bulkhead.waitingDuration",
-                                                                                            Histogram.class,
-                                                                                            MetricUnits.NANOSECONDS);
+            RetryResult.class),
+    RETRY_RETRIES("ft.retry.retries.total", Counter.class), TIMEOUT_CALLS(
+            "ft.timeout.calls.total", Counter.class,
+            TimeoutTimedOut.class),
+    TIMEOUT_EXECUTION_DURATION("ft.timeout.executionDuration", Histogram.class,
+            MetricUnits.NANOSECONDS),
+    CIRCUITBREAKER_CALLS("ft.circuitbreaker.calls.total",
+            Counter.class, CircuitBreakerResult.class),
+    CIRCUITBREAKER_STATE(
+            "ft.circuitbreaker.state.total", Gauge.class, MetricUnits.NANOSECONDS,
+            CircuitBreakerState.class),
+    CIRCUITBREAKER_OPENED(
+            "ft.circuitbreaker.opened.total", Counter.class),
+    BULKHEAD_CALLS(
+            "ft.bulkhead.calls.total", Counter.class,
+            BulkheadResult.class),
+    BULKHEAD_EXECUTIONS_RUNNING(
+            "ft.bulkhead.executionsRunning",
+            Gauge.class),
+    BULKHEAD_EXECUTIONS_WAITING(
+            "ft.bulkhead.executionsWaiting",
+            Gauge.class),
+    BULKHEAD_RUNNING_DURATION(
+            "ft.bulkhead.runningDuration",
+            Histogram.class,
+            MetricUnits.NANOSECONDS),
+    BULKHEAD_WAITING_DURATION(
+            "ft.bulkhead.waitingDuration",
+            Histogram.class,
+            MetricUnits.NANOSECONDS);
 
     private String name;
     private String unit;
@@ -93,7 +103,7 @@ public enum MetricDefinition {
 
     /**
      * The metric name
-     * 
+     *
      * @return the name
      */
     public String getName() {
@@ -102,7 +112,7 @@ public enum MetricDefinition {
 
     /**
      * The metric unit
-     * 
+     *
      * @return the unit
      */
     public String getUnit() {
@@ -111,7 +121,7 @@ public enum MetricDefinition {
 
     /**
      * The subclass of {@link Metric} used by this metric
-     * 
+     *
      * @return the metric class
      */
     public Class<? extends Metric> getMetricClass() {
@@ -122,7 +132,7 @@ public enum MetricDefinition {
      * The tags which are applied to this metric
      * <p>
      * The classes returned from this method will be enums which implement {@link TagValue}
-     * 
+     *
      * @return the tags which are applied to this metric
      */
     public Class<? extends TagValue>[] getTagClasses() {
@@ -205,7 +215,8 @@ public enum MetricDefinition {
 
     public enum RetryResult implements TagValue {
         VALUE_RETURNED("valueReturned"), EXCEPTION_NOT_RETRYABLE("exceptionNotRetryable"), MAX_RETRIES_REACHED(
-                "maxRetriesReached"), MAX_DURATION_REACHED("maxDurationReached");
+                "maxRetriesReached"),
+        MAX_DURATION_REACHED("maxDurationReached");
 
         private Tag tag;
 

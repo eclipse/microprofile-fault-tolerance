@@ -16,43 +16,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eclipse.microprofile.fault.tolerance.tck.metrics;
+package org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics;
 
-import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.BulkheadResult.ACCEPTED;
-import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.BulkheadResult.REJECTED;
-import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.CircuitBreakerResult.CIRCUIT_BREAKER_OPEN;
-import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.CircuitBreakerResult.FAILURE;
-import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.CircuitBreakerResult.SUCCESS;
-import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.CircuitBreakerState.CLOSED;
-import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.CircuitBreakerState.HALF_OPEN;
-import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.CircuitBreakerState.OPEN;
-import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationResult.EXCEPTION_THROWN;
-import static org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationResult.VALUE_RETURNED;
+import static org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.BulkheadResult.ACCEPTED;
+import static org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.BulkheadResult.REJECTED;
+import static org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.CircuitBreakerResult.CIRCUIT_BREAKER_OPEN;
+import static org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.CircuitBreakerResult.FAILURE;
+import static org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.CircuitBreakerResult.SUCCESS;
+import static org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.CircuitBreakerState.CLOSED;
+import static org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.CircuitBreakerState.HALF_OPEN;
+import static org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.CircuitBreakerState.OPEN;
+import static org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.InvocationResult.EXCEPTION_THROWN;
+import static org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.InvocationResult.VALUE_RETURNED;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Optional;
+import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
 import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
 import org.eclipse.microprofile.fault.tolerance.tck.metrics.common.AllMetricsBean;
-import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition;
-import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.InvocationFallback;
-import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.RetryResult;
-import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.RetryRetried;
-import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricDefinition.TimeoutTimedOut;
-import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricGetter;
-import org.eclipse.microprofile.fault.tolerance.tck.metrics.util.MetricRegistryProxy;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.PullExporterAutoConfigurationCustomizerProvider;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.InvocationFallback;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.RetryResult;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.RetryRetried;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.TimeoutTimedOut;
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricGetter;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
-import org.eclipse.microprofile.metrics.Metadata;
-import org.eclipse.microprofile.metrics.MetricRegistry.Type;
-import org.eclipse.microprofile.metrics.MetricUnits;
-import org.eclipse.microprofile.metrics.annotation.RegistryType;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -61,26 +52,34 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.testng.annotations.Test;
 
+import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import jakarta.inject.Inject;
 
 /**
  * Test that metrics are created when all the Fault Tolerance annotations are placed on the same method
  */
-public class AllMetricsTest extends Arquillian {
+public class AllAnnotationTelemetryTest extends Arquillian {
 
     @Deployment
     public static WebArchive deploy() {
 
+        Properties props = new Properties();
+        props.put("otel.sdk.disabled", "false");
+        props.put("otel.traces.exporter", "none");
+
         // Scales the following method's annotation values by the TCKConfig baseMultiplier
         ConfigAnnotationAsset allMetricsBeanConfig = new ConfigAnnotationAsset()
-                .autoscaleMethod(AllMetricsBean.class, "doWork");
+                .autoscaleMethod(AllMetricsBean.class, "doWork")
+                .mergeProperties(props);
 
         JavaArchive jar = ShrinkWrap.create(JavaArchive.class, "ftMetricAll.jar")
-                .addClasses(AllMetricsBean.class)
+                .addClass(AllMetricsBean.class)
                 .addPackage(Packages.UTILS)
-                .addPackage(Packages.METRIC_UTILS)
+                .addPackage(Packages.TELEMETRY_METRIC_UTILS)
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml")
-                .addAsManifestResource(allMetricsBeanConfig, "microprofile-config.properties");
+                .addAsManifestResource(allMetricsBeanConfig, "microprofile-config.properties")
+                .addAsServiceProvider(AutoConfigurationCustomizerProvider.class,
+                        PullExporterAutoConfigurationCustomizerProvider.class);
 
         WebArchive war = ShrinkWrap.create(WebArchive.class, "ftMetricAll.war")
                 .addAsLibrary(jar);
@@ -91,13 +90,9 @@ public class AllMetricsTest extends Arquillian {
     @Inject
     private AllMetricsBean allMetricsBean;
 
-    @Inject
-    @RegistryType(type = Type.BASE)
-    private MetricRegistryProxy metricRegistry;
-
     @Test
     public void testAllMetrics() throws InterruptedException, ExecutionException {
-        MetricGetter m = new MetricGetter(AllMetricsBean.class, "doWork");
+        TelemetryMetricGetter m = new TelemetryMetricGetter(AllMetricsBean.class, "doWork");
         m.baselineMetrics();
 
         allMetricsBean.doWork().get(); // Should succeed on first attempt
@@ -149,63 +144,16 @@ public class AllMetricsTest extends Arquillian {
         // Bulkhead metrics
         assertThat("bulkhead accepted calls", m.getBulkheadCalls(ACCEPTED).delta(), is(1L));
         assertThat("bulkhead rejected calls", m.getBulkheadCalls(REJECTED).delta(), is(0L));
-        assertThat("bulkhead executions running present", m.getBulkheadExecutionsRunning().gauge().isPresent(),
+        assertThat("bulkhead executions running present", m.getBulkheadExecutionsRunning().isPresent(),
                 is(true));
         assertThat("bulkhead executions running value", m.getBulkheadExecutionsRunning().value(), is(0L));
-        assertThat("bulkhead running duration histogram present", m.getBulkheadRunningDuration().isPresent(), is(true));
-        assertThat("bulkhead executions waiting present", m.getBulkheadExecutionsWaiting().gauge().isPresent(),
+        assertThat("bulkhead running duration histogram present", m.getBulkheadRunningDuration().isPresent(),
+                is(true));
+        assertThat("bulkhead executions waiting present", m.getBulkheadExecutionsWaiting().isPresent(),
                 is(true));
         assertThat("bulkhead executions waiting value", m.getBulkheadExecutionsWaiting().value(), is(0L));
-        assertThat("bulkhead queue wait time histogram present", m.getBulkheadWaitingDuration().isPresent(), is(true));
-    }
-
-    @Test
-    public void testMetricUnits() throws InterruptedException, ExecutionException {
-        // Call the method to ensure that all metrics get registered
-        allMetricsBean.doWork().get();
-
-        // Validate that each metric has metadata which declares the correct unit
-        for (MetricDefinition metric : MetricDefinition.values()) {
-            Metadata metadata = metricRegistry.getMetadata().get(metric.getName());
-
-            assertNotNull(metadata, "Missing metadata for metric " + metric);
-
-            assertEquals(getUnit(metadata), metric.getUnit(), "Incorrect unit for metric " + metric);
-        }
-    }
-
-    /**
-     * Gets metric unit from metadata via reflection which works for Metrics 2.x and 3.x
-     *
-     * @param metadata
-     *            the metadata
-     * @return the unit or {@code MetricUnits.NONE} if the metadata has no unit
-     */
-    private String getUnit(Metadata metadata) {
-        Method getUnit = null;
-        try {
-            // Look for Metrics 3.0 method
-            getUnit = Metadata.class.getMethod("unit");
-        } catch (NoSuchMethodException e) {
-            // Look for Metrics 2.x method
-            try {
-                getUnit = Metadata.class.getMethod("getUnit");
-            } catch (NoSuchMethodException e1) {
-                throw new RuntimeException(e1);
-            }
-        }
-
-        if (!getUnit.getReturnType().equals(Optional.class)) {
-            throw new RuntimeException("Method found to get unit has wrong return type: " + getUnit);
-        }
-
-        Optional<String> optional;
-        try {
-            optional = (Optional<String>) getUnit.invoke(metadata);
-        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            throw new RuntimeException("Failure calling method to get unit: " + getUnit, e);
-        }
-        return optional.orElse(MetricUnits.NONE);
+        assertThat("bulkhead queue wait time histogram present", m.getBulkheadRunningDuration().isPresent(),
+                is(true));
     }
 
 }
