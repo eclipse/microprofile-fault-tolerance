@@ -153,7 +153,8 @@ a| * `method` - the fully qualified method name
 |===
 | Name | `ft.circuitbreaker.opened.total`
 
-| Type | `Counter`
+| Type in MP Metrics | `Counter`
+| Type in MP Telemetry | A counter that emits long
 | Unit | None
 | Description | Number of times the circuit breaker has moved from closed state to open state
 | Tags
