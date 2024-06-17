@@ -18,6 +18,20 @@
 // Contributors:
 // Emily Jiang
 
+[[release_notes_41]]
+== Release Notes for MicroProfile Fault Tolerance 4.1
+
+A full list of changes delivered in the 4.1 release can be found at link:https://github.com/eclipse/microprofile-fault-tolerance/milestone/11[MicroProfile Fault Tolerance 4.1 Milestone].
+
+=== Incompatible Changes
+No.
+
+=== API/SPI Changes
+No.
+
+=== Specification changes
+- Work with MicroProfile Telemetry Metrics (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/622[#622])
+
 [[release_notes_40]]
 == Release Notes for MicroProfile Fault Tolerance 4.0
 
