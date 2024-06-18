@@ -35,7 +35,7 @@ public class CircuitBreakerClientWithTimeout {
      * Sleeps for 1000ms, times out after 500ms
      * <p>
      * CircuitBreaker opens after two failed requests
-     * 
+     *
      * @return should always throw TimeoutException, unless CircuitBreaker prevents execution
      */
     @CircuitBreaker(successThreshold = 2, requestVolumeThreshold = 2, failureRatio = 0.75, delay = 50000)
@@ -56,7 +56,7 @@ public class CircuitBreakerClientWithTimeout {
      * CircuitBreaker opens after two BulkheadExceptions
      * <p>
      * The method should never throw a BulkheadException so the CircuitBreaker should have no effect
-     * 
+     *
      * @return should always throw TimeoutException
      */
     @CircuitBreaker(successThreshold = 2, requestVolumeThreshold = 2, failureRatio = 0.75, delay = 50000, failOn = BulkheadException.class)

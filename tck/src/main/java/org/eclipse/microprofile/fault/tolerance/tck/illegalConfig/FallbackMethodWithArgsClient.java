@@ -26,7 +26,7 @@ import jakarta.enterprise.context.RequestScoped;
 
 /**
  * A client to demonstrate the fallback after doing retries
- * 
+ *
  * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  *
  */
@@ -35,7 +35,7 @@ public class FallbackMethodWithArgsClient {
 
     /**
      * Retry 5 times and then fallback
-     * 
+     *
      * @param name
      *            a string
      * @param type
@@ -50,7 +50,7 @@ public class FallbackMethodWithArgsClient {
 
     /**
      * Fallback method with incompatible signature, only one parameter
-     * 
+     *
      * @param name
      *            a string
      * @return a dummy number

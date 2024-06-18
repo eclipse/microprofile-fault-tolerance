@@ -47,7 +47,7 @@ public class InvalidTimeoutValueTest extends Arquillian {
 
     /**
      * Test that the deployment of an invalid @Timeout parameter leads to a DeploymentException.
-     * 
+     *
      * A Service is annotated with a @Timeout annotation with a negative value.
      */
     @Test

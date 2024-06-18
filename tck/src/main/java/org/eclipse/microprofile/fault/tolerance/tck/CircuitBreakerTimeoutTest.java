@@ -35,7 +35,7 @@ import jakarta.inject.Inject;
 
 /**
  * Test the combination of {@code @CircuitBreaker} and {@code @Timeout}
- * 
+ *
  * @author <a href="mailto:anrouse@uk.ibm.com">Andrew Rouse</a>
  */
 public class CircuitBreakerTimeoutTest extends Arquillian {

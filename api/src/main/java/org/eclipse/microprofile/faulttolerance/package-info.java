@@ -22,7 +22,7 @@
  * <p>
  * CDI Support for Microprofile Fault Tolerance
  *
- * 
+ *
  *
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  */

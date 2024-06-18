@@ -68,7 +68,7 @@ public class ConfigAnnotationAsset implements Asset {
      * <li>Timeout.value</li>
      * <li>CircuitBreaker.delay</li>
      * </ul>
-     * 
+     *
      * @return {@code this}
      */
     public ConfigAnnotationAsset autoscaleMethod(Class<?> clazz, final String method) {
@@ -103,7 +103,7 @@ public class ConfigAnnotationAsset implements Asset {
      * <li>Timeout.value</li>
      * <li>CircuitBreaker.delay</li>
      * </ul>
-     * 
+     *
      * @return {@code this}
      */
     public ConfigAnnotationAsset autoscaleClass(Class<?> clazz) {
@@ -116,7 +116,7 @@ public class ConfigAnnotationAsset implements Asset {
      * <p>
      * If {@code method} is provided, then config will be generated for annotations on the method, otherwise config will
      * be generated for annotations on the class.
-     * 
+     *
      * @param clazz
      *            the class
      * @param method
@@ -167,7 +167,7 @@ public class ConfigAnnotationAsset implements Asset {
 
     /**
      * Configure the {@code value} parameter on an annotation applied to a method
-     * 
+     *
      * @param clazz
      *            the class which has the method
      * @param method
@@ -186,7 +186,7 @@ public class ConfigAnnotationAsset implements Asset {
 
     /**
      * Configure a parameter on an annotation applied to a method
-     * 
+     *
      * @param clazz
      *            the class which has the method
      * @param method
@@ -210,7 +210,7 @@ public class ConfigAnnotationAsset implements Asset {
 
     /**
      * Configure the parameter of an annotation globally
-     * 
+     *
      * @param annotation
      *            the annotation type which has the parameter
      * @param parameter

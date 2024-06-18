@@ -46,7 +46,7 @@ public class InvalidCircuitBreakerFailureReqVol0Test extends Arquillian {
     }
     /**
      * Test that the deployment of an invalid @CircuitBreaker parameter leads to a DeploymentException.
-     * 
+     *
      * A Service is annotated with a @CircuitBreaker annotation with a requestVolumeThreshold of 0.
      */
     @Test

@@ -30,7 +30,7 @@ import jakarta.enterprise.context.RequestScoped;
 
 /**
  * A client to demonstrate the delay configurations
- * 
+ *
  * @author <a href="mailto:bbaptista@tomitribe.com">Bruno Baptista</a>
  *
  */

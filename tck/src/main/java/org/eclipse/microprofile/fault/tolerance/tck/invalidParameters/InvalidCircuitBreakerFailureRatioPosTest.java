@@ -46,7 +46,7 @@ public class InvalidCircuitBreakerFailureRatioPosTest extends Arquillian {
     }
     /**
      * Test that the deployment of an invalid @CircuitBreaker parameter leads to a DeploymentException.
-     * 
+     *
      * A Service is annotated with a @CircuitBreaker annotation with a failureRatio greater than 1.
      */
     @Test

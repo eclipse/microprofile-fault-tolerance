@@ -124,10 +124,10 @@ public class AsynchronousTest extends Arquillian {
     /**
      * Test that the request context is active during execution for an asynchronous method that returns a
      * CompletionStage
-     * 
+     *
      * If the request scope is active, then an @ApplicationScoped bean should be able to asynchronously call
      * an @Asynchronous method returning a CompletionStage on a @RequestScoped bean, and return the correct result
-     * 
+     *
      * @throws TimeoutException
      * @throws ExecutionException
      * @throws InterruptedException
@@ -142,10 +142,10 @@ public class AsynchronousTest extends Arquillian {
 
     /**
      * Test that the request context is active during execution for an asynchronous method that returns a Future
-     * 
+     *
      * If the request scope is active, then an @ApplicationScoped bean should be able to asynchronously call
      * an @Asynchronous method returning a Future on a @RequestScoped bean, and return the correct result
-     * 
+     *
      * @throws TimeoutException
      * @throws ExecutionException
      * @throws InterruptedException

@@ -29,7 +29,7 @@ import jakarta.enterprise.context.RequestScoped;
 /**
  * A client to exercise Circuit Breaker thresholds, with a SuccessThreshold of 3, a requestVolumeThreshold of 4,
  * failureRatio of 0.75 and a 1 second delay.
- * 
+ *
  * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  *
  */

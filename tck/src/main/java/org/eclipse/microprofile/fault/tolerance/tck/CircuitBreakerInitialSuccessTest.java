@@ -36,7 +36,7 @@ import jakarta.inject.Inject;
 
 /**
  * Test CircuitBreaker using different success/failure pattern.
- * 
+ *
  * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  *
  */
@@ -60,7 +60,7 @@ public class CircuitBreakerInitialSuccessTest extends Arquillian {
     /**
      * Analagous to testCircuitDefaultSuccessThreshold but with a different success/failure pattern for the service that
      * is called. In this case, the service initially succeeds.
-     * 
+     *
      * With requestVolumeThreshold = 4, failureRatio=0.75 and successThreshold = 1 the expected behaviour is,
      *
      * Execution Behaviour ========= ========= 1 SUCCESS 2 RunTimeException 3 RunTimeException 4 RunTimeException 5

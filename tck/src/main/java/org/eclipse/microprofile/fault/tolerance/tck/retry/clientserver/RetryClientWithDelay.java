@@ -35,7 +35,7 @@ import jakarta.enterprise.context.RequestScoped;
 
 /**
  * A client to demonstrate the delay configurations
- * 
+ *
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  *
  */

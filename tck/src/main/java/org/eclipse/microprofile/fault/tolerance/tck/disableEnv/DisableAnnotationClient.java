@@ -40,7 +40,7 @@ import jakarta.inject.Inject;
  * A client to determine the impact of disabling annotations via config
  * <p>
  * Each method has an easy test to determine whether it's annotations are active or not.
- * 
+ *
  * @author <a href="mailto:anrouse@uk.ibm.com">Andrew Rouse</a>
  *
  */
@@ -75,7 +75,7 @@ public class DisableAnnotationClient {
      * Should return normally if Fallback is enabled or throw TestException if not
      * <p>
      * Should increment counter by two if Retry is enabled or one if it is not
-     * 
+     *
      * @return nothing, always throws TestException
      */
     @Retry(maxRetries = 1)
@@ -130,7 +130,7 @@ public class DisableAnnotationClient {
      * If passed an already completed {@link Future}, this method will return immediately.
      * <p>
      * Should permit two simultaneous calls if bulkhead enabled, or more if bulkhead disabled.
-     * 
+     *
      * @param waitingFuture
      *            the future to wait for
      */

@@ -50,7 +50,7 @@ public class IncompatibleFallbackTest extends Arquillian {
 
     /**
      * Test that the deployment of an invalid FallbackHandler leads to a DeploymentException.
-     * 
+     *
      * A Service is annotated with the IncompatibleFallbackHandler. While the Service returns an Integer, the
      * IncompatibleFallbackHandler returns a String.
      */

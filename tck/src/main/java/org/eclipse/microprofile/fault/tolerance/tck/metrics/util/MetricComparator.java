@@ -39,7 +39,7 @@ public class MetricComparator {
      * conversion and creates a {@link Matcher} to do the check.
      * <p>
      * Useful for checking the results from Histograms.
-     * 
+     *
      * @param originalMillis
      *            the expected time in milliseconds
      * @return a {@link Matcher} which matches against a time in nanoseconds
@@ -58,7 +58,7 @@ public class MetricComparator {
      * and creates a {@link Matcher} to do the check.
      * <p>
      * Useful for checking the results from Histograms.
-     * 
+     *
      * @param originalMillis
      *            the expected time in milliseconds
      * @return a {@link Matcher} which matches against a time in nanoseconds

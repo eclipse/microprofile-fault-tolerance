@@ -56,7 +56,7 @@ public class DurationMatcher extends TypeSafeDiagnosingMatcher<Duration> {
 
     /**
      * Matcher that asserts that a duration is within {@code margin} of {@code target}
-     * 
+     *
      * @param target
      *            the target duration
      * @param margin
@@ -69,7 +69,7 @@ public class DurationMatcher extends TypeSafeDiagnosingMatcher<Duration> {
 
     /**
      * Matcher that asserts that a duration is within 100ms of {@code target}
-     * 
+     *
      * @param target
      *            the target duration
      * @return the matcher

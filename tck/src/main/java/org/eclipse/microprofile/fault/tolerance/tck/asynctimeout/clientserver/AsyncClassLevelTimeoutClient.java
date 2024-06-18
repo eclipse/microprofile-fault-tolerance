@@ -31,7 +31,7 @@ import jakarta.enterprise.context.RequestScoped;
 
 /**
  * A client to demonstrate the combination of the @Retry and @Timeout annotations when applied at the Class level.
- * 
+ *
  * @author <a href="mailto:neilyoung@uk.ibm.com">Neil Young</a>
  *
  */
@@ -43,7 +43,7 @@ public class AsyncClassLevelTimeoutClient {
     /**
      * serviceA is a slow running service that will take 5 seconds in normal operation. Here it is configured to time
      * out after 2 seconds.
-     * 
+     *
      * @return the result as a Future
      * @throws InterruptedException
      *             the interrupted exception

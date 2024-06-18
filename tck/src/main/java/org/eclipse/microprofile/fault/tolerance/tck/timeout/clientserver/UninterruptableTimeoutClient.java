@@ -54,7 +54,7 @@ public class UninterruptableTimeoutClient {
      * Does not respect thread interruption.
      * <p>
      * Uses a tight loop so the thread interrupted flag should be set when the method returns
-     * 
+     *
      * @param waitMs
      *            the time to wait
      */
@@ -78,7 +78,7 @@ public class UninterruptableTimeoutClient {
      * Runs asynchronously.
      * <p>
      * Does not respect thread interruption.
-     * 
+     *
      * @param waitingFuture
      *            future to wait for
      * @param completion
@@ -113,7 +113,7 @@ public class UninterruptableTimeoutClient {
      * Does not respect thread interruption.
      * <p>
      * Uses a tight loop so the thread interrupted flag should be set when the method returns
-     * 
+     *
      * @param waitMs
      *            the time to wait
      * @return a completed CompletionStage
@@ -143,7 +143,7 @@ public class UninterruptableTimeoutClient {
      * Has a bulkhead with capacity of 1, queue size of 1.
      * <p>
      * Increments timeoutAsyncBulkheadCounter.
-     * 
+     *
      * @param waitingFuture
      *            future to wait for
      * @return a completed future
@@ -183,7 +183,7 @@ public class UninterruptableTimeoutClient {
      * Does not respect thread interruption.
      * <p>
      * Has a bulkhead with capacity of 1, queue size of 1.
-     * 
+     *
      * @param waitingFuture
      *            future to wait for
      * @return a completed Future
@@ -218,7 +218,7 @@ public class UninterruptableTimeoutClient {
      * Will do 2 retries with no delay.
      * <p>
      * Increments timeoutAsyncRetryCounter.
-     * 
+     *
      * @param waitingFuture
      *            future to wait for
      * @return a completed Future
@@ -261,7 +261,7 @@ public class UninterruptableTimeoutClient {
      * Does not respect thread interruption.
      * <p>
      * Will run the fallback method on exception
-     * 
+     *
      * @param waitingFuture
      *            future to wait for
      * @return Future completed with "OK", or completed with "FALLBACK" if the fallback ran

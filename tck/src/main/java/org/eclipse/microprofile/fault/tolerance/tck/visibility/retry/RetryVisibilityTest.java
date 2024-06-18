@@ -34,7 +34,7 @@ import jakarta.inject.Inject;
 
 /**
  * Test for annotations discovering rules in the contexts of class inheritance, method override, etc.
- * 
+ *
  * @author <a href="mailto:matthieu@brouillard.fr">Matthieu Brouillard</a>
  */
 public class RetryVisibilityTest extends Arquillian {

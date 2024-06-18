@@ -30,7 +30,7 @@ import jakarta.enterprise.context.RequestScoped;
 
 /**
  * A client to demonstrate the retryOn conditions
- * 
+ *
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  *
  */
@@ -51,7 +51,7 @@ public class RetryClientRetryOn {
     /**
      * Service that throws a child custom exception but in the retry on list is configured child's parent custom
      * exception
-     * 
+     *
      * @return Connection
      */
     @Retry(retryOn = {RetryParentException.class})
@@ -63,7 +63,7 @@ public class RetryClientRetryOn {
     /**
      * Service that throws a child custom exception but in the retry on list is configured child's parent custom
      * exception and is configured in the abort on list the child custom exception
-     * 
+     *
      * @return Connection
      */
     @Retry(retryOn = {RetryParentException.class}, abortOn = {RetryChildException.class})

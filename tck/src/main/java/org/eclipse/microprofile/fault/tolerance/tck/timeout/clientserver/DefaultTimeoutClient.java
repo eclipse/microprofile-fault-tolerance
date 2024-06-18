@@ -27,7 +27,7 @@ import jakarta.enterprise.context.RequestScoped;
 
 /**
  * A client to test Timeouts
- * 
+ *
  * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  *
  */
@@ -37,7 +37,7 @@ public class DefaultTimeoutClient {
 
     /**
      * serviceA uses the default Fault Tolerance timeout of 1 second.
-     * 
+     *
      * @param timeToSleep
      *            How long should the execution take in millis
      * @return null or exception is raised
@@ -54,7 +54,7 @@ public class DefaultTimeoutClient {
 
     /**
      * serviceB specifies a an overriding Timeout longer than the default, at 2 seconds
-     * 
+     *
      * @param timeToSleep
      *            How long should the execution take in millis
      * @return null or exception is raised

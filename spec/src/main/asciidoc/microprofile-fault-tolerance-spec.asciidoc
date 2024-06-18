@@ -18,7 +18,7 @@
 // Contributors:
 // Emily Jiang
 
-= Microprofile Fault Tolerance
+= MicroProfile Fault Tolerance
 :author: Emily Jiang, Antoine Sabot-Durant, Andrew Rouse
 :email: emijiang@uk.ibm.com
 :version-label!:

@@ -175,7 +175,7 @@ public class AllMetricsTest extends Arquillian {
 
     /**
      * Gets metric unit from metadata via reflection which works for Metrics 2.x and 3.x
-     * 
+     *
      * @param metadata
      *            the metadata
      * @return the unit or {@code MetricUnits.NONE} if the metadata has no unit
