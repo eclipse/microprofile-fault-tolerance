@@ -27,7 +27,7 @@ import jakarta.enterprise.context.Dependent;
 
 /**
  * A fallback handler to recover and return a string object.
- * 
+ *
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  *
  */

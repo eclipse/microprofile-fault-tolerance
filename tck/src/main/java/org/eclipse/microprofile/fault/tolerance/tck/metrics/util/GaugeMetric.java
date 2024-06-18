@@ -65,7 +65,7 @@ public class GaugeMetric {
      * Get the counter value, or zero if the metric doesn't exist
      * <p>
      * This method will not create the metric if it does not exist.
-     * 
+     *
      * @return the counter value, or zero if the metric doesn't exist
      */
     public long value() {
@@ -83,7 +83,7 @@ public class GaugeMetric {
 
     /**
      * Return the difference between the current value of the metric and the value when {@link #baseline} was called.
-     * 
+     *
      * @return the difference between the metric value and the baseline
      */
     public long delta() {
@@ -92,7 +92,7 @@ public class GaugeMetric {
 
     /**
      * Return the actual {@link Counter} object for the metric, if it exists.
-     * 
+     *
      * @return an {@code Optional} containing the {@code Counter}, or an empty {@code Optional} if the metric does not
      *         exist.
      */
@@ -109,7 +109,7 @@ public class GaugeMetric {
 
     /**
      * Reflectively call `getValue()` to account for different signature in MP Metrics 4.0 vs 5.0
-     * 
+     *
      * @param <T>
      *            the gauge type
      * @param gauge

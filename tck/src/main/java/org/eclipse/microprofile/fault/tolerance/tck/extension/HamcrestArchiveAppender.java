@@ -32,7 +32,7 @@ public class HamcrestArchiveAppender extends CachedAuxilliaryArchiveAppender {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.jboss.arquillian.container.test.spi.client.deployment.CachedAuxilliaryArchiveAppender#buildArchive()
      */
     @Override

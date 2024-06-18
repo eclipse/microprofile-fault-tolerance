@@ -47,7 +47,7 @@ public class InvalidRetryDelayDurationTest extends Arquillian {
 
     /**
      * Test that the deployment of an invalid @Retry parameter leads to a DeploymentException.
-     * 
+     *
      * A Service is annotated with a @Retry annotation with a maxDuration that is less than the delay.
      */
     @Test

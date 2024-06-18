@@ -39,7 +39,7 @@ import jakarta.inject.Inject;
 /**
  * Test when maxDuration is reached, no more retries will be perfomed. Test the delay and jitter were taken into
  * consideration.
- * 
+ *
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  *
  */
@@ -74,7 +74,7 @@ public class RetryTest extends Arquillian {
 
     /**
      * Test maxRetries.
-     * 
+     *
      * As serviceA is annotated with maxRetries = 5, serviceA should be executed 6 times.
      */
     @Test
@@ -164,7 +164,7 @@ public class RetryTest extends Arquillian {
 
     /**
      * Analogous to testRetryMaxRetries but using a Class level rather than method level annotation.
-     * 
+     *
      * With maxRetries = 2, serviceA should be executed 3 times.
      */
     @Test
@@ -184,7 +184,7 @@ public class RetryTest extends Arquillian {
     /**
      * Analogous to testRetryMaxDuration, testing whether the {@code @Retry} annotation on method serviceB overrides the
      * Class level {@code @Retry} annotation.
-     * 
+     *
      * Ensure that serviceB is executed more than the maxRetries of 2 specified at the Class level.
      */
     @Test
@@ -211,7 +211,7 @@ public class RetryTest extends Arquillian {
     /**
      * Analogous to testRetryMaxDurationSeconds, testing whether the {@code @Retry} annotation on method serviceB
      * overrides the Class level {@code @Retry} annotation.
-     * 
+     *
      * Ensure that serviceB is executed more than the maxRetries of 2 specified at the Class level.
      */
     @Test

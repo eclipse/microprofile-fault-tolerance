@@ -21,7 +21,7 @@ package org.eclipse.microprofile.faulttolerance.exceptions;
 /**
  * The exception should be thrown when the definition of any Fault Tolerance annotations is invalid. The deployment
  * should fail.
- * 
+ *
  * <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  *
  */

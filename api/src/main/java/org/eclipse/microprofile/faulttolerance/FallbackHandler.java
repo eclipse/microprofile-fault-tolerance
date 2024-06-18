@@ -23,12 +23,12 @@ package org.eclipse.microprofile.faulttolerance;
  * instance must be assignable to the return type of the method, where the {@link Fallback} is specified. The container
  * must ensure this type safety. Otherwise, {@link IllegalArgumentException} should be thrown.
  * <h2>Usage</h2>
- * 
+ *
  * <pre>
  * public class MyService {
  *     &#064;Inject
  *     OtherService otherService;
- * 
+ *
  *     &#064;Timeout(3000)
  *     &#064;Fallback(MyFallback.class)
  *     Long getAmount() {
@@ -46,7 +46,7 @@ package org.eclipse.microprofile.faulttolerance;
  *     }
  * }
  * </pre>
- * 
+ *
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  * @author Ken Finnigan
  *
@@ -54,10 +54,10 @@ package org.eclipse.microprofile.faulttolerance;
 public interface FallbackHandler<T> {
     /**
      * Handle the previous calling failure and then call alternative methods or perform any alternative operations.
-     * 
+     *
      * @param context
      *            the execution context
-     * 
+     *
      * @return the result of the fallback
      */
     T handle(ExecutionContext context);

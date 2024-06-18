@@ -165,7 +165,7 @@ public class BulkheadSynchRetryTest extends Arquillian {
      * </ul>
      * <p>
      * This second point is particularly important if Retry is used with a long delay.
-     * 
+     *
      * @throws InterruptedException
      *             if the test is interrupted
      */
@@ -209,7 +209,7 @@ public class BulkheadSynchRetryTest extends Arquillian {
      * </ul>
      * <p>
      * This second point is particularly important if Retry is used with a long delay.
-     * 
+     *
      * @throws InterruptedException
      *             if the test is interrupted
      */
@@ -271,7 +271,7 @@ public class BulkheadSynchRetryTest extends Arquillian {
      * Tests that a Bulkhead + Retry configuration does not retry on BulkheadException
      * <p>
      * The test method should be configured with {@code Bulkhead(1)} and a 1 second delay on Retry.
-     * 
+     *
      * @param testMethod
      *            the test method
      */

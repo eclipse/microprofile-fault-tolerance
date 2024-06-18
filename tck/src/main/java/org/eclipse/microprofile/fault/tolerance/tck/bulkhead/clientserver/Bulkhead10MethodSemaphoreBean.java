@@ -26,7 +26,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * A simple method level Semaphore @Bulkhead(10)
- * 
+ *
  * @author Gordon Hutchison
  * @author Andrew Rouse
  */

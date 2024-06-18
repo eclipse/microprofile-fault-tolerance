@@ -42,7 +42,7 @@ public class AsyncClient {
 
     /**
      * Service an operation until waitCondition is completed or 1000 second timeout.
-     * 
+     *
      * @param waitCondition
      *            Execution of this method will delay until the condition is finished
      * @return the result as a Future.
@@ -54,7 +54,7 @@ public class AsyncClient {
 
     /**
      * Service an operation until waitCondition is completed or 1000 second timeout.
-     * 
+     *
      * @param waitCondition
      *            Execution of this method will delay until the condition is finished
      * @param throwException
@@ -82,7 +82,7 @@ public class AsyncClient {
      * Helper method that allows to complete a future in an exceptional or a non exceptional way also simulates a
      * service processing waiting time. NOTE: This 1000 second timeout is to ensure test timeout kicks in before the
      * operation timeout for a better test error to be displayed.
-     * 
+     *
      * @param waitCondition
      *            Future that will simulate the services processing
      * @param throwException

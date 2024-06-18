@@ -26,7 +26,7 @@ import jakarta.enterprise.context.RequestScoped;
 
 /**
  * A client to support Fault Tolerance Configuration tests.
- * 
+ *
  * @author <a href="mailto:neilyoung@uk.ibm.com">Neil Young</a>
  *
  */
@@ -38,7 +38,7 @@ public class ConfigClassLevelMaxDurationClient {
 
     /**
      * Max retries is configured to 90 but the max duration is 3 seconds with a default durationUnit of milliseconds.
-     * 
+     *
      * Once the duration is reached, no more retries should be performed.
      */
     public void serviceA() {

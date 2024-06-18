@@ -112,7 +112,7 @@ public class Barrier {
 
     /**
      * Assert that no task waits on any of a set of barriers within EXPECTED_FAIL_TIME_MS
-     * 
+     *
      * @param barriers
      *            the barriers to check
      */

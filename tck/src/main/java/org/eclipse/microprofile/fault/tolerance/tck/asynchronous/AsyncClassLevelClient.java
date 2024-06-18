@@ -43,7 +43,7 @@ public class AsyncClassLevelClient {
 
     /**
      * Service an operation until waitCondition is completed or 1000 second timeout.
-     * 
+     *
      * @param waitCondition
      *            Execution of this method will delay until the condition is finished
      * @return the result as a Future.
@@ -56,7 +56,7 @@ public class AsyncClassLevelClient {
     /**
      * Service an operation until waitCondition is completed or 1000 second timeout. NOTE: This 1000 second timeout is
      * to ensure test timeout kicks in before the operation timeout for a better test error to be displayed.
-     * 
+     *
      * @param waitCondition
      *            Execution of this method will delay until the condition is finished
      * @param throwException

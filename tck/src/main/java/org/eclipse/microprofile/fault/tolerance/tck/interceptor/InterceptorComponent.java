@@ -33,7 +33,7 @@ import jakarta.inject.Inject;
 
 /**
  * Component to show the CDI interceptor ordering with FT annotations
- * 
+ *
  * @author carlosdlr
  */
 @ApplicationScoped

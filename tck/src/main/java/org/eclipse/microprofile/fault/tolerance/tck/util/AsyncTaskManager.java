@@ -58,7 +58,7 @@ import jakarta.enterprise.inject.spi.CDI;
  * ensure everything from your test is cleaned up.
  * <p>
  * Example:
- * 
+ *
  * <pre>
  * <code>
  * try (AsyncTaskManager taskManager = new AsyncTaskManager()) {
@@ -71,7 +71,7 @@ import jakarta.enterprise.inject.spi.CDI;
  * </pre>
  * <p>
  * Example test method:
- * 
+ *
  * <pre>
  * <code>
  * public void testMethod(Barrier barrier) {
@@ -93,7 +93,7 @@ public class AsyncTaskManager implements AutoCloseable {
      * call the task asynchronously.
      * <p>
      * The returned {@link BarrierTask} can be used to release the barrier and assert the result of the task.
-     * 
+     *
      * @param task
      *            the task to run
      * @return the BarrierTask
@@ -116,7 +116,7 @@ public class AsyncTaskManager implements AutoCloseable {
      * annotated with {@link Asynchronous} or by some other means.
      * <p>
      * The returned {@link BarrierTask} can be used to release the barrier and assert the result of the task.
-     * 
+     *
      * @param <T>
      *            the return type of the task
      * @param task
@@ -139,7 +139,7 @@ public class AsyncTaskManager implements AutoCloseable {
      * method annotated with {@link Asynchronous} or by some other means.
      * <p>
      * The returned {@link BarrierTask} can be used to release the barrier and assert the result of the task.
-     * 
+     *
      * @param <T>
      *            the return type of the task
      * @param task
@@ -160,7 +160,7 @@ public class AsyncTaskManager implements AutoCloseable {
      * <p>
      * The AsyncTaskManager will ensure that {@link Barrier#open()} is called when {@link AsyncTaskManager#close()} is
      * called.
-     * 
+     *
      * @return the newly created {@code Barrier}
      */
     public Barrier newBarrier() {
@@ -212,7 +212,7 @@ public class AsyncTaskManager implements AutoCloseable {
      * A task which runs using a barrier
      * <p>
      * Use this interface to check that the task waits on the barrier and completes as expected
-     * 
+     *
      * @param <T>
      *            the return type of the task
      */
@@ -294,7 +294,7 @@ public class AsyncTaskManager implements AutoCloseable {
 
         /**
          * Assert that the task completes, throwing an exception of the specified class within WAIT_TIME_MS
-         * 
+         *
          * @param exceptionClass
          *            the class of the expected exception
          */
@@ -310,7 +310,7 @@ public class AsyncTaskManager implements AutoCloseable {
         /**
          * Assert that the task completes without exception within WAIT_TIME_MS and that the value returned is matched
          * by the provided matcher
-         * 
+         *
          * @param matcher
          *            the {@link Matcher} used to assert the returned value
          */
@@ -327,7 +327,7 @@ public class AsyncTaskManager implements AutoCloseable {
          * Get the result of the task
          * <p>
          * Asserts that the task completes within WAIT_TIME_MS.
-         * 
+         *
          * @return the task result
          * @throws ExecutionException
          *             if the task threw an exception instead of returning
@@ -340,7 +340,7 @@ public class AsyncTaskManager implements AutoCloseable {
          * Get the result of the task
          * <p>
          * Asserts that the task completes within the given time
-         * 
+         *
          * @param time
          *            the time to wait for the task to complete
          * @param unit
@@ -363,7 +363,7 @@ public class AsyncTaskManager implements AutoCloseable {
          * Whether this task is awaiting its barrier right now
          * <p>
          * This method returns immediately.
-         * 
+         *
          * @return {@code true} if this task is currently waiting on its barrier, otherwise {@code false}
          */
         public boolean isAwaiting() {

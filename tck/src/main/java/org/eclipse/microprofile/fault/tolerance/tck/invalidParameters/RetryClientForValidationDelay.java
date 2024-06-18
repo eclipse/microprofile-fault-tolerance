@@ -27,7 +27,7 @@ import jakarta.enterprise.context.RequestScoped;
 
 /**
  * A client to demonstrate the validation of the delay attribute on @Retry
- * 
+ *
  * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  *
  */

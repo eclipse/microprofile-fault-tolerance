@@ -69,14 +69,14 @@ public class CircuitBreakerBulkheadTest extends Arquillian {
     /**
      * A test to ensure that the CircuitBreaker is checked before entering the Bulkhead and that BulkheadExceptions
      * count as failures for the CircuitBreaker.
-     * 
+     *
      * Uses an asynchronous bulkhead
-     * 
+     *
      * With requestVolumeThreshold = 3, failureRatio = 1.0, delay = 50000 the expected behaviour is,
-     * 
+     *
      * Execution Behaviour ========= ========= 1 Fill Bulkhead 2 Fill Bulkhead 3 BulkheadException 4 BulkheadException 5
      * BulkheadException 6 CircuitBreakerOpenException 7 CircuitBreakerOpenException
-     * 
+     *
      * @throws InterruptedException
      *             if the test is interrupted
      * @throws TimeoutException
@@ -116,14 +116,14 @@ public class CircuitBreakerBulkheadTest extends Arquillian {
     /**
      * A test to ensure that the CircuitBreaker is checked before entering the Bulkhead and that BulkheadExceptions
      * count as failures for the CircuitBreaker.
-     * 
+     *
      * Uses a synchronous bulkhead
-     * 
+     *
      * With requestVolumeThreshold = 3, failureRatio = 1.0, delay = 50000 the expected behaviour is,
-     * 
+     *
      * Execution Behaviour ========= ========= 1 Fill Bulkhead 2 BulkheadException 3 BulkheadException 4
      * BulkheadException 5 CircuitBreakerOpenException 6 CircuitBreakerOpenException
-     * 
+     *
      * @throws InterruptedException
      *             if the test is interrupted
      * @throws TimeoutException
@@ -158,15 +158,15 @@ public class CircuitBreakerBulkheadTest extends Arquillian {
     /**
      * A test to ensure that the CircuitBreaker does not open in response to a BulkheadException if {@code failOn} does
      * not include BulkheadException
-     * 
+     *
      * Uses an asynchronous bulkhead
-     * 
+     *
      * With requestVolumeThreshold = 3, failureRatio = 1.0, delay = 50000, failOn=TestException the expected behaviour
      * is,
-     * 
+     *
      * Execution Behaviour ========= ========= 1 Fill Bulkhead 2 Fill Bulkhead 3 BulkheadException 4 BulkheadException 5
      * BulkheadException 6 BulkheadException 7 BulkheadException
-     * 
+     *
      * @throws InterruptedException
      *             if the test is interrupted
      * @throws TimeoutException

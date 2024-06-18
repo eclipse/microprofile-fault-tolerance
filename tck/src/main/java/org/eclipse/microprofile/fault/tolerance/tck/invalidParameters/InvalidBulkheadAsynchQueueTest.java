@@ -47,7 +47,7 @@ public class InvalidBulkheadAsynchQueueTest extends Arquillian {
 
     /**
      * Test that the deployment of an invalid @Bulkhead parameter leads to a DeploymentException.
-     * 
+     *
      * A Service is annotated with a @Bulkhead annotation with a negative waitingTaskQueue attribute.
      */
     @Test

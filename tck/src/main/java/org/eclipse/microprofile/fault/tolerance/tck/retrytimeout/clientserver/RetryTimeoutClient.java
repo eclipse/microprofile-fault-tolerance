@@ -32,7 +32,7 @@ import jakarta.enterprise.context.RequestScoped;
 
 /**
  * A client to demonstrate the combination of the @Retry and @Timeout annotations.
- * 
+ *
  * @author <a href="mailto:neilyoung@uk.ibm.com">Neil Young</a>
  *
  */
@@ -58,7 +58,7 @@ public class RetryTimeoutClient {
 
     /**
      * Times out after 500ms, retries once
-     * 
+     *
      * @param timeToSleep
      *            time this method should sleep for in ms
      * @return {@code null}
@@ -80,7 +80,7 @@ public class RetryTimeoutClient {
      * Sleeps for 1000ms, times out after 500ms, retries once on BulkheadException
      * <p>
      * Method will never throw a BulkheadException so the Retry annotation should have no effect
-     * 
+     *
      * @return {@code null}
      */
     @Timeout(500)
@@ -98,7 +98,7 @@ public class RetryTimeoutClient {
 
     /**
      * Sleeps for 1000ms, times out after 500ms, retries once on anything but TimeoutException
-     * 
+     *
      * @return {@code null}
      */
     @Timeout(500)
