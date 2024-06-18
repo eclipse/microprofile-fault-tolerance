@@ -32,7 +32,7 @@ import jakarta.enterprise.context.RequestScoped;
 
 /**
  * A client to determine the impact of the MP_Fault_Tolerance_NonFallback_Enabled environment variable
- * 
+ *
  * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  *
  */
@@ -44,7 +44,7 @@ public class DisableClient {
 
     /**
      * Invokes connection service and increases the counter for invocations the connection service
-     * 
+     *
      * @return Always throws exception
      */
     @Retry(maxRetries = 1)
@@ -59,7 +59,7 @@ public class DisableClient {
 
     /**
      * Invokes name service and increases the counter for invocations of serviceB
-     * 
+     *
      * @return Always throws exception
      */
     @Retry(maxRetries = 1)
@@ -71,7 +71,7 @@ public class DisableClient {
 
     /**
      * Invokes connection service and increases the counter for invocations of serviceC and connection service
-     * 
+     *
      * @return Always throws exception
      */
     @CircuitBreaker(successThreshold = 2, requestVolumeThreshold = 4, failureRatio = 0.75, delay = 50000)
@@ -85,7 +85,7 @@ public class DisableClient {
 
     /**
      * serviceD uses the default Fault Tolerance timeout of 1 second.
-     * 
+     *
      * @param timeToSleep
      *            How long should the execution take in millis
      * @return null or exception is raised

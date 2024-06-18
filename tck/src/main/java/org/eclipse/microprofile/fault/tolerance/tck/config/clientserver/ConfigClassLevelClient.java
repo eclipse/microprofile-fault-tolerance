@@ -28,7 +28,7 @@ import jakarta.enterprise.context.RequestScoped;
 
 /**
  * A client to support Fault Tolerance Configuration tests.
- * 
+ *
  * @author <a href="mailto:neilyoung@uk.ibm.com">Neil Young</a>
  *
  */

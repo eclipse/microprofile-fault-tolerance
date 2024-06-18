@@ -42,7 +42,7 @@ import jakarta.inject.Inject;
 
 /**
  * Test CircuitBreaker Thresholds and delays.
- * 
+ *
  * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  *
  */
@@ -76,10 +76,10 @@ public class CircuitBreakerTest extends Arquillian {
 
     /**
      * A test to exercise Circuit Breaker thresholds, with a default SuccessThreshold
-     * 
+     *
      * With requestVolumeThreshold = 4, failureRatio=0.75, successThreshold = 2, delay = 50000 the expected behaviour
      * is,
-     * 
+     *
      * Execution Behaviour ========= ========= 1 TestException 2 TestException 3 TestException 4 TestException 5
      * CircuitBreakerOpenException 6 CircuitBreakerOpenException 7 CircuitBreakerOpenException
      */
@@ -118,9 +118,9 @@ public class CircuitBreakerTest extends Arquillian {
 
     /**
      * A test to exercise Circuit Breaker thresholds, with a SuccessThreshold of 2
-     * 
+     *
      * With requestVolumeThreshold = 4, failureRatio=0.75 and successThreshold = 2 the expected behaviour is,
-     * 
+     *
      * Execution Behaviour ========= ========= 1 TestException 2 TestException 3 TestException 4 TestException Pause for
      * longer than CircuitBreaker delay, so that it transitions to half-open 5 SUCCEED 6 SUCCEED (CircuitBreaker will be
      * re-closed as successThreshold is 2) 7 SUCCEED
@@ -165,7 +165,7 @@ public class CircuitBreakerTest extends Arquillian {
 
     /**
      * A test to exercise Circuit Breaker thresholds, with a default SuccessThreshold
-     * 
+     *
      * With requestVolumeThreshold = 4, failureRatio=0.75 and successThreshold = 1 the expected behaviour is,
      *
      * Execution Behaviour ========= ========= 1 TestException 2 TestException 3 TestException 4 TestException 5
@@ -222,9 +222,9 @@ public class CircuitBreakerTest extends Arquillian {
 
     /**
      * A test to exercise Circuit Breaker thresholds, with a default SuccessThreshold
-     * 
+     *
      * With requestVolumeThreshold = 4, failureRatio=0.75 and successThreshold = 3 the expected behaviour is,
-     * 
+     *
      * Execution Behaviour ========= ========= 1 TestException 2 TestException 3 TestException 4 TestException 5
      * CircuitBreakerOpenException Pause for longer than CircuitBreaker delay, so that it transitions to half-open 6
      * SUCCEED 7 SUCCEED 8 TestException (CircuitBreaker will be re-opened) 9 CircuitBreakerOpenException
@@ -278,10 +278,10 @@ public class CircuitBreakerTest extends Arquillian {
 
     /**
      * Analogous to testCircuitClosedThenOpen but using a Class level rather than method level annotation.
-     * 
+     *
      * With requestVolumeThreshold = 4, failureRatio=0.75, successThreshold = 2 , delay = 50000 the expected behaviour
      * is,
-     * 
+     *
      * Execution Behaviour ========= ========= 1 TestException 2 TestException 3 TestException 4 TestException 5
      * CircuitBreakerOpenException 6 CircuitBreakerOpenException 7 CircuitBreakerOpenException
      */
@@ -323,9 +323,9 @@ public class CircuitBreakerTest extends Arquillian {
     /**
      * Analogous to testCircuitClosedThenOpen but with a Class level annotation specified that is overridden by a Method
      * level annotation on serviceC.
-     * 
+     *
      * With successThreshold = 2, requestVolumeThreshold = 2, failureRatio=1, delay = 50000 the expected behaviour is,
-     * 
+     *
      * Execution Behaviour ========= ========= 1 TestException 2 TestException 3 CircuitBreakerOpenException 4
      * CircuitBreakerOpenException 5 CircuitBreakerOpenException 6 CircuitBreakerOpenException 7
      * CircuitBreakerOpenException
@@ -368,9 +368,9 @@ public class CircuitBreakerTest extends Arquillian {
     /**
      * Analogous to testCircuitReClose but with a Class level annotation specified that is overridden by a Method level
      * annotation on serviceD.
-     * 
+     *
      * With successThreshold = 2, requestVolumeThreshold = 4, failureRatio=0.75, delay = 1 the expected behaviour is,
-     * 
+     *
      * Execution Behaviour ========= ========= 1 TestException 2 TestException 3 TestException 4 TestException Pause for
      * longer than CircuitBreaker delay, so that it transitions to half-open 5 SUCCEED 6 SUCCEED (CircuitBreaker will be
      * re-closed as successThreshold is 2) 7 SUCCEED
@@ -421,9 +421,9 @@ public class CircuitBreakerTest extends Arquillian {
 
     /**
      * A test to exercise Circuit Breaker rolling window
-     * 
+     *
      * With requestVolumeThreshold = 4, failureRatio=0.5, expected behaviour is,
-     * 
+     *
      * Execution Behaviour ========= ========= 1 Success 2 TestException 3 TestException 4 Success 5
      * CircuitBreakerOpenException
      */
@@ -463,9 +463,9 @@ public class CircuitBreakerTest extends Arquillian {
 
     /**
      * A test to exercise Circuit Breaker rolling window
-     * 
+     *
      * With requestVolumeThreshold = 4, failureRatio=0.5, expected behaviour is,
-     * 
+     *
      * Execution Behaviour ========= ========= 1 Success 2 TestException 3 Success 4 Success 5 TestException 6
      * CircuitBreakerOpenException
      */

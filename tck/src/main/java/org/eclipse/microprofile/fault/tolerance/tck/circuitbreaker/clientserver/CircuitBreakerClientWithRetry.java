@@ -34,7 +34,7 @@ import jakarta.enterprise.context.RequestScoped;
 
 /**
  * A client to exercise Circuit Breaker thresholds using Retries.
- * 
+ *
  * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  * @author <a href="mailto:anrouse@uk.ibm.com">Andrew Rouse</a>
  */
@@ -95,7 +95,7 @@ public class CircuitBreakerClientWithRetry implements Serializable {
 
     /**
      * Has a CircuitBreaker and Retries on CircuitBreakerOpenException
-     * 
+     *
      * @param throwException
      *            whether this method should throw a TestException to simulate an application failure
      * @return string "OK"
@@ -115,7 +115,7 @@ public class CircuitBreakerClientWithRetry implements Serializable {
      * Has a CircuitBreaker and Retries on TimeoutException
      * <p>
      * The method should never throw a TimeoutException so the retry should have no effect
-     * 
+     *
      * @param throwException
      *            whether this method should throw a TestException to simulate an application failure
      * @return string "OK"
@@ -133,7 +133,7 @@ public class CircuitBreakerClientWithRetry implements Serializable {
 
     /**
      * Has a CircuitBreaker and Retries on all exceptions except TestException and CircuitBreakerOpenException
-     * 
+     *
      * @param throwException
      *            whether this method should throw a TestException to simulate an application failure
      * @return string "OK"

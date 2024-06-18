@@ -22,11 +22,11 @@
  * A hierarchy of test exceptions
  * <p>
  * Exceptions in this package:
- * 
+ *
  * <pre>
  * The &lt;: symbol denotes the subtyping relation (Foo &lt;: Bar means "Foo is a subtype of Bar")
  * Note that subtyping is reflexive (Foo &lt;: Foo)
- * 
+ *
  * E0  &lt;: Exception
  * E1  &lt;: E0
  * E2  &lt;: E1

@@ -37,7 +37,7 @@ import jakarta.inject.Inject;
 
 /**
  * Test CircuitBreaker using different success/failure pattern.
- * 
+ *
  * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  *
  */

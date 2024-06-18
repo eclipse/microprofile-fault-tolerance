@@ -42,7 +42,7 @@ import jakarta.inject.Inject;
 
 /**
  * Test the combination of the @Retry and @Timeout annotations.
- * 
+ *
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  * @author <a href="mailto:anrouse@uk.ibm.com">Andrew Rouse</a>
  *
@@ -78,9 +78,9 @@ public class RetryTimeoutTest extends Arquillian {
 
     /**
      * Test that a Service is retried the expected number of times.
-     * 
+     *
      * A timeout is configured for serviceA and in this case the service should generate Timeout exceptions.
-     * 
+     *
      * The service should be retried.
      */
     @Test
@@ -100,10 +100,10 @@ public class RetryTimeoutTest extends Arquillian {
 
     /**
      * Test that a Service is retried the expected number of times.
-     * 
+     *
      * A timeout is configured for serviceA but the service should fail before the timeout is reached and generate a
      * RuntimeException.
-     * 
+     *
      * The service should be retried.
      */
     @Test

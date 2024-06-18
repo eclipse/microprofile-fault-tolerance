@@ -37,7 +37,7 @@ import jakarta.inject.Inject;
 
 /**
  * Tests to exercise Fault Tolerance Timeouts.
- * 
+ *
  * @author <a href="mailto:neil_young@uk.ibm.com">Neil Young</a>
  *
  */
@@ -62,7 +62,7 @@ public class TimeoutTest extends Arquillian {
     /**
      * A test to exercise the default timeout. The default Fault Tolerance timeout is 1 second but serviceA will attempt
      * to sleep for 20 seconds, so should throw a TimeoutException.
-     * 
+     *
      */
     @Test
     public void testTimeout() {
@@ -80,7 +80,7 @@ public class TimeoutTest extends Arquillian {
     /**
      * A test that should not time out. The default Fault Tolerance timeout is 1 second but serviceA will attempt to
      * sleep for only 10 milliseconds before throwing a RuntimeException. There should be no Timeout.
-     * 
+     *
      */
     @Test
     public void testNoTimeout() {
@@ -116,7 +116,7 @@ public class TimeoutTest extends Arquillian {
      * A test that should not time out. The Fault Tolerance timeout is set to 2 seconds but serviceB will attempt to
      * sleep for 1.5 seconds - so longer than a default timeout but shorter than the timeout that has been configured,
      * before throwing a RuntimeException. There should be no Timeout.
-     * 
+     *
      */
     @Test
     public void testGTDefaultNoTimeout() {
@@ -152,7 +152,7 @@ public class TimeoutTest extends Arquillian {
     /**
      * A test that should not time out. The Fault Tolerance timeout is set to a (non-default) 0.5 seconds but serviceC
      * will attempt to sleep for only 10 milliseconds before throwing a RuntimeException. There should be no Timeout.
-     * 
+     *
      */
     @Test
     public void testLTDefaultNoTimeout() {
@@ -190,7 +190,7 @@ public class TimeoutTest extends Arquillian {
      * A test that should not time out. The Fault Tolerance timeout is set to 2 seconds but serviceD will attempt to
      * sleep for 1.5 seconds - so longer than a default timeout but shorter than the timeout that has been configured,
      * before throwing a RuntimeException. There should be no Timeout.
-     * 
+     *
      */
     @Test
     public void testSecondsNoTimeout() {
@@ -208,7 +208,7 @@ public class TimeoutTest extends Arquillian {
     /**
      * A parallel test to testTimeout with class level annotation. The default Fault Tolerance timeout is 1 second but
      * serviceA will attempt to sleep for 20 seconds, so should throw a TimeoutException.
-     * 
+     *
      */
     @Test
     public void testTimeoutClassLevel() {
@@ -227,7 +227,7 @@ public class TimeoutTest extends Arquillian {
      * A parallel test to testNoTimeout with class level annotation. The default Fault Tolerance timeout is 1 second but
      * serviceA will attempt to sleep for only 10 milliseconds before throwing a RuntimeException. There should be no
      * Timeout.
-     * 
+     *
      */
     @Test
     public void testNoTimeoutClassLevel() {

@@ -90,7 +90,7 @@ public class Exceptions {
 
     /**
      * Call {@code future.get()} and check that it throws an ExecutionException wrapping the {@code expectedException}
-     * 
+     *
      * @param expectedException
      *            the expected exception type
      * @param future

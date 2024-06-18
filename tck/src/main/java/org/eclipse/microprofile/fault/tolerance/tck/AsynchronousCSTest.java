@@ -155,7 +155,7 @@ public class AsynchronousCSTest extends Arquillian {
     /**
      * Test that the callbacks added to the initial stage are executed after the stage returned by the asynchronous
      * method call is completed.
-     * 
+     *
      * The callbacks added inside method invocation must be called first and then callbacks added to the result of the
      * call (on the calling thread) must be executed in the order they were added.
      */

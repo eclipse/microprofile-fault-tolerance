@@ -28,7 +28,7 @@ import jakarta.enterprise.context.RequestScoped;
 
 /**
  * A client to demonstrate the fallback after doing the maximum retries
- * 
+ *
  * @author <a href="mailto:neilyoung@uk.ibm.com">Neil Young</a>
  *
  */

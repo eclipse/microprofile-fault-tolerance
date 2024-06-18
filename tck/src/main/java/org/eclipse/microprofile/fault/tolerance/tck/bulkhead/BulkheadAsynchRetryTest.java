@@ -160,7 +160,7 @@ public class BulkheadAsynchRetryTest extends Arquillian {
      * <p>
      * This test fills the bulkhead and the queue, tries to run an additional task, empties the bulkhead and the queue
      * and checks that the additional task runs.
-     * 
+     *
      * @param maxRunning
      *            bulkhead size
      * @param maxQueued
@@ -303,7 +303,7 @@ public class BulkheadAsynchRetryTest extends Arquillian {
 
     /**
      * Test that retries do not occur when BulkheadException is included in the abortOn attribute
-     * 
+     *
      * @throws InterruptedException
      *             if the test is interrupted
      */

@@ -32,7 +32,7 @@ public class AsynchronousClientForValidationClass {
 
     /**
      * Valid
-     * 
+     *
      * @return Future("foo")
      */
     public Future<String> getStringAsync() {
@@ -42,7 +42,7 @@ public class AsynchronousClientForValidationClass {
     /**
      * Invalid because the class is annotated with {@link Asynchronous} but the method does not return Future or
      * CompletionStage.
-     * 
+     *
      * @return "foo"
      */
     public String getString() {

@@ -36,14 +36,14 @@ import jakarta.interceptor.InterceptorBinding;
  * <li>{@link java.util.concurrent.Future}</li>
  * <li>{@link java.util.concurrent.CompletionStage}</li>
  * </ul>
- * 
+ *
  * Otherwise, {@link org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException} occurs during
  * deployment. The return type {@link java.util.concurrent.CompletionStage} is preferred over
  * {@link java.util.concurrent.Future} as a {@link java.util.concurrent.Future} that completes exceptionally will not
  * trigger other Fault Tolerance operations even if specified (e.g. Retry), while a
  * {@link java.util.concurrent.CompletionStage} that completes exceptionally will trigger other Fault Tolerance
  * capabilities if specified (e.g. Retry).
- * 
+ *
  * <p>
  * When a method marked with this annotation is called from one thread (which we will call Thread A), the method call is
  * intercepted, and execution of the method is submitted to run asynchronously on another thread (which we will call
@@ -70,7 +70,7 @@ import jakarta.interceptor.InterceptorBinding;
  * At this point, any calls to the Future or CompletionStage returned in Thread A will be delegated to the Future or
  * CompletionStage returned from the execution in Thread B.</li>
  * </ul>
- * 
+ *
  * <p>
  * The call made on Thread A will never throw an exception, even if the method declares that it throws checked
  * exceptions, because the execution is going to occur on Thread B and hasn't happened yet. To avoid unnecessary
@@ -86,14 +86,14 @@ import jakarta.interceptor.InterceptorBinding;
  * <li>If the method declares {@link java.util.concurrent.CompletionStage} as the return type, the CompletionStage
  * returned in Thread A is completed exceptionally with the exception.</li>
  * </ul>
- * 
+ *
  * <p>
  * If a class is annotated with this annotation, all class methods are treated as if they were marked with this
  * annotation. If one of the methods doesn't return either Future or CompletionStage,
  * {@link org.eclipse.microprofile.faulttolerance.exceptions.FaultToleranceDefinitionException} occurs (at deploy time
  * if the bean is discovered during deployment).
  * </p>
- * 
+ *
  * <p>
  * Example usage:
  * </p>
@@ -111,11 +111,11 @@ import jakarta.interceptor.InterceptorBinding;
  *
  * <pre>
  * <code>CompletionStage stage = getString().exceptionally(e -&gt; {
- *     handleException(e); 
+ *     handleException(e);
  *     return null;
  * });</code>
  * </pre>
- * 
+ *
  * @author <a href="mailto:emijiang@uk.ibm.com">Emily Jiang</a>
  */
 @Documented

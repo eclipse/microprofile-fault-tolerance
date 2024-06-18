@@ -158,7 +158,7 @@ public class MetricGetter {
      * Given an array of TagValue enums, this method find every combination of values from across this set of tags.
      * <p>
      * For example, if we had two tags {@code foo=[a|b]} and {@code bar=[x|y]}, this method would return
-     * 
+     *
      * <pre>
      * [[foo=a, bar=x],
      *  [foo=a, bar=y],
@@ -171,7 +171,7 @@ public class MetricGetter {
      * <p>
      * If called with no arguments, this method returns an array containing an empty array (indicating the only possible
      * combination the the one with no tag values at all).
-     * 
+     *
      * @param tagValueClazzes
      *            the set of tags
      * @return every possible combination when taking one value for each of the given tags
@@ -215,7 +215,7 @@ public class MetricGetter {
      * <p>
      * This method will check that the {@code TagValue}s passed in match the value of
      * {@link MetricDefinition#getTagClasses()}.
-     * 
+     *
      * @param metricDefinition
      *            the definition of the metric
      * @param metricTags
@@ -249,7 +249,7 @@ public class MetricGetter {
      * <p>
      * Each created {@code CounterMetric} will be stored and calling this method twice with the same {@code MetricID}
      * will return the same {@code CounterMetric}.
-     * 
+     *
      * @param metricId
      *            the {@code MetricID}
      * @return the {@code CounterMetric} for {@code metricId}
@@ -263,7 +263,7 @@ public class MetricGetter {
      * <p>
      * Each created {@code GaugeMetric} will be stored and calling this method twice with the same {@code MetricID} will
      * return the same {@code GaugeMetric}.
-     * 
+     *
      * @param metricId
      *            the {@code MetricID}
      * @return the {@code GaugeMetric} for {@code metricId}
