@@ -20,7 +20,7 @@
         <!-- This is just for now and will not work if the API has a separate release cycle than the rest. -->
         <groupId>org.eclipse.microprofile.fault-tolerance</groupId>
         <artifactId>microprofile-fault-tolerance-parent</artifactId>
-        <version>4.1-RC1</version>
+        <version>4.1-SNAPSHOT</version>
     </parent>
 
     <properties>
@@ -28,7 +28,7 @@
     </properties>
     <groupId>org.eclipse.microprofile.fault-tolerance</groupId>
     <artifactId>microprofile-fault-tolerance-api</artifactId>
-    <version>4.1-RC1</version>
+    <version>4.1-SNAPSHOT</version>
     <name>microProfile-fault-tolerance-api</name>
     <description>Fault Tolerance APIs for MicroProfile :: API</description>
     <dependencies>
