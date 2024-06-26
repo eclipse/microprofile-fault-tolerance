@@ -21,13 +21,13 @@ package org.eclipse.microprofile.fault.tolerance.tck.disableEnv;
 
 import static org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig.getConfig;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.eclipse.microprofile.fault.tolerance.tck.config.ConfigAnnotationAsset;
+import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncCaller;
+import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncTaskManager;
+import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncTaskManager.BarrierTask;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
@@ -85,7 +85,8 @@ public class DisableAnnotationGloballyEnableOnClassDisableOnMethod extends Arqui
                 .disable(DisableAnnotationClient.class, "failWithTimeout", Timeout.class)
                 .disable(DisableAnnotationClient.class, "asyncWaitThenReturn", Asynchronous.class)
                 .disable(DisableAnnotationClient.class, "failRetryOnceThenFallback", Fallback.class)
-                .disable(DisableAnnotationClient.class, "waitWithBulkhead", Bulkhead.class);
+                .disable(DisableAnnotationClient.class, "waitWithBulkhead", Bulkhead.class)
+                .enable(AsyncCaller.class, Asynchronous.class); // Needed by AsyncTaskManager
 
         final ConfigAnnotationAsset mpAnnotationConfig = new ConfigAnnotationAsset()
                 .setValue(DisableAnnotationClient.class, "failWithTimeout", Timeout.class,
@@ -173,34 +174,22 @@ public class DisableAnnotationGloballyEnableOnClassDisableOnMethod extends Arqui
 
     /**
      * Test whether Bulkhead is enabled on {@code waitWithBulkhead()}
-     *
-     * @throws InterruptedException
-     *             interrupted
-     * @throws ExecutionException
-     *             task was aborted
      */
     @Test
-    public void testBulkhead() throws ExecutionException, InterruptedException {
-        ExecutorService executor = Executors.newFixedThreadPool(10);
+    public void testBulkhead() {
 
-        // Start two executions at once
-        CompletableFuture<Void> waitingFuture = new CompletableFuture<>();
-        Future<?> result1 = executor.submit(() -> disableClient.waitWithBulkhead(waitingFuture));
-        Future<?> result2 = executor.submit(() -> disableClient.waitWithBulkhead(waitingFuture));
-
-        try {
-            disableClient.waitForBulkheadExecutions(2);
+        try (AsyncTaskManager taskManager = new AsyncTaskManager()) {
+            // Start two executions at once
+            BarrierTask<?> task1 = taskManager.runBarrierTask(disableClient::waitWithBulkhead);
+            BarrierTask<?> task2 = taskManager.runBarrierTask(disableClient::waitWithBulkhead);
+            task1.assertAwaits();
+            task2.assertAwaits();
 
             // Try to start a third execution. This would throw a BulkheadException if Bulkhead is enabled.
             // Bulkhead is disabled on the method so no exception expected
-            disableClient.waitWithBulkhead(CompletableFuture.completedFuture(null));
-        } finally {
-            // Clean up executor and first two executions
-            executor.shutdown();
-
-            waitingFuture.complete(null);
-            result1.get();
-            result2.get();
+            BarrierTask<?> task3 = taskManager.runBarrierTask(disableClient::waitWithBulkhead);
+            task3.openBarrier();
+            task3.assertSuccess();
         }
     }
 }
