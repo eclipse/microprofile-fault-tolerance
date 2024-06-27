@@ -26,11 +26,12 @@
     <properties>
         <bnd.version>5.0.0</bnd.version>
     </properties>
-    <groupId>org.eclipse.microprofile.fault-tolerance</groupId>
+
     <artifactId>microprofile-fault-tolerance-api</artifactId>
     <version>4.1-SNAPSHOT</version>
     <name>microProfile-fault-tolerance-api</name>
     <description>Fault Tolerance APIs for MicroProfile :: API</description>
+
     <dependencies>
         <dependency>
             <groupId>jakarta.enterprise</groupId>
