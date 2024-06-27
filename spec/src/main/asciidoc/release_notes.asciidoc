@@ -33,7 +33,7 @@ No.
 - Work with MicroProfile Telemetry Metrics (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/622[#622])
 
 === Other Changes
-- Removed use of unmanaged threads in TCK (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/634[#634])
+- Removed unmanaged threads in TCK (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/634[#634])
 
 [[release_notes_40]]
 == Release Notes for MicroProfile Fault Tolerance 4.0
@@ -69,7 +69,7 @@ In addition, metrics have moved from the `application:` scope to the `base:` sco
 Old metric:: `application:ft.<name>.timeout.callsTimedOut.total`
 New metric:: `base:ft.timeout.calls.total{method="<name>", timedOut="true"}`
 
-These changes mean that existing dashboards and queries which use metrics provided by MicroProfile Fault Tolerance will need to be updated to use the new metrics listed in <<Integration with MicroProfile Metrics>>.
+These changes mean that existing dashboards and queries which use metrics provided by MicroProfile Fault Tolerance will need to be updated to use the new metrics listed in <<Integration with MicroProfile Metrics and MicroProfile Telemetry>>.
 
 ==== Lifecycle of circuit breakers and bulkheads is now specified
 
