@@ -20,10 +20,9 @@
 package org.eclipse.microprofile.fault.tolerance.tck.disableEnv;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import org.eclipse.microprofile.fault.tolerance.tck.util.ConcurrentExecutionTracker;
+import org.eclipse.microprofile.fault.tolerance.tck.util.Barrier;
 import org.eclipse.microprofile.fault.tolerance.tck.util.TCKConfig;
 import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
@@ -34,7 +33,6 @@ import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.faulttolerance.Timeout;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 
 /**
  * A client to determine the impact of disabling annotations via config
@@ -49,9 +47,6 @@ public class DisableAnnotationClient {
 
     private int failAndRetryOnceCounter = 0;
     private int failRetryOnceThenFallbackCounter = 0;
-
-    @Inject
-    private ConcurrentExecutionTracker tracker;
 
     /**
      * Always throws {@link TestException}, should increment counter by two if Retry is enabled, or one if it is not
@@ -125,35 +120,16 @@ public class DisableAnnotationClient {
     }
 
     /**
-     * Blocks waiting for {@code waitingFuture} to complete
-     * <p>
-     * If passed an already completed {@link Future}, this method will return immediately.
+     * Blocks waiting for {@code barrier} to complete
      * <p>
      * Should permit two simultaneous calls if bulkhead enabled, or more if bulkhead disabled.
      *
-     * @param waitingFuture
-     *            the future to wait for
+     * @param barrier
+     *            the barrier to wait for
      */
     @Bulkhead(2)
-    public void waitWithBulkhead(Future<?> waitingFuture) {
-        try {
-            tracker.executionStarted();
-            waitingFuture.get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
-        } finally {
-            tracker.executionEnded();
-        }
-    }
-
-    /**
-     * Wait for {@code count} executions of {@link #waitWithBulkhead(Future)} to be in progress.
-     *
-     * @param count
-     *            execution count
-     */
-    public void waitForBulkheadExecutions(int count) {
-        tracker.waitForRunningExecutions(count);
+    public void waitWithBulkhead(Barrier barrier) {
+        barrier.await();
     }
 
     /**

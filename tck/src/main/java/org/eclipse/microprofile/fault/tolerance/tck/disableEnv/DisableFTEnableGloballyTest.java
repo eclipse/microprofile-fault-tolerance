@@ -19,12 +19,12 @@
  *******************************************************************************/
 package org.eclipse.microprofile.fault.tolerance.tck.disableEnv;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncCaller;
+import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncTaskManager;
+import org.eclipse.microprofile.fault.tolerance.tck.util.AsyncTaskManager.BarrierTask;
 import org.eclipse.microprofile.fault.tolerance.tck.util.Packages;
 import org.eclipse.microprofile.fault.tolerance.tck.util.TestException;
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
@@ -69,7 +69,8 @@ public class DisableFTEnableGloballyTest extends Arquillian {
                 .enable(Asynchronous.class)
                 .enable(Fallback.class)
                 .enable(Bulkhead.class)
-                .disableGlobally();
+                .disableGlobally()
+                .enable(AsyncCaller.class, Asynchronous.class); // Needed by AsyncTaskManager;
 
         JavaArchive testJar = ShrinkWrap
                 .create(JavaArchive.class, "ftDisableGlobalEnableClass.jar")
@@ -150,35 +151,22 @@ public class DisableFTEnableGloballyTest extends Arquillian {
 
     /**
      * Test whether Bulkhead is enabled on {@code waitWithBulkhead()}
-     *
-     * @throws InterruptedException
-     *             interrupted
-     * @throws ExecutionException
-     *             task was aborted
      */
     @Test
-    public void testBulkhead() throws ExecutionException, InterruptedException {
-        ExecutorService executor = Executors.newFixedThreadPool(10);
+    public void testBulkhead() {
 
-        // Start two executions at once
-        CompletableFuture<Void> waitingFuture = new CompletableFuture<>();
-        Future<?> result1 = executor.submit(() -> disableClient.waitWithBulkhead(waitingFuture));
-        Future<?> result2 = executor.submit(() -> disableClient.waitWithBulkhead(waitingFuture));
-
-        try {
-            disableClient.waitForBulkheadExecutions(2);
+        try (AsyncTaskManager taskManager = new AsyncTaskManager()) {
+            // Start two executions at once
+            BarrierTask<?> task1 = taskManager.runBarrierTask(disableClient::waitWithBulkhead);
+            BarrierTask<?> task2 = taskManager.runBarrierTask(disableClient::waitWithBulkhead);
+            task1.assertAwaits();
+            task2.assertAwaits();
 
             // Try to start a third execution. This would throw a BulkheadException if Bulkhead is enabled.
-            // Bulkhead is enabled on the class, so expect exception
-            Assert.assertThrows(BulkheadException.class,
-                    () -> disableClient.waitWithBulkhead(CompletableFuture.completedFuture(null)));
-        } finally {
-            // Clean up executor and first two executions
-            executor.shutdown();
-
-            waitingFuture.complete(null);
-            result1.get();
-            result2.get();
+            // Bulkhead is enabled globally, so expect exception
+            BarrierTask<?> task3 = taskManager.runBarrierTask(disableClient::waitWithBulkhead);
+            task3.openBarrier();
+            task3.assertThrows(BulkheadException.class);
         }
     }
 }
