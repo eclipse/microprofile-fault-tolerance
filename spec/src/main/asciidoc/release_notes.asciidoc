@@ -32,6 +32,9 @@ No.
 === Specification changes
 - Work with MicroProfile Telemetry Metrics (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/622[#622])
 
+=== Other Changes
+- Removed use of unmanaged threads in TCK (link:https://github.com/eclipse/microprofile-fault-tolerance/issues/634[#634])
+
 [[release_notes_40]]
 == Release Notes for MicroProfile Fault Tolerance 4.0
 
