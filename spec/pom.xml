@@ -27,4 +27,20 @@
     <packaging>pom</packaging>
     <name>MicroProfile Fault Tolerance Specification</name>
     
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.asciidoctor</groupId>
+                <artifactId>asciidoctor-maven-plugin</artifactId>
+                <configuration>
+                    <logHandler>
+                        <failIf>
+                            <severity>INFO</severity> <!-- Fail on invalid internal references -->
+                        </failIf>
+                    </logHandler>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>
