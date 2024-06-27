@@ -29,7 +29,7 @@
 
     <artifactId>microprofile-fault-tolerance-api</artifactId>
     <version>4.1-SNAPSHOT</version>
-    <name>microProfile-fault-tolerance-api</name>
+    <name>MicroProfile Fault Tolerance API</name>
     <description>Fault Tolerance APIs for MicroProfile :: API</description>
 
     <dependencies>
