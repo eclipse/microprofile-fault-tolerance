@@ -15,18 +15,19 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <!-- This is just for now and will not work if the API has a separate release 
+        <!-- This is just for now and will not work if the API has a separate release
             cycle than the rest. -->
         <groupId>org.eclipse.microprofile.fault-tolerance</groupId>
         <artifactId>microprofile-fault-tolerance-parent</artifactId>
         <version>4.2-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.eclipse.microprofile.fault-tolerance</groupId>
     <artifactId>microprofile-fault-tolerance-tck</artifactId>
     <version>4.2-SNAPSHOT</version>
+    <name>MicroProfile Fault Tolerance TCK</name>
 
     <description>Fault Tolerance for MicroProfile :: TCK</description>
+
     <properties>
         <checkstyle.methodNameFormat>^_?[a-z][a-zA-Z0-9_]*$</checkstyle.methodNameFormat>
         <microprofile-config-api.version>3.1</microprofile-config-api.version>
