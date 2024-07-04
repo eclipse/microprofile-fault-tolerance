@@ -19,18 +19,20 @@
             cycle than the rest. -->
         <groupId>org.eclipse.microprofile.fault-tolerance</groupId>
         <artifactId>microprofile-fault-tolerance-parent</artifactId>
-        <version>4.1-SNAPSHOT</version>
+        <version>4.2-SNAPSHOT</version>
     </parent>
 
     <artifactId>microprofile-fault-tolerance-tck</artifactId>
-    <version>4.1-SNAPSHOT</version>
+    <version>4.2-SNAPSHOT</version>
     <name>MicroProfile Fault Tolerance TCK</name>
+
     <description>Fault Tolerance for MicroProfile :: TCK</description>
 
     <properties>
         <checkstyle.methodNameFormat>^_?[a-z][a-zA-Z0-9_]*$</checkstyle.methodNameFormat>
         <microprofile-config-api.version>3.1</microprofile-config-api.version>
         <microprofile-metrics-api.version>4.0</microprofile-metrics-api.version>
+        <microprofile-telemetry-api.version>2.0</microprofile-telemetry-api.version>
     </properties>
 
     <dependencyManagement>
@@ -65,11 +67,7 @@
             <scope>provided</scope>
         </dependency>
 
-        <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-api</artifactId>
-            <version>1.39.0</version>
-        </dependency>
+        
 
         <dependency>
             <groupId>jakarta.enterprise</groupId>
@@ -92,11 +90,13 @@
         </dependency>
 
         <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-sdk-metrics</artifactId>
-            <version>1.39.0</version>
+            <groupId>org.eclipse.microprofile.telemetry</groupId>
+            <artifactId>microprofile-telemetry-api</artifactId>
+            <version>${microprofile-telemetry-api.version}</version>
+            <type>pom</type>
+            <scope>provided</scope>
         </dependency>
-
+       
         <dependency>
             <groupId>io.opentelemetry</groupId>
             <artifactId>opentelemetry-sdk-extension-autoconfigure</artifactId>
