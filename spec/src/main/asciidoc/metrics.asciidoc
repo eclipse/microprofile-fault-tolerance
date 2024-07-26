@@ -110,7 +110,7 @@ a| * `method` - the fully qualified method name
 | Name | `ft.timeout.executionDuration`
 
 | Type in MP Metrics  | `Histogram`
-| Type in MP Telemetry  | A `Histogram` that emits Double
+| Type in MP Telemetry  | A `Histogram` that emits Double with explicit bucket boundaries `[ 0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1, 2.5, 5, 7.5, 10 ]`
 | Unit (MP Metrics) | Nanoseconds
 | Unit (MP Telemetry) | seconds
 | Description | Histogram of execution times for the method
@@ -207,7 +207,7 @@ a| * `method` - the fully qualified method name
 | Name | `ft.bulkhead.runningDuration`
 
 | Type in MP Metrics  | `Histogram`
-| Type in MP Telemetry  | A `Histogram` that emits Double
+| Type in MP Telemetry  | A `Histogram` that emits Double with explicit bucket boundaries `[ 0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1, 2.5, 5, 7.5, 10 ]`
 | Unit (MP Metrics) | Nanoseconds
 | Unit (MP Telemetry) | seconds
 | Description | Histogram of the time that method executions spent running
@@ -220,7 +220,7 @@ a| * `method` - the fully qualified method name
 | Name | `ft.bulkhead.waitingDuration`
 
 | Type in MP Metrics  | `Histogram`
-| Type in MP Telemetry  | A `Histogram` that emits Double
+| Type in MP Telemetry  | A `Histogram` that emits Double with explicit bucket boundaries `[ 0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1, 2.5, 5, 7.5, 10 ]`
 | Unit (MP Metrics) | Nanoseconds
 | Unit (MP Telemetry) | seconds
 | Description | Histogram of the time that method executions spent waiting in the queue
