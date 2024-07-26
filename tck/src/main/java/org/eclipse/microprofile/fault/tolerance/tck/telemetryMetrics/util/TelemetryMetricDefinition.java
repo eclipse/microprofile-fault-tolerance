@@ -61,6 +61,7 @@ public enum TelemetryMetricDefinition {
 
     public enum MetricType {
         COUNTER,
+        UPDOWNCOUNTER,
         GAUGE,
         HISTOGRAM
     }
@@ -104,9 +105,9 @@ public enum TelemetryMetricDefinition {
     }
 
     /**
-     * The subclass of {@link Metric} used by this metric
+     * The type of this metric
      *
-     * @return the metric class
+     * @return the metric type
      */
     public MetricType getMetricType() {
         return metricType;

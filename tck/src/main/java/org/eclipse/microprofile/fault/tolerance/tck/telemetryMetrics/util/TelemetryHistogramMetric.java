@@ -20,8 +20,6 @@
 
 package org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 import io.opentelemetry.sdk.metrics.data.HistogramPointData;
@@ -38,25 +36,18 @@ public class TelemetryHistogramMetric {
         this.metricId = metricId;
     }
 
-    @SuppressWarnings("unchecked") // Fail early on a misconfigured test
-    public Collection<HistogramPointData> getHistogramPoints() {
+    public Optional<HistogramPointData> getHistogramPoint() {
         InMemoryMetricReader reader = InMemoryMetricReader.current();
-        return (List<HistogramPointData>) reader.getPointData(metricId);
+        return reader.getMetric(metricId)
+                .flatMap(md -> InMemoryMetricReader.getHistogramPointData(md, metricId));
     }
 
     public Optional<Long> getHistogramCount() {
-        Collection<HistogramPointData> hpd = getHistogramPoints();
-
-        if (hpd.isEmpty()) {
-            return Optional.empty();
-        }
-
-        return Optional.of(hpd.stream().mapToLong(
-                pd -> pd.getCounts().stream().reduce(0L, Long::sum))
-                .sum());
+        return getHistogramPoint()
+                .map(HistogramPointData::getCount);
     }
 
     public boolean isPresent() {
-        return !getHistogramPoints().isEmpty();
+        return getHistogramPoint().isPresent();
     }
 }

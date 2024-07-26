@@ -55,8 +55,7 @@ public class TelemetryMetricGetter {
 
     private final String classMethodName;
 
-    private Map<TelemetryMetricID, TelemetryCounterMetric> counterMetrics = new HashMap<>();
-    private Map<TelemetryMetricID, TelemetryGaugeMetric> gaugeMetrics = new HashMap<>();
+    private Map<TelemetryMetricID, TelemetryLongMetric> longMetrics = new HashMap<>();
     private Map<TelemetryMetricID, TelemetryHistogramMetric> histogramMetrics = new HashMap<>();
 
     public TelemetryMetricGetter(Class<?> clazz, String methodName) {
@@ -64,48 +63,48 @@ public class TelemetryMetricGetter {
         classMethodName = clazz.getCanonicalName() + "." + methodName;
     }
 
-    public TelemetryCounterMetric getInvocations(InvocationResult result, InvocationFallback fallbackUsed) {
-        return getCounterMetric(getMetricId(TelemetryMetricDefinition.INVOCATIONS, result, fallbackUsed));
+    public TelemetryLongMetric getInvocations(InvocationResult result, InvocationFallback fallbackUsed) {
+        return getLongMetric(getMetricId(TelemetryMetricDefinition.INVOCATIONS, result, fallbackUsed));
     }
 
-    public TelemetryCounterMetric getRetryCalls(RetryRetried retried, RetryResult result) {
-        return getCounterMetric(getMetricId(TelemetryMetricDefinition.RETRY_CALLS, retried, result));
+    public TelemetryLongMetric getRetryCalls(RetryRetried retried, RetryResult result) {
+        return getLongMetric(getMetricId(TelemetryMetricDefinition.RETRY_CALLS, retried, result));
     }
 
-    public TelemetryCounterMetric getRetryRetries() {
-        return getCounterMetric(getMetricId(TelemetryMetricDefinition.RETRY_RETRIES));
+    public TelemetryLongMetric getRetryRetries() {
+        return getLongMetric(getMetricId(TelemetryMetricDefinition.RETRY_RETRIES));
     }
 
-    public TelemetryCounterMetric getTimeoutCalls(TimeoutTimedOut timedOut) {
-        return getCounterMetric(getMetricId(TelemetryMetricDefinition.TIMEOUT_CALLS, timedOut));
+    public TelemetryLongMetric getTimeoutCalls(TimeoutTimedOut timedOut) {
+        return getLongMetric(getMetricId(TelemetryMetricDefinition.TIMEOUT_CALLS, timedOut));
     }
 
     public TelemetryHistogramMetric getTimeoutExecutionDuration() {
         return getHistogramMetric(getMetricId(TelemetryMetricDefinition.TIMEOUT_EXECUTION_DURATION));
     }
 
-    public TelemetryCounterMetric getCircuitBreakerCalls(CircuitBreakerResult cbResult) {
-        return getCounterMetric(getMetricId(TelemetryMetricDefinition.CIRCUITBREAKER_CALLS, cbResult));
+    public TelemetryLongMetric getCircuitBreakerCalls(CircuitBreakerResult cbResult) {
+        return getLongMetric(getMetricId(TelemetryMetricDefinition.CIRCUITBREAKER_CALLS, cbResult));
     }
 
-    public TelemetryCounterMetric getCircuitBreakerOpened() {
-        return getCounterMetric(getMetricId(TelemetryMetricDefinition.CIRCUITBREAKER_OPENED));
+    public TelemetryLongMetric getCircuitBreakerOpened() {
+        return getLongMetric(getMetricId(TelemetryMetricDefinition.CIRCUITBREAKER_OPENED));
     }
 
-    public TelemetryCounterMetric getCircuitBreakerState(CircuitBreakerState cbState) {
-        return getCounterMetric(getMetricId(TelemetryMetricDefinition.CIRCUITBREAKER_STATE, cbState));
+    public TelemetryLongMetric getCircuitBreakerState(CircuitBreakerState cbState) {
+        return getLongMetric(getMetricId(TelemetryMetricDefinition.CIRCUITBREAKER_STATE, cbState));
     }
 
-    public TelemetryCounterMetric getBulkheadCalls(BulkheadResult bulkheadResult) {
-        return getCounterMetric(getMetricId(TelemetryMetricDefinition.BULKHEAD_CALLS, bulkheadResult));
+    public TelemetryLongMetric getBulkheadCalls(BulkheadResult bulkheadResult) {
+        return getLongMetric(getMetricId(TelemetryMetricDefinition.BULKHEAD_CALLS, bulkheadResult));
     }
 
-    public TelemetryGaugeMetric getBulkheadExecutionsRunning() {
-        return getGaugeMetric(getMetricId(TelemetryMetricDefinition.BULKHEAD_EXECUTIONS_RUNNING));
+    public TelemetryLongMetric getBulkheadExecutionsRunning() {
+        return getLongMetric(getMetricId(TelemetryMetricDefinition.BULKHEAD_EXECUTIONS_RUNNING));
     }
 
-    public TelemetryGaugeMetric getBulkheadExecutionsWaiting() {
-        return getGaugeMetric(getMetricId(TelemetryMetricDefinition.BULKHEAD_EXECUTIONS_WAITING));
+    public TelemetryLongMetric getBulkheadExecutionsWaiting() {
+        return getLongMetric(getMetricId(TelemetryMetricDefinition.BULKHEAD_EXECUTIONS_WAITING));
     }
 
     public TelemetryHistogramMetric getBulkheadRunningDuration() {
@@ -119,21 +118,20 @@ public class TelemetryMetricGetter {
     /**
      * Calls {@code baseline()} on all relevant metrics.
      * <p>
-     * Extracts all of the {@code Counter} and {@code Gauge} metrics from {@link TelemetryMetricDefinition} and calls
-     * {@link TelemetryCounterMetric#baseline()} or {@link TelemetryGaugeMetric#baseline()} on them.
+     * Extracts all of the metrics which return long values from {@link TelemetryMetricDefinition} and calls
+     * {@link TelemetryLongMetric#baseline()} on them.
      * <p>
-     * This allows us to check how they've changed later in the test using the {@code CounterMetric.delta()} or
-     * {@code GaugeMetric.delta()} methods, without having to explicitly baseline every metric ourselves up front.
+     * This allows us to check how they've changed later in the test using the {@code TelemetryLongMetric.delta()}
+     * method, without having to explicitly baseline every metric ourselves up front.
      */
     public void baselineMetrics() {
         for (TelemetryMetricDefinition definition : TelemetryMetricDefinition.values()) {
             for (AttributeValue[] tags : getTagCombinations(definition.getAttributeClasses())) {
                 TelemetryMetricID id = getMetricId(definition, tags);
-                if (definition.getMetricType() == TelemetryMetricDefinition.MetricType.COUNTER) {
-                    getCounterMetric(id).baseline();
-                }
-                if (definition.getMetricType() == TelemetryMetricDefinition.MetricType.GAUGE) {
-                    getGaugeMetric(id).baseline();
+                if (definition.getMetricType() == TelemetryMetricDefinition.MetricType.COUNTER
+                        || definition.getMetricType() == TelemetryMetricDefinition.MetricType.GAUGE
+                        || definition.getMetricType() == TelemetryMetricDefinition.MetricType.UPDOWNCOUNTER) {
+                    getLongMetric(id).baseline();
                 }
             }
         }
@@ -235,35 +233,21 @@ public class TelemetryMetricGetter {
 
         builder.put("method", classMethodName);
 
-        return new TelemetryMetricID(metricDefinition.getName(), builder.build());
+        return new TelemetryMetricID(metricDefinition.getName(), metricDefinition.getMetricType(), builder.build());
     }
 
     /**
-     * Get or create the {@link TelemetryCounterMetric} for the given {@link TelemetryMetricID}
+     * Get or create the {@link TelemetryLongMetric} for the given {@link TelemetryMetricID}
      * <p>
-     * Each created {@code CounterMetric} will be stored and calling this method twice with the same {@code MetricID}
-     * will return the same {@code CounterMetric}.
+     * Each created {@code TelemetryLongMetric} will be stored and calling this method twice with the same
+     * {@code MetricID} will return the same {@code TelemetryLongMetric}.
      *
      * @param metricId
      *            the {@code MetricID}
-     * @return the {@code CounterMetric} for {@code metricId}
+     * @return the {@code TelemetryLongMetric} for {@code metricId}
      */
-    private TelemetryCounterMetric getCounterMetric(TelemetryMetricID metricId) {
-        return counterMetrics.computeIfAbsent(metricId, m -> new TelemetryCounterMetric(m));
-    }
-
-    /**
-     * Get or create the {@link TelemetryGaugeMetric} for the given {@link TelemetryMetricID}
-     * <p>
-     * Each created {@code GaugeMetric} will be stored and calling this method twice with the same {@code MetricID} will
-     * return the same {@code GaugeMetric}.
-     *
-     * @param metricId
-     *            the {@code MetricID}
-     * @return the {@code GaugeMetric} for {@code metricId}
-     */
-    private TelemetryGaugeMetric getGaugeMetric(TelemetryMetricID metricId) {
-        return gaugeMetrics.computeIfAbsent(metricId, m -> new TelemetryGaugeMetric(m));
+    private TelemetryLongMetric getLongMetric(TelemetryMetricID metricId) {
+        return longMetrics.computeIfAbsent(metricId, m -> new TelemetryLongMetric(m));
     }
 
     private TelemetryHistogramMetric getHistogramMetric(TelemetryMetricID metricId) {

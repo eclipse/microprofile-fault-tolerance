@@ -32,8 +32,8 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -206,14 +206,14 @@ public class BulkheadTelemetryTest extends Arquillian {
         assertThat("histogram count", executionTimesCount, is(2L)); // Rejected executions
                                                                     // not recorded in
 
-        Collection<HistogramPointData> executionTimesPoints = m.getBulkheadRunningDuration().getHistogramPoints();
-        double time = executionTimesPoints.stream()
-                .mapToDouble(points -> points.getSum())
-                .sum();
+        Optional<HistogramPointData> executionTimesPoint = m.getBulkheadRunningDuration().getHistogramPoint();
+        double time = executionTimesPoint
+                .map(HistogramPointData::getSum)
+                .orElse(0.0);
 
-        long count = executionTimesPoints.stream()
-                .mapToLong(points -> points.getCount())
-                .sum();
+        long count = executionTimesPoint
+                .map(HistogramPointData::getCount)
+                .orElse(0L);
 
         assertThat("mean", Math.round(time / count), approxMillis(1000)); // histogram
 
