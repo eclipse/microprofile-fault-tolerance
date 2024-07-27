@@ -113,8 +113,8 @@ public class TimeoutTelemetryTest extends Arquillian {
                                                                                                            // timeout
                                                                                                            // after 2000
 
-        Long histogramCount = m.getTimeoutExecutionDuration().getHistogramCount().get();
-        assertThat("Histogram count", histogramCount, is(2L));
+        m.getTimeoutExecutionDuration().assertBucketCounts(300, 2000);
+        m.getTimeoutExecutionDuration().assertBoundaries();
     }
 
     @Test(dependsOnGroups = "main")
