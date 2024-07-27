@@ -54,8 +54,8 @@ public enum TelemetryMetricDefinition {
             CircuitBreakerState.class),
     CIRCUITBREAKER_OPENED("ft.circuitbreaker.opened.total", MetricType.COUNTER),
     BULKHEAD_CALLS("ft.bulkhead.calls.total", MetricType.COUNTER, BulkheadResult.class),
-    BULKHEAD_EXECUTIONS_RUNNING("ft.bulkhead.executionsRunning", MetricType.GAUGE),
-    BULKHEAD_EXECUTIONS_WAITING("ft.bulkhead.executionsWaiting", MetricType.GAUGE),
+    BULKHEAD_EXECUTIONS_RUNNING("ft.bulkhead.executionsRunning", MetricType.UPDOWNCOUNTER),
+    BULKHEAD_EXECUTIONS_WAITING("ft.bulkhead.executionsWaiting", MetricType.UPDOWNCOUNTER),
     BULKHEAD_RUNNING_DURATION("ft.bulkhead.runningDuration", MetricType.HISTOGRAM, "nanoseconds"),
     BULKHEAD_WAITING_DURATION("ft.bulkhead.waitingDuration", MetricType.HISTOGRAM, "nanoseconds");
 
