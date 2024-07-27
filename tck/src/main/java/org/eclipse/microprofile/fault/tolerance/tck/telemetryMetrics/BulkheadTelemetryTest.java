@@ -115,17 +115,14 @@ public class BulkheadTelemetryTest extends Arquillian {
 
     @Test(groups = "main")
     public void bulkheadMetricTest() throws InterruptedException, ExecutionException, TimeoutException {
-        System.out.println("GREP + bulkheadMetricTest start");
         TelemetryMetricGetter m = new TelemetryMetricGetter(BulkheadMetricBean.class, "waitFor");
         m.baselineMetrics();
-        System.out.println("GREP + bulkheadMetricTest after baseline");
 
         CompletableFuture<Void> waitingFuture = newWaitingFuture();
 
         Future<?> f1 = async.run(() -> bulkheadBean.waitFor(waitingFuture));
         Future<?> f2 = async.run(() -> bulkheadBean.waitFor(waitingFuture));
 
-        System.out.println("GREP + bulkheadMetricTest before fail");
         bulkheadBean.waitForRunningExecutions(2);
         assertThat("executions running", m.getBulkheadExecutionsRunning().value(), is(2L));
 
