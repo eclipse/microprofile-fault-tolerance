@@ -52,6 +52,25 @@ public class TimeUtils {
     }
 
     /**
+     * Check that a floating point time in seconds is within 20% of an expected time in milliseconds
+     * <p>
+     * Note that this method applies any timeout scaling configured in TCKConfig, does the millseconds to nanoseconds
+     * conversion and creates a {@link Matcher} to do the check.
+     * <p>
+     * Useful for checking the results from Telemetry Histograms.
+     *
+     * @param originalMillis
+     *            the expected time in milliseconds
+     * @return a {@link Matcher} which matches against a time in seconds
+     */
+    public static Matcher<Double> approxMillisFromSeconds(final long originalMillis) {
+        long millis = TCKConfig.getConfig().getTimeoutInMillis(originalMillis);
+        double seconds = millis / 1_000d;
+        double error = seconds * 0.2;
+        return Matchers.closeTo(seconds, error);
+    }
+
+    /**
      * Check that a nanosecond time is less than an expected time in milliseconds
      * <p>
      * This method applies any timeout scaling configured in TCKConfig, does the millseconds to nanoseconds conversion

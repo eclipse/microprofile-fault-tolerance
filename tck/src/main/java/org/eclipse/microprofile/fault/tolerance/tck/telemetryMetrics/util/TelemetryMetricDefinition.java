@@ -48,7 +48,7 @@ public enum TelemetryMetricDefinition {
     RETRY_CALLS("ft.retry.calls.total", MetricType.COUNTER, RetryRetried.class, RetryResult.class),
     RETRY_RETRIES("ft.retry.retries.total", MetricType.COUNTER),
     TIMEOUT_CALLS("ft.timeout.calls.total", MetricType.COUNTER, TimeoutTimedOut.class),
-    TIMEOUT_EXECUTION_DURATION("ft.timeout.executionDuration", MetricType.HISTOGRAM, "nanoseconds"),
+    TIMEOUT_EXECUTION_DURATION("ft.timeout.executionDuration", MetricType.HISTOGRAM, "seconds"),
     CIRCUITBREAKER_CALLS("ft.circuitbreaker.calls.total", MetricType.COUNTER, CircuitBreakerResult.class),
     CIRCUITBREAKER_STATE("ft.circuitbreaker.state.total", MetricType.COUNTER, "nanoseconds",
             CircuitBreakerState.class),
@@ -56,8 +56,8 @@ public enum TelemetryMetricDefinition {
     BULKHEAD_CALLS("ft.bulkhead.calls.total", MetricType.COUNTER, BulkheadResult.class),
     BULKHEAD_EXECUTIONS_RUNNING("ft.bulkhead.executionsRunning", MetricType.UPDOWNCOUNTER),
     BULKHEAD_EXECUTIONS_WAITING("ft.bulkhead.executionsWaiting", MetricType.UPDOWNCOUNTER),
-    BULKHEAD_RUNNING_DURATION("ft.bulkhead.runningDuration", MetricType.HISTOGRAM, "nanoseconds"),
-    BULKHEAD_WAITING_DURATION("ft.bulkhead.waitingDuration", MetricType.HISTOGRAM, "nanoseconds");
+    BULKHEAD_RUNNING_DURATION("ft.bulkhead.runningDuration", MetricType.HISTOGRAM, "seconds"),
+    BULKHEAD_WAITING_DURATION("ft.bulkhead.waitingDuration", MetricType.HISTOGRAM, "seconds");
 
     public enum MetricType {
         COUNTER,

@@ -19,7 +19,7 @@
 package org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
-import static org.eclipse.microprofile.fault.tolerance.tck.metrics.common.util.TimeUtils.approxMillis;
+import static org.eclipse.microprofile.fault.tolerance.tck.metrics.common.util.TimeUtils.approxMillisFromSeconds;
 import static org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.BulkheadResult.ACCEPTED;
 import static org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.BulkheadResult.REJECTED;
 import static org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.InvocationResult.EXCEPTION_THROWN;
@@ -215,7 +215,7 @@ public class BulkheadTelemetryTest extends Arquillian {
                 .map(HistogramPointData::getCount)
                 .orElse(0L);
 
-        assertThat("mean", Math.round(time / count), approxMillis(1000)); // histogram
+        assertThat("mean", time / count, approxMillisFromSeconds(1000)); // histogram
 
         // Now let's put some quick results through the bulkhead
         bulkheadBean.waitForHistogram(CompletableFuture.completedFuture(null));
