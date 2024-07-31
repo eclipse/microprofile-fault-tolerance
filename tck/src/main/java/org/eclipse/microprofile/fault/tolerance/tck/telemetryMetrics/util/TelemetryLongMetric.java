@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * Copyright (c) 2020-2022 Contributors to the Eclipse Foundation
+ * Copyright (c) 2020, 2024 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -17,29 +17,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-
 package org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.isOneOf;
+
 import java.util.Optional;
+
+import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.MetricType;
 
 import io.opentelemetry.sdk.metrics.data.LongPointData;
 import jakarta.enterprise.inject.spi.CDI;
 
 /**
- * Allows tests to get the value of a {@code Gauge<Long>} and compare it with a baseline.
+ * Allows tests to get the value of a {@code Long} counter or gauge and compare it with a baseline.
  * <p>
- * Most methods on this class will treat a non-existent gauge as having a value of zero to allow implementations to
+ * Most methods on this class will treat a non-existent metric as having a value of zero to allow implementations to
  * lazily create metrics.
  * <p>
  * Most tests should use {@link TelemetryMetricGetter} to create instances of this class.
  */
-public class TelemetryGaugeMetric {
+public class TelemetryLongMetric {
     private TelemetryMetricID metricId;
     private long baseline;
 
-    public TelemetryGaugeMetric(TelemetryMetricID metricId) {
+    public TelemetryLongMetric(TelemetryMetricID metricId) {
         this.metricId = metricId;
         this.baseline = 0;
+        assertThat(metricId.type, isOneOf(MetricType.COUNTER, MetricType.GAUGE, MetricType.UPDOWNCOUNTER));
     }
 
     /**
@@ -51,16 +56,13 @@ public class TelemetryGaugeMetric {
      */
     public long value() {
         InMemoryMetricReader reader = CDI.current().select(InMemoryMetricReader.class).get();
-        Optional<LongPointData> latest = reader.getGaugueMetricLatestValue(metricId);
-        if (latest.isPresent()) {
-            return latest.get().getValue();
-        }
-        return 0L;
+        return reader.readLongData(metricId);
     }
 
     public boolean isPresent() {
         InMemoryMetricReader exporter = CDI.current().select(InMemoryMetricReader.class).get();
-        Optional<LongPointData> latest = exporter.getGaugueMetricLatestValue(metricId);
+        Optional<LongPointData> latest = exporter.getMetric(metricId)
+                .flatMap(md -> InMemoryMetricReader.getLongPointData(md, metricId));
         return latest.isPresent();
     }
 

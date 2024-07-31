@@ -32,7 +32,7 @@
         <checkstyle.methodNameFormat>^_?[a-z][a-zA-Z0-9_]*$</checkstyle.methodNameFormat>
         <microprofile-config-api.version>3.1</microprofile-config-api.version>
         <microprofile-metrics-api.version>4.0</microprofile-metrics-api.version>
-        <microprofile-telemetry-api.version>2.0</microprofile-telemetry-api.version>
+        <microprofile-telemetry-api.version>2.0-RC2</microprofile-telemetry-api.version>
     </properties>
 
     <dependencyManagement>

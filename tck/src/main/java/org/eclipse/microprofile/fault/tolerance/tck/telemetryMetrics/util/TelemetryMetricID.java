@@ -20,8 +20,8 @@
 
 package org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util;
 
-import java.util.Arrays;
-import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
 
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
@@ -30,59 +30,48 @@ public class TelemetryMetricID {
 
     public final String name;
     public final Attributes attributes;
+    public final TelemetryMetricDefinition.MetricType type;
 
-    public TelemetryMetricID(String classMethodName, Attributes attributes) {
+    public TelemetryMetricID(String classMethodName, TelemetryMetricDefinition.MetricType type, Attributes attributes) {
         this.name = classMethodName;
         this.attributes = attributes;
-
+        this.type = type;
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(name + " Attributes:");
-        for (AttributeKey<?> key : attributes.asMap().keySet()) {
-            sb.append("[" + key.toString() + "=" + attributes.asMap().get(key).toString() + "]");
+        sb.append(name);
+        sb.append(" Type: ").append(type);
+        sb.append(" Attributes: ");
+        for (Entry<AttributeKey<?>, Object> e : attributes.asMap().entrySet()) {
+            sb.append("[");
+            sb.append(e.getKey());
+            sb.append("=");
+            sb.append(e.getValue());
+            sb.append("]");
         }
         return sb.toString();
     }
 
     @Override
-    public boolean equals(Object o) {
-        TelemetryMetricID other = (TelemetryMetricID) o;
-
-        if (name != other.name) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
             return false;
         }
-
-        if (attributes.size() != other.attributes.size()) {
+        if (getClass() != obj.getClass()) {
             return false;
         }
-
-        for (AttributeKey<?> key : attributes.asMap().keySet()) {
-            if (attributes.get(key) != other.attributes.get(key)) {
-                return false;
-            }
-        }
-
-        return true;
+        TelemetryMetricID other = (TelemetryMetricID) obj;
+        return Objects.equals(attributes, other.attributes) && Objects.equals(name, other.name) && type == other.type;
     }
 
     @Override
     public int hashCode() {
-        Map<?, ?> map = attributes.asMap();
-        Object[] names = map.entrySet().toArray();
-        Object[] value = map.keySet().toArray();
-
-        int namesHash = Arrays.deepHashCode(names);
-        int valuesHash = Arrays.deepHashCode(value);
-
-        int hash = 17;
-        hash = hash * 31 + namesHash;
-        hash = hash * 31 + valuesHash;
-        hash = hash * 31 + name.hashCode();
-
-        return hash;
+        return Objects.hash(attributes, name, type);
     }
 
 }
