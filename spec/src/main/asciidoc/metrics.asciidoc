@@ -110,8 +110,9 @@ a| * `method` - the fully qualified method name
 | Name | `ft.timeout.executionDuration`
 
 | Type in MP Metrics  | `Histogram`
-| Type in MP Telemetry  | A histogram that emits long
-| Unit | Nanoseconds
+| Unit in MP Metrics | Nanoseconds
+| Type in MP Telemetry | A Histogram that records `double` values with explicit bucket boundaries `[ 0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1, 2.5, 5, 7.5, 10 ]`
+| Unit in MP Telemetry | Seconds
 | Description | Histogram of execution times for the method
 | Tags
 a| * `method` - the fully qualified method name
@@ -181,7 +182,7 @@ a| * `method` - the fully qualified method name
 | Name | `ft.bulkhead.executionsRunning`
 
 | Type in MP Metrics | `Gauge<Long>`
-| Type in MP Telemetry | A gauge that emits long
+| Type in MP Telemetry | An UpDownCounter that emits long
 | Unit | None
 | Description | Number of currently running executions
 | Tags
@@ -193,7 +194,7 @@ a| * `method` - the fully qualified method name
 | Name | `ft.bulkhead.executionsWaiting`
 
 | Type in MP Metrics | `Gauge<Long>`
-| Type in MP Telemetry | A gauge that emits long
+| Type in MP Telemetry | An UpDownCounter that emits long
 | Unit | None
 | Description | Number of executions currently waiting in the queue
 | Tags
@@ -206,8 +207,9 @@ a| * `method` - the fully qualified method name
 | Name | `ft.bulkhead.runningDuration`
 
 | Type in MP Metrics  | `Histogram`
-| Type in MP Telemetry  | A histogram that emits long
-| Unit | Nanoseconds
+| Unit in MP Metrics | Nanoseconds
+| Type in MP Telemetry | A Histogram that records `double` values with explicit bucket boundaries `[ 0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1, 2.5, 5, 7.5, 10 ]`
+| Unit in MP Telemetry | Seconds
 | Description | Histogram of the time that method executions spent running
 | Tags
 a| * `method` - the fully qualified method name
@@ -218,8 +220,9 @@ a| * `method` - the fully qualified method name
 | Name | `ft.bulkhead.waitingDuration`
 
 | Type in MP Metrics  | `Histogram`
-| Type in MP Telemetry  | A histogram that emits long
-| Unit | Nanoseconds
+| Unit in MP Metrics | Nanoseconds
+| Type in MP Telemetry | A Histogram that records `double` values with explicit bucket boundaries `[ 0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1, 2.5, 5, 7.5, 10 ]`
+| Unit in MP Telemetry | Seconds
 | Description | Histogram of the time that method executions spent waiting in the queue
 | Tags
 a| * `method` - the fully qualified method name
