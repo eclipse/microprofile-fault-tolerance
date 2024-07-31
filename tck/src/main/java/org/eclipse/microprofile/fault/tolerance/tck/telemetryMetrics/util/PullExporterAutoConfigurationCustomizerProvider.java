@@ -23,7 +23,6 @@ import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.metrics.SdkMeterProviderBuilder;
-import jakarta.enterprise.inject.spi.CDI;
 
 public class PullExporterAutoConfigurationCustomizerProvider implements AutoConfigurationCustomizerProvider {
 
@@ -33,7 +32,7 @@ public class PullExporterAutoConfigurationCustomizerProvider implements AutoConf
 
     private SdkMeterProviderBuilder registerMeterProvider(SdkMeterProviderBuilder builder,
             ConfigProperties properties) {
-        InMemoryMetricReader exporter = CDI.current().select(InMemoryMetricReader.class).get();
+        InMemoryMetricReader exporter = InMemoryMetricReader.current();
         builder.registerMetricReader(exporter);
         return builder;
     }

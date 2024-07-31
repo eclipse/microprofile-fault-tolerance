@@ -27,7 +27,6 @@ import java.util.Optional;
 import org.eclipse.microprofile.fault.tolerance.tck.telemetryMetrics.util.TelemetryMetricDefinition.MetricType;
 
 import io.opentelemetry.sdk.metrics.data.LongPointData;
-import jakarta.enterprise.inject.spi.CDI;
 
 /**
  * Allows tests to get the value of a {@code Long} counter or gauge and compare it with a baseline.
@@ -55,12 +54,12 @@ public class TelemetryLongMetric {
      * @return the counter value, or zero if the metric doesn't exist
      */
     public long value() {
-        InMemoryMetricReader reader = CDI.current().select(InMemoryMetricReader.class).get();
+        InMemoryMetricReader reader = InMemoryMetricReader.current();
         return reader.readLongData(metricId);
     }
 
     public boolean isPresent() {
-        InMemoryMetricReader exporter = CDI.current().select(InMemoryMetricReader.class).get();
+        InMemoryMetricReader exporter = InMemoryMetricReader.current();
         Optional<LongPointData> latest = exporter.getMetric(metricId)
                 .flatMap(md -> InMemoryMetricReader.getLongPointData(md, metricId));
         return latest.isPresent();
