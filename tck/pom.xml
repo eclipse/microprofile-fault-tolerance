@@ -19,11 +19,11 @@
             cycle than the rest. -->
         <groupId>org.eclipse.microprofile.fault-tolerance</groupId>
         <artifactId>microprofile-fault-tolerance-parent</artifactId>
-        <version>4.1-RC4</version>
+        <version>4.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>microprofile-fault-tolerance-tck</artifactId>
-    <version>4.1-RC4</version>
+    <version>4.1-SNAPSHOT</version>
     <name>MicroProfile Fault Tolerance TCK</name>
 
     <description>Fault Tolerance for MicroProfile :: TCK</description>
