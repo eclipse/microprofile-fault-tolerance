@@ -49,17 +49,21 @@ import io.opentelemetry.sdk.metrics.data.PointData;
 import io.opentelemetry.sdk.metrics.data.SumData;
 import io.opentelemetry.sdk.metrics.export.CollectionRegistration;
 import io.opentelemetry.sdk.metrics.export.MetricReader;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.spi.CDI;
 
-@ApplicationScoped
 public class InMemoryMetricReader implements MetricReader {
+
+    private static InMemoryMetricReader instance;
 
     private CollectionRegistration collectionRegistration;
     private boolean isShutdown = false;
 
     public static InMemoryMetricReader current() {
-        return CDI.current().select(InMemoryMetricReader.class).get();
+        synchronized (InMemoryMetricReader.class) {
+            if (instance == null) {
+                instance = new InMemoryMetricReader();
+            }
+            return instance;
+        }
     }
 
     @Override
@@ -85,6 +89,9 @@ public class InMemoryMetricReader implements MetricReader {
     public CompletableResultCode shutdown() {
         collectionRegistration = null;
         isShutdown = true;
+        synchronized (InMemoryMetricReader.class) {
+            instance = null;
+        }
         return CompletableResultCode.ofSuccess();
     }
 
@@ -106,6 +113,10 @@ public class InMemoryMetricReader implements MetricReader {
     }
 
     private Optional<MetricData> getMetric(String name) {
+        if (collectionRegistration == null) {
+            throw new IllegalStateException("InMemoryMetricReader has not been registered");
+        }
+
         Collection<MetricData> allMetrics = collectionRegistration.collectAllMetrics();
         List<MetricData> matchingMetrics = allMetrics.stream()
                 .filter(md -> md.getName().equals(name))
