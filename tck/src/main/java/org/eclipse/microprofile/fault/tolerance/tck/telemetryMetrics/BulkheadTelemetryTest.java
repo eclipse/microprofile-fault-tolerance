@@ -112,7 +112,7 @@ public class BulkheadTelemetryTest extends Arquillian {
         return result;
     }
 
-    @Test(groups = "main")
+    @Test
     public void bulkheadMetricTest() throws InterruptedException, ExecutionException, TimeoutException {
         TelemetryMetricGetter m = new TelemetryMetricGetter(BulkheadMetricBean.class, "waitFor");
         m.baselineMetrics();
@@ -145,7 +145,7 @@ public class BulkheadTelemetryTest extends Arquillian {
                 is(0L));
     }
 
-    @Test(groups = "main")
+    @Test
     public void bulkheadMetricRejectionTest() throws InterruptedException, ExecutionException, TimeoutException {
         TelemetryMetricGetter m = new TelemetryMetricGetter(BulkheadMetricBean.class, "waitFor");
         m.baselineMetrics();
@@ -178,7 +178,7 @@ public class BulkheadTelemetryTest extends Arquillian {
 
     }
 
-    @Test(groups = "main")
+    @Test
     public void bulkheadMetricHistogramTest() throws InterruptedException, ExecutionException, TimeoutException {
         TelemetryMetricGetter m = new TelemetryMetricGetter(BulkheadMetricBean.class, "waitForHistogram");
         m.baselineMetrics();
@@ -217,7 +217,7 @@ public class BulkheadTelemetryTest extends Arquillian {
         m.getBulkheadRunningDuration().assertBoundaries();
     }
 
-    @Test(groups = "main")
+    @Test
     public void bulkheadMetricAsyncTest() throws InterruptedException, ExecutionException, TimeoutException {
         TelemetryMetricGetter m = new TelemetryMetricGetter(BulkheadMetricBean.class, "waitForAsync");
         m.baselineMetrics();
@@ -265,7 +265,8 @@ public class BulkheadTelemetryTest extends Arquillian {
                 is(1L));
     }
 
-    @Test(dependsOnGroups = "main")
+    @Test(dependsOnMethods = {"bulkheadMetricTest", "bulkheadMetricRejectionTest", "bulkheadMetricHistogramTest",
+            "bulkheadMetricAsyncTest"})
     public void testMetricUnits() throws InterruptedException, ExecutionException {
         InMemoryMetricReader reader = InMemoryMetricReader.current();
 

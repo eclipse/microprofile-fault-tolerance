@@ -84,7 +84,7 @@ public class TimeoutTelemetryTest extends Arquillian {
     @Inject
     private TimeoutMetricBean timeoutBean;
 
-    @Test(groups = "main")
+    @Test
     public void testTimeoutMetric() {
         TelemetryMetricGetter m = new TelemetryMetricGetter(TimeoutMetricBean.class, "counterTestWorkForMillis");
         m.baselineMetrics();
@@ -104,7 +104,7 @@ public class TimeoutTelemetryTest extends Arquillian {
                 is(2L));
     }
 
-    @Test(groups = "main")
+    @Test
     public void testTimeoutHistogram() {
         TelemetryMetricGetter m = new TelemetryMetricGetter(TimeoutMetricBean.class, "histogramTestWorkForMillis");
 
@@ -117,7 +117,7 @@ public class TimeoutTelemetryTest extends Arquillian {
         m.getTimeoutExecutionDuration().assertBoundaries();
     }
 
-    @Test(dependsOnGroups = "main")
+    @Test(dependsOnMethods = {"testTimeoutMetric", "testTimeoutHistogram"})
     public void testMetricUnits() throws InterruptedException, ExecutionException {
         InMemoryMetricReader reader = InMemoryMetricReader.current();
 
