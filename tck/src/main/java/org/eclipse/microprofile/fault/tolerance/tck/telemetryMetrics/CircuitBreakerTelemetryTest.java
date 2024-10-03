@@ -117,7 +117,7 @@ public class CircuitBreakerTelemetryTest extends Arquillian {
         }
     }
 
-    @Test(groups = "main")
+    @Test
     public void testCircuitBreakerMetric() throws Exception {
         TelemetryMetricGetter m = new TelemetryMetricGetter(CircuitBreakerMetricBean.class, "doWork");
 
@@ -181,7 +181,7 @@ public class CircuitBreakerTelemetryTest extends Arquillian {
                 is(5L));
     }
 
-    @Test(dependsOnGroups = "main")
+    @Test(dependsOnMethods = "testCircuitBreakerMetric")
     public void testMetricUnits() throws InterruptedException, ExecutionException {
         InMemoryMetricReader reader = InMemoryMetricReader.current();
 

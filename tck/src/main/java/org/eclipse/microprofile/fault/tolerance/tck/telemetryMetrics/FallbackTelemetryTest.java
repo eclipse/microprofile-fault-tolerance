@@ -71,7 +71,7 @@ public class FallbackTelemetryTest extends Arquillian {
     @Inject
     private FallbackMetricBean fallbackBean;
 
-    @Test(groups = "main")
+    @Test
     public void fallbackMetricMethodTest() {
         TelemetryMetricGetter m = new TelemetryMetricGetter(FallbackMetricBean.class, "doWork");
         m.baselineMetrics();
@@ -124,7 +124,7 @@ public class FallbackTelemetryTest extends Arquillian {
                 is(1L));
     }
 
-    @Test(groups = "main")
+    @Test
     public void fallbackMetricHandlerTest() {
         TelemetryMetricGetter m = new TelemetryMetricGetter(FallbackMetricBean.class, "doWorkWithHandler");
         m.baselineMetrics();
@@ -177,7 +177,7 @@ public class FallbackTelemetryTest extends Arquillian {
                 is(1L));
     }
 
-    @Test(dependsOnGroups = "main")
+    @Test(dependsOnMethods = {"fallbackMetricMethodTest", "fallbackMetricHandlerTest"})
     public void testMetricUnits() throws InterruptedException, ExecutionException {
         InMemoryMetricReader reader = InMemoryMetricReader.current();
 

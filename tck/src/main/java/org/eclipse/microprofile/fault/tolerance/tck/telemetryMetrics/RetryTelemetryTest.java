@@ -87,7 +87,7 @@ public class RetryTelemetryTest extends Arquillian {
     @Inject
     private RetryMetricBean retryBean;
 
-    @Test(groups = "main")
+    @Test
     public void testRetryMetricSuccessfulImmediately() {
         TelemetryMetricGetter m = new TelemetryMetricGetter(RetryMetricBean.class, "failSeveralTimes");
         m.baselineMetrics();
@@ -103,7 +103,7 @@ public class RetryTelemetryTest extends Arquillian {
                 m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_DEFINED).delta(), is(0L));
     }
 
-    @Test(groups = "main")
+    @Test
     public void testRetryMetricSuccessfulAfterRetry() {
         TelemetryMetricGetter m = new TelemetryMetricGetter(RetryMetricBean.class, "failSeveralTimes");
         m.baselineMetrics();
@@ -119,7 +119,7 @@ public class RetryTelemetryTest extends Arquillian {
                 m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_DEFINED).delta(), is(0L));
     }
 
-    @Test(groups = "main")
+    @Test
     public void testRetryMetricNonRetryableImmediately() {
         TelemetryMetricGetter m = new TelemetryMetricGetter(RetryMetricBean.class, "failSeveralTimesThenNonRetryable");
         m.baselineMetrics();
@@ -137,7 +137,7 @@ public class RetryTelemetryTest extends Arquillian {
                 m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_DEFINED).delta(), is(1L));
     }
 
-    @Test(groups = "main")
+    @Test
     public void testRetryMetricNonRetryableAfterRetries() {
         TelemetryMetricGetter m = new TelemetryMetricGetter(RetryMetricBean.class, "failSeveralTimesThenNonRetryable");
         m.baselineMetrics();
@@ -155,7 +155,7 @@ public class RetryTelemetryTest extends Arquillian {
                 m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_DEFINED).delta(), is(1L));
     }
 
-    @Test(groups = "main")
+    @Test
     public void testRetryMetricMaxRetries() {
         TelemetryMetricGetter m = new TelemetryMetricGetter(RetryMetricBean.class, "failSeveralTimes");
         m.baselineMetrics();
@@ -172,7 +172,7 @@ public class RetryTelemetryTest extends Arquillian {
                 m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_DEFINED).delta(), is(2L));
     }
 
-    @Test(groups = "main")
+    @Test
     public void testRetryMetricMaxRetriesHitButNoRetry() {
         // This is an edge case which can only occur when maxRetries = 0
         TelemetryMetricGetter m = new TelemetryMetricGetter(RetryMetricBean.class, "maxRetriesZero");
@@ -189,7 +189,7 @@ public class RetryTelemetryTest extends Arquillian {
                 m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_DEFINED).delta(), is(1L));
     }
 
-    @Test(groups = "main")
+    @Test
     public void testRetryMetricMaxDuration() {
         TelemetryMetricGetter m = new TelemetryMetricGetter(RetryMetricBean.class, "failAfterDelay");
         m.baselineMetrics();
@@ -206,7 +206,7 @@ public class RetryTelemetryTest extends Arquillian {
                 m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_DEFINED).delta(), is(1L));
     }
 
-    @Test(groups = "main")
+    @Test
     public void testRetryMetricMaxDurationNoRetries() {
         TelemetryMetricGetter m = new TelemetryMetricGetter(RetryMetricBean.class, "failAfterDelay");
         m.baselineMetrics();
@@ -224,7 +224,10 @@ public class RetryTelemetryTest extends Arquillian {
                 m.getInvocations(EXCEPTION_THROWN, InvocationFallback.NOT_DEFINED).delta(), is(1L));
     }
 
-    @Test(dependsOnGroups = "main")
+    @Test(dependsOnMethods = {"testRetryMetricSuccessfulImmediately", "testRetryMetricSuccessfulAfterRetry",
+            "testRetryMetricNonRetryableImmediately", "testRetryMetricNonRetryableAfterRetries",
+            "testRetryMetricMaxRetries", "testRetryMetricMaxRetriesHitButNoRetry", "testRetryMetricMaxDuration",
+            "testRetryMetricMaxDurationNoRetries"})
     public void testMetricUnits() throws InterruptedException, ExecutionException {
         InMemoryMetricReader reader = InMemoryMetricReader.current();
 
